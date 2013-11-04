@@ -1,17 +1,26 @@
 #include <sparrow3d.h>
 SDL_Surface* screen;
 spFontPointer font;
+SDL_Surface* testbild;
+Sint32 counter = 0;
+
+#define DRAW_AT_ONCE 2048
+
 
 void draw(void)
 {
+	char buffer[256];
 	spClearTarget(0);
-
+	Sint32 zoom = spSin(counter*128)+spFloatToFixed(1.25f);
+	spRotozoomSurface(screen->w/2,screen->h/2,0,testbild,zoom,zoom,SP_PI/2);
+	sprintf(buffer,"FPS: %i",spGetFPS());
+	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	spFlip();
 }
 
 int calc(Uint32 steps)
 {
-	
+	counter+=steps;
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 		return 1;
 	return 0;
@@ -45,7 +54,11 @@ int main(int argc, char **argv)
 	spInitCore();
 	screen = spCreateDefaultWindow();
 	resize( screen->w, screen->h );
+	testbild = spLoadSurface("./data/testbild.png");
+	spSetZSet(0);
+	spSetZTest(0);
 	spLoop(draw,calc,10,resize,NULL);
+	spDeleteSurface(testbild);
 	spQuitCore();
 	return 0;
 }
