@@ -1,102 +1,122 @@
 #include <sparrow3d.h>
 SDL_Surface* screen;
 spFontPointer font;
-SDL_Surface* testbild;
-SDL_Surface* testbild_original;
-Sint32* gravity_x = NULL;
-Sint32* gravity_y = NULL;
+SDL_Surface* level;
+SDL_Surface* level_original;
+SDL_Surface* gravity_surface;
+typedef struct {
+	Sint32 mass,x,y;
+} tGravity;
+#define GRAVITY_RESOLUTION 3
+#define GRAVITY_PER_PIXEL (SP_ONE/196)
+tGravity* gravity;
 Sint32 counter = 0;
-
-#define DRAW_AT_ONCE 2048
-#define GRAVITY_PER_PIXEL (SP_ONE)
 
 
 void free_gravity()
 {
-	if (gravity_x)
-		free(gravity_x);
-	if (gravity_y)
-		free(gravity_y);
+	if (gravity)
+		free(gravity);
 }
 
 void realloc_gravity()
 {
 	free_gravity();
-	gravity_x = (Sint32*)malloc(sizeof(Sint32)*testbild->w*testbild->h);
-	gravity_y = (Sint32*)malloc(sizeof(Sint32)*testbild->w*testbild->h);
+	gravity = (tGravity*)malloc(sizeof(tGravity)*level->w*level->h>>2*GRAVITY_RESOLUTION);
 }
 
-#define TEST_FIELD 64
-
-Sint32 calc_gravity_x(Uint16* pixel,int x,int y)
+Sint32 calc_mass(Uint16* original,int x,int y)
 {
-	Sint32 sum = 0;
+	Sint32 mass = 0;
 	int a,b;
-	int a_min = x-TEST_FIELD;
-	if (a_min < 0)
-		a_min = 0;
-	int a_max = x+TEST_FIELD+1;
-	if (a_max > testbild->w)
-		a_max = testbild->w;
-	int b_min = y-TEST_FIELD;
-	if (b_min < 0)
-		b_min = 0;
-	int b_max = y+TEST_FIELD+1;
-	if (b_max > testbild->h)
-		b_max = testbild->h;
-	for (a = a_min; a < a_max; a++)
-	{
-		int sign = (a<x)?-1:1;
-		for (b = b_min; b < b_max; b++)
-			if (pixel[a+b*testbild->w] != SP_ALPHA_COLOR)
-				sum += sign*GRAVITY_PER_PIXEL/(((a-x)*(a-x)+(b-y)*(b-y)+1));
-	}
-	return sum;
+	for (a = 0; a < (1<<GRAVITY_RESOLUTION); a++)	
+		for (b = 0; b < (1<<GRAVITY_RESOLUTION); b++)
+		{
+			if (original[(x<<GRAVITY_RESOLUTION)+a+((y<<GRAVITY_RESOLUTION)+b)*level->w] != SP_ALPHA_COLOR )
+				mass+=GRAVITY_PER_PIXEL;
+		}
+	return mass;
 }
 
-Sint32 calc_gravity_y(Uint16* pixel,int x,int y)
+#define GRAVITY_CIRCLE 12
+
+void impact_gravity(Sint32 mass,int x,int y)
 {
-	Sint32 sum = 0;
 	int a,b;
-	int a_min = y-TEST_FIELD;
-	if (a_min < 0)
-		a_min = 0;
-	int a_max = y+TEST_FIELD+1;
-	if (a_max > testbild->h)
-		a_max = testbild->h;
-	int b_min = x-TEST_FIELD;
-	if (b_min < 0)
-		b_min = 0;
-	int b_max = x+TEST_FIELD+1;
-	if (b_max > testbild->w)
-		b_max = testbild->w;
-	for (a = a_min; a < a_max; a++)
-	{
-		int sign = (a<y)?-1:1;
-		for (b = b_min; b < b_max; b++)
-			if (pixel[b+a*testbild->w] != SP_ALPHA_COLOR)
-				sum += sign*GRAVITY_PER_PIXEL/(((a-y)*(a-y)+(b-x)*(b-x)+1));
-	}
-	return sum;
+	int start_a = x-GRAVITY_CIRCLE;
+	if (start_a < 0)
+		start_a = 0;
+	int end_a = x+GRAVITY_CIRCLE+1;
+	if (end_a > (level->w>>GRAVITY_RESOLUTION))
+		end_a = (level->w>>GRAVITY_RESOLUTION);
+	int start_b = y-GRAVITY_CIRCLE;
+	if (start_b < 0)
+		start_b = 0;
+	int end_b = y+GRAVITY_CIRCLE+1;
+	if (end_b > (level->h>>GRAVITY_RESOLUTION))
+		end_b = (level->h>>GRAVITY_RESOLUTION);
+	for (a = start_a; a < end_a; a++)	
+		for (b = start_b; b < end_b; b++)
+		{
+			Sint32 dx = a-x;
+			Sint32 dy = b-y;
+			Sint32 sum = spFixedToInt(spSqrt(spIntToFixed(dx*dx+dy*dy+1)));//abs(dx)+abs(dy)+1;
+			gravity[a+b*(level->w>>GRAVITY_RESOLUTION)].x += dx*mass/sum;
+			gravity[a+b*(level->w>>GRAVITY_RESOLUTION)].y += dy*mass/sum;
+		}
 }
 
 void update_gravity()
 {
 	int x,y;
-	SDL_LockSurface(testbild);
-	SDL_LockSurface(testbild_original);
-	Uint16* pixel = (Uint16*)testbild->pixels;
-	Uint16* original = (Uint16*)testbild_original->pixels;
-	for (x = 0; x < testbild->w; x++)
-		for (y = 0; y < testbild->h; y++)
+	SDL_LockSurface(level_original);
+	Uint16* original = (Uint16*)level_original->pixels;
+	memset(gravity,0,sizeof(tGravity)*level->w*level->h>>2*GRAVITY_RESOLUTION);
+	for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
+		for (y = 0; y < (level->h>>GRAVITY_RESOLUTION); y++)
 		{
-			gravity_x[x+y*testbild->w] = calc_gravity_x(original,x,y);
-			gravity_y[x+y*testbild->w] = calc_gravity_y(original,x,y);
-			if (pixel[x+y*testbild->w] == SP_ALPHA_COLOR)
-				pixel[x+y*testbild->w] = spGetRGB(abs(gravity_x[x+y*testbild->w]) >> 6,abs(gravity_y[x+y*testbild->w]) >> 6,0);
+			gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass = calc_mass(original,x,y);
+			if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass)
+				impact_gravity(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass,x,y);
 		}
-	SDL_UnlockSurface(testbild_original);
-	SDL_UnlockSurface(testbild);
+	SDL_UnlockSurface(level_original);
+	spSelectRenderTarget(level);
+	spSetAlphaTest(1);
+	for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
+	{
+		for (y = 0; y < (level->h>>GRAVITY_RESOLUTION); y++)
+		{
+			Sint32 force = spSqrt(spMul(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x,
+			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x)+
+			                      spMul(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y,
+			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y));			                      
+			int f = 31-force / GRAVITY_PER_PIXEL / 512;
+			if (f < 0)
+				f = 0;
+			Sint32 angle = 0;
+			if (force)
+			{
+				Sint32 ac = spDiv(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y,force);
+				if (ac < -SP_ONE)
+					ac = -SP_ONE;
+				if (ac > SP_ONE)
+					ac = SP_ONE;
+				angle = spAcos(ac)*16/SP_PI;
+			}
+			if (x <= 0)
+				angle = 31-angle;
+			if (angle > 31)
+				angle = 31;
+			if (angle < 0)
+				angle = 0;
+			spBlitSurfacePart(x<<GRAVITY_RESOLUTION,y<<GRAVITY_RESOLUTION,0,
+			                  gravity_surface,angle*8,f*8,8,8);
+		}
+	}
+	spSetBlending(SP_ONE/2);
+	spBlitSurface(level->w/2,level->h/2,0,level_original);
+	spSetBlending(SP_ONE);
+	spSelectRenderTarget(screen);
 }
 
 
@@ -106,7 +126,7 @@ void draw(void)
 	char buffer[256];
 	spClearTarget(0);
 	Sint32 zoom = spSin(counter*32)+spFloatToFixed(1.25f);
-	spRotozoomSurface(screen->w/2,screen->h/2,0,testbild,zoom,zoom,counter*32);
+	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,counter*32);
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	spFlip();
@@ -143,20 +163,22 @@ void resize( Uint16 w, Uint16 h )
 
 int main(int argc, char **argv)
 {
-	//srand(time(NULL));
-	spSetDefaultWindowSize( 800, 480 );
+	srand(time(NULL));
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	screen = spCreateDefaultWindow();
-	resize( screen->w, screen->h );
-	testbild = spLoadSurface("./data/testbild.png");
-	testbild_original = spUniqueCopySurface( testbild );
-	realloc_gravity();
-	update_gravity();
 	spSetZSet(0);
 	spSetZTest(0);
+	resize( screen->w, screen->h );
+	level_original = spLoadSurface("./data/testbild.png");
+	gravity_surface = spLoadSurface("./data/gravity.png");
+	level = spCreateSurface(level_original->w,level_original->h);
+	realloc_gravity();
+	update_gravity();
 	spLoop(draw,calc,10,resize,NULL);
 	free_gravity();
-	spDeleteSurface(testbild);
+	spDeleteSurface(level);
+	spDeleteSurface(gravity_surface);
 	spQuitCore();
 	return 0;
 }
