@@ -3,14 +3,18 @@ SDL_Surface* screen;
 spFontPointer font;
 SDL_Surface* level;
 SDL_Surface* level_original;
-SDL_Surface* gravity_surface;
 typedef struct {
 	Sint32 mass,x,y;
 } tGravity;
 #define GRAVITY_RESOLUTION 3
 #define GRAVITY_PER_PIXEL (SP_ONE/196)
+#define GRAVITY_DENSITY 32
+SDL_Surface* gravity_surface;
+SDL_Surface* arrow;
 tGravity* gravity;
 Sint32 counter = 0;
+
+int posX,posY;
 
 
 void free_gravity()
@@ -90,7 +94,7 @@ void update_gravity()
 			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x)+
 			                      spMul(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y,
 			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y));			                      
-			int f = 31-force / GRAVITY_PER_PIXEL / 512;
+			int f = GRAVITY_DENSITY-1-force / GRAVITY_PER_PIXEL / (16384/GRAVITY_DENSITY);
 			if (f < 0)
 				f = 0;
 			Sint32 angle = 0;
@@ -101,21 +105,21 @@ void update_gravity()
 					ac = -SP_ONE;
 				if (ac > SP_ONE)
 					ac = SP_ONE;
-				angle = spAcos(ac)*16/SP_PI;
+				angle = spAcos(ac)*(GRAVITY_DENSITY/2)/SP_PI;
 			}
-			if (x <= 0)
-				angle = 31-angle;
-			if (angle > 31)
-				angle = 31;
+			if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x <= 0)
+				angle = GRAVITY_DENSITY-1-angle;
+			if (angle > GRAVITY_DENSITY-1)
+				angle = GRAVITY_DENSITY-1;
 			if (angle < 0)
 				angle = 0;
 			spBlitSurfacePart(x<<GRAVITY_RESOLUTION,y<<GRAVITY_RESOLUTION,0,
-			                  gravity_surface,angle*8,f*8,8,8);
+			                  gravity_surface,angle<<GRAVITY_RESOLUTION+1,f<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1);
 		}
 	}
-	spSetBlending(SP_ONE/2);
+	//spSetBlending(SP_ONE/2);
 	spBlitSurface(level->w/2,level->h/2,0,level_original);
-	spSetBlending(SP_ONE);
+	//spSetBlending(SP_ONE);
 	spSelectRenderTarget(screen);
 }
 
@@ -126,7 +130,8 @@ void draw(void)
 	char buffer[256];
 	spClearTarget(0);
 	Sint32 zoom = spSin(counter*32)+spFloatToFixed(1.25f);
-	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,counter*32);
+	zoom = SP_ONE;
+	spRotozoomSurface(posX>>SP_ACCURACY,posY>>SP_ACCURACY,0,level,zoom,zoom,0/*counter*32*/);
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	spFlip();
@@ -135,6 +140,14 @@ void draw(void)
 int calc(Uint32 steps)
 {
 	counter+=steps;
+	if (spGetInput()->axis[0] > 0)
+		posX-=steps*8192*2;
+	if (spGetInput()->axis[0] < 0)
+		posX+=steps*8192*2;
+	if (spGetInput()->axis[1] > 0)
+		posY-=steps*8192*2;
+	if (spGetInput()->axis[1] < 0)
+		posY+=steps*8192*2;
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 		return 1;
 	return 0;
@@ -161,6 +174,39 @@ void resize( Uint16 w, Uint16 h )
 	spFontAddBorder(font , 0);//spGetRGB(128,128,128));
 }
 
+void fill_gravity_surface()
+{
+	spSelectRenderTarget(gravity_surface);
+	spClearTarget( SP_ALPHA_COLOR );
+	spBindTexture( arrow );
+	int x,y,s;
+	s = 1 << SP_ACCURACY+GRAVITY_RESOLUTION;
+	for (x = 0; x < GRAVITY_DENSITY; x++)
+	{
+		int angle = (GRAVITY_DENSITY-1-x)*SP_PI*2/GRAVITY_DENSITY;
+		Uint16 color = spGetHSV(angle,255,255);
+		for (y = 0; y < GRAVITY_DENSITY; y++)
+		{
+			int S = s*(GRAVITY_DENSITY-1-y)/GRAVITY_DENSITY*3/4;
+			int X = (x<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
+			int Y = (y<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
+			int x1 = spFixedToInt(X+spMul(spCos(angle),+S)-spMul(spSin(angle),+S));
+			int y1 = spFixedToInt(Y+spMul(spSin(angle),+S)+spMul(spCos(angle),+S));
+			int x2 = spFixedToInt(X+spMul(spCos(angle),+S)-spMul(spSin(angle),-S));
+			int y2 = spFixedToInt(Y+spMul(spSin(angle),+S)+spMul(spCos(angle),-S));
+			int x3 = spFixedToInt(X+spMul(spCos(angle),-S)-spMul(spSin(angle),-S));
+			int y3 = spFixedToInt(Y+spMul(spSin(angle),-S)+spMul(spCos(angle),-S));
+			int x4 = spFixedToInt(X+spMul(spCos(angle),-S)-spMul(spSin(angle),+S));
+			int y4 = spFixedToInt(Y+spMul(spSin(angle),-S)+spMul(spCos(angle),+S));
+			spQuad_tex( x1, y1,0,arrow->w-1,arrow->h-1,
+			            x2, y2,0,arrow->w-1,         0,
+			            x3, y3,0,         0,         0,
+			            x4, y4,0,         0,arrow->h-1,color);
+		}
+	}
+	spSelectRenderTarget(screen);
+	}
+
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
@@ -171,13 +217,19 @@ int main(int argc, char **argv)
 	spSetZTest(0);
 	resize( screen->w, screen->h );
 	level_original = spLoadSurface("./data/testbild.png");
-	gravity_surface = spLoadSurface("./data/gravity.png");
+	posX = level_original->w/2 << SP_ACCURACY;
+	posY = level_original->h/2 << SP_ACCURACY;
+	arrow = spLoadSurface("./data/gravity.png");
+	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
+	fill_gravity_surface();
 	level = spCreateSurface(level_original->w,level_original->h);
 	realloc_gravity();
 	update_gravity();
 	spLoop(draw,calc,10,resize,NULL);
 	free_gravity();
+	spDeleteSurface(arrow);
 	spDeleteSurface(level);
+	spDeleteSurface(level_original);
 	spDeleteSurface(gravity_surface);
 	spQuitCore();
 	return 0;
