@@ -13,9 +13,15 @@ SDL_Surface* gravity_surface;
 SDL_Surface* arrow;
 tGravity* gravity;
 Sint32 counter = 0;
-
 int posX,posY;
+char levelname[256] = "testlevel";
 
+void loadInformation(char* information)
+{
+	spClearTarget(0);
+	spFontDrawMiddle(screen->w/2,screen->h/2,0,information,font);
+	spFlip();
+}
 
 void free_gravity()
 {
@@ -70,20 +76,38 @@ void impact_gravity(Sint32 mass,int x,int y)
 		}
 }
 
-void update_gravity()
+void init_gravity()
 {
 	int x,y;
-	SDL_LockSurface(level_original);
-	Uint16* original = (Uint16*)level_original->pixels;
-	memset(gravity,0,sizeof(tGravity)*level->w*level->h>>2*GRAVITY_RESOLUTION);
-	for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
-		for (y = 0; y < (level->h>>GRAVITY_RESOLUTION); y++)
-		{
-			gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass = calc_mass(original,x,y);
-			if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass)
-				impact_gravity(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass,x,y);
-		}
-	SDL_UnlockSurface(level_original);
+	char buffer[256];
+	sprintf(buffer,"./levels/%s.gra",levelname);
+	if (spFileExists(buffer))
+	{
+		loadInformation("Loading cached gravity...");
+		spFilePointer file = SDL_RWFromFile(buffer,"rb");
+		SDL_RWread(file,gravity,sizeof(tGravity),level->w*level->h>>2*GRAVITY_RESOLUTION);
+		SDL_RWclose(file);
+	}
+	else
+	{
+		loadInformation("Calculating Gravity...");
+		SDL_LockSurface(level_original);
+		Uint16* original = (Uint16*)level_original->pixels;
+		memset(gravity,0,sizeof(tGravity)*level->w*level->h>>2*GRAVITY_RESOLUTION);
+		for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
+			for (y = 0; y < (level->h>>GRAVITY_RESOLUTION); y++)
+			{
+				gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass = calc_mass(original,x,y);
+				if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass)
+					impact_gravity(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass,x,y);
+			}
+		SDL_UnlockSurface(level_original);
+		loadInformation("Caching Gravity...");
+		spFilePointer file = SDL_RWFromFile(buffer,"wb");
+		SDL_RWwrite(file,gravity,sizeof(tGravity),level->w*level->h>>2*GRAVITY_RESOLUTION);
+		SDL_RWclose(file);
+	}
+	loadInformation("Drawing level...");
 	spSelectRenderTarget(level);
 	spSetAlphaTest(1);
 	for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
@@ -130,8 +154,12 @@ void draw(void)
 	char buffer[256];
 	spClearTarget(0);
 	Sint32 zoom = spSin(counter*32)+spFloatToFixed(1.25f);
-	zoom = SP_ONE;
-	spRotozoomSurface(posX>>SP_ACCURACY,posY>>SP_ACCURACY,0,level,zoom,zoom,0/*counter*32*/);
+	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
+	spSetVerticalOrigin(SP_FIXED);
+	spSetHorizontalOrigin(SP_FIXED);
+	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,counter*32);
+	spSetVerticalOrigin(SP_CENTER);
+	spSetHorizontalOrigin(SP_CENTER);
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	spFlip();
@@ -140,13 +168,13 @@ void draw(void)
 int calc(Uint32 steps)
 {
 	counter+=steps;
-	if (spGetInput()->axis[0] > 0)
-		posX-=steps*8192*2;
 	if (spGetInput()->axis[0] < 0)
+		posX-=steps*8192*2;
+	if (spGetInput()->axis[0] > 0)
 		posX+=steps*8192*2;
-	if (spGetInput()->axis[1] > 0)
-		posY-=steps*8192*2;
 	if (spGetInput()->axis[1] < 0)
+		posY-=steps*8192*2;
+	if (spGetInput()->axis[1] > 0)
 		posY+=steps*8192*2;
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 		return 1;
@@ -160,7 +188,7 @@ void resize( Uint16 w, Uint16 h )
 	if ( font )
 		spFontDelete( font );
 	spFontSetShadeColor(0);
-	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 6 * spGetSizeFactor() >> SP_ACCURACY );
+	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 10 * spGetSizeFactor() >> SP_ACCURACY );
 	spFontAdd( font, SP_FONT_GROUP_ASCII, 65535 ); //whole ASCII
 	spFontAddButton( font, 'R', SP_BUTTON_START_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Return == START
 	spFontAddButton( font, 'B', SP_BUTTON_SELECT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Backspace == SELECT
@@ -187,7 +215,7 @@ void fill_gravity_surface()
 		Uint16 color = spGetHSV(angle,255,255);
 		for (y = 0; y < GRAVITY_DENSITY; y++)
 		{
-			int S = s*(GRAVITY_DENSITY-1-y)/GRAVITY_DENSITY*3/4;
+			int S = s*(GRAVITY_DENSITY-1-y)/GRAVITY_DENSITY*3/5;
 			int X = (x<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
 			int Y = (y<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
 			int x1 = spFixedToInt(X+spMul(spCos(angle),+S)-spMul(spSin(angle),+S));
@@ -216,15 +244,19 @@ int main(int argc, char **argv)
 	spSetZSet(0);
 	spSetZTest(0);
 	resize( screen->w, screen->h );
-	level_original = spLoadSurface("./data/testbild.png");
-	posX = level_original->w/2 << SP_ACCURACY;
-	posY = level_original->h/2 << SP_ACCURACY;
+	loadInformation("Loading images...");
+	char buffer[256];
+	sprintf(buffer,"./levels/%s.png",levelname);
+	level_original = spLoadSurface(buffer);
+	posX = level_original->w << SP_ACCURACY-1;
+	posY = level_original->h << SP_ACCURACY-1;
 	arrow = spLoadSurface("./data/gravity.png");
 	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
+	loadInformation("Created Arrow image...");
 	fill_gravity_surface();
 	level = spCreateSurface(level_original->w,level_original->h);
 	realloc_gravity();
-	update_gravity();
+	init_gravity();
 	spLoop(draw,calc,10,resize,NULL);
 	free_gravity();
 	spDeleteSurface(arrow);
