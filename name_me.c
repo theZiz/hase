@@ -6,15 +6,18 @@ SDL_Surface* level_original;
 typedef struct {
 	Sint32 mass,x,y;
 } tGravity;
-#define GRAVITY_RESOLUTION 3
-#define GRAVITY_PER_PIXEL (SP_ONE/196)
 #define GRAVITY_DENSITY 32
+#define GRAVITY_RESOLUTION 4
+#define GRAVITY_PER_PIXEL 16
+#define GRAVITY_PER_PIXEL_CORRECTION 12
+#define GRAVITY_CIRCLE 32
+
 SDL_Surface* gravity_surface;
 SDL_Surface* arrow;
 tGravity* gravity;
 Sint32 counter = 0;
 int posX,posY;
-char levelname[256] = "testlevel";
+char levelname[256] = "testlevel2";
 
 void loadInformation(char* information)
 {
@@ -48,8 +51,6 @@ Sint32 calc_mass(Uint16* original,int x,int y)
 	return mass;
 }
 
-#define GRAVITY_CIRCLE 12
-
 void impact_gravity(Sint32 mass,int x,int y)
 {
 	int a,b;
@@ -59,21 +60,26 @@ void impact_gravity(Sint32 mass,int x,int y)
 	int end_a = x+GRAVITY_CIRCLE+1;
 	if (end_a > (level->w>>GRAVITY_RESOLUTION))
 		end_a = (level->w>>GRAVITY_RESOLUTION);
-	int start_b = y-GRAVITY_CIRCLE;
-	if (start_b < 0)
-		start_b = 0;
-	int end_b = y+GRAVITY_CIRCLE+1;
-	if (end_b > (level->h>>GRAVITY_RESOLUTION))
-		end_b = (level->h>>GRAVITY_RESOLUTION);
-	for (a = start_a; a < end_a; a++)	
+	for (a = start_a; a < end_a; a++)
+	{
+		int start_b = y-GRAVITY_CIRCLE;
+		if (start_b < 0)
+			start_b = 0;
+		int end_b = y+GRAVITY_CIRCLE+1;
+		if (end_b > (level->h>>GRAVITY_RESOLUTION))
+			end_b = (level->h>>GRAVITY_RESOLUTION);
 		for (b = start_b; b < end_b; b++)
+		if (a!=x && b!=y && (a-x)*(a-x)+(b-y)*(b-y) <= GRAVITY_CIRCLE*GRAVITY_CIRCLE)
 		{
 			Sint32 dx = a-x;
 			Sint32 dy = b-y;
-			Sint32 sum = spFixedToInt(spSqrt(spIntToFixed(dx*dx+dy*dy+1)));//abs(dx)+abs(dy)+1;
+			//Sint32 sum = spFixedToInt(spSqrt(spIntToFixed(dx*dx+dy*dy+1)));
+			//Sint32 sum = spFixedToInt(spSqrt(spSqrt(spIntToFixed(dx*dx+dy*dy+1))));
+			Sint32 sum = dx*dx+dy*dy;
 			gravity[a+b*(level->w>>GRAVITY_RESOLUTION)].x += dx*mass/sum;
 			gravity[a+b*(level->w>>GRAVITY_RESOLUTION)].y += dy*mass/sum;
 		}
+	}
 }
 
 void init_gravity()
@@ -118,9 +124,11 @@ void init_gravity()
 			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x)+
 			                      spMul(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y,
 			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y));			                      
-			int f = GRAVITY_DENSITY-1-force / GRAVITY_PER_PIXEL / (16384/GRAVITY_DENSITY);
+			int f = GRAVITY_DENSITY-1-force / GRAVITY_PER_PIXEL_CORRECTION / (16384/GRAVITY_DENSITY);
 			if (f < 0)
 				f = 0;
+			if (f == 31 && force != 0)
+				f = 31;
 			Sint32 angle = 0;
 			if (force)
 			{
@@ -188,7 +196,7 @@ void resize( Uint16 w, Uint16 h )
 	if ( font )
 		spFontDelete( font );
 	spFontSetShadeColor(0);
-	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 10 * spGetSizeFactor() >> SP_ACCURACY );
+	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY );
 	spFontAdd( font, SP_FONT_GROUP_ASCII, 65535 ); //whole ASCII
 	spFontAddButton( font, 'R', SP_BUTTON_START_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Return == START
 	spFontAddButton( font, 'B', SP_BUTTON_SELECT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Backspace == SELECT
@@ -198,7 +206,7 @@ void resize( Uint16 w, Uint16 h )
 	spFontAddButton( font, 'd', SP_BUTTON_RIGHT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // d == right button
 	spFontAddButton( font, 'w', SP_BUTTON_UP_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // w == up button
 	spFontAddButton( font, 's', SP_BUTTON_DOWN_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // s == down button
-	spFontMulWidth(font,spFloatToFixed(0.85f));
+	spFontMulWidth(font,spFloatToFixed(0.65f));
 	spFontAddBorder(font , 0);//spGetRGB(128,128,128));
 }
 
@@ -215,7 +223,10 @@ void fill_gravity_surface()
 		Uint16 color = spGetHSV(angle,255,255);
 		for (y = 0; y < GRAVITY_DENSITY; y++)
 		{
+			//int S = s*(GRAVITY_DENSITY-1)/GRAVITY_DENSITY/2;
 			int S = s*(GRAVITY_DENSITY-1-y)/GRAVITY_DENSITY*3/5;
+			//Uint16 color = spGetRGB((GRAVITY_DENSITY-1-y)*256/GRAVITY_DENSITY,(GRAVITY_DENSITY-1-y)*256/GRAVITY_DENSITY,0);
+			//Uint16 color = spGetHSV(angle,255,(GRAVITY_DENSITY-1-y)*256/GRAVITY_DENSITY);
 			int X = (x<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
 			int Y = (y<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
 			int x1 = spFixedToInt(X+spMul(spCos(angle),+S)-spMul(spSin(angle),+S));
@@ -230,6 +241,10 @@ void fill_gravity_surface()
 			            x2, y2,0,arrow->w-1,         0,
 			            x3, y3,0,         0,         0,
 			            x4, y4,0,         0,arrow->h-1,color);
+			/*spRectangleBorder( spFixedToInt(X),spFixedToInt(Y),0,spFixedToInt(s),spFixedToInt(s),1,1,65535);
+			char buffer[16];
+			sprintf(buffer,"%i",y);
+			spFontDrawMiddle( spFixedToInt(X),spFixedToInt(Y),0,buffer,font);*/
 		}
 	}
 	spSelectRenderTarget(screen);
