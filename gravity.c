@@ -85,12 +85,11 @@ void init_gravity()
 	{
 		loadInformation("Calculating Gravity...");
 		SDL_LockSurface(level_original);
-		Uint16* original = (Uint16*)level_original->pixels;
 		memset(gravity,0,sizeof(tGravity)*level->w*level->h>>2*GRAVITY_RESOLUTION);
 		for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
 			for (y = 0; y < (level->h>>GRAVITY_RESOLUTION); y++)
 			{
-				gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass = calc_mass(original,x,y);
+				gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass = calc_mass(level_pixel,x,y);
 				if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass)
 					impact_gravity(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass,x,y);
 			}

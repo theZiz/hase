@@ -3,10 +3,11 @@ SDL_Surface* screen;
 spFontPointer font;
 SDL_Surface* level;
 SDL_Surface* level_original;
+Uint16* level_pixel;
 SDL_Surface* arrow;
 Sint32 counter = 0;
 int posX,posY;
-char levelname[256] = "testlevel";
+char levelname[256] = "testlevel2";
 
 void loadInformation(char* information)
 {
@@ -22,17 +23,24 @@ void draw(void)
 {
 	srand(0);
 	char buffer[256];
+	Sint32 rotation = 0;
 	spClearTarget(0);
 	Sint32 zoom = spGetSizeFactor();
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
 	spSetVerticalOrigin(SP_FIXED);
 	spSetHorizontalOrigin(SP_FIXED);
-	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,0);
+	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
 	spSetVerticalOrigin(SP_CENTER);
 	spSetHorizontalOrigin(SP_CENTER);
 	spSpritePointer sprite = spActiveSprite(hase);
+	
+	player.x = posX;
+	player.y = posY;
+	update_player();
+	
 	spSetSpriteZoom(sprite,zoom,zoom);
-	spDrawSprite(screen->w/2,screen->h/2,0,sprite);
+	spSetSpriteRotation(sprite,player.rotation);
+	spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
 	//spEllipseBorder(screen->w/2,screen->h/2,0,32,32,1,1,spGetRGB(255,0,0));
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
@@ -90,14 +98,13 @@ int main(int argc, char **argv)
 	char buffer[256];
 	sprintf(buffer,"./levels/%s.png",levelname);
 	level_original = spLoadSurface(buffer);
-	posX = level_original->w << SP_ACCURACY-1;
-	posY = level_original->h << SP_ACCURACY-1;
 	arrow = spLoadSurface("./data/gravity.png");
 	hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
 	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
 	loadInformation("Created Arrow image...");
 	fill_gravity_surface();
 	level = spCreateSurface(level_original->w,level_original->h);
+	level_pixel = (Uint16*)level_original->pixels;
 	realloc_gravity();
 	init_gravity();
 	init_player();
