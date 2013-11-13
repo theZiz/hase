@@ -1,30 +1,17 @@
-#include <sparrow3d.h>
-SDL_Surface* screen;
-spFontPointer font;
-SDL_Surface* level;
-SDL_Surface* level_original;
-typedef struct {
-	Sint32 mass,x,y;
-} tGravity;
 #define GRAVITY_DENSITY 32
 #define GRAVITY_RESOLUTION 4
 #define GRAVITY_PER_PIXEL 16
 #define GRAVITY_PER_PIXEL_CORRECTION 12
 #define GRAVITY_CIRCLE 32
 
-SDL_Surface* gravity_surface;
-SDL_Surface* arrow;
-tGravity* gravity;
-Sint32 counter = 0;
-int posX,posY;
-char levelname[256] = "testlevel2";
+int color_mode = 2;
 
-void loadInformation(char* information)
-{
-	spClearTarget(0);
-	spFontDrawMiddle(screen->w/2,screen->h/2,0,information,font);
-	spFlip();
-}
+typedef struct {
+	Sint32 mass,x,y;
+} tGravity;
+
+SDL_Surface* gravity_surface;
+tGravity* gravity;
 
 void free_gravity()
 {
@@ -155,78 +142,31 @@ void init_gravity()
 	spSelectRenderTarget(screen);
 }
 
-
-void draw(void)
-{
-	srand(0);
-	char buffer[256];
-	spClearTarget(0);
-	Sint32 zoom = spSin(counter*32)+spFloatToFixed(1.25f);
-	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
-	spSetVerticalOrigin(SP_FIXED);
-	spSetHorizontalOrigin(SP_FIXED);
-	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,counter*32);
-	spSetVerticalOrigin(SP_CENTER);
-	spSetHorizontalOrigin(SP_CENTER);
-	sprintf(buffer,"FPS: %i",spGetFPS());
-	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
-	spFlip();
-}
-
-int calc(Uint32 steps)
-{
-	counter+=steps;
-	if (spGetInput()->axis[0] < 0)
-		posX-=steps*8192*2;
-	if (spGetInput()->axis[0] > 0)
-		posX+=steps*8192*2;
-	if (spGetInput()->axis[1] < 0)
-		posY-=steps*8192*2;
-	if (spGetInput()->axis[1] > 0)
-		posY+=steps*8192*2;
-	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
-		return 1;
-	return 0;
-}
-
-void resize( Uint16 w, Uint16 h )
-{
-	spSelectRenderTarget(screen);
-	//Font Loading
-	if ( font )
-		spFontDelete( font );
-	spFontSetShadeColor(0);
-	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY );
-	spFontAdd( font, SP_FONT_GROUP_ASCII, 65535 ); //whole ASCII
-	spFontAddButton( font, 'R', SP_BUTTON_START_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Return == START
-	spFontAddButton( font, 'B', SP_BUTTON_SELECT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Backspace == SELECT
-	spFontAddButton( font, 'q', SP_BUTTON_L_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // q == L
-	spFontAddButton( font, 'e', SP_BUTTON_R_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // e == R
-	spFontAddButton( font, 'a', SP_BUTTON_LEFT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //a == left button
-	spFontAddButton( font, 'd', SP_BUTTON_RIGHT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // d == right button
-	spFontAddButton( font, 'w', SP_BUTTON_UP_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // w == up button
-	spFontAddButton( font, 's', SP_BUTTON_DOWN_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // s == down button
-	spFontMulWidth(font,spFloatToFixed(0.65f));
-	spFontAddBorder(font , 0);//spGetRGB(128,128,128));
-}
-
 void fill_gravity_surface()
 {
 	spSelectRenderTarget(gravity_surface);
 	spClearTarget( SP_ALPHA_COLOR );
 	spBindTexture( arrow );
 	int x,y,s;
+	Uint16 color;
 	s = 1 << SP_ACCURACY+GRAVITY_RESOLUTION;
 	for (x = 0; x < GRAVITY_DENSITY; x++)
 	{
 		int angle = (GRAVITY_DENSITY-1-x)*SP_PI*2/GRAVITY_DENSITY;
-		Uint16 color = spGetHSV(angle,255,255);
+		if (color_mode == 0)
+			color = spGetHSV(angle,255,255);
 		for (y = 0; y < GRAVITY_DENSITY; y++)
 		{
-			//int S = s*(GRAVITY_DENSITY-1)/GRAVITY_DENSITY/2;
-			int S = s*(GRAVITY_DENSITY-1-y)/GRAVITY_DENSITY*3/5;
-			//Uint16 color = spGetRGB((GRAVITY_DENSITY-1-y)*256/GRAVITY_DENSITY,(GRAVITY_DENSITY-1-y)*256/GRAVITY_DENSITY,0);
-			//Uint16 color = spGetHSV(angle,255,(GRAVITY_DENSITY-1-y)*256/GRAVITY_DENSITY);
+			int S;
+			if (color_mode & 1)
+				S = s*(GRAVITY_DENSITY-1)/GRAVITY_DENSITY/2;
+			else
+				S = s*(GRAVITY_DENSITY-1-y)/GRAVITY_DENSITY*3/5;
+			if (color_mode)
+			{
+				int v = (GRAVITY_DENSITY*2-1-y)*256/(GRAVITY_DENSITY*2);
+				color = spGetRGB(v,v/2,v/4);
+			}
 			int X = (x<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
 			int Y = (y<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
 			int x1 = spFixedToInt(X+spMul(spCos(angle),+S)-spMul(spSin(angle),+S));
@@ -248,36 +188,4 @@ void fill_gravity_surface()
 		}
 	}
 	spSelectRenderTarget(screen);
-	}
-
-int main(int argc, char **argv)
-{
-	srand(time(NULL));
-	//spSetDefaultWindowSize( 800, 480 );
-	spInitCore();
-	screen = spCreateDefaultWindow();
-	spSetZSet(0);
-	spSetZTest(0);
-	resize( screen->w, screen->h );
-	loadInformation("Loading images...");
-	char buffer[256];
-	sprintf(buffer,"./levels/%s.png",levelname);
-	level_original = spLoadSurface(buffer);
-	posX = level_original->w << SP_ACCURACY-1;
-	posY = level_original->h << SP_ACCURACY-1;
-	arrow = spLoadSurface("./data/gravity.png");
-	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
-	loadInformation("Created Arrow image...");
-	fill_gravity_surface();
-	level = spCreateSurface(level_original->w,level_original->h);
-	realloc_gravity();
-	init_gravity();
-	spLoop(draw,calc,10,resize,NULL);
-	free_gravity();
-	spDeleteSurface(arrow);
-	spDeleteSurface(level);
-	spDeleteSurface(level_original);
-	spDeleteSurface(gravity_surface);
-	spQuitCore();
-	return 0;
 }

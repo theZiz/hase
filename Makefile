@@ -17,7 +17,7 @@ SPARROW_FOLDER = ../sparrow3d
 
 ifdef TARGET
 include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
-BUILD = ./build/$(TARGET)/name_me
+BUILD = ./build/$(TARGET)/hase
 SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
 else
 TARGET = "Default (change with make TARGET=otherTarget. See All targets with make targets)"
@@ -28,20 +28,20 @@ LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
 DYNAMIC += -lsparrow3d
 
-all: name_me
+all: hase
 	@echo "=== Built for Target "$(TARGET)" ==="
 
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
-name_me: name_me.c makeBuildDir
+hase: hase.c gravity.c player.c makeBuildDir
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	$(CPP) $(CFLAGS) name_me.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) $(BLAS) -o $(BUILD)/name_me
+	$(CPP) $(CFLAGS) hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) $(BLAS) -o $(BUILD)/hase
 
 makeBuildDir:
-	 @if [ ! -d $(BUILD:/name_me=/) ]; then mkdir $(BUILD:/name_me=/);fi
+	 @if [ ! -d $(BUILD:/hase=/) ]; then mkdir $(BUILD:/hase=/);fi
 	 @if [ ! -d $(BUILD) ]; then mkdir $(BUILD);fi
 
 clean:
 	rm -f *.o
-	rm -f name_me
+	rm -f hase
