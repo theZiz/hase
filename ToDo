@@ -1,6 +1,3 @@
-- Loading an image
-- Showing the image
-- Showing the rotated
-- Showing ANY part of the image rotated
-- Showing any part of the image rotated and zoomed
-- Showing the gravitation
+- angle flow smaller (for the next idea)
+- linear interpolation of the gravity
+- camera flows behind hase
