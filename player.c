@@ -41,19 +41,6 @@ int circle_is_empty(int x, int y, int r)
 	return 1;
 }
 
-Sint32 gravitation_force(int x,int y)
-{
-	int gx = x >> GRAVITY_RESOLUTION;
-	int gy = y >> GRAVITY_RESOLUTION;
-	if (gx < 0 || gy < 0 || gx >= (level->w >> GRAVITY_RESOLUTION) || gy >= (level->h >> GRAVITY_RESOLUTION))
-		return 0;
-	Sint32 force = spSqrt(spMul(gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].x,
-						        gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].x)+
-						  spMul(gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].y,
-						        gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].y));
-	return force;
-}
-
 Sint32 gravitation_x(int x,int y)
 {
 	int gx = x >> GRAVITY_RESOLUTION;
@@ -70,6 +57,15 @@ Sint32 gravitation_y(int x,int y)
 	if (gx < 0 || gy < 0 || gx >= (level->w >> GRAVITY_RESOLUTION) || gy >= (level->h >> GRAVITY_RESOLUTION))
 		return 0;
 	return gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].y;
+}
+
+Sint32 gravitation_force(int x,int y)
+{
+	int grav_x = gravitation_x(x,y);
+	int grav_y = gravitation_y(x,y);
+	if (grav_x == 0 && grav_y == 0)
+		return 0;
+	return spSqrt(spMul(grav_x,grav_x)+spMul(grav_y,grav_y));
 }
 
 void update_player(int steps)
@@ -105,23 +101,16 @@ void update_player(int steps)
 	
 	player.rotation = 0;
 	player.bums = 0;
-	int gx = player.x >> SP_ACCURACY + GRAVITY_RESOLUTION;
-	int gy = player.y >> SP_ACCURACY + GRAVITY_RESOLUTION;
-	if (gx < 0 || gy < 0 || gx >= (level->w >> GRAVITY_RESOLUTION) || gy >= (level->h >> GRAVITY_RESOLUTION))
-		return;
-	Sint32 force = spSqrt(spMul(-gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].x,
-						        -gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].x)+
-						  spMul(-gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].y,
-						        -gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].y));			                      
+	Sint32 force = gravitation_force(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY);
 	if (force)
 	{
-		Sint32 ac = spDiv(-gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].y,force);
+		Sint32 ac = spDiv(-gravitation_y(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY),force);
 		if (ac < -SP_ONE)
 			ac = -SP_ONE;
 		if (ac > SP_ONE)
 			ac = SP_ONE;
 		player.rotation = -spAcos(ac);
-		if (-gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].x <= 0)
+		if (-gravitation_x(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY) <= 0)
 			player.rotation = 2*SP_PI-player.rotation;
 		while (player.rotation < 0)
 			player.rotation += 2*SP_PI;
@@ -181,5 +170,5 @@ void init_player()
 	posX = player.x;
 	posY = player.y;
 	update_player(0);
-	rotation = player.rotation;
+	rotation = -player.rotation;
 }
