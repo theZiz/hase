@@ -6,7 +6,10 @@ SDL_Surface* level_original;
 Uint16* level_pixel;
 SDL_Surface* arrow;
 Sint32 counter = 0;
-int posX,posY;
+int posX,posY,rotation;
+Sint32 zoom;
+Sint32 zoomAdjust;
+Sint32 minZoom,maxZoom;
 char levelname[256] = "testlevel2";
 
 void loadInformation(char* information)
@@ -18,14 +21,15 @@ void loadInformation(char* information)
 
 #include "gravity.c"
 #include "player.c"
+#include "logic.c"
+
+int map_follows = 1;
 
 void draw(void)
 {
 	srand(0);
 	char buffer[256];
-	Sint32 rotation = 0;
 	spClearTarget(0);
-	Sint32 zoom = spGetSizeFactor();
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
 	spSetVerticalOrigin(SP_FIXED);
 	spSetHorizontalOrigin(SP_FIXED);
@@ -34,13 +38,20 @@ void draw(void)
 	spSetHorizontalOrigin(SP_CENTER);
 	spSpritePointer sprite = spActiveSprite(hase);
 	
-	player.x = posX;
-	player.y = posY;
-	update_player();
+	posX = player.x;
+	posY = player.y;
 	
 	spSetSpriteZoom(sprite,zoom,zoom);
-	spSetSpriteRotation(sprite,player.rotation);
-	spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
+	if (map_follows)
+	{
+		spSetSpriteRotation(sprite,0);
+		spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
+	}
+	else
+	{
+		spSetSpriteRotation(sprite,player.rotation);
+		spDrawSprite(screen->w/2,screen->h/2,0,sprite);
+	}
 	//spEllipseBorder(screen->w/2,screen->h/2,0,32,32,1,1,spGetRGB(255,0,0));
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
@@ -49,16 +60,67 @@ void draw(void)
 
 int calc(Uint32 steps)
 {
-	spUpdateSprite(spActiveSprite(hase),steps);
+	int i;
+	if (map_follows)
+		for (i = 0; i < steps; i++)
+		{
+			Sint32 goal = -player.rotation;
+			if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
+				rotation -= 2*SP_PI;
+			if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
+				rotation += 2*SP_PI;
+			rotation = rotation*127/128+goal/128;
+		}
+	else
+		rotation = 0;
+	update_player(steps);
+	do_physics(steps);
 	counter+=steps;
+	if (spGetInput()->button[SP_BUTTON_LEFT] && player.bums && player.hops <= 0)
+	{
+		Sint32 dx = spSin(player.rotation);
+		Sint32 dy = spCos(player.rotation);
+		if (circle_is_empty(player.x+dx,player.y+dy,15))
+		{
+			player.hops = HOPS_TIME;
+			player.high_hops = 0;
+		}
+	}
+	if (spGetInput()->button[SP_BUTTON_RIGHT] && player.bums && player.hops <= 0)
+	{
+		Sint32 dx = spSin(player.rotation);
+		Sint32 dy = spCos(player.rotation);
+		if (circle_is_empty(player.x+dx,player.y+dy,15))
+		{
+			player.hops = HIGH_HOPS_TIME;
+			player.high_hops = 1;
+		}
+	}
+	if (spGetInput()->button[SP_BUTTON_L])
+	{
+		zoomAdjust -= steps*32;
+		if (zoomAdjust < minZoom)
+			zoomAdjust = minZoom;
+		zoom = spMul(zoomAdjust,zoomAdjust);
+	}
+	if (spGetInput()->button[SP_BUTTON_R])
+	{
+		zoomAdjust += steps*32;
+		if (zoomAdjust > maxZoom)
+			zoomAdjust = maxZoom;
+		zoom = spMul(zoomAdjust,zoomAdjust);
+	}
+	update_player_sprite(steps);
 	if (spGetInput()->axis[0] < 0)
-		posX-=steps*8192*2;
+		player.direction = 0;
 	if (spGetInput()->axis[0] > 0)
-		posX+=steps*8192*2;
-	if (spGetInput()->axis[1] < 0)
-		posY-=steps*8192*2;
-	if (spGetInput()->axis[1] > 0)
-		posY+=steps*8192*2;
+		player.direction = 1;
+	if (spGetInput()->button[SP_BUTTON_START_NOWASD])
+	{
+		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
+		map_follows = 1-map_follows;
+	}
+		
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 		return 1;
 	return 0;
@@ -108,6 +170,10 @@ int main(int argc, char **argv)
 	realloc_gravity();
 	init_gravity();
 	init_player();
+	zoomAdjust = spSqrt(spGetSizeFactor());
+	minZoom = spSqrt(spGetSizeFactor()/4);
+	maxZoom = spSqrt(spGetSizeFactor()*4);
+	zoom = spMul(zoomAdjust,zoomAdjust);
 	spLoop(draw,calc,10,resize,NULL);
 	free_gravity();
 	spDeleteSpriteCollection(hase,0);
