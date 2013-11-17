@@ -5,6 +5,7 @@ SDL_Surface* level;
 SDL_Surface* level_original;
 Uint16* level_pixel;
 SDL_Surface* arrow;
+SDL_Surface* weapon;
 Sint32 counter = 0;
 int posX,posY,rotation;
 Sint32 zoom;
@@ -44,11 +45,23 @@ void draw(void)
 	spSetSpriteZoom(sprite,zoom,zoom);
 	if (map_follows)
 	{
+		spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom,zoom,player.w_direction);
+		Sint32 x = spCos(player.w_direction)*(-16-spFixedToInt(8*player.w_power));
+		Sint32 y = spSin(player.w_direction)*(-16-spFixedToInt(8*player.w_power));
+		spSetAlphaPattern4x4(127,0);
+		spRotozoomSurface(screen->w/2+(spMul(player.x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/16,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.w_direction-SP_PI/2);
+		spDeactivatePattern();
 		spSetSpriteRotation(sprite,0);
 		spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
 	}
 	else
 	{
+		spRotozoomSurface(screen->w/2,screen->h/2,0,weapon,zoom,zoom,player.rotation+player.w_direction);
+		int x = spFixedToInt(spCos(player.rotation+player.w_direction)*(-32-spFixedToInt(16*player.w_power)));
+		int y = spFixedToInt(spSin(player.rotation+player.w_direction)*(-32-spFixedToInt(16*player.w_power)));
+		spSetAlphaPattern4x4(127,0);
+		spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,zoom/8,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.rotation+player.w_direction-SP_PI/2);
+		spDeactivatePattern();
 		spSetSpriteRotation(sprite,player.rotation);
 		spDrawSprite(screen->w/2,screen->h/2,0,sprite);
 	}
@@ -111,10 +124,38 @@ int calc(Uint32 steps)
 		zoom = spMul(zoomAdjust,zoomAdjust);
 	}
 	update_player_sprite(steps);
+	if (spGetInput()->button[SP_BUTTON_DOWN])
+	{
+		spGetInput()->button[SP_BUTTON_DOWN] = 0;
+		player.direction = 1 - player.direction;
+		player.w_direction = SP_PI-player.w_direction;
+	}
 	if (spGetInput()->axis[0] < 0)
-		player.direction = 0;
+	{
+		player.w_power-=steps*64;
+		if (player.w_power < 0)
+			player.w_power = 0;
+	}
 	if (spGetInput()->axis[0] > 0)
-		player.direction = 1;
+	{
+		player.w_power+=steps*64;
+		if (player.w_power > 2*SP_ONE)
+			player.w_power = 2*SP_ONE;
+	}
+	if (spGetInput()->axis[1] < 0)
+	{
+		if (player.direction == 0)
+			player.w_direction+=steps*64;
+		else
+			player.w_direction-=steps*64;
+	}
+	if (spGetInput()->axis[1] > 0)
+	{
+		if (player.direction == 0)
+			player.w_direction-=steps*64;
+		else
+			player.w_direction+=steps*64;
+	}
 	if (spGetInput()->button[SP_BUTTON_START_NOWASD])
 	{
 		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
@@ -161,6 +202,7 @@ int main(int argc, char **argv)
 	sprintf(buffer,"./levels/%s.png",levelname);
 	level_original = spLoadSurface(buffer);
 	arrow = spLoadSurface("./data/gravity.png");
+	weapon = spLoadSurface("./data/weapon.png");
 	hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
 	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
 	loadInformation("Created Arrow image...");
@@ -178,6 +220,7 @@ int main(int argc, char **argv)
 	free_gravity();
 	spDeleteSpriteCollection(hase,0);
 	spDeleteSurface(arrow);
+	spDeleteSurface(weapon);
 	spDeleteSurface(level);
 	spDeleteSurface(level_original);
 	spDeleteSurface(gravity_surface);

@@ -5,6 +5,8 @@ spSpriteCollectionPointer hase;
 struct
 {
 	int direction;
+	int w_direction;
+	int w_power;
 	Sint32 x,y;
 	Sint32 dx,dy;
 	Sint32 rotation;
@@ -43,22 +45,33 @@ int circle_is_empty(int x, int y, int r)
 
 Sint32 gravitation_x(int x,int y)
 {
-	int gx = x >> GRAVITY_RESOLUTION;
-	int gy = y >> GRAVITY_RESOLUTION;
-	if (gx < 0 || gy < 0 || gx >= (level->w >> GRAVITY_RESOLUTION) || gy >= (level->h >> GRAVITY_RESOLUTION))
+	int gx1 = x - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
+	int gy1 = y - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
+	/*int gx2 = gx1+1;
+	int gy2 = gy1+1;
+	int rx = x - (gx1 << GRAVITY_RESOLUTION);
+	int ry = y - (gy1 << GRAVITY_RESOLUTION);*/
+	if (gx1 < 0 || gy1 < 0 || gx1 >= (level->w >> GRAVITY_RESOLUTION) || gy1 >= (level->h >> GRAVITY_RESOLUTION))
 		return 0;
-	return gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].x;
+	/*if (gx2 < 0 || gy2 < 0 || gx2 >= (level->w >> GRAVITY_RESOLUTION) || gy2 >= (level->h >> GRAVITY_RESOLUTION))
+		return 0;*/
+	return /*gravity[gx2+gy2*(level->w>>GRAVITY_RESOLUTION)].x*rx + */gravity[gx1+gy1*(level->w>>GRAVITY_RESOLUTION)].x/* *((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION*/;
 }
 
 Sint32 gravitation_y(int x,int y)
 {
-	int gx = x >> GRAVITY_RESOLUTION;
-	int gy = y >> GRAVITY_RESOLUTION;
-	if (gx < 0 || gy < 0 || gx >= (level->w >> GRAVITY_RESOLUTION) || gy >= (level->h >> GRAVITY_RESOLUTION))
+	int gx1 = x - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
+	int gy1 = y - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
+	/*int gx2 = gx1+1;
+	int gy2 = gy1+1;
+	int rx = x - (gx1 << GRAVITY_RESOLUTION);
+	int ry = y - (gy1 << GRAVITY_RESOLUTION);*/
+	if (gx1 < 0 || gy1 < 0 || gx1 >= (level->w >> GRAVITY_RESOLUTION) || gy1 >= (level->h >> GRAVITY_RESOLUTION))
 		return 0;
-	return gravity[gx+gy*(level->w>>GRAVITY_RESOLUTION)].y;
+	/*if (gx2 < 0 || gy2 < 0 || gx2 >= (level->w >> GRAVITY_RESOLUTION) || gy2 >= (level->h >> GRAVITY_RESOLUTION))
+		return 0;*/
+	return /*gravity[gx2+gy2*(level->w>>GRAVITY_RESOLUTION)].y * ry + */gravity[gx1+gy1*(level->w>>GRAVITY_RESOLUTION)].y/* * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION*/;
 }
-
 Sint32 gravitation_force(int x,int y)
 {
 	int grav_x = gravitation_x(x,y);
@@ -151,6 +164,8 @@ void update_player_sprite(int steps)
 void init_player()
 {
 	player.direction = 0;
+	player.w_direction = 0;
+	player.w_power = SP_ONE;
 	player.hops = 0;
 	int x,y;
 	while (1)
