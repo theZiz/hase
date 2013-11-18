@@ -1,4 +1,6 @@
 #include <sparrow3d.h>
+#include <stdlib.h>
+#include <string.h>
 SDL_Surface* screen;
 spFontPointer font;
 SDL_Surface* level;
@@ -249,6 +251,7 @@ int main(int argc, char **argv)
 	loadInformation("Created Arrow image...");
 	fill_gravity_surface();
 	level = spCreateSurface(level_original->w,level_original->h);
+	loadInformation("Created new surface...");
 	level_pixel = (Uint16*)level_original->pixels;
 	realloc_gravity();
 	init_gravity();
