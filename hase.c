@@ -12,6 +12,7 @@ Sint32 zoom;
 Sint32 zoomAdjust;
 Sint32 minZoom,maxZoom;
 char levelname[256] = "testlevel2";
+int help = 0;
 
 void loadInformation(char* information)
 {
@@ -23,6 +24,7 @@ void loadInformation(char* information)
 #include "gravity.c"
 #include "player.c"
 #include "logic.c"
+#include "help.c"
 
 int map_follows = 1;
 
@@ -66,6 +68,7 @@ void draw(void)
 		spDrawSprite(screen->w/2,screen->h/2,0,sprite);
 	}
 	//spEllipseBorder(screen->w/2,screen->h/2,0,32,32,1,1,spGetRGB(255,0,0));
+	draw_help();
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	spFlip();
@@ -89,6 +92,11 @@ int calc(Uint32 steps)
 	update_player(steps);
 	do_physics(steps);
 	counter+=steps;
+	if (spGetInput()->button[SP_BUTTON_START])
+	{
+		spGetInput()->button[SP_BUTTON_START] = 0;
+		help = 1-help;
+	}
 	if (spGetInput()->button[SP_BUTTON_LEFT] && player.bums && player.hops <= 0)
 	{
 		Sint32 dx = spSin(player.rotation);
@@ -156,11 +164,11 @@ int calc(Uint32 steps)
 		else
 			player.w_direction+=steps*64;
 	}
-	if (spGetInput()->button[SP_BUTTON_START_NOWASD])
+	/*if (spGetInput()->button[SP_BUTTON_START])
 	{
-		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
+		spGetInput()->button[SP_BUTTON_START] = 0;
 		map_follows = 1-map_follows;
-	}
+	}*/
 		
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 		return 1;
@@ -174,16 +182,16 @@ void resize( Uint16 w, Uint16 h )
 	if ( font )
 		spFontDelete( font );
 	spFontSetShadeColor(0);
-	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 12 * spGetSizeFactor() >> SP_ACCURACY);
+	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 10 * spGetSizeFactor() >> SP_ACCURACY);
 	spFontAdd( font, SP_FONT_GROUP_ASCII, 65535 ); //whole ASCII
-	spFontAddButton( font, 'R', SP_BUTTON_START_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Return == START
+	spFontAddButton( font, 'R', SP_BUTTON_START_NAME, 65535, SP_ALPHA_COLOR ); //Return == START
 	spFontAddButton( font, 'B', SP_BUTTON_SELECT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Backspace == SELECT
-	spFontAddButton( font, 'q', SP_BUTTON_L_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // q == L
-	spFontAddButton( font, 'e', SP_BUTTON_R_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // e == R
-	spFontAddButton( font, 'a', SP_BUTTON_LEFT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //a == left button
-	spFontAddButton( font, 'd', SP_BUTTON_RIGHT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // d == right button
-	spFontAddButton( font, 'w', SP_BUTTON_UP_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // w == up button
-	spFontAddButton( font, 's', SP_BUTTON_DOWN_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); // s == down button
+	spFontAddButton( font, 'q', SP_BUTTON_L_NAME, 65535, SP_ALPHA_COLOR ); // q == L
+	spFontAddButton( font, 'e', SP_BUTTON_R_NAME, 65535, SP_ALPHA_COLOR ); // e == R
+	spFontAddButton( font, 'a', SP_BUTTON_LEFT_NAME, 65535, SP_ALPHA_COLOR ); //a == left button
+	spFontAddButton( font, 'd', SP_BUTTON_RIGHT_NAME, 65535, SP_ALPHA_COLOR ); // d == right button
+	spFontAddButton( font, 'w', SP_BUTTON_UP_NAME, 65535, SP_ALPHA_COLOR ); // w == up button
+	spFontAddButton( font, 's', SP_BUTTON_DOWN_NAME, 65535, SP_ALPHA_COLOR ); // s == down button
 	spFontMulWidth(font,spFloatToFixed(0.85f));
 	spFontAddBorder(font , 0);
 }
