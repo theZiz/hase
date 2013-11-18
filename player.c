@@ -47,30 +47,34 @@ Sint32 gravitation_x(int x,int y)
 {
 	int gx1 = x - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
 	int gy1 = y - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
-	/*int gx2 = gx1+1;
+	int gx2 = gx1+1;
 	int gy2 = gy1+1;
 	int rx = x - (gx1 << GRAVITY_RESOLUTION);
-	int ry = y - (gy1 << GRAVITY_RESOLUTION);*/
+	int ry = y - (gy1 << GRAVITY_RESOLUTION);
 	if (gx1 < 0 || gy1 < 0 || gx1 >= (level->w >> GRAVITY_RESOLUTION) || gy1 >= (level->h >> GRAVITY_RESOLUTION))
 		return 0;
-	/*if (gx2 < 0 || gy2 < 0 || gx2 >= (level->w >> GRAVITY_RESOLUTION) || gy2 >= (level->h >> GRAVITY_RESOLUTION))
-		return 0;*/
-	return /*gravity[gx2+gy2*(level->w>>GRAVITY_RESOLUTION)].x*rx + */gravity[gx1+gy1*(level->w>>GRAVITY_RESOLUTION)].x/* *((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION*/;
+	if (gx2 < 0 || gy2 < 0 || gx2 >= (level->w >> GRAVITY_RESOLUTION) || gy2 >= (level->h >> GRAVITY_RESOLUTION))
+		return 0;
+	int g1 = gravity[gx2+gy1*(level->w>>GRAVITY_RESOLUTION)].x * rx + gravity[gx1+gy1*(level->w>>GRAVITY_RESOLUTION)].x * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
+	int g2 = gravity[gx2+gy2*(level->w>>GRAVITY_RESOLUTION)].x * rx + gravity[gx1+gy2*(level->w>>GRAVITY_RESOLUTION)].x * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
+	return g2 * ry + g1 * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION;
 }
 
 Sint32 gravitation_y(int x,int y)
 {
 	int gx1 = x - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
 	int gy1 = y - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
-	/*int gx2 = gx1+1;
+	int gx2 = gx1+1;
 	int gy2 = gy1+1;
 	int rx = x - (gx1 << GRAVITY_RESOLUTION);
-	int ry = y - (gy1 << GRAVITY_RESOLUTION);*/
+	int ry = y - (gy1 << GRAVITY_RESOLUTION);
 	if (gx1 < 0 || gy1 < 0 || gx1 >= (level->w >> GRAVITY_RESOLUTION) || gy1 >= (level->h >> GRAVITY_RESOLUTION))
 		return 0;
-	/*if (gx2 < 0 || gy2 < 0 || gx2 >= (level->w >> GRAVITY_RESOLUTION) || gy2 >= (level->h >> GRAVITY_RESOLUTION))
-		return 0;*/
-	return /*gravity[gx2+gy2*(level->w>>GRAVITY_RESOLUTION)].y * ry + */gravity[gx1+gy1*(level->w>>GRAVITY_RESOLUTION)].y/* * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION*/;
+	if (gx2 < 0 || gy2 < 0 || gx2 >= (level->w >> GRAVITY_RESOLUTION) || gy2 >= (level->h >> GRAVITY_RESOLUTION))
+		return 0;
+	int g1 = gravity[gx2+gy1*(level->w>>GRAVITY_RESOLUTION)].y * rx + gravity[gx1+gy1*(level->w>>GRAVITY_RESOLUTION)].y * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
+	int g2 = gravity[gx2+gy2*(level->w>>GRAVITY_RESOLUTION)].y * rx + gravity[gx1+gy2*(level->w>>GRAVITY_RESOLUTION)].y * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
+	return g2 * ry + g1 * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION;
 }
 Sint32 gravitation_force(int x,int y)
 {
@@ -165,7 +169,7 @@ void init_player()
 {
 	player.direction = 0;
 	player.w_direction = 0;
-	player.w_power = SP_ONE;
+	player.w_power = 0;
 	player.hops = 0;
 	int x,y;
 	while (1)
@@ -173,7 +177,7 @@ void init_player()
 		x = rand()%level->w;
 		y = rand()%level->h;
 		printf("Tried %i %i...",x,y);
-		if (circle_is_empty(x,y,16) && gravitation_force(x,y)/8192)
+		if (circle_is_empty(x,y,16) && gravitation_force(x,y)/32768)
 			break;
 		printf("NOT!\n");
 	}

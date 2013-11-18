@@ -48,22 +48,24 @@ void draw(void)
 	if (map_follows)
 	{
 		spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom,zoom,player.w_direction);
-		Sint32 x = spCos(player.w_direction)*(-16-spFixedToInt(8*player.w_power));
-		Sint32 y = spSin(player.w_direction)*(-16-spFixedToInt(8*player.w_power));
-		spSetAlphaPattern4x4(127,0);
-		spRotozoomSurface(screen->w/2+(spMul(player.x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/16,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.w_direction-SP_PI/2);
-		spDeactivatePattern();
+		if (player.w_power)
+		{
+			Sint32 x = spCos(player.w_direction)*(-16-spFixedToInt(8*player.w_power));
+			Sint32 y = spSin(player.w_direction)*(-16-spFixedToInt(8*player.w_power));
+			spRotozoomSurface(screen->w/2+(spMul(player.x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.w_direction-SP_PI/2);
+		}
 		spSetSpriteRotation(sprite,0);
 		spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
 	}
 	else
 	{
 		spRotozoomSurface(screen->w/2,screen->h/2,0,weapon,zoom,zoom,player.rotation+player.w_direction);
-		int x = spFixedToInt(spCos(player.rotation+player.w_direction)*(-32-spFixedToInt(16*player.w_power)));
-		int y = spFixedToInt(spSin(player.rotation+player.w_direction)*(-32-spFixedToInt(16*player.w_power)));
-		spSetAlphaPattern4x4(127,0);
-		spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,zoom/8,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.rotation+player.w_direction-SP_PI/2);
-		spDeactivatePattern();
+		if (player.w_power)
+		{
+			int x = spFixedToInt(spCos(player.rotation+player.w_direction)*spFixedToInt((-16-spFixedToInt(8*player.w_power))*zoom));
+			int y = spFixedToInt(spSin(player.rotation+player.w_direction)*spFixedToInt((-16-spFixedToInt(8*player.w_power))*zoom));
+			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,zoom/4,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.rotation+player.w_direction-SP_PI/2);
+		}
 		spSetSpriteRotation(sprite,player.rotation);
 		spDrawSprite(screen->w/2,screen->h/2,0,sprite);
 	}
@@ -72,6 +74,23 @@ void draw(void)
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	spFlip();
+}
+
+int direction_hold = 0;
+#define DIRECTION_HOLD_TIME 200
+
+int jump(int high)
+{
+	Sint32 dx = spSin(player.rotation);
+	Sint32 dy = spCos(player.rotation);
+	if (circle_is_empty(player.x+dx,player.y+dy,15))
+	{
+		if (high)
+			player.hops = HIGH_HOPS_TIME;
+		else
+			player.hops = HOPS_TIME;
+		player.high_hops = high;
+	}
 }
 
 int calc(Uint32 steps)
@@ -99,23 +118,11 @@ int calc(Uint32 steps)
 	}
 	if (spGetInput()->button[SP_BUTTON_LEFT] && player.bums && player.hops <= 0)
 	{
-		Sint32 dx = spSin(player.rotation);
-		Sint32 dy = spCos(player.rotation);
-		if (circle_is_empty(player.x+dx,player.y+dy,15))
-		{
-			player.hops = HOPS_TIME;
-			player.high_hops = 0;
-		}
+		jump(0);
 	}
 	if (spGetInput()->button[SP_BUTTON_RIGHT] && player.bums && player.hops <= 0)
 	{
-		Sint32 dx = spSin(player.rotation);
-		Sint32 dy = spCos(player.rotation);
-		if (circle_is_empty(player.x+dx,player.y+dy,15))
-		{
-			player.hops = HIGH_HOPS_TIME;
-			player.high_hops = 1;
-		}
+		jump(1);
 	}
 	if (spGetInput()->button[SP_BUTTON_L])
 	{
@@ -132,24 +139,33 @@ int calc(Uint32 steps)
 		zoom = spMul(zoomAdjust,zoomAdjust);
 	}
 	update_player_sprite(steps);
-	if (spGetInput()->button[SP_BUTTON_DOWN])
-	{
-		spGetInput()->button[SP_BUTTON_DOWN] = 0;
-		player.direction = 1 - player.direction;
-		player.w_direction = SP_PI-player.w_direction;
-	}
 	if (spGetInput()->axis[0] < 0)
 	{
-		player.w_power-=steps*64;
-		if (player.w_power < 0)
-			player.w_power = 0;
+		if (player.direction == 1)
+		{
+			player.direction = 0;
+			player.w_direction = SP_PI-player.w_direction;
+			direction_hold = 0;
+		}
+		direction_hold+=steps;
+		if (direction_hold >= DIRECTION_HOLD_TIME && player.bums && player.hops <= 0)
+			jump(0);
 	}
+	else
 	if (spGetInput()->axis[0] > 0)
 	{
-		player.w_power+=steps*64;
-		if (player.w_power > 2*SP_ONE)
-			player.w_power = 2*SP_ONE;
+		if (player.direction == 0)
+		{
+			player.direction = 1;
+			player.w_direction = SP_PI-player.w_direction;
+			direction_hold = 0;
+		}
+		direction_hold+=steps;
+		if (direction_hold >= DIRECTION_HOLD_TIME && player.bums && player.hops <= 0)
+			jump(0);
 	}
+	else
+		direction_hold = 0;
 	if (spGetInput()->axis[1] < 0)
 	{
 		if (player.direction == 0)
@@ -163,6 +179,18 @@ int calc(Uint32 steps)
 			player.w_direction-=steps*64;
 		else
 			player.w_direction+=steps*64;
+	}
+	if (spGetInput()->button[SP_BUTTON_UP])
+	{
+		player.w_power += steps*64;
+		if (player.w_power >= 2*SP_ONE)
+			player.w_power = 2*SP_ONE;
+	}
+	else
+	if (player.w_power)
+	{
+		//Shoot!
+		player.w_power = 0;
 	}
 	/*if (spGetInput()->button[SP_BUTTON_START])
 	{
@@ -182,7 +210,7 @@ void resize( Uint16 w, Uint16 h )
 	if ( font )
 		spFontDelete( font );
 	spFontSetShadeColor(0);
-	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 10 * spGetSizeFactor() >> SP_ACCURACY);
+	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 9 * spGetSizeFactor() >> SP_ACCURACY);
 	spFontAdd( font, SP_FONT_GROUP_ASCII, 65535 ); //whole ASCII
 	spFontAddButton( font, 'R', SP_BUTTON_START_NAME, 65535, SP_ALPHA_COLOR ); //Return == START
 	spFontAddButton( font, 'B', SP_BUTTON_SELECT_NOWASD_NAME, 65535, SP_ALPHA_COLOR ); //Backspace == SELECT

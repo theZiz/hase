@@ -102,6 +102,11 @@ void init_gravity()
 	loadInformation("Drawing level...");
 	spSelectRenderTarget(level);
 	spSetAlphaTest(1);
+	Uint16* pixel = (Uint16*)level->pixels;
+	for (x = 0; x < level->w; x++)
+		for (y = 0; y < level->h; y++)
+			pixel[x+y*level->w] = spGetRGB(gravitation_force(x,y)/2048,gravitation_force(x,y)/1024,gravitation_force(x,y)/512);
+	spSetBlending(SP_ONE*3/4);
 	for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
 	{
 		for (y = 0; y < (level->h>>GRAVITY_RESOLUTION); y++)
@@ -135,6 +140,7 @@ void init_gravity()
 			                  gravity_surface,angle<<GRAVITY_RESOLUTION+1,f<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1);
 		}
 	}
+	spSetBlending(SP_ONE);
 	//spSetBlending(SP_ONE/2);
 	spBlitSurface(level->w/2,level->h/2,0,level_original);
 	//spSetBlending(SP_ONE);
@@ -180,10 +186,6 @@ void fill_gravity_surface()
 			            x2, y2,0,arrow->w-1,         0,
 			            x3, y3,0,         0,         0,
 			            x4, y4,0,         0,arrow->h-1,color);
-			/*spRectangleBorder( spFixedToInt(X),spFixedToInt(Y),0,spFixedToInt(s),spFixedToInt(s),1,1,65535);
-			char buffer[16];
-			sprintf(buffer,"%i",y);
-			spFontDrawMiddle( spFixedToInt(X),spFixedToInt(Y),0,buffer,font);*/
 		}
 	}
 	spSelectRenderTarget(screen);
