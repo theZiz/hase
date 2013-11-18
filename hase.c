@@ -6,6 +6,7 @@ SDL_Surface* level_original;
 Uint16* level_pixel;
 SDL_Surface* arrow;
 SDL_Surface* weapon;
+SDL_Surface* bullet;
 Sint32 counter = 0;
 int posX,posY,rotation;
 Sint32 zoom;
@@ -21,12 +22,13 @@ void loadInformation(char* information)
 	spFlip();
 }
 
+int map_follows = 1;
+
 #include "gravity.c"
 #include "player.c"
-#include "logic.c"
 #include "help.c"
-
-int map_follows = 1;
+#include "bullet.c"
+#include "logic.c"
 
 void draw(void)
 {
@@ -70,6 +72,7 @@ void draw(void)
 		spDrawSprite(screen->w/2,screen->h/2,0,sprite);
 	}
 	//spEllipseBorder(screen->w/2,screen->h/2,0,32,32,1,1,spGetRGB(255,0,0));
+	drawBullets();
 	draw_help();
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
@@ -169,16 +172,16 @@ int calc(Uint32 steps)
 	if (spGetInput()->axis[1] < 0)
 	{
 		if (player.direction == 0)
-			player.w_direction+=steps*64;
+			player.w_direction+=steps*128;
 		else
-			player.w_direction-=steps*64;
+			player.w_direction-=steps*128;
 	}
 	if (spGetInput()->axis[1] > 0)
 	{
 		if (player.direction == 0)
-			player.w_direction-=steps*64;
+			player.w_direction-=steps*128;
 		else
-			player.w_direction+=steps*64;
+			player.w_direction+=steps*128;
 	}
 	if (spGetInput()->button[SP_BUTTON_UP])
 	{
@@ -190,6 +193,7 @@ int calc(Uint32 steps)
 	if (player.w_power)
 	{
 		//Shoot!
+		shootBullet(player.x,player.y,player.w_direction+player.rotation+SP_PI,player.w_power/2);
 		player.w_power = 0;
 	}
 	/*if (spGetInput()->button[SP_BUTTON_START])
@@ -239,6 +243,7 @@ int main(int argc, char **argv)
 	level_original = spLoadSurface(buffer);
 	arrow = spLoadSurface("./data/gravity.png");
 	weapon = spLoadSurface("./data/weapon.png");
+	bullet = spLoadSurface("./data/bullet.png");
 	hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
 	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
 	loadInformation("Created Arrow image...");
@@ -249,7 +254,7 @@ int main(int argc, char **argv)
 	init_gravity();
 	init_player();
 	zoomAdjust = spSqrt(spGetSizeFactor());
-	minZoom = spSqrt(spGetSizeFactor()/4);
+	minZoom = spSqrt(spGetSizeFactor()/8);
 	maxZoom = spSqrt(spGetSizeFactor()*4);
 	zoom = spMul(zoomAdjust,zoomAdjust);
 	spLoop(draw,calc,10,resize,NULL);
@@ -257,6 +262,7 @@ int main(int argc, char **argv)
 	spDeleteSpriteCollection(hase,0);
 	spDeleteSurface(arrow);
 	spDeleteSurface(weapon);
+	spDeleteSurface(bullet);
 	spDeleteSurface(level);
 	spDeleteSurface(level_original);
 	spDeleteSurface(gravity_surface);

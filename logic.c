@@ -17,4 +17,5 @@ void do_physics(int steps)
 			player.bums = 1;
 		}
 	}
+	updateBullets(steps);
 }
