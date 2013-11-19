@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PXML xmlns="http://openpandora.org/namespaces/PXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PXML_schema.xsd">
+  <package id="hase_prototype-hase_prototype-12345">
+    <version major="1" minor="0" release="1" build="0"/>
+    <author name="Ziz" website="http://ziz.openhandhelds.org"/>
+    <titles>
+      <title lang="en_US">
+        Hase Prototype
+      </title>
+    </titles>
+    <title lang="en_US">
+      Hase Prototype
+    </title>
+    <descriptions>
+      <description lang="en_US">
+        A prototype of a 2D worms like game with gravitation and stuff...
+        Entry for the crap game competition 2013.
+      </description>
+    </descriptions>
+    <description lang="en_US">
+        A prototype of a 2D worms like game with gravitation and stuff...
+        Entry for the crap game competition 2013.
+    </description>
+    <icon src="./hase_prototype.png"/>
+  </package>
+  <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
+    <exec command="./hase.sh"/>
+    <title lang="en_US">Hase Prototype</title>
+    <author name="Ziz" website="http://ziz.openhandhelds.org"/>
+    <version major="1" minor="0" release="1" build="0"/>
+    <osversion major="1" minor="0" release="0" build="0"/>
+    <description lang="en_US">A game about bunnies in space</description>
+    <icon src="./hase_prototype.png"/>
+    <previewpics>
+      <pic src="previews/screenshot1.png"/>
+    </previewpics>
+    <licenses>
+      <license name="GPLv2+" url="http://www.gnu.org/licenses/gpl-2.0.html" sourcecodeurl="https://github.com/theZiz/hase"/>
+    </licenses>
+    <categories>
+      <category name="Game">
+        <subcategory name="ActionGame"/>
+      </category>
+    </categories>
+  </application>
+</PXML>
