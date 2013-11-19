@@ -5,7 +5,7 @@ void do_physics(int steps)
 	{
 		player.dx -= gravitation_x(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY)/8192;
 		player.dy -= gravitation_y(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY)/8192;
-		if (circle_is_empty(player.x+player.dx >> SP_ACCURACY,player.y+player.dy >> SP_ACCURACY,15))
+		if (circle_is_empty(player.x+player.dx >> SP_ACCURACY,player.y+player.dy >> SP_ACCURACY,7))
 		{
 			player.x += player.dx;
 			player.y += player.dy;

@@ -5,8 +5,13 @@ typedef struct sBullet
 	Sint32 rotation;
 	Sint32 dr;
 	Sint32 dx,dy;
+	Sint32 impact_state;
+	Sint32 impact_counter;
 	pBullet next;
 } tBullet;
+
+#define IMPACT_TIME 100
+#define EXPLOSION_COLOR spGetFastRGB(255,255,255)
 
 pBullet firstBullet = NULL;
 
@@ -27,6 +32,7 @@ void shootBullet(int x,int y,int direction,int power)
 	firstBullet = bullet;
 	bullet->x = x;
 	bullet->y = y;
+	bullet->impact_state = 0;
 	bullet->rotation = rand()/(2*SP_PI);
 	bullet->dr = rand()/(2*SP_PI/100);
 	bullet->dx = spMul(spCos(direction),power);
@@ -38,20 +44,23 @@ void drawBullets()
 	pBullet momBullet = firstBullet;
 	while (momBullet)
 	{
-		Sint32 x,y;
-		if (map_follows)
+		if (momBullet->impact_state < 2)
 		{
-			Sint32 ox = spMul(momBullet->x-posX,zoom);
-			Sint32 oy = spMul(momBullet->y-posY,zoom);
-			x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
-			y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+			Sint32 x,y;
+			if (map_follows)
+			{
+				Sint32 ox = spMul(momBullet->x-posX,zoom);
+				Sint32 oy = spMul(momBullet->y-posY,zoom);
+				x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+				y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+			}
+			else
+			{
+				x = spMul(momBullet->x-posX,zoom) >> SP_ACCURACY;
+				y = spMul(momBullet->y-posY,zoom) >> SP_ACCURACY;
+			}
+			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,bullet,zoom/8,zoom/8,momBullet->rotation);
 		}
-		else
-		{
-			x = spMul(momBullet->x-posX,zoom) >> SP_ACCURACY;
-			y = spMul(momBullet->y-posY,zoom) >> SP_ACCURACY;
-		}
-		spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,bullet,zoom/4,zoom/4,momBullet->rotation);
 		momBullet = momBullet->next;
 	}
 }
@@ -139,19 +148,19 @@ void bullet_impact(int X,int Y,int radius)
 	end = SDL_GetTicks();
 	printf("  Drawing Arrows: %i\n",end-begin);
 	begin=end;
-	/*spSetHorizontalOrigin(SP_LEFT);
+	spSetHorizontalOrigin(SP_LEFT);
 	spSetVerticalOrigin(SP_TOP);
-	spSetAlphaTest(0);
-	spBlitSurfacePart(X-radius-(GRAVITY_CIRCLE - 2 << GRAVITY_RESOLUTION),
-	                  Y-radius-(GRAVITY_CIRCLE - 2 << GRAVITY_RESOLUTION),
+	spSetAlphaTest(1);
+	spBlitSurfacePart(X-radius-(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION),
+	                  Y-radius-(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION),
 	                  0,level_original,
-	                  X-radius-(GRAVITY_CIRCLE - 2 << GRAVITY_RESOLUTION),
-	                  Y-radius-(GRAVITY_CIRCLE - 2 << GRAVITY_RESOLUTION),
+	                  X-radius-(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION),
+	                  Y-radius-(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION),
 	                  2*(radius+(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION)),
 	                  2*(radius+(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION)));
 	spSetHorizontalOrigin(SP_CENTER);
-	spSetVerticalOrigin(SP_CENTER);*/
-	spBlitSurface(level->w/2,level->h/2,0,level_original);
+	spSetVerticalOrigin(SP_CENTER);
+	//spBlitSurface(level->w/2,level->h/2,0,level_original);
 	end = SDL_GetTicks();
 	printf("  Blitting: %i\n",end-begin);
 	begin=end;
@@ -171,15 +180,38 @@ void updateBullets(int steps)
 			momBullet->dx -= gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY)/8192;
 			momBullet->dy -= gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY)/8192;
 			int dead = 0;
-			if (circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,4))
+			if (momBullet->impact_state == 0 && circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,2))
 			{
 				momBullet->x += momBullet->dx;
 				momBullet->y += momBullet->dy;
 			}
 			else
 			{
-				dead = 1;
-				bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,64);
+				switch (momBullet->impact_state)
+				{
+					case 0:
+						momBullet->impact_state = 1;
+						momBullet->impact_counter = IMPACT_TIME;
+						break;
+					case 1:
+						momBullet->impact_counter--;
+						if (momBullet->impact_counter == 0)
+						{
+							momBullet->impact_state = 2;
+							momBullet->impact_counter = IMPACT_TIME;
+							spClearTarget(EXPLOSION_COLOR);
+							spFlip();
+							bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
+							spResetLoop();
+							return;
+						}
+						break;
+					case 2:
+						momBullet->impact_counter--;
+						if (momBullet->impact_counter == 0)
+							dead = 1;
+						break;
+				}
 			}
 			if (dead || momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= level->w || spFixedToInt(momBullet->y) >= level->h)
 			{
@@ -198,4 +230,29 @@ void updateBullets(int steps)
 			}
 		}
 	}
+}
+
+Sint32 bullet_alpha()
+{
+	Sint32 alpha = 0;
+	Sint32 newalpha;
+	pBullet momBullet = firstBullet;
+	while (momBullet)
+	{
+		switch (momBullet->impact_state)
+		{
+			case 1:
+				newalpha = SP_ONE-momBullet->impact_counter*SP_ONE/100;
+				if (newalpha > alpha)
+					alpha = newalpha;
+				break;
+			case 2:
+				newalpha = momBullet->impact_counter*SP_ONE/100;
+				if (newalpha > alpha)
+					alpha = newalpha;
+				break;
+		}
+		momBullet = momBullet->next;
+	}
+	return alpha;
 }

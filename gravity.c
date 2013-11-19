@@ -1,7 +1,7 @@
 #define GRAVITY_DENSITY 32
 #define GRAVITY_RESOLUTION 4
 #define GRAVITY_PER_PIXEL 32
-#define GRAVITY_PER_PIXEL_CORRECTION 12
+#define GRAVITY_PER_PIXEL_CORRECTION 16
 #define GRAVITY_CIRCLE 16
 
 int color_mode = 2;
@@ -178,10 +178,7 @@ void init_gravity()
 			                  gravity_surface,angle<<GRAVITY_RESOLUTION+1,f<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1);
 		}
 	}
-	//spSetBlending(SP_ONE);
-	//spSetBlending(SP_ONE/2);
 	spBlitSurface(level->w/2,level->h/2,0,level_original);
-	//spSetBlending(SP_ONE);
 	spSelectRenderTarget(screen);
 }
 

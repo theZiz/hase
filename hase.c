@@ -34,7 +34,6 @@ int map_follows = 1;
 
 void draw(void)
 {
-	srand(0);
 	char buffer[256];
 	spClearTarget(0);
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
@@ -48,14 +47,14 @@ void draw(void)
 	posX = player.x;
 	posY = player.y;
 	
-	spSetSpriteZoom(sprite,zoom,zoom);
+	spSetSpriteZoom(sprite,zoom/2,zoom/2);
 	if (map_follows)
 	{
-		spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom,zoom,player.w_direction);
+		spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player.w_direction);
 		if (player.w_power)
 		{
-			Sint32 x = spCos(player.w_direction)*(-16-spFixedToInt(8*player.w_power));
-			Sint32 y = spSin(player.w_direction)*(-16-spFixedToInt(8*player.w_power));
+			Sint32 x = spCos(player.w_direction)*(-8-spFixedToInt(8*player.w_power));
+			Sint32 y = spSin(player.w_direction)*(-8-spFixedToInt(8*player.w_power));
 			spRotozoomSurface(screen->w/2+(spMul(player.x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.w_direction-SP_PI/2);
 		}
 		spSetSpriteRotation(sprite,0);
@@ -66,8 +65,8 @@ void draw(void)
 		spRotozoomSurface(screen->w/2,screen->h/2,0,weapon,zoom,zoom,player.rotation+player.w_direction);
 		if (player.w_power)
 		{
-			int x = spFixedToInt(spCos(player.rotation+player.w_direction)*spFixedToInt((-16-spFixedToInt(8*player.w_power))*zoom));
-			int y = spFixedToInt(spSin(player.rotation+player.w_direction)*spFixedToInt((-16-spFixedToInt(8*player.w_power))*zoom));
+			int x = spFixedToInt(spCos(player.rotation+player.w_direction)*spFixedToInt((-8-spFixedToInt(8*player.w_power))*zoom));
+			int y = spFixedToInt(spSin(player.rotation+player.w_direction)*spFixedToInt((-8-spFixedToInt(8*player.w_power))*zoom));
 			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,zoom/4,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.rotation+player.w_direction-SP_PI/2);
 		}
 		spSetSpriteRotation(sprite,player.rotation);
@@ -78,6 +77,9 @@ void draw(void)
 	draw_help();
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
+	int b_alpha = bullet_alpha();
+	if (b_alpha)
+		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
 	spFlip();
 }
 
@@ -88,7 +90,7 @@ int jump(int high)
 {
 	Sint32 dx = spSin(player.rotation);
 	Sint32 dy = spCos(player.rotation);
-	if (circle_is_empty(player.x+dx,player.y+dy,15))
+	if (circle_is_empty(player.x+dx,player.y+dy,7))
 	{
 		if (high)
 			player.hops = HIGH_HOPS_TIME;
