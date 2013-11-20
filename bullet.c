@@ -46,19 +46,10 @@ void drawBullets()
 	{
 		if (momBullet->impact_state < 2)
 		{
-			Sint32 x,y;
-			if (map_follows)
-			{
-				Sint32 ox = spMul(momBullet->x-posX,zoom);
-				Sint32 oy = spMul(momBullet->y-posY,zoom);
-				x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
-				y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-			}
-			else
-			{
-				x = spMul(momBullet->x-posX,zoom) >> SP_ACCURACY;
-				y = spMul(momBullet->y-posY,zoom) >> SP_ACCURACY;
-			}
+			Sint32 ox = spMul(momBullet->x-posX,zoom);
+			Sint32 oy = spMul(momBullet->y-posY,zoom);
+			Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+			Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,bullet,zoom/8,zoom/8,momBullet->rotation);
 		}
 		momBullet = momBullet->next;

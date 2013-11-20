@@ -24,8 +24,6 @@ void loadInformation(char* information)
 	spFlip();
 }
 
-int map_follows = 1;
-
 #include "gravity.c"
 #include "player.c"
 #include "help.c"
@@ -48,35 +46,22 @@ void draw(void)
 	posY = player.y;
 	
 	spSetSpriteZoom(sprite,zoom/2,zoom/2);
-	if (map_follows)
+	spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player.w_direction);
+	if (player.w_power)
 	{
-		spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player.w_direction);
-		if (player.w_power)
-		{
-			Sint32 x = spCos(player.w_direction)*(-8-spFixedToInt(8*player.w_power));
-			Sint32 y = spSin(player.w_direction)*(-8-spFixedToInt(8*player.w_power));
-			spRotozoomSurface(screen->w/2+(spMul(player.x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.w_direction-SP_PI/2);
-		}
-		spSetSpriteRotation(sprite,0);
-		spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
+		Sint32 x = spCos(player.w_direction)*(-8-spFixedToInt(16*player.w_power));
+		Sint32 y = spSin(player.w_direction)*(-8-spFixedToInt(16*player.w_power));
+		spRotozoomSurface(screen->w/2+(spMul(player.x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/4,player.w_direction-SP_PI/2);
 	}
-	else
-	{
-		spRotozoomSurface(screen->w/2,screen->h/2,0,weapon,zoom,zoom,player.rotation+player.w_direction);
-		if (player.w_power)
-		{
-			int x = spFixedToInt(spCos(player.rotation+player.w_direction)*spFixedToInt((-8-spFixedToInt(8*player.w_power))*zoom));
-			int y = spFixedToInt(spSin(player.rotation+player.w_direction)*spFixedToInt((-8-spFixedToInt(8*player.w_power))*zoom));
-			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,zoom/4,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/8,player.rotation+player.w_direction-SP_PI/2);
-		}
-		spSetSpriteRotation(sprite,player.rotation);
-		spDrawSprite(screen->w/2,screen->h/2,0,sprite);
-	}
+	spSetSpriteRotation(sprite,0);
+	spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
 	//spEllipseBorder(screen->w/2,screen->h/2,0,32,32,1,1,spGetRGB(255,0,0));
 	drawBullets();
 	draw_help();
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
+	sprintf(buffer,"Power: %i %%",player.w_power*100/SP_ONE);
+	spFontDraw( 2, 2, 0, buffer, font );
 	int b_alpha = bullet_alpha();
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
@@ -103,18 +88,15 @@ int jump(int high)
 int calc(Uint32 steps)
 {
 	int i;
-	if (map_follows)
-		for (i = 0; i < steps; i++)
-		{
-			Sint32 goal = -player.rotation;
-			if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
-				rotation -= 2*SP_PI;
-			if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
-				rotation += 2*SP_PI;
-			rotation = rotation*127/128+goal/128;
-		}
-	else
-		rotation = 0;
+	for (i = 0; i < steps; i++)
+	{
+		Sint32 goal = -player.rotation;
+		if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
+			rotation -= 2*SP_PI;
+		if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
+			rotation += 2*SP_PI;
+		rotation = rotation*127/128+goal/128;
+	}
 	update_player(steps);
 	do_physics(steps);
 	counter+=steps;
@@ -124,10 +106,6 @@ int calc(Uint32 steps)
 		help = 1-help;
 	}
 	if (spGetInput()->button[SP_BUTTON_LEFT] && player.bums && player.hops <= 0)
-	{
-		jump(0);
-	}
-	if (spGetInput()->button[SP_BUTTON_RIGHT] && player.bums && player.hops <= 0)
 	{
 		jump(1);
 	}
@@ -189,23 +167,22 @@ int calc(Uint32 steps)
 	}
 	if (spGetInput()->button[SP_BUTTON_UP])
 	{
-		player.w_power += steps*64;
-		if (player.w_power >= 2*SP_ONE)
-			player.w_power = 2*SP_ONE;
+		player.w_power += steps*16;
+		if (player.w_power >= SP_ONE)
+			player.w_power = SP_ONE;
 	}
-	else
-	if (player.w_power)
+	if (spGetInput()->button[SP_BUTTON_DOWN])
+	{
+		player.w_power -= steps*16;
+		if (player.w_power < 0)
+			player.w_power = 0;
+	}
+	if (spGetInput()->button[SP_BUTTON_RIGHT])
 	{
 		//Shoot!
+		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
 		shootBullet(player.x,player.y,player.w_direction+player.rotation+SP_PI,player.w_power/2);
-		player.w_power = 0;
 	}
-	/*if (spGetInput()->button[SP_BUTTON_START])
-	{
-		spGetInput()->button[SP_BUTTON_START] = 0;
-		map_follows = 1-map_follows;
-	}*/
-		
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 		return 1;
 	return 0;
@@ -235,7 +212,7 @@ void resize( Uint16 w, Uint16 h )
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
-	spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 400, 240 );
 	spInitCore();
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);

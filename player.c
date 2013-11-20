@@ -169,7 +169,7 @@ void init_player()
 {
 	player.direction = 0;
 	player.w_direction = 0;
-	player.w_power = 0;
+	player.w_power = SP_ONE/2;
 	player.hops = 0;
 	int x,y;
 	while (1)
