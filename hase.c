@@ -14,7 +14,7 @@ int posX,posY,rotation;
 Sint32 zoom;
 Sint32 zoomAdjust;
 Sint32 minZoom,maxZoom;
-char levelname[256] = "testlevel2";
+char levelname[256] = "testlevel";
 int help = 0;
 
 int power_pressed = 0;
