@@ -1,5 +1,7 @@
 #define TRACE_LENGTH 200
 #define TRACE_STEP 100
+#define TRACE_UPDATE 5
+int trace_count = TRACE_UPDATE-1;
 typedef struct sTrace
 {
 	Sint32 x,y;
@@ -11,6 +13,14 @@ int traceLength;
 
 void updateTrace()
 {
+	if (spGetFPS() < 30)
+	{
+		trace_count++;
+		if (trace_count >= TRACE_UPDATE)
+			trace_count = 0;
+		else
+			return;
+	}
 	int i,j;
 	trace[0].x = player.x;
 	trace[0].y = player.y;
@@ -26,7 +36,7 @@ void updateTrace()
 		{
 			dx -= gravitation_x(x >> SP_ACCURACY,y >> SP_ACCURACY)/8192;
 			dy -= gravitation_y(x >> SP_ACCURACY,y >> SP_ACCURACY)/8192;
-			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,2) || x < 0 || y < 0 || spFixedToInt(x) >= level->w || spFixedToInt(y) >= level->h)
+			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,2) && x >= 0 && y >= 0 && spFixedToInt(x) < level->w && spFixedToInt(y) < level->h)
 			{
 				x += dx;
 				y += dy;

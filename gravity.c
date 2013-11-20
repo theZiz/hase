@@ -115,27 +115,37 @@ void update_gravity()
 	SDL_UnlockSurface(level_original);	
 }
 
+#define BORDER_SIZE 8
+#define BORDER_SQUARE 64
+
 void init_gravity()
 {
-	int x,y;
-	/*char buffer[256];
-	sprintf(buffer,"./levels/%s.gra",levelname);
-	if (spFileExists(buffer))
+	int x,y,a,b;
+	loadInformation("Calculating Gravity...");
+	update_gravity();
+	loadInformation("Drawing level borders...");
+	spSelectRenderTarget(level_original);
+	Uint16* pixel = spGetTargetPixel();
+	for (x = BORDER_SIZE; x < level_original->w-BORDER_SIZE; x++)
 	{
-		loadInformation("Loading cached gravity...");
-		spFilePointer file = SDL_RWFromFile(buffer,"rb");
-		SDL_RWread(file,gravity,sizeof(tGravity),level->w*level->h>>2*GRAVITY_RESOLUTION);
-		SDL_RWclose(file);
+		for (y = BORDER_SIZE; y < level_original->h-BORDER_SIZE; y++)
+		{
+			if (pixel[x+y*level_original->w] != SP_ALPHA_COLOR &&
+			   (pixel[ x-1 +y*level_original->w] == SP_ALPHA_COLOR ||
+			    pixel[ x+1 +y*level_original->w] == SP_ALPHA_COLOR ||
+			    pixel[x+(y+1)*level_original->w] == SP_ALPHA_COLOR ||
+			    pixel[x+(y-1)*level_original->w] == SP_ALPHA_COLOR))
+				for (a = -BORDER_SIZE; a < BORDER_SIZE-1; a++)
+					for (b = -BORDER_SIZE; b < BORDER_SIZE-1; b++)
+					{
+						if (a*a+b*b > BORDER_SQUARE)
+							continue;
+						if (pixel[x+a+(y+b)*level_original->w] != SP_ALPHA_COLOR)
+							pixel[x+a+(y+b)*level_original->w] = spGetFastRGB(255,200,0);
+					}
+		}
 	}
-	else*/
-	{
-		loadInformation("Calculating Gravity...");
-		update_gravity();
-		/*loadInformation("Caching Gravity...");
-		spFilePointer file = SDL_RWFromFile(buffer,"wb");
-		SDL_RWwrite(file,gravity,sizeof(tGravity),level->w*level->h>>2*GRAVITY_RESOLUTION);
-		SDL_RWclose(file);*/
-	}
+	spSelectRenderTarget(screen);
 	loadInformation("Drawing level...");
 	spSelectRenderTarget(level);
 	spClearTarget(0);

@@ -58,12 +58,32 @@ void drawBullets()
 
 void bullet_impact(int X,int Y,int radius)
 {
+	int x,y;
 	int R = (radius>>GRAVITY_RESOLUTION)+GRAVITY_CIRCLE+2;
 	R *= R;
 	Sint32 begin = SDL_GetTicks();
 	spSelectRenderTarget(level_original);
-	spSetAlphaTest(0);
-	spEllipse(X,Y,0,radius,radius,SP_ALPHA_COLOR);
+	//spSetAlphaTest(0);
+	//spEllipse(X,Y,0,radius,radius,SP_ALPHA_COLOR);
+	Uint16* pixel = spGetTargetPixel();
+	int inner_radius = radius*radius;
+	int outer_radius = (radius+BORDER_SIZE)*(radius+BORDER_SIZE);
+	for (x = -radius-BORDER_SIZE; x < radius+BORDER_SIZE+1; x++)
+	{
+		for (y = -radius-BORDER_SIZE; y < radius+BORDER_SIZE+1; y++)
+		{
+			int sum = x*x+y*y;
+			if (sum > outer_radius)
+				continue;
+			if (sum > inner_radius)
+			{
+				if (pixel[X+x+(Y+y)*level_original->w] != SP_ALPHA_COLOR)
+					pixel[X+x+(Y+y)*level_original->w] = spGetFastRGB(255,200,0);
+			}
+			else
+				pixel[X+x+(Y+y)*level_original->w] = SP_ALPHA_COLOR;
+		}
+	}	
 	Sint32 end = SDL_GetTicks();
 	printf("* Recalculating level:\n");
 	printf("  Drawing Ellipse: %i\n",end-begin);
@@ -83,7 +103,6 @@ void bullet_impact(int X,int Y,int radius)
 	printf("  Drawing Ellipse: %i\n",end-begin);
 	begin=end;
 	//spSetBlending(SP_ONE*3/4);
-	int x,y;
 	int start_x = (X - radius >> GRAVITY_RESOLUTION) - 2 - GRAVITY_CIRCLE;
 	int end_x = (X + radius >> GRAVITY_RESOLUTION) + 2 + GRAVITY_CIRCLE;
 	int start_y = (Y - radius >> GRAVITY_RESOLUTION) - 2 - GRAVITY_CIRCLE;
