@@ -29,7 +29,7 @@ all: hase
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
-hase: hase.c gravity.c player.c logic.c help.c bullet.c makeBuildDir
+hase: hase.c gravity.c player.c logic.c help.c bullet.c trace.c makeBuildDir
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
 	$(CPP) $(CFLAGS) hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/hase
 

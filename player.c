@@ -168,7 +168,7 @@ void update_player_sprite(int steps)
 void init_player()
 {
 	player.direction = 0;
-	player.w_direction = 0;
+	player.w_direction = SP_ONE/2;
 	player.w_power = SP_ONE/2;
 	player.hops = 0;
 	int x,y;

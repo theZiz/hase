@@ -17,6 +17,9 @@ Sint32 minZoom,maxZoom;
 char levelname[256] = "testlevel2";
 int help = 0;
 
+int power_pressed = 0;
+int direction_pressed = 0;
+
 void loadInformation(char* information)
 {
 	spClearTarget(0);
@@ -24,11 +27,13 @@ void loadInformation(char* information)
 	spFlip();
 }
 
+
 #include "gravity.c"
 #include "player.c"
 #include "help.c"
 #include "bullet.c"
 #include "logic.c"
+#include "trace.c"
 
 void draw(void)
 {
@@ -57,11 +62,13 @@ void draw(void)
 	spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
 	//spEllipseBorder(screen->w/2,screen->h/2,0,32,32,1,1,spGetRGB(255,0,0));
 	drawBullets();
+	drawTrace();
 	draw_help();
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	sprintf(buffer,"Power: %i %%",player.w_power*100/SP_ONE);
 	spFontDraw( 2, 2, 0, buffer, font );
+	spFontDrawRight( screen->w-2, 2, 0, "Entry for the Crap\nGame Competition 2013", font );
 	int b_alpha = bullet_alpha();
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
@@ -151,38 +158,55 @@ int calc(Uint32 steps)
 	}
 	else
 		direction_hold = 0;
+	
 	if (spGetInput()->axis[1] < 0)
 	{
+		direction_pressed += SP_ONE*steps/20;
+		if (direction_pressed >= 128*SP_ONE)
+			direction_pressed = 128*SP_ONE;
 		if (player.direction == 0)
-			player.w_direction+=steps*128;
+			player.w_direction += (direction_pressed*steps) >> SP_ACCURACY;
 		else
-			player.w_direction-=steps*128;
+			player.w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
 	}
+	else
 	if (spGetInput()->axis[1] > 0)
 	{
+		direction_pressed += SP_ONE*steps/20;
+		if (direction_pressed >= 128*SP_ONE)
+			direction_pressed = 128*SP_ONE;
 		if (player.direction == 0)
-			player.w_direction-=steps*128;
+			player.w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
 		else
-			player.w_direction+=steps*128;
+			player.w_direction += (direction_pressed*steps) >> SP_ACCURACY;
 	}
+	else
+		direction_pressed = 0;
+
 	if (spGetInput()->button[SP_BUTTON_UP])
 	{
-		player.w_power += steps*16;
+		power_pressed += SP_ONE*steps/100;
+		player.w_power += (power_pressed*steps) >> SP_ACCURACY;
 		if (player.w_power >= SP_ONE)
 			player.w_power = SP_ONE;
 	}
+	else
 	if (spGetInput()->button[SP_BUTTON_DOWN])
 	{
-		player.w_power -= steps*16;
+		power_pressed += SP_ONE*steps/100;
+		player.w_power -= (power_pressed*steps) >> SP_ACCURACY;
 		if (player.w_power < 0)
 			player.w_power = 0;
 	}
+	else
+		power_pressed = 0;
 	if (spGetInput()->button[SP_BUTTON_RIGHT])
 	{
 		//Shoot!
 		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
 		shootBullet(player.x,player.y,player.w_direction+player.rotation+SP_PI,player.w_power/2);
 	}
+	updateTrace();
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 		return 1;
 	return 0;
@@ -212,7 +236,7 @@ void resize( Uint16 w, Uint16 h )
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
-	spSetDefaultWindowSize( 400, 240 );
+	spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);
@@ -235,6 +259,7 @@ int main(int argc, char **argv)
 	realloc_gravity();
 	init_gravity();
 	init_player();
+	updateTrace();
 	zoomAdjust = spSqrt(spGetSizeFactor());
 	minZoom = spSqrt(spGetSizeFactor()/8);
 	maxZoom = spSqrt(spGetSizeFactor()*4);
