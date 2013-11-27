@@ -1,2 +1,14 @@
-- Showing weapon and shot direction
-- when very small, arrow to show in which direction the bunny looks
+* Random level
+	* Loading pattern
+	* Making level out of pattern
+
+* Second bunny, which is controlled
+* Second bunny in another color
+* Round change after each shoot
+* Second bunny does stuff, which makes sense! (AI)
+* Life bar over bunnies
+* Bunnies looses live
+* Menu for the three game modes:
+	* Endless
+	* Bunny vs. AI
+	* Bunny vs. Bunny
