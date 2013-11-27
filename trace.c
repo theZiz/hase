@@ -34,8 +34,8 @@ void updateTrace()
 		int dead = 0;
 		for (i = 0; i < TRACE_STEP; i++)
 		{
-			dx -= gravitation_x(x >> SP_ACCURACY,y >> SP_ACCURACY)/8192;
-			dy -= gravitation_y(x >> SP_ACCURACY,y >> SP_ACCURACY)/8192;
+			dx -= gravitation_x(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			dy -= gravitation_y(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
 			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,2) && x >= 0 && y >= 0 && spFixedToInt(x) < level->w && spFixedToInt(y) < level->h)
 			{
 				x += dx;

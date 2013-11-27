@@ -27,7 +27,7 @@ void loadInformation(char* information)
 	spFlip();
 }
 
-
+#define PHYSIC_IMPACT 13
 #include "gravity.c"
 #include "player.c"
 #include "help.c"
@@ -236,7 +236,7 @@ void resize( Uint16 w, Uint16 h )
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
-	spSetDefaultWindowSize( 800, 480 );
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);
