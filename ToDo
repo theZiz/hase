@@ -1,3 +1,10 @@
+* Rotation of the bullet
+* new bullet image to see, what rotates (carrot!)
+* weapon bigger
+* changing the start point of the bullet
+
+* Jump high depends on gravity at a specific point
+
 * Random level
 	* Loading pattern
 	* Making level out of pattern
