@@ -3,8 +3,8 @@ typedef struct sBullet
 {
 	Sint32 x,y;
 	Sint32 rotation;
-	Sint32 dr;
 	Sint32 dx,dy;
+	Sint32 dr;
 	Sint32 impact_state;
 	Sint32 impact_counter;
 	pBullet next;
@@ -12,6 +12,8 @@ typedef struct sBullet
 
 #define IMPACT_TIME 100
 #define EXPLOSION_COLOR spGetFastRGB(255,255,255)
+#define BULLET_SIZE 4
+#define BULLET_SPEED_DOWN 32
 
 pBullet firstBullet = NULL;
 
@@ -25,16 +27,16 @@ void deleteAllBullets()
 	}
 }
 
-void shootBullet(int x,int y,int direction,int power)
+void shootBullet(int x,int y,int direction,int power,Sint32 dr)
 {
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 	bullet->next = firstBullet;
 	firstBullet = bullet;
 	bullet->x = x;
 	bullet->y = y;
+	bullet->dr = dr;
 	bullet->impact_state = 0;
-	bullet->rotation = rand()/(2*SP_PI);
-	bullet->dr = rand()/(2*SP_PI/100);
+	bullet->rotation = rand()%(2*SP_PI);
 	bullet->dx = spMul(spCos(direction),power);
 	bullet->dy = spMul(spSin(direction),power);
 }
@@ -50,7 +52,7 @@ void drawBullets()
 			Sint32 oy = spMul(momBullet->y-posY,zoom);
 			Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 			Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,bullet,zoom/8,zoom/8,momBullet->rotation);
+			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,bullet,zoom*BULLET_SIZE/16,zoom*BULLET_SIZE/16,momBullet->rotation);
 		}
 		momBullet = momBullet->next;
 	}
@@ -189,8 +191,10 @@ void updateBullets(int steps)
 		{
 			momBullet->dx -= gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
 			momBullet->dy -= gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			int speed = abs(momBullet->dx)+abs(momBullet->dy);
+			momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;
 			int dead = 0;
-			if (momBullet->impact_state == 0 && circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,2))
+			if (momBullet->impact_state == 0 && circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,BULLET_SIZE))
 			{
 				momBullet->x += momBullet->dx;
 				momBullet->y += momBullet->dy;

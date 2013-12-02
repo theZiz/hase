@@ -36,7 +36,7 @@ void updateTrace()
 		{
 			dx -= gravitation_x(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
 			dy -= gravitation_y(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,2) && x >= 0 && y >= 0 && spFixedToInt(x) < level->w && spFixedToInt(y) < level->h)
+			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,BULLET_SIZE) && x >= 0 && y >= 0 && spFixedToInt(x) < level->w && spFixedToInt(y) < level->h)
 			{
 				x += dx;
 				y += dy;
@@ -71,7 +71,7 @@ void drawTrace()
 		oy = spMul(trace[j].y-posY,zoom);
 		Sint32 x1 = screen->w/2+(spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY);
 		Sint32 y1 = screen->h/2+(spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY);
-		spLine(x0,y0,0,x1,y1,0,spGetFastRGB(255,0,0));
+		spLine(x0,y0,0,x1,y1,0,spGetFastRGB(255,160,0));
 		x0 = x1;
 		y0 = y1;
 	}

@@ -204,7 +204,7 @@ int calc(Uint32 steps)
 	{
 		//Shoot!
 		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
-		shootBullet(player.x,player.y,player.w_direction+player.rotation+SP_PI,player.w_power/2);
+		shootBullet(player.x,player.y,player.w_direction+player.rotation+SP_PI,player.w_power/2,player.direction?1:-1);
 	}
 	updateTrace();
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
