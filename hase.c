@@ -37,33 +37,46 @@ void loadInformation(char* information)
 
 void draw(void)
 {
+	posX = player.x;
+	posY = player.y;	
 	char buffer[256];
 	spClearTarget(0);
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
 	spSetVerticalOrigin(SP_FIXED);
 	spSetHorizontalOrigin(SP_FIXED);
+	
+	//Level
 	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
 	spSetVerticalOrigin(SP_CENTER);
 	spSetHorizontalOrigin(SP_CENTER);
-	spSpritePointer sprite = spActiveSprite(hase);
-	
-	posX = player.x;
-	posY = player.y;
-	
-	spSetSpriteZoom(sprite,zoom/2,zoom/2);
-	spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player.w_direction);
+
+	//Arrow
 	if (player.w_power)
 	{
 		Sint32 x = spCos(player.w_direction)*(-8-spFixedToInt(16*player.w_power));
 		Sint32 y = spSin(player.w_direction)*(-8-spFixedToInt(16*player.w_power));
 		spRotozoomSurface(screen->w/2+(spMul(player.x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/4,player.w_direction-SP_PI/2);
 	}
+
+	//Bullets
+	drawBullets();
+	
+	//Weapon
+	spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player.w_direction);
+	
+	//Player
+	spSpritePointer sprite = spActiveSprite(hase);
+	spSetSpriteZoom(sprite,zoom/2,zoom/2);
 	spSetSpriteRotation(sprite,0);
 	spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
-	//spEllipseBorder(screen->w/2,screen->h/2,0,32,32,1,1,spGetRGB(255,0,0));
-	drawBullets();
+	
+	//Trace
 	drawTrace();
+	
+	//Help
 	draw_help();
+	
+	//HID
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	sprintf(buffer,"Power: %i %%",player.w_power*100/SP_ONE);

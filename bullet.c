@@ -32,8 +32,8 @@ void shootBullet(int x,int y,int direction,int power,Sint32 dr)
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 	bullet->next = firstBullet;
 	firstBullet = bullet;
-	bullet->x = x;
-	bullet->y = y;
+	bullet->x = x+8*spCos(direction);
+	bullet->y = y+8*spSin(direction);
 	bullet->dr = dr;
 	bullet->impact_state = 0;
 	bullet->rotation = rand()%(2*SP_PI);
