@@ -17,6 +17,7 @@ void free_gravity()
 {
 	if (gravity)
 		free(gravity);
+	gravity = NULL;
 }
 
 void realloc_gravity()

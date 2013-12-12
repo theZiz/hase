@@ -1,4 +1,4 @@
-void do_physics(int steps)
+int do_physics(int steps)
 {
 	int i;
 	for (i = 0; i < steps; i++)
@@ -17,5 +17,5 @@ void do_physics(int steps)
 			player.bums = 1;
 		}
 	}
-	updateBullets(steps);
+	return updateBullets(steps);
 }

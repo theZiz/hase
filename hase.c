@@ -76,9 +76,13 @@ void draw(void)
 	spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
 
 	//Health bar
-	spRectangle(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY),0,
-	            spFixedToInt(zoom*16),spFixedToInt(zoom*2),spGetRGB(0,255,0));	
-	
+	spSetHorizontalOrigin(SP_RIGHT);
+	spRectangle(screen->w/2+(spMul(player.x-posX+spIntToFixed(7),zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY),0,
+	            spFixedToInt(zoom*16*(MAX_HEALTH-player.health)/MAX_HEALTH),spFixedToInt(zoom*2),spGetRGB(255,0,0));	
+	spSetHorizontalOrigin(SP_LEFT);
+	spRectangle(screen->w/2+(spMul(player.x-posX-spIntToFixed(8),zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY),0,
+	            spFixedToInt(zoom*16*player.health/MAX_HEALTH),spFixedToInt(zoom*2),spGetRGB(0,255,0));	
+	spSetHorizontalOrigin(SP_CENTER);
 	//Trace
 	drawTrace();
 	
@@ -127,7 +131,8 @@ int calc(Uint32 steps)
 		rotation = rotation*127/128+goal/128;
 	}
 	update_player(steps);
-	do_physics(steps);
+	if (do_physics(steps))
+		return 2;
 	counter+=steps;
 	if (spGetInput()->button[SP_BUTTON_START])
 	{
@@ -258,44 +263,49 @@ void resize( Uint16 w, Uint16 h )
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
-	spSetDefaultWindowSize( 800, 480 );
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);
 	spSetZTest(0);
 	resize( screen->w, screen->h );
-	loadInformation("Loading images...");
-	arrow = spLoadSurface("./data/gravity.png");
-	weapon = spLoadSurface("./data/weapon.png");
-	bullet = spLoadSurface("./data/bullet.png");
-	hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
-	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
-	loadInformation("Creating random level...");
-	level_original = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);
-	create_level(3,3,3);
-	texturize_level();
-	loadInformation("Created Arrow image...");
-	fill_gravity_surface();
-	level = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);
-	loadInformation("Created new surface...");
-	level_pixel = (Uint16*)level_original->pixels;
-	realloc_gravity();
-	init_gravity();
-	init_player();
-	updateTrace();
-	zoomAdjust = spSqrt(spGetSizeFactor());
-	minZoom = spSqrt(spGetSizeFactor()/8);
-	maxZoom = spSqrt(spGetSizeFactor()*4);
-	zoom = spMul(zoomAdjust,zoomAdjust);
-	spLoop(draw,calc,10,resize,NULL);
-	free_gravity();
-	spDeleteSpriteCollection(hase,0);
-	spDeleteSurface(arrow);
-	spDeleteSurface(weapon);
-	spDeleteSurface(bullet);
-	spDeleteSurface(level);
-	spDeleteSurface(level_original);
-	spDeleteSurface(gravity_surface);
+	int result = 2;
+	while (result == 2)
+	{
+		loadInformation("Loading images...");
+		arrow = spLoadSurface("./data/gravity.png");
+		weapon = spLoadSurface("./data/weapon.png");
+		bullet = spLoadSurface("./data/bullet.png");
+		hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
+		gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
+		loadInformation("Creating random level...");
+		level_original = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);
+		create_level(3,3,3);
+		texturize_level();
+		loadInformation("Created Arrow image...");
+		fill_gravity_surface();
+		level = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);
+		loadInformation("Created new surface...");
+		level_pixel = (Uint16*)level_original->pixels;
+		realloc_gravity();
+		init_gravity();
+		init_player();
+		updateTrace();
+		zoomAdjust = spSqrt(spGetSizeFactor());
+		minZoom = spSqrt(spGetSizeFactor()/8);
+		maxZoom = spSqrt(spGetSizeFactor()*4);
+		zoom = spMul(zoomAdjust,zoomAdjust);
+		result = spLoop(draw,calc,10,resize,NULL);
+		deleteAllBullets();
+		free_gravity();
+		spDeleteSpriteCollection(hase,0);
+		spDeleteSurface(arrow);
+		spDeleteSurface(weapon);
+		spDeleteSurface(bullet);
+		spDeleteSurface(level);
+		spDeleteSurface(level_original);
+		spDeleteSurface(gravity_surface);
+	}
 	spQuitCore();
 	return 0;
 }

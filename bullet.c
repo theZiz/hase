@@ -180,7 +180,7 @@ void bullet_impact(int X,int Y,int radius)
 	spSelectRenderTarget(screen);
 }
 
-void updateBullets(int steps)
+int updateBullets(int steps)
 {
 	int i;
 	for (i = 0; i < steps; i++)
@@ -201,6 +201,7 @@ void updateBullets(int steps)
 			}
 			else
 			{
+				int d;
 				switch (momBullet->impact_state)
 				{
 					case 0:
@@ -217,13 +218,25 @@ void updateBullets(int steps)
 							spFlip();
 							bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
 							spResetLoop();
-							return;
+							return 0;
 						}
 						break;
 					case 2:
 						momBullet->impact_counter--;
 						if (momBullet->impact_counter == 0)
+						{
 							dead = 1;
+							d = spFixedToInt(player.x-momBullet->x)*spFixedToInt(player.x-momBullet->x)+
+							    spFixedToInt(player.y-momBullet->y)*spFixedToInt(player.y-momBullet->y);
+							d = 1024-d;
+							if (d > 0)
+								player.health -= d*MAX_HEALTH/2048;
+							if (player.health <= 0)
+							{
+								player.health = 0;
+								return 1;
+							}
+						}
 						break;
 				}
 			}
@@ -244,6 +257,7 @@ void updateBullets(int steps)
 			}
 		}
 	}
+	return 0;
 }
 
 Sint32 bullet_alpha()
