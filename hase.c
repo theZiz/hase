@@ -5,6 +5,7 @@
 #define LEVEL_WIDTH 1536
 #define LEVEL_HEIGHT 1536
 #define LEVEL_BORDER 256
+#define COUNT_DOWN 30720
 
 SDL_Surface* screen;
 spFontPointer font;
@@ -20,6 +21,7 @@ Sint32 zoom;
 Sint32 zoomAdjust;
 Sint32 minZoom,maxZoom;
 int help = 0;
+int countdown;
 
 int power_pressed = 0;
 int direction_pressed = 0;
@@ -120,6 +122,10 @@ void draw(void)
 	sprintf(buffer,"Power: %i %%",player[active_player].w_power*100/SP_ONE);
 	spFontDraw( 2, 2, 0, buffer, font );
 	spFontDrawRight( screen->w-2, 2, 0, "Entry for the Crap\nGame Competition 2013", font );
+	int m = countdown >> 10;
+	int s = spMin(countdown & 1023,999);
+	sprintf(buffer,"%i.%03is left",m,s);
+	spFontDrawMiddle( screen->w >> 1, 2, 0, buffer, font );
 	int b_alpha = bullet_alpha();
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
@@ -145,6 +151,10 @@ int jump(int high)
 
 int calc(Uint32 steps)
 {
+	if (player[active_player].shoot == 0)
+		countdown -= steps;
+	if (countdown < 0)
+		next_player();
 	int i;
 	for (i = 0; i < steps; i++)
 	{
@@ -183,42 +193,46 @@ int calc(Uint32 steps)
 	if (SECOND_PLAYER_AI && active_player == 1)
 	{
 		//AI
-		if (player[active_player].bums && player[active_player].shoot == 0)
+		if (player[active_player].shoot == 0)
 		{
-			int j;
-			for (j = 0; j < AI_TRIES_PER_FRAME; j++)
+			if (player[active_player].bums)
 			{
-				ai_shoot_tries++;
-				if (ai_shoot_tries < AI_MAX_TRIES)
+				int j;
+				for (j = 0; j < AI_TRIES_PER_FRAME; j++)
 				{
-					//Lets first try...
-					int x = player[active_player].x;
-					int y = player[active_player].y;
-					int w_d = rand()%(2*SP_PI);
-					int w_p = rand()%SP_ONE;
-					lastPoint(&x,&y,player[active_player].rotation+w_d+SP_PI,w_p/2);
-					int d = spFixedToInt(player[0].x-x)*spFixedToInt(player[0].x-x)+
-									spFixedToInt(player[0].y-y)*spFixedToInt(player[0].y-y);
-					if (d < lastAIDistance)
+					ai_shoot_tries++;
+					if (ai_shoot_tries < AI_MAX_TRIES)
 					{
-						lastAIDistance = d;
-						player[active_player].w_direction = w_d;
-						player[active_player].w_power = w_p;
+						//Lets first try...
+						int x = player[active_player].x;
+						int y = player[active_player].y;
+						int w_d = rand()%(2*SP_PI);
+						int w_p = rand()%SP_ONE;
+						lastPoint(&x,&y,player[active_player].rotation+w_d+SP_PI,w_p/2);
+						int d = spFixedToInt(player[0].x-x)*spFixedToInt(player[0].x-x)+
+										spFixedToInt(player[0].y-y)*spFixedToInt(player[0].y-y);
+						if (d < lastAIDistance)
+						{
+							lastAIDistance = d;
+							player[active_player].w_direction = w_d;
+							player[active_player].w_power = w_p;
+						}
 					}
-				}
-				else
-				{
-					//Shoot!
-					player[active_player].shoot = 1;
-					player[active_player].bullet = shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
-					break;
+					else
+					{
+						//Shoot!
+						player[active_player].shoot = 1;
+						player[active_player].bullet = shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
+						break;
+					}
 				}
 			}
 		}
 		else
 		{
 			//RUNNING!
-			
+			if (player[active_player].bums && player[active_player].hops <= 0)
+				jump((rand()%4==0)?1:0);
 		}
 	}
 	else
@@ -343,7 +357,7 @@ int main(int argc, char **argv)
 	else
 		printf("Game Mode: Player vs. Player\n");
 	srand(time(NULL));
-	spSetDefaultWindowSize( 800, 480 );
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);
@@ -374,6 +388,7 @@ int main(int argc, char **argv)
 		minZoom = spSqrt(spGetSizeFactor()/8);
 		maxZoom = spSqrt(spGetSizeFactor()*4);
 		zoom = spMul(zoomAdjust,zoomAdjust);
+		countdown = COUNT_DOWN;
 		result = spLoop(draw,calc,10,resize,NULL);
 		deleteAllBullets();
 		free_gravity();

@@ -191,6 +191,7 @@ void init_player()
 		player[i].w_direction = SP_ONE/2;
 		player[i].w_power = SP_ONE/2;
 		player[i].hops = 0;
+		player[i].high_hops = 0;
 		int x,y;
 		while (1)
 		{
@@ -232,4 +233,9 @@ void next_player()
 	active_player = 1-active_player;
 	player[active_player].shoot = 0;
 	player[active_player].bullet = NULL;
+	if (active_player == 1)
+		player[active_player].direction = rand()&1;
+	countdown = COUNT_DOWN;
+	player[active_player].hops = 0;
+	player[active_player].high_hops = 0;
 }
