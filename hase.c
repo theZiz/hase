@@ -74,6 +74,10 @@ void draw(void)
 	spSetSpriteZoom(sprite,zoom/2,zoom/2);
 	spSetSpriteRotation(sprite,0);
 	spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
+
+	//Health bar
+	spRectangle(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY),0,
+	            spFixedToInt(zoom*16),spFixedToInt(zoom*2),spGetRGB(0,255,0));	
 	
 	//Trace
 	drawTrace();

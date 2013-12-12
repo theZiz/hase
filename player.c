@@ -1,8 +1,9 @@
 #define HOPS_TIME 200
 #define HIGH_HOPS_TIME 403
+#define MAX_HEALTH 256
 
 spSpriteCollectionPointer hase;
-struct
+typedef struct sPlayer
 {
 	int direction;
 	int w_direction;
@@ -13,7 +14,10 @@ struct
 	int bums;
 	int hops;
 	int high_hops;
-} player;
+	int health;
+} tPlayer;
+
+tPlayer player;
 
 int circle_is_empty(int x, int y, int r)
 {
@@ -190,4 +194,5 @@ void init_player()
 	posY = player.y;
 	update_player(0);
 	rotation = -player.rotation;
+	player.health = MAX_HEALTH;
 }
