@@ -1,8 +1,8 @@
 #define HOPS_TIME 200
 #define HIGH_HOPS_TIME 403
 #define MAX_HEALTH 256
-#define AI_MAX_TRIES 1000
-#define AI_TRIES_PER_FRAME 20
+#define AI_MAX_TRIES 2048
+#define AI_TRIES_PER_FRAME 16
 int ai_shoot_tries = 0;
 
 int lastAIDistance = 100000000;
