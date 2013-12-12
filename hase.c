@@ -42,8 +42,8 @@ void loadInformation(char* information)
 
 void draw(void)
 {
-	posX = player.x;
-	posY = player.y;	
+	posX = player[active_player].x;
+	posY = player[active_player].y;	
 	char buffer[256];
 	spClearTarget(0);
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
@@ -56,33 +56,56 @@ void draw(void)
 	spSetHorizontalOrigin(SP_CENTER);
 
 	//Arrow
-	if (player.w_power)
+	if (player[active_player].w_power)
 	{
-		Sint32 x = spCos(player.w_direction)*(-8-spFixedToInt(16*player.w_power));
-		Sint32 y = spSin(player.w_direction)*(-8-spFixedToInt(16*player.w_power));
-		spRotozoomSurface(screen->w/2+(spMul(player.x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player.w_power,spMul(zoom,spGetSizeFactor()))/4,player.w_direction-SP_PI/2);
+		Sint32 x = spCos(player[active_player].w_direction)*(-8-spFixedToInt(16*player[active_player].w_power));
+		Sint32 y = spSin(player[active_player].w_direction)*(-8-spFixedToInt(16*player[active_player].w_power));
+		spRotozoomSurface(screen->w/2+(spMul(player[active_player].x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player].y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player[active_player].w_power,spMul(zoom,spGetSizeFactor()))/4,player[active_player].w_direction-SP_PI/2);
 	}
 
 	//Bullets
 	drawBullets();
 	
 	//Weapon
-	spRotozoomSurface(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player.w_direction);
+	spRotozoomSurface(screen->w/2+(spMul(player[active_player].x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player].y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player[active_player].w_direction);
 	
 	//Player
-	spSpritePointer sprite = spActiveSprite(hase);
+	spSpritePointer sprite = spActiveSprite(player[active_player].hase);
 	spSetSpriteZoom(sprite,zoom/2,zoom/2);
 	spSetSpriteRotation(sprite,0);
-	spDrawSprite(screen->w/2+(spMul(player.x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY,zoom) >> SP_ACCURACY),0,sprite);
+	spDrawSprite(screen->w/2+(spMul(player[active_player].x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player].y-posY,zoom) >> SP_ACCURACY),0,sprite);
 
-	//Health bar
-	spSetHorizontalOrigin(SP_RIGHT);
-	spRectangle(screen->w/2+(spMul(player.x-posX+spIntToFixed(7),zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY),0,
-	            spFixedToInt(zoom*16*(MAX_HEALTH-player.health)/MAX_HEALTH),spFixedToInt(zoom*2),spGetRGB(255,0,0));	
-	spSetHorizontalOrigin(SP_LEFT);
-	spRectangle(screen->w/2+(spMul(player.x-posX-spIntToFixed(8),zoom) >> SP_ACCURACY),screen->h/2+(spMul(player.y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY),0,
-	            spFixedToInt(zoom*16*player.health/MAX_HEALTH),spFixedToInt(zoom*2),spGetRGB(0,255,0));	
-	spSetHorizontalOrigin(SP_CENTER);
+	//Health circle
+	spEllipse(screen->w/2+(spMul(player[active_player].x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player].y-posY-spIntToFixed(14),zoom) >> SP_ACCURACY),0,
+	          spFixedToInt(zoom*6)+1,
+	          spFixedToInt(zoom*6)+1,spGetRGB(255,0,0));	
+	spEllipse(screen->w/2+(spMul(player[active_player].x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player].y-posY-spIntToFixed(14),zoom) >> SP_ACCURACY),0,
+	          spFixedToInt(zoom*6*(player[active_player].health)/MAX_HEALTH)+1,
+	          spFixedToInt(zoom*6*(player[active_player].health)/MAX_HEALTH)+1,spGetRGB(0,255,0));
+	//spFontDrawMiddle( screen->w/2+(spMul(player[active_player].x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player].y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY)-font->maxheight/2,0,"100", font );
+	
+	//Not the player:
+	int not_active_player = 1-active_player;
+	sprite = spActiveSprite(player[not_active_player].hase);
+	spSetSpriteZoom(sprite,zoom/2,zoom/2);
+	spSetSpriteRotation(sprite,+rotation+player[not_active_player].rotation);
+	Sint32 ox = spMul(player[not_active_player].x-posX,zoom);
+	Sint32 oy = spMul(player[not_active_player].y-posY,zoom);
+	Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+	Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+	spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
+	//Health circle
+	ox = spMul(player[not_active_player].x-posX-14*-spSin(player[not_active_player].rotation),zoom);
+	oy = spMul(player[not_active_player].y-posY-14* spCos(player[not_active_player].rotation),zoom);
+	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+	spEllipse(screen->w/2+x,screen->h/2+y,0,
+	          spFixedToInt(zoom*6)+1,
+	          spFixedToInt(zoom*6)+1,spGetRGB(255,0,0));	
+	spEllipse(screen->w/2+x,screen->h/2+y,0,
+	          spFixedToInt(zoom*6*(player[not_active_player].health)/MAX_HEALTH)+1,
+	          spFixedToInt(zoom*6*(player[not_active_player].health)/MAX_HEALTH)+1,spGetRGB(0,255,0));
+	
 	//Trace
 	drawTrace();
 	
@@ -92,7 +115,7 @@ void draw(void)
 	//HID
 	sprintf(buffer,"FPS: %i",spGetFPS());
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
-	sprintf(buffer,"Power: %i %%",player.w_power*100/SP_ONE);
+	sprintf(buffer,"Power: %i %%",player[active_player].w_power*100/SP_ONE);
 	spFontDraw( 2, 2, 0, buffer, font );
 	spFontDrawRight( screen->w-2, 2, 0, "Entry for the Crap\nGame Competition 2013", font );
 	int b_alpha = bullet_alpha();
@@ -106,15 +129,15 @@ int direction_hold = 0;
 
 int jump(int high)
 {
-	Sint32 dx = spSin(player.rotation);
-	Sint32 dy = spCos(player.rotation);
-	if (circle_is_empty(player.x+dx,player.y+dy,7))
+	Sint32 dx = spSin(player[active_player].rotation);
+	Sint32 dy = spCos(player[active_player].rotation);
+	if (circle_is_empty(player[active_player].x+dx,player[active_player].y+dy,7))
 	{
 		if (high)
-			player.hops = HIGH_HOPS_TIME;
+			player[active_player].hops = HIGH_HOPS_TIME;
 		else
-			player.hops = HOPS_TIME;
-		player.high_hops = high;
+			player[active_player].hops = HOPS_TIME;
+		player[active_player].high_hops = high;
 	}
 }
 
@@ -123,7 +146,7 @@ int calc(Uint32 steps)
 	int i;
 	for (i = 0; i < steps; i++)
 	{
-		Sint32 goal = -player.rotation;
+		Sint32 goal = -player[active_player].rotation;
 		if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
 			rotation -= 2*SP_PI;
 		if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
@@ -139,7 +162,7 @@ int calc(Uint32 steps)
 		spGetInput()->button[SP_BUTTON_START] = 0;
 		help = 1-help;
 	}
-	if (spGetInput()->button[SP_BUTTON_LEFT] && player.bums && player.hops <= 0)
+	if (spGetInput()->button[SP_BUTTON_LEFT] && player[active_player].bums && player[active_player].hops <= 0)
 	{
 		jump(1);
 	}
@@ -160,27 +183,27 @@ int calc(Uint32 steps)
 	update_player_sprite(steps);
 	if (spGetInput()->axis[0] < 0)
 	{
-		if (player.direction == 1)
+		if (player[active_player].direction == 1)
 		{
-			player.direction = 0;
-			player.w_direction = SP_PI-player.w_direction;
+			player[active_player].direction = 0;
+			player[active_player].w_direction = SP_PI-player[active_player].w_direction;
 			direction_hold = 0;
 		}
 		direction_hold+=steps;
-		if (direction_hold >= DIRECTION_HOLD_TIME && player.bums && player.hops <= 0)
+		if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player].bums && player[active_player].hops <= 0)
 			jump(0);
 	}
 	else
 	if (spGetInput()->axis[0] > 0)
 	{
-		if (player.direction == 0)
+		if (player[active_player].direction == 0)
 		{
-			player.direction = 1;
-			player.w_direction = SP_PI-player.w_direction;
+			player[active_player].direction = 1;
+			player[active_player].w_direction = SP_PI-player[active_player].w_direction;
 			direction_hold = 0;
 		}
 		direction_hold+=steps;
-		if (direction_hold >= DIRECTION_HOLD_TIME && player.bums && player.hops <= 0)
+		if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player].bums && player[active_player].hops <= 0)
 			jump(0);
 	}
 	else
@@ -191,10 +214,10 @@ int calc(Uint32 steps)
 		direction_pressed += SP_ONE*steps/20;
 		if (direction_pressed >= 128*SP_ONE)
 			direction_pressed = 128*SP_ONE;
-		if (player.direction == 0)
-			player.w_direction += (direction_pressed*steps) >> SP_ACCURACY;
+		if (player[active_player].direction == 0)
+			player[active_player].w_direction += (direction_pressed*steps) >> SP_ACCURACY;
 		else
-			player.w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
+			player[active_player].w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
 	}
 	else
 	if (spGetInput()->axis[1] > 0)
@@ -202,10 +225,10 @@ int calc(Uint32 steps)
 		direction_pressed += SP_ONE*steps/20;
 		if (direction_pressed >= 128*SP_ONE)
 			direction_pressed = 128*SP_ONE;
-		if (player.direction == 0)
-			player.w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
+		if (player[active_player].direction == 0)
+			player[active_player].w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
 		else
-			player.w_direction += (direction_pressed*steps) >> SP_ACCURACY;
+			player[active_player].w_direction += (direction_pressed*steps) >> SP_ACCURACY;
 	}
 	else
 		direction_pressed = 0;
@@ -213,17 +236,17 @@ int calc(Uint32 steps)
 	if (spGetInput()->button[SP_BUTTON_UP])
 	{
 		power_pressed += SP_ONE*steps/100;
-		player.w_power += (power_pressed*steps) >> SP_ACCURACY;
-		if (player.w_power >= SP_ONE)
-			player.w_power = SP_ONE;
+		player[active_player].w_power += (power_pressed*steps) >> SP_ACCURACY;
+		if (player[active_player].w_power >= SP_ONE)
+			player[active_player].w_power = SP_ONE;
 	}
 	else
 	if (spGetInput()->button[SP_BUTTON_DOWN])
 	{
 		power_pressed += SP_ONE*steps/100;
-		player.w_power -= (power_pressed*steps) >> SP_ACCURACY;
-		if (player.w_power < 0)
-			player.w_power = 0;
+		player[active_player].w_power -= (power_pressed*steps) >> SP_ACCURACY;
+		if (player[active_player].w_power < 0)
+			player[active_player].w_power = 0;
 	}
 	else
 		power_pressed = 0;
@@ -231,7 +254,7 @@ int calc(Uint32 steps)
 	{
 		//Shoot!
 		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
-		shootBullet(player.x,player.y,player.w_direction+player.rotation+SP_PI,player.w_power/2,player.direction?1:-1);
+		shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
 	}
 	updateTrace();
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
@@ -263,7 +286,7 @@ void resize( Uint16 w, Uint16 h )
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
-	//spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);
@@ -276,7 +299,6 @@ int main(int argc, char **argv)
 		arrow = spLoadSurface("./data/gravity.png");
 		weapon = spLoadSurface("./data/weapon.png");
 		bullet = spLoadSurface("./data/bullet.png");
-		hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
 		gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
 		loadInformation("Creating random level...");
 		level_original = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);
@@ -298,7 +320,9 @@ int main(int argc, char **argv)
 		result = spLoop(draw,calc,10,resize,NULL);
 		deleteAllBullets();
 		free_gravity();
-		spDeleteSpriteCollection(hase,0);
+		int i;
+		for (i = 0; i < 2; i++)
+			spDeleteSpriteCollection(player[i].hase,0);
 		spDeleteSurface(arrow);
 		spDeleteSurface(weapon);
 		spDeleteSurface(bullet);

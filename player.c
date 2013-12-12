@@ -2,7 +2,6 @@
 #define HIGH_HOPS_TIME 403
 #define MAX_HEALTH 256
 
-spSpriteCollectionPointer hase;
 typedef struct sPlayer
 {
 	int direction;
@@ -15,9 +14,11 @@ typedef struct sPlayer
 	int hops;
 	int high_hops;
 	int health;
+	spSpriteCollectionPointer hase;
 } tPlayer;
 
-tPlayer player;
+int active_player = 0;
+tPlayer player[2];
 
 int circle_is_empty(int x, int y, int r)
 {
@@ -91,108 +92,117 @@ Sint32 gravitation_force(int x,int y)
 
 void update_player(int steps)
 {
-	if (player.hops > 0)
+	if (player[active_player].hops > 0)
 	{
-		player.hops -= steps;
-		if (player.hops <= 0)
+		player[active_player].hops -= steps;
+		if (player[active_player].hops <= 0)
 		{
-			Sint32 dx = spSin(player.rotation);
-			Sint32 dy = spCos(player.rotation);
-			player.x += dx;
-			player.y -= dy;
+			Sint32 dx = spSin(player[active_player].rotation);
+			Sint32 dy = spCos(player[active_player].rotation);
+			player[active_player].x += dx;
+			player[active_player].y -= dy;
 			Sint32 angle = SP_PI/3;
 			Sint32 divisor = 8;
-			if (player.high_hops)
+			if (player[active_player].high_hops)
 			{
 				angle = SP_PI/10;
 				divisor = 6;
 			}
-			if (player.direction)
+			if (player[active_player].direction)
 			{
-				player.dx += spSin(player.rotation+angle)/divisor;
-				player.dy -= spCos(player.rotation+angle)/divisor;
+				player[active_player].dx += spSin(player[active_player].rotation+angle)/divisor;
+				player[active_player].dy -= spCos(player[active_player].rotation+angle)/divisor;
 			}
 			else
 			{
-				player.dx += spSin(player.rotation-angle)/divisor;
-				player.dy -= spCos(player.rotation-angle)/divisor;
+				player[active_player].dx += spSin(player[active_player].rotation-angle)/divisor;
+				player[active_player].dy -= spCos(player[active_player].rotation-angle)/divisor;
 			}			
 		}
 	}
-	
-	player.rotation = 0;
-	player.bums = 0;
-	Sint32 force = gravitation_force(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY);
-	if (force)
+	int j;
+	for (j = 0; j < 2; j++)
 	{
-		Sint32 ac = spDiv(-gravitation_y(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY),force);
-		if (ac < -SP_ONE)
-			ac = -SP_ONE;
-		if (ac > SP_ONE)
-			ac = SP_ONE;
-		player.rotation = -spAcos(ac);
-		if (-gravitation_x(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY) <= 0)
-			player.rotation = 2*SP_PI-player.rotation;
-		while (player.rotation < 0)
-			player.rotation += 2*SP_PI;
-		while (player.rotation >= 2*SP_PI)
-			player.rotation -= 2*SP_PI;
+		player[j].rotation = 0;
+		player[j].bums = 0;
+		Sint32 force = gravitation_force(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY);
+		if (force)
+		{
+			Sint32 ac = spDiv(-gravitation_y(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY),force);
+			if (ac < -SP_ONE)
+				ac = -SP_ONE;
+			if (ac > SP_ONE)
+				ac = SP_ONE;
+			player[j].rotation = -spAcos(ac);
+			if (-gravitation_x(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY) <= 0)
+				player[j].rotation = 2*SP_PI-player[j].rotation;
+			while (player[j].rotation < 0)
+				player[j].rotation += 2*SP_PI;
+			while (player[j].rotation >= 2*SP_PI)
+				player[j].rotation -= 2*SP_PI;
+		}
 	}
 }
 
 void update_player_sprite(int steps)
 {
-	if (player.hops > 0)
+	if (player[active_player].hops > 0)
 	{
-		if (player.high_hops)
+		if (player[active_player].high_hops)
 		{
-			if (player.direction == 0)
-				spSelectSprite(hase,"high jump left");
+			if (player[active_player].direction == 0)
+				spSelectSprite(player[active_player].hase,"high jump left");
 			else
-				spSelectSprite(hase,"high jump right");
+				spSelectSprite(player[active_player].hase,"high jump right");
 		}
 		else
 		{
-			if (player.direction == 0)
-				spSelectSprite(hase,"jump left");
+			if (player[active_player].direction == 0)
+				spSelectSprite(player[active_player].hase,"jump left");
 			else
-				spSelectSprite(hase,"jump right");
+				spSelectSprite(player[active_player].hase,"jump right");
 		}
 	}
 	else
 	{
-		if (player.direction == 0)
-			spSelectSprite(hase,"stand left");
+		if (player[active_player].direction == 0)
+			spSelectSprite(player[active_player].hase,"stand left");
 		else
-			spSelectSprite(hase,"stand right");
+			spSelectSprite(player[active_player].hase,"stand right");
 	}
-	spUpdateSprite(spActiveSprite(hase),steps);
+	spUpdateSprite(spActiveSprite(player[active_player].hase),steps);
 }	
 
 void init_player()
 {
-	player.direction = 0;
-	player.w_direction = SP_ONE/2;
-	player.w_power = SP_ONE/2;
-	player.hops = 0;
-	int x,y;
-	while (1)
+	int i;
+	for (i = 0; i < 2; i ++)
 	{
-		x = rand()%LEVEL_WIDTH;
-		y = rand()%LEVEL_HEIGHT;
-		printf("Tried %i %i...",x,y);
-		if (circle_is_empty(x,y,16) && gravitation_force(x,y)/32768)
-			break;
-		printf("NOT!\n");
+		player[i].direction = 0;
+		player[i].w_direction = SP_ONE/2;
+		player[i].w_power = SP_ONE/2;
+		player[i].hops = 0;
+		int x,y;
+		while (1)
+		{
+			x = rand()%LEVEL_WIDTH;
+			y = rand()%LEVEL_HEIGHT;
+			printf("Tried %i %i...",x,y);
+			if (circle_is_empty(x,y,16) && gravitation_force(x,y)/32768)
+				break;
+			printf("NOT!\n");
+		}
+		printf("Fine.\n");
+		player[i].x = x << SP_ACCURACY;
+		player[i].y = y << SP_ACCURACY;
+		player[i].dx = 0;
+		player[i].dy = 0;
+		posX = player[i].x;
+		posY = player[i].y;
+		update_player(0);
+		rotation = -player[i].rotation;
+		player[i].health = MAX_HEALTH;
+		player[i].hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
 	}
-	printf("Fine.\n");
-	player.x = x << SP_ACCURACY;
-	player.y = y << SP_ACCURACY;
-	player.dx = 0;
-	player.dy = 0;
-	posX = player.x;
-	posY = player.y;
-	update_player(0);
-	rotation = -player.rotation;
-	player.health = MAX_HEALTH;
+	active_player = rand()%2;
 }

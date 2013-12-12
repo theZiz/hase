@@ -201,7 +201,7 @@ int updateBullets(int steps)
 			}
 			else
 			{
-				int d;
+				int j;
 				switch (momBullet->impact_state)
 				{
 					case 0:
@@ -226,15 +226,18 @@ int updateBullets(int steps)
 						if (momBullet->impact_counter == 0)
 						{
 							dead = 1;
-							d = spFixedToInt(player.x-momBullet->x)*spFixedToInt(player.x-momBullet->x)+
-							    spFixedToInt(player.y-momBullet->y)*spFixedToInt(player.y-momBullet->y);
-							d = 1024-d;
-							if (d > 0)
-								player.health -= d*MAX_HEALTH/2048;
-							if (player.health <= 0)
+							for (j = 0; j < 2; j++)
 							{
-								player.health = 0;
-								return 1;
+								int d = spFixedToInt(player[j].x-momBullet->x)*spFixedToInt(player[j].x-momBullet->x)+
+										spFixedToInt(player[j].y-momBullet->y)*spFixedToInt(player[j].y-momBullet->y);
+									d = 1024-d;
+								if (d > 0)
+									player[j].health -= d*MAX_HEALTH/2048;
+								if (player[j].health <= 0)
+								{
+									player[j].health = 0;
+									return 1;
+								}
 							}
 						}
 						break;

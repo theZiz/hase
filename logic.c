@@ -1,21 +1,22 @@
 int do_physics(int steps)
 {
-	int i;
+	int i,j;
 	for (i = 0; i < steps; i++)
-	{
-		player.dx -= gravitation_x(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-		player.dy -= gravitation_y(player.x >> SP_ACCURACY,player.y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-		if (circle_is_empty(player.x+player.dx >> SP_ACCURACY,player.y+player.dy >> SP_ACCURACY,7))
+		for (j = 0; j < 2; j++)
 		{
-			player.x += player.dx;
-			player.y += player.dy;
+			player[j].dx -= gravitation_x(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			player[j].dy -= gravitation_y(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			if (circle_is_empty(player[j].x+player[j].dx >> SP_ACCURACY,player[j].y+player[j].dy >> SP_ACCURACY,7))
+			{
+				player[j].x += player[j].dx;
+				player[j].y += player[j].dy;
+			}
+			else
+			{
+				player[j].dx = 0;
+				player[j].dy = 0;
+				player[j].bums = 1;
+			}
 		}
-		else
-		{
-			player.dx = 0;
-			player.dy = 0;
-			player.bums = 1;
-		}
-	}
 	return updateBullets(steps);
 }
