@@ -1,4 +1,3 @@
-typedef struct sBullet *pBullet;
 typedef struct sBullet
 {
 	Sint32 x,y;
@@ -27,7 +26,7 @@ void deleteAllBullets()
 	}
 }
 
-void shootBullet(int x,int y,int direction,int power,Sint32 dr)
+pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr)
 {
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 	bullet->next = firstBullet;
@@ -39,6 +38,7 @@ void shootBullet(int x,int y,int direction,int power,Sint32 dr)
 	bullet->rotation = rand()%(2*SP_PI);
 	bullet->dx = spMul(spCos(direction),power);
 	bullet->dy = spMul(spSin(direction),power);
+	return bullet;
 }
 
 void drawBullets()
@@ -237,6 +237,10 @@ int updateBullets(int steps)
 								{
 									player[j].health = 0;
 									return 1;
+								}
+								if (momBullet == player[j].bullet)
+								{
+									next_player();
 								}
 							}
 						}

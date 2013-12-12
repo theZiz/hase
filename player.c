@@ -2,6 +2,8 @@
 #define HIGH_HOPS_TIME 403
 #define MAX_HEALTH 256
 
+typedef struct sBullet *pBullet;
+
 typedef struct sPlayer
 {
 	int direction;
@@ -15,6 +17,8 @@ typedef struct sPlayer
 	int high_hops;
 	int health;
 	spSpriteCollectionPointer hase;
+	int shoot;
+	pBullet bullet;
 } tPlayer;
 
 int active_player = 0;
@@ -202,7 +206,20 @@ void init_player()
 		update_player(0);
 		rotation = -player[i].rotation;
 		player[i].health = MAX_HEALTH;
-		player[i].hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
+		switch (i)
+		{
+			case 0:	player[i].hase = spLoadSpriteCollection("./data/hase.ssc",NULL); break;
+			case 1:	player[i].hase = spLoadSpriteCollection("./data/hase2.ssc",NULL); break;
+		}
 	}
 	active_player = rand()%2;
+	player[active_player].shoot = 0;
+	player[active_player].bullet = NULL;
+}
+
+void next_player()
+{
+	active_player = 1-active_player;
+	player[active_player].shoot = 0;
+	player[active_player].bullet = NULL;
 }

@@ -1,5 +1,5 @@
 default = stand left
-image = ./data/hase.png
+image = ./data/hase2.png
 framesize = 34, 34
 bordersize = 34, 34
 

@@ -250,11 +250,12 @@ int calc(Uint32 steps)
 	}
 	else
 		power_pressed = 0;
-	if (spGetInput()->button[SP_BUTTON_RIGHT])
+	if (spGetInput()->button[SP_BUTTON_RIGHT] && player[active_player].shoot == 0)
 	{
 		//Shoot!
+		player[active_player].shoot = 1;
 		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
-		shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
+		player[active_player].bullet = shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
 	}
 	updateTrace();
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
