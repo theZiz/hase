@@ -71,12 +71,13 @@ void texturize_level()
 	spSelectRenderTarget(level_original);
 	Uint16* level_pixel = spGetTargetPixel();
 	SDL_LockSurface(texture);
+	int texture_width = texture->pitch/texture->format->BytesPerPixel;
 	Uint16* texture_pixel = (Uint16*)texture->pixels;
 	int x,y;
 	for (x = 0; x < LEVEL_WIDTH; x++)
 		for (y = 0; y < LEVEL_HEIGHT; y++)
 			if (level_pixel[x+y*LEVEL_WIDTH]!= SP_ALPHA_COLOR)
-				level_pixel[x+y*LEVEL_WIDTH] = texture_pixel[(x & TEXTURE_MASK) + (y & TEXTURE_MASK)*TEXTURE_SIZE];
+				level_pixel[x+y*LEVEL_WIDTH] = texture_pixel[(x & TEXTURE_MASK) + (y & TEXTURE_MASK)*texture_width];
 	SDL_UnlockSurface(texture);
 	spSelectRenderTarget(screen);
 	spDeleteSurface(texture);

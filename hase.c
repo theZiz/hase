@@ -357,7 +357,7 @@ int main(int argc, char **argv)
 	else
 		printf("Game Mode: Player vs. Player\n");
 	srand(time(NULL));
-	//spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);
