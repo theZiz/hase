@@ -10,6 +10,27 @@ typedef struct sTrace
 tTrace trace[TRACE_LENGTH];
 int traceLength;
 
+void lastPoint(int* x,int* y,int direction,int power)
+{
+	int i,j;
+	Sint32 dx = spMul(spCos(direction),power);
+	Sint32 dy = spMul(spSin(direction),power);
+	(*x) += 8*spCos(direction);
+	(*y) += 8*spSin(direction);
+	for (j = 1; j < TRACE_LENGTH; j++)
+		for (i = 0; i < TRACE_STEP; i++)
+		{
+			dx -= gravitation_x((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			dy -= gravitation_y((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			if (circle_is_empty((*x)+dx >> SP_ACCURACY,(*y)+dy >> SP_ACCURACY,BULLET_SIZE) && (*x) >= 0 && (*y) >= 0 && spFixedToInt((*x)) < LEVEL_WIDTH && spFixedToInt((*y)) < LEVEL_HEIGHT)
+			{
+				(*x) += dx;
+				(*y) += dy;
+			}
+			else
+				return;
+		}
+}
 
 void updateTrace()
 {

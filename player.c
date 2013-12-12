@@ -1,6 +1,11 @@
 #define HOPS_TIME 200
 #define HIGH_HOPS_TIME 403
 #define MAX_HEALTH 256
+#define AI_MAX_TRIES 1000
+#define AI_TRIES_PER_FRAME 20
+int ai_shoot_tries = 0;
+
+int lastAIDistance = 100000000;
 
 typedef struct sBullet *pBullet;
 
@@ -217,10 +222,13 @@ void init_player()
 	player[active_player].bullet = NULL;
 	posX = player[active_player].x;
 	posY = player[active_player].y;
+	ai_shoot_tries = 0;
 }
 
 void next_player()
 {
+	ai_shoot_tries = 0;
+	lastAIDistance = 100000000;
 	active_player = 1-active_player;
 	player[active_player].shoot = 0;
 	player[active_player].bullet = NULL;

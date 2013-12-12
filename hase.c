@@ -185,9 +185,40 @@ int calc(Uint32 steps)
 		//AI
 		if (player[active_player].bums && player[active_player].shoot == 0)
 		{
-			//Shoot!
-			player[active_player].shoot = 1;
-			player[active_player].bullet = shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
+			int j;
+			for (j = 0; j < AI_TRIES_PER_FRAME; j++)
+			{
+				ai_shoot_tries++;
+				if (ai_shoot_tries < AI_MAX_TRIES)
+				{
+					//Lets first try...
+					int x = player[active_player].x;
+					int y = player[active_player].y;
+					int w_d = rand()%(2*SP_PI);
+					int w_p = rand()%SP_ONE;
+					lastPoint(&x,&y,player[active_player].rotation+w_d+SP_PI,w_p/2);
+					int d = spFixedToInt(player[0].x-x)*spFixedToInt(player[0].x-x)+
+									spFixedToInt(player[0].y-y)*spFixedToInt(player[0].y-y);
+					if (d < lastAIDistance)
+					{
+						lastAIDistance = d;
+						player[active_player].w_direction = w_d;
+						player[active_player].w_power = w_p;
+					}
+				}
+				else
+				{
+					//Shoot!
+					player[active_player].shoot = 1;
+					player[active_player].bullet = shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
+					break;
+				}
+			}
+		}
+		else
+		{
+			//RUNNING!
+			
 		}
 	}
 	else
