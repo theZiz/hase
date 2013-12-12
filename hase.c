@@ -1,6 +1,11 @@
 #include <sparrow3d.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define LEVEL_WIDTH 1536
+#define LEVEL_HEIGHT 1536
+#define LEVEL_BORDER 256
+
 SDL_Surface* screen;
 spFontPointer font;
 SDL_Surface* level;
@@ -14,7 +19,6 @@ int posX,posY,rotation;
 Sint32 zoom;
 Sint32 zoomAdjust;
 Sint32 minZoom,maxZoom;
-char levelname[256] = "testlevel";
 int help = 0;
 
 int power_pressed = 0;
@@ -34,6 +38,7 @@ void loadInformation(char* information)
 #include "bullet.c"
 #include "logic.c"
 #include "trace.c"
+#include "level.c"
 
 void draw(void)
 {
@@ -256,17 +261,18 @@ int main(int argc, char **argv)
 	spSetZTest(0);
 	resize( screen->w, screen->h );
 	loadInformation("Loading images...");
-	char buffer[256];
-	sprintf(buffer,"./levels/%s.png",levelname);
-	level_original = spLoadSurface(buffer);
 	arrow = spLoadSurface("./data/gravity.png");
 	weapon = spLoadSurface("./data/weapon.png");
 	bullet = spLoadSurface("./data/bullet.png");
 	hase = spLoadSpriteCollection("./data/hase.ssc",NULL);
 	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
+	loadInformation("Creating random level...");
+	level_original = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);
+	create_level(3,3,3);
+	texturize_level();
 	loadInformation("Created Arrow image...");
 	fill_gravity_surface();
-	level = spCreateSurface(level_original->w,level_original->h);
+	level = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);
 	loadInformation("Created new surface...");
 	level_pixel = (Uint16*)level_original->pixels;
 	realloc_gravity();

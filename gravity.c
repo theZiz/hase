@@ -22,7 +22,7 @@ void free_gravity()
 void realloc_gravity()
 {
 	free_gravity();
-	gravity = (tGravity*)malloc(sizeof(tGravity)*level->w*level->h>>2*GRAVITY_RESOLUTION);
+	gravity = (tGravity*)malloc(sizeof(tGravity)*LEVEL_WIDTH*LEVEL_HEIGHT>>2*GRAVITY_RESOLUTION);
 }
 
 Sint32 calc_mass(Uint16* original,int x,int y)
@@ -32,7 +32,7 @@ Sint32 calc_mass(Uint16* original,int x,int y)
 	for (a = 0; a < (1<<GRAVITY_RESOLUTION); a++)	
 		for (b = 0; b < (1<<GRAVITY_RESOLUTION); b++)
 		{
-			if (original[(x<<GRAVITY_RESOLUTION)+a+((y<<GRAVITY_RESOLUTION)+b)*level->w] != SP_ALPHA_COLOR )
+			if (original[(x<<GRAVITY_RESOLUTION)+a+((y<<GRAVITY_RESOLUTION)+b)*LEVEL_WIDTH] != SP_ALPHA_COLOR )
 				mass+=GRAVITY_PER_PIXEL;
 		}
 	return mass;
@@ -45,16 +45,16 @@ void impact_gravity(Sint32 mass,int x,int y)
 	if (start_a < 0)
 		start_a = 0;
 	int end_a = x+GRAVITY_CIRCLE+1;
-	if (end_a > (level->w>>GRAVITY_RESOLUTION))
-		end_a = (level->w>>GRAVITY_RESOLUTION);
+	if (end_a > (LEVEL_WIDTH>>GRAVITY_RESOLUTION))
+		end_a = (LEVEL_WIDTH>>GRAVITY_RESOLUTION);
 	for (a = start_a; a < end_a; a++)
 	{
 		int start_b = y-GRAVITY_CIRCLE;
 		if (start_b < 0)
 			start_b = 0;
 		int end_b = y+GRAVITY_CIRCLE+1;
-		if (end_b > (level->h>>GRAVITY_RESOLUTION))
-			end_b = (level->h>>GRAVITY_RESOLUTION);
+		if (end_b > (LEVEL_HEIGHT>>GRAVITY_RESOLUTION))
+			end_b = (LEVEL_HEIGHT>>GRAVITY_RESOLUTION);
 		for (b = start_b; b < end_b; b++)
 		if (a!=x && b!=y && (a-x)*(a-x)+(b-y)*(b-y) <= GRAVITY_CIRCLE*GRAVITY_CIRCLE)
 		{
@@ -63,8 +63,8 @@ void impact_gravity(Sint32 mass,int x,int y)
 			//Sint32 sum = spFixedToInt(spSqrt(spIntToFixed(dx*dx+dy*dy+1)));
 			//Sint32 sum = spFixedToInt(spSqrt(spSqrt(spIntToFixed(dx*dx+dy*dy+1))));
 			Sint32 sum = dx*dx+dy*dy;
-			gravity[a+b*(level->w>>GRAVITY_RESOLUTION)].x += dx*mass/sum;
-			gravity[a+b*(level->w>>GRAVITY_RESOLUTION)].y += dy*mass/sum;
+			gravity[a+b*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x += dx*mass/sum;
+			gravity[a+b*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y += dy*mass/sum;
 		}
 	}
 }
@@ -81,20 +81,20 @@ void negate_gravity(int mx,int my,int r)
 		start_x = 0;
 	if (start_y < 0)
 		start_y = 0;
-	if (end_x > (level->w >> GRAVITY_RESOLUTION))
-		end_x = (level->w >> GRAVITY_RESOLUTION);
-	if (end_y > (level->h >> GRAVITY_RESOLUTION))
-		end_y = (level->h >> GRAVITY_RESOLUTION);	
+	if (end_x > (LEVEL_WIDTH >> GRAVITY_RESOLUTION))
+		end_x = (LEVEL_WIDTH >> GRAVITY_RESOLUTION);
+	if (end_y > (LEVEL_HEIGHT >> GRAVITY_RESOLUTION))
+		end_y = (LEVEL_HEIGHT >> GRAVITY_RESOLUTION);	
 	for (x = start_x; x < end_x; x++)
 		for (y = start_y; y < end_y; y++)
-			if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass)
+			if (gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass)
 			{
 				int new_mass = calc_mass(level_pixel,x,y);
-				int diff = new_mass-gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass;
+				int diff = new_mass-gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass;
 				if (diff)
 				{
 					impact_gravity(diff,x,y);
-					gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass = new_mass;
+					gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass = new_mass;
 				}
 			}
 	SDL_UnlockSurface(level_original);	
@@ -103,14 +103,14 @@ void negate_gravity(int mx,int my,int r)
 void update_gravity()
 {
 	SDL_LockSurface(level_original);
-	memset(gravity,0,sizeof(tGravity)*level->w*level->h>>2*GRAVITY_RESOLUTION);
+	memset(gravity,0,sizeof(tGravity)*LEVEL_WIDTH*LEVEL_HEIGHT>>2*GRAVITY_RESOLUTION);
 	int x,y;
-	for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
-		for (y = 0; y < (level->h>>GRAVITY_RESOLUTION); y++)
+	for (x = 0; x < (LEVEL_WIDTH>>GRAVITY_RESOLUTION); x++)
+		for (y = 0; y < (LEVEL_HEIGHT>>GRAVITY_RESOLUTION); y++)
 		{
-			gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass = calc_mass(level_pixel,x,y);
-			if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass)
-				impact_gravity(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass,x,y);
+			gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass = calc_mass(level_pixel,x,y);
+			if (gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass)
+				impact_gravity(gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass,x,y);
 		}
 	SDL_UnlockSurface(level_original);	
 }
@@ -126,22 +126,22 @@ void init_gravity()
 	loadInformation("Drawing level borders...");
 	spSelectRenderTarget(level_original);
 	Uint16* pixel = spGetTargetPixel();
-	for (x = BORDER_SIZE; x < level_original->w-BORDER_SIZE; x++)
+	for (x = BORDER_SIZE; x < LEVEL_WIDTH-BORDER_SIZE; x++)
 	{
-		for (y = BORDER_SIZE; y < level_original->h-BORDER_SIZE; y++)
+		for (y = BORDER_SIZE; y < LEVEL_HEIGHT-BORDER_SIZE; y++)
 		{
-			if (pixel[x+y*level_original->w] != SP_ALPHA_COLOR &&
-			   (pixel[ x-1 +y*level_original->w] == SP_ALPHA_COLOR ||
-			    pixel[ x+1 +y*level_original->w] == SP_ALPHA_COLOR ||
-			    pixel[x+(y+1)*level_original->w] == SP_ALPHA_COLOR ||
-			    pixel[x+(y-1)*level_original->w] == SP_ALPHA_COLOR))
+			if (pixel[x+y*LEVEL_WIDTH] != SP_ALPHA_COLOR &&
+			   (pixel[ x-1 +y*LEVEL_WIDTH] == SP_ALPHA_COLOR ||
+			    pixel[ x+1 +y*LEVEL_WIDTH] == SP_ALPHA_COLOR ||
+			    pixel[x+(y+1)*LEVEL_WIDTH] == SP_ALPHA_COLOR ||
+			    pixel[x+(y-1)*LEVEL_WIDTH] == SP_ALPHA_COLOR))
 				for (a = -BORDER_SIZE; a < BORDER_SIZE-1; a++)
 					for (b = -BORDER_SIZE; b < BORDER_SIZE-1; b++)
 					{
 						if (a*a+b*b > BORDER_SQUARE)
 							continue;
-						if (pixel[x+a+(y+b)*level_original->w] != SP_ALPHA_COLOR)
-							pixel[x+a+(y+b)*level_original->w] = spGetFastRGB(255,200,0);
+						if (pixel[x+a+(y+b)*LEVEL_WIDTH] != SP_ALPHA_COLOR)
+							pixel[x+a+(y+b)*LEVEL_WIDTH] = spGetFastRGB(255,200,0);
 					}
 		}
 	}
@@ -151,18 +151,18 @@ void init_gravity()
 	spClearTarget(0);
 	spSetAlphaTest(1);
 	/*Uint16* pixel = (Uint16*)level->pixels;
-	for (x = 0; x < level->w; x++)
-		for (y = 0; y < level->h; y++)
-			pixel[x+y*level->w] = spGetRGB(gravitation_force(x,y)/2048,gravitation_force(x,y)/1024,gravitation_force(x,y)/512);*/
+	for (x = 0; x < LEVEL_WIDTH; x++)
+		for (y = 0; y < LEVEL_HEIGHT; y++)
+			pixel[x+y*LEVEL_WIDTH] = spGetRGB(gravitation_force(x,y)/2048,gravitation_force(x,y)/1024,gravitation_force(x,y)/512);*/
 	//spSetBlending(SP_ONE*3/4);
-	for (x = 0; x < (level->w>>GRAVITY_RESOLUTION); x++)
+	for (x = 0; x < (LEVEL_WIDTH>>GRAVITY_RESOLUTION); x++)
 	{
-		for (y = 0; y < (level->h>>GRAVITY_RESOLUTION); y++)
+		for (y = 0; y < (LEVEL_HEIGHT>>GRAVITY_RESOLUTION); y++)
 		{
-			Sint32 force = spSqrt(spMul(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x,
-			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x)+
-			                      spMul(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y,
-			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y));			                      
+			Sint32 force = spSqrt(spMul(gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x,
+			                      gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x)+
+			                      spMul(gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y,
+			                      gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y));			                      
 			int f = GRAVITY_DENSITY-1-force / GRAVITY_PER_PIXEL_CORRECTION / (16384/GRAVITY_DENSITY);
 			if (f < 0)
 				f = 0;
@@ -171,14 +171,14 @@ void init_gravity()
 			Sint32 angle = 0;
 			if (force)
 			{
-				Sint32 ac = spDiv(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y,force);
+				Sint32 ac = spDiv(gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y,force);
 				if (ac < -SP_ONE)
 					ac = -SP_ONE;
 				if (ac > SP_ONE)
 					ac = SP_ONE;
 				angle = spAcos(ac)*(GRAVITY_DENSITY/2)/SP_PI;
 			}
-			if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x <= 0)
+			if (gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x <= 0)
 				angle = GRAVITY_DENSITY-1-angle;
 			if (angle > GRAVITY_DENSITY-1)
 				angle = GRAVITY_DENSITY-1;
@@ -188,7 +188,7 @@ void init_gravity()
 			                  gravity_surface,angle<<GRAVITY_RESOLUTION+1,f<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1);
 		}
 	}
-	spBlitSurface(level->w/2,level->h/2,0,level_original);
+	spBlitSurface(LEVEL_WIDTH/2,LEVEL_HEIGHT/2,0,level_original);
 	spSelectRenderTarget(screen);
 }
 

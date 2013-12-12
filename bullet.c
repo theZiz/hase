@@ -79,11 +79,11 @@ void bullet_impact(int X,int Y,int radius)
 				continue;
 			if (sum > inner_radius)
 			{
-				if (pixel[X+x+(Y+y)*level_original->w] != SP_ALPHA_COLOR)
-					pixel[X+x+(Y+y)*level_original->w] = spGetFastRGB(255,200,0);
+				if (pixel[X+x+(Y+y)*LEVEL_WIDTH] != SP_ALPHA_COLOR)
+					pixel[X+x+(Y+y)*LEVEL_WIDTH] = spGetFastRGB(255,200,0);
 			}
 			else
-				pixel[X+x+(Y+y)*level_original->w] = SP_ALPHA_COLOR;
+				pixel[X+x+(Y+y)*LEVEL_WIDTH] = SP_ALPHA_COLOR;
 		}
 	}	
 	Sint32 end = SDL_GetTicks();
@@ -97,9 +97,9 @@ void bullet_impact(int X,int Y,int radius)
 	spSelectRenderTarget(level);
 	spSetAlphaTest(1);
 	/*Uint16* pixel = (Uint16*)level->pixels;
-	for (x = 0; x < level->w; x++)
-		for (y = 0; y < level->h; y++)
-			pixel[x+y*level->w] = spGetRGB(gravitation_force(x,y)/2048,gravitation_force(x,y)/1024,gravitation_force(x,y)/512);*/
+	for (x = 0; x < LEVEL_WIDTH; x++)
+		for (y = 0; y < LEVEL_HEIGHT; y++)
+			pixel[x+y*LEVEL_WIDTH] = spGetRGB(gravitation_force(x,y)/2048,gravitation_force(x,y)/1024,gravitation_force(x,y)/512);*/
 	spEllipse(X,Y,0,radius+(GRAVITY_CIRCLE<<GRAVITY_RESOLUTION),radius+(GRAVITY_CIRCLE<<GRAVITY_RESOLUTION),0);
 	end = SDL_GetTicks();
 	printf("  Drawing Ellipse: %i\n",end-begin);
@@ -113,23 +113,23 @@ void bullet_impact(int X,int Y,int radius)
 		start_x = 0;
 	if (start_y < 0)
 		start_y = 0;
-	if (end_x > (level->w >> GRAVITY_RESOLUTION))
-		end_x = (level->w >> GRAVITY_RESOLUTION);
-	if (end_y > (level->h >> GRAVITY_RESOLUTION))
-		end_y = (level->h >> GRAVITY_RESOLUTION);	
+	if (end_x > (LEVEL_WIDTH >> GRAVITY_RESOLUTION))
+		end_x = (LEVEL_WIDTH >> GRAVITY_RESOLUTION);
+	if (end_y > (LEVEL_HEIGHT >> GRAVITY_RESOLUTION))
+		end_y = (LEVEL_HEIGHT >> GRAVITY_RESOLUTION);	
 	int max_mass = GRAVITY_PER_PIXEL << 2*GRAVITY_RESOLUTION;
 	for (x = start_x; x < end_x; x++)
 	{
 		for (y = start_y; y < end_y; y++)
 		{
-			if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].mass == max_mass)
+			if (gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass == max_mass)
 				continue;
 			if ((x-(X >> GRAVITY_RESOLUTION))*(x-(X >> GRAVITY_RESOLUTION))+(y-(Y >> GRAVITY_RESOLUTION))*(y-(Y >> GRAVITY_RESOLUTION)) > R)
 				continue;
-			Sint32 force = spSqrt(spMul(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x,
-			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x)+
-			                      spMul(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y,
-			                      gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y));			                      
+			Sint32 force = spSqrt(spMul(gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x,
+			                      gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x)+
+			                      spMul(gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y,
+			                      gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y));			                      
 			int f = GRAVITY_DENSITY-1-force / GRAVITY_PER_PIXEL_CORRECTION / (16384/GRAVITY_DENSITY);
 			if (f < 0)
 				f = 0;
@@ -138,13 +138,13 @@ void bullet_impact(int X,int Y,int radius)
 			Sint32 angle = 0;
 			if (force)
 			{
-				Sint32 ac = spDiv(gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].y,force);
+				Sint32 ac = spDiv(gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y,force);
 				if (ac < -SP_ONE)
 					ac = -SP_ONE;
 				if (ac > SP_ONE)
 					ac = SP_ONE;
 				angle = spAcos(ac)*(GRAVITY_DENSITY/2)/SP_PI;
-				if (gravity[x+y*(level->w>>GRAVITY_RESOLUTION)].x <= 0)
+				if (gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x <= 0)
 					angle = GRAVITY_DENSITY-1-angle;
 				if (angle > GRAVITY_DENSITY-1)
 					angle = GRAVITY_DENSITY-1;
@@ -172,7 +172,7 @@ void bullet_impact(int X,int Y,int radius)
 	                  2*(radius+(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION)));
 	spSetHorizontalOrigin(SP_CENTER);
 	spSetVerticalOrigin(SP_CENTER);
-	//spBlitSurface(level->w/2,level->h/2,0,level_original);
+	//spBlitSurface(LEVEL_WIDTH/2,LEVEL_HEIGHT/2,0,level_original);
 	end = SDL_GetTicks();
 	printf("  Blitting: %i\n",end-begin);
 	begin=end;
@@ -227,7 +227,7 @@ void updateBullets(int steps)
 						break;
 				}
 			}
-			if (dead || momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= level->w || spFixedToInt(momBullet->y) >= level->h)
+			if (dead || momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT)
 			{
 				if (before)
 					before->next = momBullet->next;

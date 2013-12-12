@@ -36,7 +36,7 @@ void updateTrace()
 		{
 			dx -= gravitation_x(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
 			dy -= gravitation_y(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,BULLET_SIZE) && x >= 0 && y >= 0 && spFixedToInt(x) < level->w && spFixedToInt(y) < level->h)
+			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,BULLET_SIZE) && x >= 0 && y >= 0 && spFixedToInt(x) < LEVEL_WIDTH && spFixedToInt(y) < LEVEL_HEIGHT)
 			{
 				x += dx;
 				y += dy;
