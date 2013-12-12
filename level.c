@@ -1,3 +1,7 @@
+#define TEXTURE_SIZE 256
+#define TEXTURE_MASK 255
+#define TEXTURE_COUNT 8
+
 void create_level(int circles,int triangles,int quads)
 {
 	spSelectRenderTarget(level_original);
@@ -60,5 +64,20 @@ void create_level(int circles,int triangles,int quads)
 
 void texturize_level()
 {
-	
+	int t = rand()%TEXTURE_COUNT+1;
+	char buffer[256];
+	sprintf(buffer,"./textures/texture%i.png",t);
+	SDL_Surface* texture = spLoadSurface(buffer);
+	spSelectRenderTarget(level_original);
+	Uint16* level_pixel = spGetTargetPixel();
+	SDL_LockSurface(texture);
+	Uint16* texture_pixel = (Uint16*)texture->pixels;
+	int x,y;
+	for (x = 0; x < LEVEL_WIDTH; x++)
+		for (y = 0; y < LEVEL_HEIGHT; y++)
+			if (level_pixel[x+y*LEVEL_WIDTH]!= SP_ALPHA_COLOR)
+				level_pixel[x+y*LEVEL_WIDTH] = texture_pixel[(x & TEXTURE_MASK) + (y & TEXTURE_MASK)*TEXTURE_SIZE];
+	SDL_UnlockSurface(texture);
+	spSelectRenderTarget(screen);
+	spDeleteSurface(texture);
 }
