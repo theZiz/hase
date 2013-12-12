@@ -215,6 +215,8 @@ void init_player()
 	active_player = rand()%2;
 	player[active_player].shoot = 0;
 	player[active_player].bullet = NULL;
+	posX = player[active_player].x;
+	posY = player[active_player].y;
 }
 
 void next_player()

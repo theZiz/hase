@@ -164,10 +164,6 @@ int calc(Uint32 steps)
 		spGetInput()->button[SP_BUTTON_START] = 0;
 		help = 1-help;
 	}
-	if (spGetInput()->button[SP_BUTTON_LEFT] && player[active_player].bums && player[active_player].hops <= 0)
-	{
-		jump(1);
-	}
 	if (spGetInput()->button[SP_BUTTON_L])
 	{
 		zoomAdjust -= steps*32;
@@ -187,7 +183,7 @@ int calc(Uint32 steps)
 	if (SECOND_PLAYER_AI && active_player == 1)
 	{
 		//AI
-		if (player[active_player].shoot == 0)
+		if (player[active_player].bums && player[active_player].shoot == 0)
 		{
 			//Shoot!
 			player[active_player].shoot = 1;
@@ -197,6 +193,10 @@ int calc(Uint32 steps)
 	else
 	{
 		//not AI
+		if (spGetInput()->button[SP_BUTTON_LEFT] && player[active_player].bums && player[active_player].hops <= 0)
+		{
+			jump(1);
+		}
 		if (spGetInput()->axis[0] < 0)
 		{
 			if (player[active_player].direction == 1)
