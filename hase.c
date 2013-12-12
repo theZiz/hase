@@ -24,6 +24,8 @@ int help = 0;
 int power_pressed = 0;
 int direction_pressed = 0;
 
+int SECOND_PLAYER_AI = 0;
+
 void loadInformation(char* information)
 {
 	spClearTarget(0);
@@ -181,81 +183,96 @@ int calc(Uint32 steps)
 		zoom = spMul(zoomAdjust,zoomAdjust);
 	}
 	update_player_sprite(steps);
-	if (spGetInput()->axis[0] < 0)
-	{
-		if (player[active_player].direction == 1)
-		{
-			player[active_player].direction = 0;
-			player[active_player].w_direction = SP_PI-player[active_player].w_direction;
-			direction_hold = 0;
-		}
-		direction_hold+=steps;
-		if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player].bums && player[active_player].hops <= 0)
-			jump(0);
-	}
-	else
-	if (spGetInput()->axis[0] > 0)
-	{
-		if (player[active_player].direction == 0)
-		{
-			player[active_player].direction = 1;
-			player[active_player].w_direction = SP_PI-player[active_player].w_direction;
-			direction_hold = 0;
-		}
-		direction_hold+=steps;
-		if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player].bums && player[active_player].hops <= 0)
-			jump(0);
-	}
-	else
-		direction_hold = 0;
 	
-	if (spGetInput()->axis[1] < 0)
+	if (SECOND_PLAYER_AI && active_player == 1)
 	{
-		direction_pressed += SP_ONE*steps/20;
-		if (direction_pressed >= 128*SP_ONE)
-			direction_pressed = 128*SP_ONE;
-		if (player[active_player].direction == 0)
-			player[active_player].w_direction += (direction_pressed*steps) >> SP_ACCURACY;
-		else
-			player[active_player].w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
+		//AI
+		if (player[active_player].shoot == 0)
+		{
+			//Shoot!
+			player[active_player].shoot = 1;
+			player[active_player].bullet = shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
+		}
 	}
 	else
-	if (spGetInput()->axis[1] > 0)
 	{
-		direction_pressed += SP_ONE*steps/20;
-		if (direction_pressed >= 128*SP_ONE)
-			direction_pressed = 128*SP_ONE;
-		if (player[active_player].direction == 0)
-			player[active_player].w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
+		//not AI
+		if (spGetInput()->axis[0] < 0)
+		{
+			if (player[active_player].direction == 1)
+			{
+				player[active_player].direction = 0;
+				player[active_player].w_direction = SP_PI-player[active_player].w_direction;
+				direction_hold = 0;
+			}
+			direction_hold+=steps;
+			if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player].bums && player[active_player].hops <= 0)
+				jump(0);
+		}
 		else
-			player[active_player].w_direction += (direction_pressed*steps) >> SP_ACCURACY;
-	}
-	else
-		direction_pressed = 0;
+		if (spGetInput()->axis[0] > 0)
+		{
+			if (player[active_player].direction == 0)
+			{
+				player[active_player].direction = 1;
+				player[active_player].w_direction = SP_PI-player[active_player].w_direction;
+				direction_hold = 0;
+			}
+			direction_hold+=steps;
+			if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player].bums && player[active_player].hops <= 0)
+				jump(0);
+		}
+		else
+			direction_hold = 0;
+		
+		if (spGetInput()->axis[1] < 0)
+		{
+			direction_pressed += SP_ONE*steps/20;
+			if (direction_pressed >= 128*SP_ONE)
+				direction_pressed = 128*SP_ONE;
+			if (player[active_player].direction == 0)
+				player[active_player].w_direction += (direction_pressed*steps) >> SP_ACCURACY;
+			else
+				player[active_player].w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
+		}
+		else
+		if (spGetInput()->axis[1] > 0)
+		{
+			direction_pressed += SP_ONE*steps/20;
+			if (direction_pressed >= 128*SP_ONE)
+				direction_pressed = 128*SP_ONE;
+			if (player[active_player].direction == 0)
+				player[active_player].w_direction -= (direction_pressed*steps) >> SP_ACCURACY;
+			else
+				player[active_player].w_direction += (direction_pressed*steps) >> SP_ACCURACY;
+		}
+		else
+			direction_pressed = 0;
 
-	if (spGetInput()->button[SP_BUTTON_UP])
-	{
-		power_pressed += SP_ONE*steps/100;
-		player[active_player].w_power += (power_pressed*steps) >> SP_ACCURACY;
-		if (player[active_player].w_power >= SP_ONE)
-			player[active_player].w_power = SP_ONE;
-	}
-	else
-	if (spGetInput()->button[SP_BUTTON_DOWN])
-	{
-		power_pressed += SP_ONE*steps/100;
-		player[active_player].w_power -= (power_pressed*steps) >> SP_ACCURACY;
-		if (player[active_player].w_power < 0)
-			player[active_player].w_power = 0;
-	}
-	else
-		power_pressed = 0;
-	if (spGetInput()->button[SP_BUTTON_RIGHT] && player[active_player].shoot == 0)
-	{
-		//Shoot!
-		player[active_player].shoot = 1;
-		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
-		player[active_player].bullet = shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
+		if (spGetInput()->button[SP_BUTTON_UP])
+		{
+			power_pressed += SP_ONE*steps/100;
+			player[active_player].w_power += (power_pressed*steps) >> SP_ACCURACY;
+			if (player[active_player].w_power >= SP_ONE)
+				player[active_player].w_power = SP_ONE;
+		}
+		else
+		if (spGetInput()->button[SP_BUTTON_DOWN])
+		{
+			power_pressed += SP_ONE*steps/100;
+			player[active_player].w_power -= (power_pressed*steps) >> SP_ACCURACY;
+			if (player[active_player].w_power < 0)
+				player[active_player].w_power = 0;
+		}
+		else
+			power_pressed = 0;
+		if (spGetInput()->button[SP_BUTTON_RIGHT] && player[active_player].shoot == 0)
+		{
+			//Shoot!
+			player[active_player].shoot = 1;
+			spGetInput()->button[SP_BUTTON_RIGHT] = 0;
+			player[active_player].bullet = shootBullet(player[active_player].x,player[active_player].y,player[active_player].w_direction+player[active_player].rotation+SP_PI,player[active_player].w_power/2,player[active_player].direction?1:-1);
+		}
 	}
 	updateTrace();
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
@@ -286,6 +303,14 @@ void resize( Uint16 w, Uint16 h )
 
 int main(int argc, char **argv)
 {
+	
+	if (argc > 1 && strcmp(argv[1],"--ai") == 0)
+	{
+		SECOND_PLAYER_AI = 1;
+		printf("Game Mode: Player vs. AI\n");
+	}
+	else
+		printf("Game Mode: Player vs. Player\n");
 	srand(time(NULL));
 	spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
