@@ -31,8 +31,8 @@ pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr)
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 	bullet->next = firstBullet;
 	firstBullet = bullet;
-	bullet->x = x+8*spCos(direction);
-	bullet->y = y+8*spSin(direction);
+	bullet->x = x+(10+BULLET_SIZE)*spCos(direction);
+	bullet->y = y+(10+BULLET_SIZE)*spSin(direction);
 	bullet->dr = dr;
 	bullet->impact_state = 0;
 	bullet->rotation = rand()%(2*SP_PI);
@@ -194,7 +194,8 @@ int updateBullets(int steps)
 			int speed = abs(momBullet->dx)+abs(momBullet->dy);
 			momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;
 			int dead = 0;
-			if (momBullet->impact_state == 0 && circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,BULLET_SIZE))
+			if (momBullet->impact_state == 0 &&
+			    circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,BULLET_SIZE,-1))
 			{
 				momBullet->x += momBullet->dx;
 				momBullet->y += momBullet->dy;

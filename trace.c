@@ -1,4 +1,4 @@
-#define TRACE_LENGTH 200
+#define TRACE_LENGTH 20
 #define TRACE_STEP 100
 #define TRACE_UPDATE 5
 int trace_count = TRACE_UPDATE-1;
@@ -15,14 +15,16 @@ void lastPoint(int* x,int* y,int direction,int power)
 	int i,j;
 	Sint32 dx = spMul(spCos(direction),power);
 	Sint32 dy = spMul(spSin(direction),power);
-	(*x) += 8*spCos(direction);
-	(*y) += 8*spSin(direction);
+	(*x) += (10+BULLET_SIZE)*spCos(direction);
+	(*y) += (10+BULLET_SIZE)*spSin(direction);
 	for (j = 1; j < TRACE_LENGTH; j++)
 		for (i = 0; i < TRACE_STEP; i++)
 		{
 			dx -= gravitation_x((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;
 			dy -= gravitation_y((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			if (circle_is_empty((*x)+dx >> SP_ACCURACY,(*y)+dy >> SP_ACCURACY,BULLET_SIZE) && (*x) >= 0 && (*y) >= 0 && spFixedToInt((*x)) < LEVEL_WIDTH && spFixedToInt((*y)) < LEVEL_HEIGHT)
+			if (circle_is_empty((*x)+dx >> SP_ACCURACY,(*y)+dy >> SP_ACCURACY,BULLET_SIZE,-1) &&
+			    (*x) >= 0 && (*y) >= 0 &&
+			    spFixedToInt((*x)) < LEVEL_WIDTH && spFixedToInt((*y)) < LEVEL_HEIGHT)
 			{
 				(*x) += dx;
 				(*y) += dy;
@@ -46,8 +48,8 @@ void updateTrace()
 	traceLength = 0;
 	Sint32 dx = spMul(spCos(player[active_player].w_direction+player[active_player].rotation+SP_PI),player[active_player].w_power/2);
 	Sint32 dy = spMul(spSin(player[active_player].w_direction+player[active_player].rotation+SP_PI),player[active_player].w_power/2);
-	Sint32 x = player[active_player].x+8*spCos(player[active_player].w_direction+player[active_player].rotation+SP_PI);
-	Sint32 y = player[active_player].y+8*spSin(player[active_player].w_direction+player[active_player].rotation+SP_PI);
+	Sint32 x = player[active_player].x+(10+BULLET_SIZE)*spCos(player[active_player].w_direction+player[active_player].rotation+SP_PI);
+	Sint32 y = player[active_player].y+(10+BULLET_SIZE)*spSin(player[active_player].w_direction+player[active_player].rotation+SP_PI);
 	trace[0].x = x;
 	trace[0].y = y;
 	for (j = 1; j < TRACE_LENGTH; j++)
@@ -57,7 +59,9 @@ void updateTrace()
 		{
 			dx -= gravitation_x(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
 			dy -= gravitation_y(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,BULLET_SIZE) && x >= 0 && y >= 0 && spFixedToInt(x) < LEVEL_WIDTH && spFixedToInt(y) < LEVEL_HEIGHT)
+			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,BULLET_SIZE,-1) &&
+			    x >= 0 && y >= 0 &&
+			    spFixedToInt(x) < LEVEL_WIDTH && spFixedToInt(y) < LEVEL_HEIGHT)
 			{
 				x += dx;
 				y += dy;
