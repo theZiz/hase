@@ -1,7 +1,7 @@
 #define HOPS_TIME 200
 #define HIGH_HOPS_TIME 403
 #define MAX_HEALTH 256
-#define AI_MAX_TRIES 2048
+#define AI_MAX_TRIES 512
 #define AI_TRIES_PER_FRAME 16
 int ai_shoot_tries = 0;
 
@@ -9,6 +9,8 @@ int lastAIDistance = 100000000;
 
 typedef struct sBullet *pBullet;
 
+
+typedef struct sPlayer *pPlayer;
 typedef struct sPlayer
 {
 	int direction;
@@ -29,7 +31,7 @@ typedef struct sPlayer
 int active_player = 0;
 tPlayer player[2];
 
-int circle_is_empty(int x, int y, int r)
+int circle_is_empty(int x, int y, int r,int except)
 {
 	int a,b;
 	int start_a = x-r;
@@ -54,6 +56,18 @@ int circle_is_empty(int x, int y, int r)
 		}
 	}
 	
+	int i;
+	if (except < 0xDEAD)
+		for (i = 0; i < 2; i++)
+		{
+			if (i == except)
+				continue;
+			int px = player[i].x >> SP_ACCURACY;
+			int py = player[i].y >> SP_ACCURACY;
+			int d = (x-px)*(x-px)+(y-py)*(y-py);
+			if (d <= (r+8)*(r+8))
+				return 0;
+		}
 	return 1;
 }
 
@@ -198,7 +212,7 @@ void init_player()
 			x = rand()%LEVEL_WIDTH;
 			y = rand()%LEVEL_HEIGHT;
 			printf("Tried %i %i...",x,y);
-			if (circle_is_empty(x,y,16) && gravitation_force(x,y)/32768)
+			if (circle_is_empty(x,y,16,i) && gravitation_force(x,y)/32768)
 				break;
 			printf("NOT!\n");
 		}

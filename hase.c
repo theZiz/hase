@@ -139,7 +139,7 @@ int jump(int high)
 {
 	Sint32 dx = spSin(player[active_player].rotation);
 	Sint32 dy = spCos(player[active_player].rotation);
-	if (circle_is_empty(player[active_player].x+dx,player[active_player].y+dy,7))
+	//if (circle_is_empty(player[active_player].x+dx >> SP_ACCURACY,player[active_player].y+dy >> SP_ACCURACY,6,0xDEAD))
 	{
 		if (high)
 			player[active_player].hops = HIGH_HOPS_TIME;
