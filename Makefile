@@ -5,7 +5,7 @@ CFLAGS = -O3 -fsingle-precision-constant -fPIC
 # Testtweaks: -fgcse-lm -fgcse-sm -fsched-spec-load -fmodulo-sched -funsafe-loop-optimizations -Wunsafe-loop-optimizations -fgcse-las -fgcse-after-reload -fvariable-expansion-in-unroller -ftracer -fbranch-target-load-optimize
 GENERAL_TWEAKS = -ffast-math
 #==PC==
-CPP = gcc -g -march=native -DX86CPU $(GENERAL_TWEAKS)
+CPP = gcc -g -DX86CPU $(GENERAL_TWEAKS)
 SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
@@ -21,13 +21,17 @@ SPARROW_LIB = $(SPARROW_FOLDER)
 endif
 LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
-DYNAMIC += -lsparrow3d
+DYNAMIC += -lsparrow3d -lsparrowNet
 
 all: hase
 	@echo "=== Built for Target "$(TARGET)" ==="
 
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
+
+client: client.c
+	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
+	$(CPP) $(CFLAGS) client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/client
 
 hase: hase.c gravity.c player.c logic.c help.c bullet.c trace.c makeBuildDir
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
