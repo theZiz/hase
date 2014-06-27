@@ -7,7 +7,6 @@ $game_id = (int)$_POST['game_id'];
 $player_id = (int)$_POST['player_id'];
 $player_pw = (int)$_POST['player_pw'];
 $second_of_player = (int)$_POST['second_of_player'];
-$last = (int)$_POST['last'];
 $data = mysql_real_escape_string($_POST['data']);
 
 $query = "SELECT * FROM hase_player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
@@ -20,5 +19,6 @@ if ($row['player_pw'] == $player_pw)
 	"VALUES ( '$game_id', '$player_id', '$second_of_player', '$data' )";
 	mysql_query($query) or die;
 }
+echo "Error: 0";
 mysql_close($connection);
 ?>

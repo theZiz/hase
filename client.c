@@ -1,40 +1,4 @@
-#include <stdio.h>
-#include <sparrowNet.h>
-typedef struct sMessage *pMessage;
-typedef struct sMessage
-{
-	char name[256];
-	char content[256];
-	int l;
-	pMessage next;
-} tMessage;
-
-typedef struct sGame *pGame;
-typedef struct sGame
-{
-	int id;
-	char name[32];
-	char level_string[512];
-	int max_player;
-	int player_count;
-	int create_date;
-	int seconds_per_turn;
-	int status;
-	int admin_pw;
-	int mom_player;
-	pGame next;
-} tGame;
-
-typedef struct sPlayer *pPlayer;
-typedef struct sPlayer
-{
-	int id;
-	char name[32];
-	int pw;
-	int position_in_game;
-	pGame game;
-	pPlayer next;
-} tPlayer;
+#include "client.h"
 
 spNetIP ip;
 
@@ -193,8 +157,17 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	
 	if (direction == -1) //incoming file TODO
 	{
-		memcpy(binary,&buffer[pos+1],count);
-		return NULL;
+		if (buffer[pos+1] == 'A' &&
+			buffer[pos+2] == 'C' &&
+			buffer[pos+3] == 'K')
+		{
+			memcpy(binary,&buffer[pos+4],count);
+			pMessage result = NULL;
+			numToMessage(&result,"Okay",1);
+			return result;
+		}
+		else
+			return NULL;
 	}
 	//Parsing in init style
 	pMessage result = NULL;
@@ -347,6 +320,16 @@ void delete_player_list(pPlayer player)
 {
 	while (player)
 	{
+		if (player->input_mutex)
+		{
+			end_pull_thread(player);
+			while (player->input_data)
+			{
+				pThreadData next = player->input_data->next;
+				free(player->input_data);
+				player->input_data = next;
+			}
+		}
 		pPlayer next = player->next;
 		free(player);
 		player = next;
@@ -365,6 +348,12 @@ pPlayer join_game(pGame game,char* name)
 	player->pw = 0;
 	player->game = game;
 	player->next = NULL;
+	player->input_data = NULL;
+	player->last_input_data_write = NULL;
+	player->last_input_data_read = NULL;
+	player->input_message = 0;
+	player->input_mutex = NULL;
+	player->input_thread = NULL;
 	pMessage now = result;
 	while (now)
 	{
@@ -424,6 +413,12 @@ void get_game(pGame game,pPlayer *playerList)
 				player->name[0] = 0;
 				player->pw = 0;
 				player->game = game;
+				player->input_data = NULL;
+				player->last_input_data_read = NULL;
+				player->last_input_data_write = NULL;
+				player->input_message = 0;
+				player->input_mutex = NULL;
+				player->input_thread = NULL;
 			}
 			if (strcmp(now->name,"player_name") == 0)
 				sprintf(player->name,"%s",now->content);
@@ -463,7 +458,7 @@ void set_status(pGame game,int status)
 	deleteMessage(&result);	
 }
 
-void push_game(pPlayer player,int second_of_player,void* data,int last)
+int push_game(pPlayer player,int second_of_player,void* data)
 {
 	pMessage message = NULL;
 	numToMessage(&message,"game_id",player->game->id);
@@ -472,23 +467,177 @@ void push_game(pPlayer player,int second_of_player,void* data,int last)
 	numToMessage(&message,"second_of_player",second_of_player);
 	pMessage result = sendMessage(message,"data",data,1536,"push_game.php");
 	deleteMessage(&message);
-	deleteMessage(&result);
+	if (result)
+	{
+		deleteMessage(&result);
+		return 0;
+	}
+	return 1; //Error!
 }
 
-void pull_game(pPlayer player,int second_of_player,void* data)
+pThreadData push_thread_first = NULL;
+pThreadData push_thread_last = NULL;
+SDL_mutex* push_mutex = NULL;
+int push_message = 0;
+
+int push_thread_function(void* data)
+{
+	while (push_message != -1 || push_thread_first)
+	{
+		if (push_thread_first)
+		{
+			//PULL STACK
+			SDL_mutexP(push_mutex);
+			pThreadData thread_data = push_thread_first;
+			push_thread_first = push_thread_first->next;
+			if (push_thread_first == NULL)
+				push_thread_last = NULL;
+			SDL_mutexV(push_mutex);
+			int i;
+			for (i = 0; i < 3; i++)
+			{
+				if (push_game(thread_data->player,thread_data->second_of_player,thread_data->data) == 0)
+					break;
+			}
+			if (i == 3)
+				printf("BIG PANIC!\n");
+			else
+			if (i != 0)
+				printf("Little panic... %i\n",i);
+			free(thread_data);
+		}
+		spSleep(100);
+	}
+	return 0;
+}
+
+void push_game_thread(pPlayer player,int second_of_player,void* data)
+{
+	pThreadData thread_data = (pThreadData)malloc(sizeof(tThreadData));
+	thread_data->player = player;
+	thread_data->second_of_player = second_of_player;
+	thread_data->next = NULL;
+	memcpy(thread_data->data,data,1536);
+	//PUSH STACK
+	SDL_mutexP(push_mutex);
+	if (push_thread_last)
+		push_thread_last->next = thread_data;
+	push_thread_last = thread_data;
+	if (push_thread_first == NULL)
+		push_thread_first = thread_data;
+	SDL_mutexV(push_mutex);
+}
+
+SDL_Thread* push_thread	= NULL;
+
+void start_push_thread()
+{
+	push_mutex = SDL_CreateMutex();
+	push_message = 0;
+	push_thread = SDL_CreateThread(push_thread_function,NULL);
+}
+
+void end_push_thread()
+{
+	push_message = -1;
+	int result;
+	SDL_WaitThread(push_thread,&(result));
+	SDL_DestroyMutex(push_mutex);
+}
+
+int pull_game(pPlayer player,int second_of_player,void* data)
 {
 	pMessage message = NULL;
 	numToMessage(&message,"game_id",player->game->id);
 	numToMessage(&message,"player_id",player->id);
 	numToMessage(&message,"second_of_player",second_of_player);
-	sendMessage(message,"data",data,-1536,"pull_game.php");
+	pMessage result = sendMessage(message,"data",data,-1536,"pull_game.php");
 	deleteMessage(&message);
+	if (result)
+	{
+		deleteMessage(&result);
+		return 0; //Okay
+	}
+	return 1;//Error
 }
 
-int main()
+int pull_thread_function(void* data)
 {
-	printf("Init spNet\n");
-	spInitNet();
+	pPlayer player = data;
+	pThreadData next_data = (pThreadData)malloc(sizeof(tThreadData));
+	while (player->input_message != -1)
+	{
+		//Try to get second after recent second
+		int new_second = 0;
+		if (player->last_input_data_write)
+			new_second = player->last_input_data_write->second_of_player+1;
+		if (pull_game(player,new_second,next_data->data) == 0) //data!
+		{
+			//Adding to the list
+			next_data->player = player;
+			next_data->second_of_player = new_second;
+			next_data->next = NULL;
+			SDL_mutexP(player->input_mutex);
+			if (player->last_input_data_write)
+				player->last_input_data_write->next = next_data;
+			else
+				player->input_data = next_data;
+			player->last_input_data_write = next_data;
+			SDL_mutexV(player->input_mutex);
+			spSleep(100000); //100ms
+		}
+		else
+			spSleep(1000000); //1s
+	}
+	return 0;
+}
+
+int pull_game_thread(pPlayer player,int second_of_player,void* data)
+{
+	//Searching
+	SDL_mutexP(player->input_mutex);
+	pThreadData thread_data = player->last_input_data_read;
+	if (player->last_input_data_read == NULL ||
+		player->last_input_data_read->second_of_player > second_of_player)
+	thread_data = player->input_data;
+	while (thread_data)
+	{
+		if (thread_data->second_of_player == second_of_player)
+			break;
+		thread_data = thread_data->next;
+	}
+	int result = 1;
+	if (thread_data)
+	{
+		result = 0;
+		memcpy(data,thread_data->data,1536);
+	}
+	SDL_mutexV(player->input_mutex);
+	return result;
+}
+
+void start_pull_thread(pPlayer player)
+{
+	player->input_mutex = SDL_CreateMutex();
+	player->input_message = 0;
+	player->input_thread = SDL_CreateThread(pull_thread_function,(void*)player);
+}
+
+void end_pull_thread(pPlayer player)
+{
+	player->input_message = -1;
+	int result;
+	SDL_WaitThread(player->input_thread,&(result));
+	SDL_DestroyMutex(player->input_mutex);
+	player->input_mutex = NULL;
+	player->input_thread = NULL;
+	player->input_data = NULL;
+	player->last_input_data_read = NULL;
+	player->last_input_data_write = NULL;
+}
+
+int connect_to_server()
+{
 	ip = spNetResolve("ziz.gp2x.de",80);
 	printf("IP of ziz.gp2x.de: %i.%i.%i.%i\n",ip.address.ipv4_bytes[0],ip.address.ipv4_bytes[1],ip.address.ipv4_bytes[2],ip.address.ipv4_bytes[3]);
 	if (ip.address.ipv4 == SP_INVALID_IP)
@@ -496,77 +645,6 @@ int main()
 		spQuitNet();
 		return 1;
 	}
-	printf("Server Version: %i\n",server_info());
-	pGame game = create_game("Testspiel",2,30,"todo");
-	printf("Created game %i with pw %i at time %i\n",game->id,game->admin_pw,game->create_date);
-	pPlayer player[3];
-	player[0] = join_game(game,"Testuser1");
-	player[1] = join_game(game,"Testuser2");
-	player[2] = join_game(game,"Testuser3");
-	printf("%p %p %p\n",player[0],player[1],player[2]);
-	leave_game(player[0]);
-	
-	pPlayer playerList = NULL;
-	get_game(game,&playerList);
-	printf("In game %s (status: %i) are %i players\n",game->name,game->status,game->player_count);
-	printf("Player:\n");
-	pPlayer momplayer = playerList;
-	while (momplayer)
-	{
-		printf("\t%i. %s (%i)\n",momplayer->position_in_game,momplayer->name,momplayer->id);
-		momplayer = momplayer->next;
-	}
-	
-	
-	player[0] = NULL;
-	player[2] = join_game(game,"Testuser3");
-	printf("%p %p %p\n",player[0],player[1],player[2]);
-
-	set_status(game,1);
-	get_game(game,&playerList);
-	printf("In game %s (status: %i) are %i players\n",game->name,game->status,game->player_count);
-	printf("Player:\n");
-	momplayer = playerList;
-	while (momplayer)
-	{
-		printf("\t%i. %s (%i)\n",momplayer->position_in_game,momplayer->name,momplayer->id);
-		momplayer = momplayer->next;
-	}
-	delete_player_list(playerList);
-	char data[1536];
-	int i;
-	for (i = 0; i < 1536; i++)
-		data[i] = i;
-	push_game(player[1],0,data,0);
-	memset(data,0,1536);
-	pull_game(player[1],0,data);
-	
-	for (i = 0; i < 1536; i++)
-		if (data[i] != (char)i)
-		{
-			printf("Error at %i! Shall be %i, is %i\n",i,(char)i,data[i]);
-			break;
-		}
-	
-	delete_game(game);
-	
-	pGame gameList;
-	printf("%i games on the server\n",get_games(&gameList));
-	game = gameList;
-	while (game)
-	{
-		get_game(game,NULL);
-		printf("%s:\n",game->name);
-		printf("\t              ID: %i\n",game->id);
-		printf("\t      Max player: %i\n",game->max_player);
-		printf("\t      Mom player: %i\n",game->player_count);
-		printf("\tSeconds per turn: %i\n",game->seconds_per_turn);
-		printf("\t          Status: %i\n",game->status);
-		printf("\t     Create time: %i\n",game->create_date);
-		printf("\t    Level string: %s\n",game->level_string);
-		game = game->next;
-	}
-	
-	spQuitNet();
 	return 0;
 }
+

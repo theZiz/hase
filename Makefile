@@ -10,8 +10,13 @@ SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
 
+TARGET = nativ
+
 ifdef TARGET
 include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
+
+TARGET = pandora
+
 BUILD = ./build/$(TARGET)/hase
 SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
 else
@@ -29,9 +34,12 @@ all: hase
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
-client: client.c
+testclient: testclient.c client.o
 	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
-	$(CPP) $(CFLAGS) client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/client
+	$(CPP) $(CFLAGS) testclient.c client.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
+	
+client.o: client.c client.h
+	$(CPP) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
 hase: hase.c gravity.c player.c logic.c help.c bullet.c trace.c makeBuildDir
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)

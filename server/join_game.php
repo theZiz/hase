@@ -17,8 +17,10 @@ $player_count = $row['total'];
 $result = mysql_query("SELECT * FROM hase_game_list WHERE game_id='$game_id'");
 $row = mysql_fetch_assoc($result);
 $max_player = $row['max_player'];
+$status = $row['status'];
 
-if ($player_count >= $max_player)
+
+if ($player_count >= $max_player || $status != 0)
 {
 	echo "error: 1";
 }
