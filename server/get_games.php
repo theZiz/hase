@@ -23,10 +23,12 @@ while ($row = mysql_fetch_array( $result ))
 		mysql_query($query) or die;
 		continue;
 	}
+	$status = $row['status'];
+	if ($status == -1)
+		continue;
 	$game_name = $row['game_name'];
 	$max_player = $row['max_player'];
 	$seconds_per_turn = $row['seconds_per_turn'];
-	$status = $row['status'];
 	//count player
 	$subresult = mysql_query("SELECT COUNT(*) AS total FROM hase_player_list WHERE game_id='$game_id'");
 	$subrow = mysql_fetch_assoc($subresult);
