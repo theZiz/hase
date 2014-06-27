@@ -37,6 +37,10 @@ targets:
 testclient: testclient.c client.o
 	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
 	$(CPP) $(CFLAGS) testclient.c client.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
+
+lobby: lobby.c client.o makeBuildDir
+	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
+	$(CPP) $(CFLAGS) lobby.c client.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
 	
 client.o: client.c client.h
 	$(CPP) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
