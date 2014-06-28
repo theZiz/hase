@@ -25,7 +25,6 @@ typedef struct sGame
 	int seconds_per_turn;
 	int status;
 	int admin_pw;
-	int mom_player;
 	pGame next;
 } tGame;
 

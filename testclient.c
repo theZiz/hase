@@ -53,7 +53,6 @@ int main(int argc, char **argv)
 		momplayer = momplayer->next;
 	}
 	printf("\n");
-	
 	//Waiting for game_start
 	if (argc > 3)
 	{

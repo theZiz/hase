@@ -226,7 +226,6 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 	game->seconds_per_turn = seconds_per_turn;
 	game->status = 0;
 	game->admin_pw = 0;
-	game->mom_player = 0;
 	game->next = NULL;
 	while (now)
 	{
@@ -295,7 +294,6 @@ int get_games(pGame *gameList)
 			game->seconds_per_turn = 0;
 			game->status = 0;
 			game->admin_pw = 0;
-			game->mom_player = 0;
 			game->next = NULL;			
 		}
 		if (strcmp(now->name,"game_name") == 0)
@@ -437,8 +435,6 @@ void get_game(pGame game,pPlayer *playerList)
 			game->create_date = atoi(now->content);
 		if (strcmp(now->name,"seconds_per_turn") == 0)
 			game->seconds_per_turn = atoi(now->content);
-		if (strcmp(now->name,"mom_player") == 0)
-			game->mom_player = atoi(now->content);
 		if (strcmp(now->name,"status") == 0)
 			game->status = atoi(now->content);
 		now = now->next;

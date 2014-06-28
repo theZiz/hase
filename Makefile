@@ -28,7 +28,7 @@ LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
 DYNAMIC += -lsparrow3d -lsparrowNet
 
-all: hase
+all: hase lobby
 	@echo "=== Built for Target "$(TARGET)" ==="
 
 targets:
