@@ -1,7 +1,9 @@
 #include "client.h"
+#include "level.h"
 
 int main(int argc, char **argv)
 {
+	srand(time(NULL));
 	if (argc < 3)
 	{
 		printf("testclient game nick [players]\n");
@@ -15,7 +17,8 @@ int main(int argc, char **argv)
 	pGame game,gameList = NULL;
 	if (argc > 3)
 	{
-		game = create_game(argv[1],atoi(argv[3]),30,"todo");
+		char buffer[512];
+		game = create_game(argv[1],atoi(argv[3]),30,create_level_string(buffer,1536,1536,3,3,3));
 		printf("Created game %s (%i) with pw %i at time %i\n",game->name,game->id,game->admin_pw,game->create_date);
 	}
 	else

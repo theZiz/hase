@@ -10,12 +10,12 @@ SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
 
-#TARGET = nativ
+TARGET = nativ
 
 ifdef TARGET
 include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
 
-#TARGET = pandora
+TARGET = pandora
 
 BUILD = ./build/$(TARGET)/hase
 SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
@@ -28,26 +28,36 @@ LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
 DYNAMIC += -lsparrow3d -lsparrowNet
 
+CPP += -g
+
 all: hase lobby
 	@echo "=== Built for Target "$(TARGET)" ==="
 
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
-testclient: testclient.c client.o
+testclient: testclient.c client.o level.o
 	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
-	$(CPP) $(CFLAGS) testclient.c client.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
-
-lobby: lobby.c client.o makeBuildDir
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	$(CPP) $(CFLAGS) lobby.c client.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
+	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
+
+lobby: lobby.c client.o lobbyList.o level.o makeBuildDir
+	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
+	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
+	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
 	
 client.o: client.c client.h
 	$(CPP) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
-hase: hase.c gravity.c player.c logic.c help.c bullet.c trace.c makeBuildDir
+lobbyList.o: lobbyList.c lobbyList.h
+	$(CPP) $(CFLAGS) -c lobbyList.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+hase: hase.c gravity.c player.c logic.c help.c bullet.c trace.c level.o makeBuildDir
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	$(CPP) $(CFLAGS) hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/hase
+	$(CPP) $(CFLAGS) hase.c level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/hase
+
+level.o: level.c level.h
+	$(CPP) $(CFLAGS) -c level.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
 makeBuildDir:
 	 @if [ ! -d $(BUILD:/hase=/) ]; then mkdir $(BUILD:/hase=/);fi

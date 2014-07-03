@@ -4,7 +4,6 @@
 
 #define LEVEL_WIDTH 1536
 #define LEVEL_HEIGHT 1536
-#define LEVEL_BORDER 256
 #define COUNT_DOWN 30720
 
 SDL_Surface* screen;
@@ -42,7 +41,8 @@ void loadInformation(char* information)
 #include "bullet.c"
 #include "logic.c"
 #include "trace.c"
-#include "level.c"
+
+#include "level.h"
 
 void draw(void)
 {
@@ -372,9 +372,9 @@ int main(int argc, char **argv)
 		bullet = spLoadSurface("./data/bullet.png");
 		gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
 		loadInformation("Creating random level...");
-		level_original = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);
-		create_level(3,3,3);
-		texturize_level();
+		char level_string[512];
+		level_original = create_level(create_level_string(level_string,LEVEL_WIDTH,LEVEL_HEIGHT,3,3,3),0,0,65535);
+		texturize_level(level_original,level_string);
 		loadInformation("Created Arrow image...");
 		fill_gravity_surface();
 		level = spCreateSurface(LEVEL_WIDTH,LEVEL_HEIGHT);

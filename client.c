@@ -65,6 +65,8 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	}
 	length += 2+boundary_len+2+4; //4 + boundary_end + 2 returns;
 	spNetTCPConnection server_connection = spNetOpenClientTCP(ip);
+	if (server_connection == NULL)
+		return NULL;
 	//int buffer_size = 2048+count;//spMax(length+1,512);
 	int buffer_size = 65536;
 	char buffer[buffer_size];
@@ -637,10 +639,7 @@ int connect_to_server()
 	ip = spNetResolve("ziz.gp2x.de",80);
 	printf("IP of ziz.gp2x.de: %i.%i.%i.%i\n",ip.address.ipv4_bytes[0],ip.address.ipv4_bytes[1],ip.address.ipv4_bytes[2],ip.address.ipv4_bytes[3]);
 	if (ip.address.ipv4 == SP_INVALID_IP)
-	{
-		spQuitNet();
 		return 1;
-	}
 	return 0;
 }
 
