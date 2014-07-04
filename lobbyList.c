@@ -47,6 +47,8 @@ void update_ll_surface()
 	spSelectRenderTarget(spGetWindowSurface());
 }
 
+int ll_reload_now = 0;
+
 void ll_draw(void)
 {
 	update_ll_surface();
@@ -70,7 +72,14 @@ void ll_draw(void)
 	spRectangle(5*screen->w/6, screen->h-1*ll_font->maxheight-h/2, 0,screen->w/3-6,h,LL_FG);
 	spFontDrawTextBlock(middle,4*screen->w/6+6, screen->h-1*ll_font->maxheight-h, 0,
 		ll_block,h,0,ll_font);
-	spFontDrawMiddle( 2, screen->h-ll_font->maxheight, 0, "Lorem ipsum", ll_font );
+	if (ll_reload_now)
+		spFontDrawMiddle( screen->w/2, screen->h-ll_font->maxheight, 0, "Reloading list...", ll_font );
+	else
+	{
+		spFontDraw( 2, screen->h-ll_font->maxheight, 0, "Lorem ipsum", ll_font );
+		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
+		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
+	}
 	spFlip();
 }
 
@@ -82,6 +91,14 @@ int ll_calc(Uint32 steps)
 {
 	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 		return 1;
+	if (ll_reload_now)
+	{
+		int a = SDL_GetTicks();
+		ll_reload();
+		int b = SDL_GetTicks();
+		ll_reload_now = 0;
+		ll_counter = a-b;
+	}
 	int step;
 	for (step = 0; step < steps; step++)
 	{
@@ -152,6 +169,8 @@ int ll_calc(Uint32 steps)
 		else
 			ll_wait = -1;
 	}
+	if (ll_counter >= 10000)
+		ll_reload_now = 1;
 	int total_height = (ll_game_count+1)*ll_font->maxheight+2;
 	if (ll_game_count > 1)
 		ll_scroll = (total_height-ll_surface->h)*1024*ll_selected/(ll_game_count-1);
@@ -196,16 +215,16 @@ int ll_calc(Uint32 steps)
 
 void ll_reload()
 {
-	
-}
-
-
-void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
-{
+	if (ll_level)
+	{
+		spDeleteSurface(ll_level);
+		spDeleteTextBlock(ll_block);
+		ll_level = NULL;
+		ll_block = NULL;
+	}
 	ll_offline = connect_to_server();
 	if (ll_offline == 0)
 		ll_offline = server_info() == 0;
-	ll_selected = 0;
 	if (!ll_offline)
 		ll_game_count = get_games(&ll_game_list);
 	else
@@ -214,7 +233,14 @@ void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 		ll_game_count = 0;
 	}
 	if (ll_game_count == 0)
-		ll_selected = -1;
+		ll_selected = -1;	
+}
+
+
+void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
+{
+	ll_selected = 0;
+	ll_reload();
 	ll_font = font;
 	ll_counter = 0;
 	ll_surface = spCreateSurface(2*spGetWindowSurface()->w/3-4,spGetWindowSurface()->h-3*font->maxheight);

@@ -1,6 +1,8 @@
 #include "client.h"
 #include "level.h"
 
+#define TURN_LEN 10
+
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
@@ -18,7 +20,7 @@ int main(int argc, char **argv)
 	if (argc > 3)
 	{
 		char buffer[512];
-		game = create_game(argv[1],atoi(argv[3]),30,create_level_string(buffer,1536,1536,3,3,3));
+		game = create_game(argv[1],atoi(argv[3]),TURN_LEN,create_level_string(buffer,1536,1536,3,3,3));
 		printf("Created game %s (%i) with pw %i at time %i\n",game->name,game->id,game->admin_pw,game->create_date);
 	}
 	else
@@ -76,7 +78,6 @@ int main(int argc, char **argv)
 	{
 		if (momplayer->id == player->id)
 			player->position_in_game = momplayer->position_in_game;
-		start_pull_thread(momplayer);
 		momplayer = momplayer->next;
 	}
 	printf("I am player %i\n",player->position_in_game);
@@ -93,12 +94,12 @@ int main(int argc, char **argv)
 			int second;
 			if (player->position_in_game == p)
 			{
-				for (second = round*30;second<(round+1)*30;second++)
+				for (second = round*TURN_LEN;second<(round+1)*TURN_LEN;second++)
 				{
 					char data[1536];
 					push_game_thread(player,second,data);
 					printf("Player %i sent %i\n",p,second);
-					spSleep(rand()%1000000);
+					spSleep(1000000);
 				}
 			}
 			else
@@ -110,13 +111,15 @@ int main(int argc, char **argv)
 						break;
 					momplayer = momplayer->next;
 				}
-				for (second = round*30;second<(round+1)*30;second++)
+				start_pull_thread(momplayer);
+				for (second = round*TURN_LEN;second<(round+1)*TURN_LEN;second++)
 				{
 					char data[1536];
 					while (pull_game_thread(momplayer,second,data))
-						spSleep(100000); //100ms
+						spSleep(500000); //500ms
 					printf("Player %i recv %i\n",p,second);
-				}				
+				}
+				end_pull_thread(momplayer);
 			}
 		}
 	}

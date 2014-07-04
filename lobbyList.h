@@ -7,5 +7,6 @@
 #define LL_BG spGetRGB(64,64,80)
 
 void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ));
+void ll_reload();
 
 #endif

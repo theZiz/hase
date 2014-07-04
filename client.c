@@ -215,8 +215,13 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 	numToMessage(&message,"max_player",max_player);
 	numToMessage(&message,"seconds_per_turn",seconds_per_turn);
 	addToMessage(&message,"level_string",level_string);
-	pMessage result = sendMessage(message,NULL,NULL,0,"create_game.php");
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"create_game.php");
 	deleteMessage(&message);
+	if (result == NULL)
+		return NULL;
 	pMessage now = result;
 	pGame game = (pGame)malloc(sizeof(tGame));
 	game->id = -1;
@@ -258,7 +263,10 @@ void delete_game(pGame game)
 	pMessage message = NULL;
 	numToMessage(&message,"game_id",game->id);
 	numToMessage(&message,"admin_pw",game->admin_pw);
-	pMessage result = sendMessage(message,NULL,NULL,0,"delete_game.php");
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"delete_game.php");
 	deleteMessage(&message);
 	deleteMessage(&result);
 	delete_game_list(game);
@@ -266,7 +274,12 @@ void delete_game(pGame game)
 
 int get_games(pGame *gameList)
 {
-	pMessage result = sendMessage(NULL,NULL,NULL,0,"get_games.php");
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(NULL,NULL,NULL,0,"get_games.php");
+	if (result == NULL)
+		return;
 	pMessage now = result;
 	*gameList = NULL;
 	pGame game = NULL;
@@ -341,7 +354,13 @@ pPlayer join_game(pGame game,char* name)
 	pMessage message = NULL;
 	addToMessage(&message,"player_name",name);
 	numToMessage(&message,"game_id",game->id);
-	pMessage result = sendMessage(message,NULL,NULL,0,"join_game.php");
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"join_game.php");
+	deleteMessage(&message);
+	if (result == NULL)
+		return NULL;
 	pPlayer player = (pPlayer)malloc(sizeof(tPlayer));
 	sprintf(player->name,"%s",name);
 	player->id = -1;
@@ -369,7 +388,6 @@ pPlayer join_game(pGame game,char* name)
 			player->pw = atoi(now->content);
 		now = now->next;
 	}
-	deleteMessage(&message);
 	deleteMessage(&result);
 	return player;
 }
@@ -380,7 +398,10 @@ void leave_game(pPlayer player)
 	numToMessage(&message,"game_id",player->game->id);
 	numToMessage(&message,"player_id",player->id);
 	numToMessage(&message,"player_pw",player->pw);
-	pMessage result = sendMessage(message,NULL,NULL,0,"leave_game.php");
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"leave_game.php");
 	deleteMessage(&message);
 	deleteMessage(&result);
 	delete_player_list(player);
@@ -390,7 +411,13 @@ void get_game(pGame game,pPlayer *playerList)
 {
 	pMessage message = NULL;
 	numToMessage(&message,"game_id",game->id);
-	pMessage result = sendMessage(message,NULL,NULL,0,"get_game.php");
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"get_game.php");
+	deleteMessage(&message);
+	if (result == NULL)
+		return;
 	pMessage now = result;
 	if (playerList)
 	{
@@ -451,7 +478,10 @@ void set_status(pGame game,int status)
 	numToMessage(&message,"admin_pw",game->admin_pw);
 	game->status = status;
 	numToMessage(&message,"status",game->status);
-	pMessage result = sendMessage(message,NULL,NULL,0,"set_status.php");
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"set_status.php");
 	deleteMessage(&message);
 	deleteMessage(&result);	
 }
@@ -484,13 +514,7 @@ int push_thread_function(void* data)
 	{
 		if (push_thread_first)
 		{
-			//PULL STACK
-			SDL_mutexP(push_mutex);
 			pThreadData thread_data = push_thread_first;
-			push_thread_first = push_thread_first->next;
-			if (push_thread_first == NULL)
-				push_thread_last = NULL;
-			SDL_mutexV(push_mutex);
 			int i;
 			for (i = 0; i < 3; i++)
 			{
@@ -500,11 +524,19 @@ int push_thread_function(void* data)
 			if (i == 3)
 				printf("BIG PANIC!\n");
 			else
-			if (i != 0)
-				printf("Little panic... %i\n",i);
-			free(thread_data);
+			{
+				if (i != 0)
+					printf("Little panic... %i\n",i);
+				//PULL STACK
+				SDL_mutexP(push_mutex);
+				push_thread_first = push_thread_first->next;
+				if (push_thread_first == NULL)
+					push_thread_last = NULL;
+				SDL_mutexV(push_mutex);
+				free(thread_data);
+			}
 		}
-		spSleep(100);
+		spSleep(100000);//100ms
 	}
 	return 0;
 }
@@ -541,6 +573,8 @@ void end_push_thread()
 	int result;
 	SDL_WaitThread(push_thread,&(result));
 	SDL_DestroyMutex(push_mutex);
+	push_mutex = NULL;
+	push_thread = NULL;
 }
 
 int pull_game(pPlayer player,int second_of_player,void* data)
@@ -582,10 +616,10 @@ int pull_thread_function(void* data)
 				player->input_data = next_data;
 			player->last_input_data_write = next_data;
 			SDL_mutexV(player->input_mutex);
-			spSleep(100000); //100ms
+			spSleep(50000); //50ms
 		}
 		else
-			spSleep(1000000); //1s
+			spSleep(500000); //500ms
 	}
 	return 0;
 }

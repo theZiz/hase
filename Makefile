@@ -30,7 +30,7 @@ DYNAMIC += -lsparrow3d -lsparrowNet
 
 CPP += -g
 
-all: hase lobby
+all: hase lobby testclient
 	@echo "=== Built for Target "$(TARGET)" ==="
 
 targets:
