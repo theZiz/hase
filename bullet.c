@@ -227,17 +227,21 @@ int updateBullets(int steps)
 						if (momBullet->impact_counter == 0)
 						{
 							dead = 1;
-							for (j = 0; j < 2; j++)
+							for (j = 0; j < player_count; j++)
 							{
-								int d = spFixedToInt(player[j].x-momBullet->x)*spFixedToInt(player[j].x-momBullet->x)+
-										spFixedToInt(player[j].y-momBullet->y)*spFixedToInt(player[j].y-momBullet->y);
+								if (player[j]->health == 0)
+									continue;
+								int d = spFixedToInt(player[j]->x-momBullet->x)*spFixedToInt(player[j]->x-momBullet->x)+
+										spFixedToInt(player[j]->y-momBullet->y)*spFixedToInt(player[j]->y-momBullet->y);
 									d = 1024-d;
 								if (d > 0)
-									player[j].health -= d*MAX_HEALTH/2048;
-								if (player[j].health <= 0)
+									player[j]->health -= d*MAX_HEALTH/2048;
+								if (player[j]->health <= 0)
 								{
-									player[j].health = 0;
-									return 1;
+									player[j]->health = 0;
+									alive_count--;
+									if (alive_count < 2)
+										return 1;
 								}
 							}
 						}
@@ -246,7 +250,7 @@ int updateBullets(int steps)
 			}
 			if (dead || momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT)
 			{
-				if (momBullet == player[active_player].bullet)
+				if (momBullet == player[active_player]->bullet)
 					next_player();
 				if (before)
 					before->next = momBullet->next;

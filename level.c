@@ -30,21 +30,18 @@ char* create_level_string(char* buffer,int width,int height,int circles,int tria
 	}
 	for (i = 0; i < triangles; i++)
 	{
-		int r = spMin(width,height) >> 2;
-		int x3,x2,x1 = LEVEL_BORDER+r+rand()%(width-2*LEVEL_BORDER-2*r);
-		int y3,y2,y1 = LEVEL_BORDER+r+rand()%(height-2*LEVEL_BORDER-2*r);
-		do
-		{
-			x2 = LEVEL_BORDER+r+rand()%(width-2*LEVEL_BORDER-2*r);
-			y2 = LEVEL_BORDER+r+rand()%(height-2*LEVEL_BORDER-2*r);
-		}
-		while ((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2) > r*r);
-		do
-		{
-			x3 = LEVEL_BORDER+r+rand()%(width-2*LEVEL_BORDER-2*r);
-			y3 = LEVEL_BORDER+r+rand()%(height-2*LEVEL_BORDER-2*r);
-		}
-		while ((x1-x3)*(x1-x3)+(y1-y3)*(y1-y3) > r*r);
+		int r = rand()%(spMin(width,height) >> 2);
+		int x = LEVEL_BORDER+r+rand()%(width-2*LEVEL_BORDER-2*r);
+		int y = LEVEL_BORDER+r+rand()%(height-2*LEVEL_BORDER-2*r);
+		int a1 = rand()%(SP_PI*2);
+		int a2 = rand()%(SP_PI*2);
+		int a3 = rand()%(SP_PI*2);
+		Sint32 x1 = x + ( r * spCos( a1 ) >> SP_ACCURACY );
+		Sint32 y1 = y + ( r * spSin( a1 ) >> SP_ACCURACY );
+		Sint32 x2 = x + ( r * spCos( a2 ) >> SP_ACCURACY );
+		Sint32 y2 = y + ( r * spSin( a2 ) >> SP_ACCURACY );
+		Sint32 x3 = x + ( r * spCos( a3 ) >> SP_ACCURACY );
+		Sint32 y3 = y + ( r * spSin( a3 ) >> SP_ACCURACY );
 		add_to_string(buffer,"^"); //triangle
 		add_to_string(buffer,ltostr(x1,temp,36));
 		add_to_string(buffer," ");
@@ -72,7 +69,6 @@ char* create_level_string(char* buffer,int width,int height,int circles,int tria
 		Sint32 y2 = r >> 1;
 		Sint32 y3 = y2;
 		Sint32 y4 = y1;
-
 		Sint32 nx1 = x + ( x1 * spCos( angle ) - y1 * spSin( angle ) >> SP_ACCURACY );
 		Sint32 ny1 = y + ( y1 * spCos( angle ) + x1 * spSin( angle ) >> SP_ACCURACY );
 		Sint32 nx2 = x + ( x2 * spCos( angle ) - y2 * spSin( angle ) >> SP_ACCURACY );

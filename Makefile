@@ -30,7 +30,7 @@ DYNAMIC += -lsparrow3d -lsparrowNet
 
 CPP += -g
 
-all: hase lobby testclient
+all: lobby testclient
 	@echo "=== Built for Target "$(TARGET)" ==="
 
 targets:
@@ -41,20 +41,25 @@ testclient: testclient.c client.o level.o
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
 	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
 
-lobby: lobby.c client.o lobbyList.o level.o makeBuildDir
+lobby: lobby.c client.o lobbyList.o lobbyGame.o level.o message.o hase.o makeBuildDir
 	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
+	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o message.o level.o hase.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
 	
 client.o: client.c client.h
 	$(CPP) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
-lobbyList.o: lobbyList.c lobbyList.h
+lobbyList.o: lobbyList.c lobbyList.h lobbyGame.h
 	$(CPP) $(CFLAGS) -c lobbyList.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
-hase: hase.c gravity.c player.c logic.c help.c bullet.c trace.c level.o makeBuildDir
-	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	$(CPP) $(CFLAGS) hase.c level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/hase
+lobbyGame.o: lobbyGame.c lobbyGame.h lobbyList.h
+	$(CPP) $(CFLAGS) -c lobbyGame.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+message.o: message.c message.h lobbyList.h
+	$(CPP) $(CFLAGS) -c message.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h makeBuildDir
+	$(CPP) $(CFLAGS) -c hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
 level.o: level.c level.h
 	$(CPP) $(CFLAGS) -c level.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
@@ -65,4 +70,5 @@ makeBuildDir:
 
 clean:
 	rm -f *.o
-	rm -f hase
+	rm -f $(BUILD)/lobby
+	rm -f $(BUILD)/testclient

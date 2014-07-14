@@ -7,29 +7,9 @@ int ai_shoot_tries = 0;
 
 int lastAIDistance = 100000000;
 
-typedef struct sBullet *pBullet;
-
-
-typedef struct sPlayer *pPlayer;
-typedef struct sPlayer
-{
-	int direction;
-	int w_direction;
-	int w_power;
-	Sint32 x,y;
-	Sint32 dx,dy;
-	Sint32 rotation;
-	int bums;
-	int hops;
-	int high_hops;
-	int health;
-	spSpriteCollectionPointer hase;
-	int shoot;
-	pBullet bullet;
-} tPlayer;
-
 int active_player = 0;
-tPlayer player[2];
+int player_count;
+pPlayer *player;
 
 int circle_is_empty(int x, int y, int r,int except)
 {
@@ -58,12 +38,14 @@ int circle_is_empty(int x, int y, int r,int except)
 	
 	int i;
 	if (except < 0xDEAD)
-		for (i = 0; i < 2; i++)
+		for (i = 0; i < player_count; i++)
 		{
+			if (player[i]->health == 0)
+				continue;
 			if (i == except)
 				continue;
-			int px = player[i].x >> SP_ACCURACY;
-			int py = player[i].y >> SP_ACCURACY;
+			int px = player[i]->x >> SP_ACCURACY;
+			int py = player[i]->y >> SP_ACCURACY;
 			int d = (x-px)*(x-px)+(y-py)*(y-py);
 			if (d <= (r+8)*(r+8))
 				return 0;
@@ -115,128 +97,138 @@ Sint32 gravitation_force(int x,int y)
 
 void update_player(int steps)
 {
-	if (player[active_player].hops > 0)
+	if (player[active_player]->hops > 0)
 	{
-		player[active_player].hops -= steps;
-		if (player[active_player].hops <= 0)
+		player[active_player]->hops -= steps;
+		if (player[active_player]->hops <= 0)
 		{
-			Sint32 dx = spSin(player[active_player].rotation);
-			Sint32 dy = spCos(player[active_player].rotation);
-			player[active_player].x += dx;
-			player[active_player].y -= dy;
+			Sint32 dx = spSin(player[active_player]->rotation);
+			Sint32 dy = spCos(player[active_player]->rotation);
+			player[active_player]->x += dx;
+			player[active_player]->y -= dy;
 			Sint32 angle = SP_PI/3;
 			Sint32 divisor = 8;
-			if (player[active_player].high_hops)
+			if (player[active_player]->high_hops)
 			{
 				angle = SP_PI/10;
 				divisor = 6;
 			}
-			if (player[active_player].direction)
+			if (player[active_player]->direction)
 			{
-				player[active_player].dx += spSin(player[active_player].rotation+angle)/divisor;
-				player[active_player].dy -= spCos(player[active_player].rotation+angle)/divisor;
+				player[active_player]->dx += spSin(player[active_player]->rotation+angle)/divisor;
+				player[active_player]->dy -= spCos(player[active_player]->rotation+angle)/divisor;
 			}
 			else
 			{
-				player[active_player].dx += spSin(player[active_player].rotation-angle)/divisor;
-				player[active_player].dy -= spCos(player[active_player].rotation-angle)/divisor;
+				player[active_player]->dx += spSin(player[active_player]->rotation-angle)/divisor;
+				player[active_player]->dy -= spCos(player[active_player]->rotation-angle)/divisor;
 			}			
 		}
 	}
 	int j;
-	for (j = 0; j < 2; j++)
+	for (j = 0; j < player_count; j++)
 	{
-		player[j].rotation = 0;
-		player[j].bums = 0;
-		Sint32 force = gravitation_force(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY);
+		if (player[j]->health == 0)
+			continue;
+		player[j]->rotation = 0;
+		player[j]->bums = 0;
+		Sint32 force = gravitation_force(player[j]->x >> SP_ACCURACY,player[j]->y >> SP_ACCURACY);
 		if (force)
 		{
-			Sint32 ac = spDiv(-gravitation_y(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY),force);
+			Sint32 ac = spDiv(-gravitation_y(player[j]->x >> SP_ACCURACY,player[j]->y >> SP_ACCURACY),force);
 			if (ac < -SP_ONE)
 				ac = -SP_ONE;
 			if (ac > SP_ONE)
 				ac = SP_ONE;
-			player[j].rotation = -spAcos(ac);
-			if (-gravitation_x(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY) <= 0)
-				player[j].rotation = 2*SP_PI-player[j].rotation;
-			while (player[j].rotation < 0)
-				player[j].rotation += 2*SP_PI;
-			while (player[j].rotation >= 2*SP_PI)
-				player[j].rotation -= 2*SP_PI;
+			player[j]->rotation = -spAcos(ac);
+			if (-gravitation_x(player[j]->x >> SP_ACCURACY,player[j]->y >> SP_ACCURACY) <= 0)
+				player[j]->rotation = 2*SP_PI-player[j]->rotation;
+			while (player[j]->rotation < 0)
+				player[j]->rotation += 2*SP_PI;
+			while (player[j]->rotation >= 2*SP_PI)
+				player[j]->rotation -= 2*SP_PI;
 		}
 	}
 }
 
 void update_player_sprite(int steps)
 {
-	if (player[active_player].hops > 0)
+	if (player[active_player]->hops > 0)
 	{
-		if (player[active_player].high_hops)
+		if (player[active_player]->high_hops)
 		{
-			if (player[active_player].direction == 0)
-				spSelectSprite(player[active_player].hase,"high jump left");
+			if (player[active_player]->direction == 0)
+				spSelectSprite(player[active_player]->hase,"high jump left");
 			else
-				spSelectSprite(player[active_player].hase,"high jump right");
+				spSelectSprite(player[active_player]->hase,"high jump right");
 		}
 		else
 		{
-			if (player[active_player].direction == 0)
-				spSelectSprite(player[active_player].hase,"jump left");
+			if (player[active_player]->direction == 0)
+				spSelectSprite(player[active_player]->hase,"jump left");
 			else
-				spSelectSprite(player[active_player].hase,"jump right");
+				spSelectSprite(player[active_player]->hase,"jump right");
 		}
 	}
 	else
 	{
-		if (player[active_player].direction == 0)
-			spSelectSprite(player[active_player].hase,"stand left");
+		if (player[active_player]->direction == 0)
+			spSelectSprite(player[active_player]->hase,"stand left");
 		else
-			spSelectSprite(player[active_player].hase,"stand right");
+			spSelectSprite(player[active_player]->hase,"stand right");
 	}
-	spUpdateSprite(spActiveSprite(player[active_player].hase),steps);
+	spUpdateSprite(spActiveSprite(player[active_player]->hase),steps);
 }	
 
-void init_player()
+void init_player(pPlayer player_list,int pc)
 {
-	int i;
-	for (i = 0; i < 2; i ++)
+	player_count = pc;
+	player = (pPlayer*)malloc(sizeof(pPlayer)*pc);
+	while (player_list)
 	{
-		player[i].direction = 0;
-		player[i].w_direction = SP_ONE/2;
-		player[i].w_power = SP_ONE/2;
-		player[i].hops = 0;
-		player[i].high_hops = 0;
+		printf("Setting player %i\n",player_list->position_in_game);
+		player[player_list->position_in_game] = player_list;
+		player_list = player_list->next;
+	}
+	int i;
+	for (i = 0; i < player_count; i ++)
+	{
+		player[i]->direction = 0;
+		player[i]->w_direction = SP_ONE/2;
+		player[i]->w_power = SP_ONE/2;
+		player[i]->hops = 0;
+		player[i]->high_hops = 0;
 		int x,y;
 		while (1)
 		{
 			x = rand()%LEVEL_WIDTH;
 			y = rand()%LEVEL_HEIGHT;
-			printf("Tried %i %i...",x,y);
+			printf("Tried %i %i... ",x,y);
 			if (circle_is_empty(x,y,16,i) && gravitation_force(x,y)/32768)
 				break;
 			printf("NOT!\n");
 		}
 		printf("Fine.\n");
-		player[i].x = x << SP_ACCURACY;
-		player[i].y = y << SP_ACCURACY;
-		player[i].dx = 0;
-		player[i].dy = 0;
-		posX = player[i].x;
-		posY = player[i].y;
+		player[i]->x = x << SP_ACCURACY;
+		player[i]->y = y << SP_ACCURACY;
+		player[i]->dx = 0;
+		player[i]->dy = 0;
+		posX = player[i]->x;
+		posY = player[i]->y;
 		update_player(0);
-		rotation = -player[i].rotation;
-		player[i].health = MAX_HEALTH;
+		rotation = -player[i]->rotation;
+		player[i]->health = MAX_HEALTH;
 		switch (i)
 		{
-			case 0:	player[i].hase = spLoadSpriteCollection("./data/hase.ssc",NULL); break;
-			case 1:	player[i].hase = spLoadSpriteCollection("./data/hase2.ssc",NULL); break;
+			case  0:	player[i]->hase = spLoadSpriteCollection("./data/hase.ssc",NULL); break;
+			default:	player[i]->hase = spLoadSpriteCollection("./data/hase2.ssc",NULL); break;
 		}
 	}
-	active_player = rand()%2;
-	player[active_player].shoot = 0;
-	player[active_player].bullet = NULL;
-	posX = player[active_player].x;
-	posY = player[active_player].y;
+	active_player = 0;
+	player[active_player]->shoot = 0;
+	player[active_player]->bullet = NULL;
+	posX = player[active_player]->x;
+	posY = player[active_player]->y;
 	ai_shoot_tries = 0;
 }
 
@@ -244,12 +236,16 @@ void next_player()
 {
 	ai_shoot_tries = 0;
 	lastAIDistance = 100000000;
-	active_player = 1-active_player;
-	player[active_player].shoot = 0;
-	player[active_player].bullet = NULL;
-	if (active_player == 1)
-		player[active_player].direction = rand()&1;
+	do
+	{
+		active_player = (active_player+1)%player_count;
+	}
+	while (player[active_player]->health == 0);
+	player[active_player]->shoot = 0;
+	player[active_player]->bullet = NULL;
+	//if (active_player == 1)
+	//	player[active_player]->direction = rand()&1;
 	countdown = COUNT_DOWN;
-	player[active_player].hops = 0;
-	player[active_player].high_hops = 0;
+	player[active_player]->hops = 0;
+	player[active_player]->high_hops = 0;
 }

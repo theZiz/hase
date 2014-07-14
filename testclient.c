@@ -11,6 +11,7 @@ int main(int argc, char **argv)
 		printf("testclient game nick [players]\n");
 		return 0;
 	}
+	spInitMath();
 	printf("Init spNet\n");
 	spInitNet();
 	if (connect_to_server())
@@ -20,7 +21,7 @@ int main(int argc, char **argv)
 	if (argc > 3)
 	{
 		char buffer[512];
-		game = create_game(argv[1],atoi(argv[3]),TURN_LEN,create_level_string(buffer,1536,1536,3,3,3));
+		game = create_game(argv[1],atoi(argv[3]),TURN_LEN,create_level_string(buffer,1536,1536,3,3,3),0);
 		printf("Created game %s (%i) with pw %i at time %i\n",game->name,game->id,game->admin_pw,game->create_date);
 	}
 	else
@@ -41,7 +42,7 @@ int main(int argc, char **argv)
 		}
 	}
 	pPlayer player;
-	player = join_game(game,argv[2]);
+	player = join_game(game,argv[2],0);
 	if (player == NULL)
 	{
 		printf("Game full or already started!\n");
@@ -59,18 +60,31 @@ int main(int argc, char **argv)
 	}
 	printf("\n");
 	//Waiting for game_start
+	
+	
 	if (argc > 3)
 	{
 		printf("Press return to start...\n");
 		getchar();
 		set_status(game,1);
+		/*int i;
+		for (i = 0; i < 6; i++)
+		{
+			char buffer[512];
+			set_level(game,create_level_string(buffer,1536,1536,3,3,3));
+			printf("%s\n",buffer);
+			sleep(10);
+		}*/
 	}
 	else
 	while (game->status != 1)
 	{
 		get_game(game,&playerList);
+		if (game->status == -1)
+			goto finish;
 		spSleep(1000000); //1s
 	}
+	
 	//Update game last time
 	get_game(game,&playerList);
 	momplayer = playerList;
@@ -127,10 +141,11 @@ int main(int argc, char **argv)
 	
 	printf("Waiting for push thread\n");
 	end_push_thread();
-	printf("Waiting for pull threads\n");
 	delete_player_list(playerList);
 	
 	printf("Finishing...\n");
+	
+	finish:
 	leave_game(player);
 	if (argc > 3)
 		delete_game(game);

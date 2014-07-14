@@ -7,6 +7,7 @@ mysql_select_db("sparrowman") or die;
 $game_id = (int)$_POST['game_id'];
 $player_name = mysql_real_escape_string($_POST['player_name']);
 $player_pw = rand();
+$computer = (int)$_POST['computer'];
 
 //counting players
 $result = mysql_query("SELECT COUNT(*) AS total FROM hase_player_list WHERE game_id='$game_id'");
@@ -26,8 +27,8 @@ if ($player_count >= $max_player || $status != 0)
 }
 else
 {
-	$query = "INSERT INTO hase_player_list (game_id, player_pw, player_name, position_in_game) ".
-	"VALUES ( '$game_id', '$player_pw', '$player_name', '0')";
+	$query = "INSERT INTO hase_player_list (game_id, player_pw, player_name, position_in_game, computer) ".
+	"VALUES ( '$game_id', '$player_pw', '$player_name', '0', '$computer')";
 
 	mysql_query($query) or die;
 	$player_id = mysql_insert_id();

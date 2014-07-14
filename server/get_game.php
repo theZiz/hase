@@ -12,6 +12,8 @@ $result = mysql_query($query) or die;
 $i = 0;
 while ($row = mysql_fetch_array( $result ))
 {
+	$computer = $row['computer'];
+	echo "computer: $computer", PHP_EOL;
 	$position_in_game = $row['position_in_game'];
 	echo "position_in_game: $position_in_game", PHP_EOL;
 	$player_name = $row['player_name'];

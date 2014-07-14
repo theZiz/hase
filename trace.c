@@ -46,10 +46,10 @@ void updateTrace()
 	}
 	int i,j;
 	traceLength = 0;
-	Sint32 dx = spMul(spCos(player[active_player].w_direction+player[active_player].rotation+SP_PI),player[active_player].w_power/2);
-	Sint32 dy = spMul(spSin(player[active_player].w_direction+player[active_player].rotation+SP_PI),player[active_player].w_power/2);
-	Sint32 x = player[active_player].x+(10+BULLET_SIZE)*spCos(player[active_player].w_direction+player[active_player].rotation+SP_PI);
-	Sint32 y = player[active_player].y+(10+BULLET_SIZE)*spSin(player[active_player].w_direction+player[active_player].rotation+SP_PI);
+	Sint32 dx = spMul(spCos(player[active_player]->w_direction+player[active_player]->rotation+SP_PI),player[active_player]->w_power/2);
+	Sint32 dy = spMul(spSin(player[active_player]->w_direction+player[active_player]->rotation+SP_PI),player[active_player]->w_power/2);
+	Sint32 x = player[active_player]->x+(10+BULLET_SIZE)*spCos(player[active_player]->w_direction+player[active_player]->rotation+SP_PI);
+	Sint32 y = player[active_player]->y+(10+BULLET_SIZE)*spSin(player[active_player]->w_direction+player[active_player]->rotation+SP_PI);
 	trace[0].x = x;
 	trace[0].y = y;
 	for (j = 1; j < TRACE_LENGTH; j++)

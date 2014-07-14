@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <sparrowNet.h>
+#include <sparrow3d.h>
 
 typedef struct sMessage *pMessage;
 typedef struct sMessage
@@ -12,6 +13,8 @@ typedef struct sMessage
 	int l;
 	pMessage next;
 } tMessage;
+
+typedef struct sPlayer *pPlayer;
 
 typedef struct sGame *pGame;
 typedef struct sGame
@@ -26,11 +29,14 @@ typedef struct sGame
 	int status;
 	int admin_pw;
 	pGame next;
+	int local;
+	pPlayer local_player;
 } tGame;
 
 typedef struct sThreadData *pThreadData;
 
-typedef struct sPlayer *pPlayer;
+typedef struct sBullet *pBullet;
+
 typedef struct sPlayer
 {
 	int id;
@@ -45,6 +51,21 @@ typedef struct sPlayer
 	pThreadData last_input_data_write;
 	pThreadData last_input_data_read;
 	int input_message;
+	int computer;
+	//ingame
+	int direction;
+	int w_direction;
+	int w_power;
+	Sint32 x,y;
+	Sint32 dx,dy;
+	Sint32 rotation;
+	int bums;
+	int hops;
+	int high_hops;
+	int health;
+	spSpriteCollectionPointer hase;
+	int shoot;
+	pBullet bullet;
 } tPlayer;
 
 typedef struct sThreadData
@@ -56,15 +77,16 @@ typedef struct sThreadData
 } tThreadData;
 
 int server_info();
-pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string);
+pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string,int local);
 void delete_game_list(pGame game);
 void delete_game(pGame game);
 int get_games(pGame *gameList);
 void delete_player_list(pPlayer player);
-pPlayer join_game(pGame game,char* name);
+pPlayer join_game(pGame game,char* name,int ai);
 void leave_game(pPlayer player);
 void get_game(pGame game,pPlayer *playerList);
 void set_status(pGame game,int status);
+void set_level(pGame game,char* level_string);
 
 int push_game(pPlayer player,int second_of_player,void* data);
 void push_game_thread(pPlayer player,int second_of_player,void* data);

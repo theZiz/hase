@@ -1,6 +1,8 @@
 #include "lobbyList.h"
 #include "client.h"
 #include "level.h"
+#include "message.h"
+
 SDL_Surface* ll_surface;
 SDL_Surface* ll_level = NULL;
 spFontPointer ll_font;
@@ -10,9 +12,10 @@ int ll_game_count;
 int ll_offline;
 int ll_scroll;
 int ll_selected;
-pPlayer ll_player_list;
+pPlayer ll_player_list = NULL;
 spTextBlockPointer ll_block = NULL;
-
+void ( *ll_resize )( Uint16 w, Uint16 h );
+ 
 void update_ll_surface()
 {
 	spSelectRenderTarget(ll_surface);
@@ -73,10 +76,13 @@ void ll_draw(void)
 	spFontDrawTextBlock(middle,4*screen->w/6+6, screen->h-1*ll_font->maxheight-h, 0,
 		ll_block,h,0,ll_font);
 	if (ll_reload_now)
+	{
 		spFontDrawMiddle( screen->w/2, screen->h-ll_font->maxheight, 0, "Reloading list...", ll_font );
+		ll_reload_now = 2;
+	}
 	else
 	{
-		spFontDraw( 2, screen->h-ll_font->maxheight, 0, "Lorem ipsum", ll_font );
+		spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[a] Join Game     [w] Create Game     [R] or [B] Exit", ll_font );
 		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
 	}
@@ -89,9 +95,64 @@ int ll_wait;
 
 int ll_calc(Uint32 steps)
 {
-	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
+	if (spGetInput()->button[SP_BUTTON_SELECT] ||
+		spGetInput()->button[SP_BUTTON_START])
 		return 1;
-	if (ll_reload_now)
+	if (spGetInput()->button[SP_BUTTON_UP])
+	{
+		spGetInput()->button[SP_BUTTON_UP] = 0;
+		char name[32] = "";
+		int players = 8;
+		int seconds = 30;
+		int online = 1;
+		if (ll_offline)
+			online = -1;
+		int res = 1;
+		while (name[0] == 0 && res == 1)
+		{
+			res = message_cg(ll_font,ll_resize,name,&players,&seconds,&online);
+			if (res == 1 && name[0] == 0)
+				message(ll_font,ll_resize,"Please enter a game name",1,NULL);
+		}
+		if (res == 1)
+		{
+			char buffer[512];
+			pGame game = create_game(name,players,seconds,create_level_string(buffer,1536,1536,3,3,3),online<=0);
+			start_lobby_game(ll_font,ll_resize,game);
+			delete_game(game);
+			ll_counter = 10000;			
+		}
+		ll_counter = 10000;
+	}		
+	if (spGetInput()->button[SP_BUTTON_LEFT])
+	{
+		spGetInput()->button[SP_BUTTON_LEFT] = 0;
+		if (ll_game_count <= 0)
+			message(ll_font,ll_resize,"No game to join!",1,NULL);
+		else
+		{
+			pGame game = ll_game_list;
+			int pos = 0;
+			while (game)
+			{
+				if (pos == ll_selected)
+					break;
+				game = game->next;
+				pos++;
+			}
+			if (game->status != 0)
+				message(ll_font,ll_resize,"Game already started!",1,NULL);
+			else
+			if (game->player_count >= game->max_player)
+				message(ll_font,ll_resize,"Game full!",1,NULL);
+			else
+			{
+				start_lobby_game(ll_font,ll_resize,game);
+				ll_counter = 10000;
+			}
+		}
+	}
+	if (ll_reload_now == 2)
 	{
 		int a = SDL_GetTicks();
 		ll_reload();
@@ -123,7 +184,6 @@ int ll_calc(Uint32 steps)
 			else
 			if (ll_wait == 0)
 			{
-				
 				ll_wait = MIN_WAIT;
 				ll_selected--;
 				if (ll_level)
@@ -139,8 +199,7 @@ int ll_calc(Uint32 steps)
 		if (spGetInput()->axis[1] > 0)
 		{
 			if (ll_wait == -1)
-			{
-				
+			{	
 				ll_wait = MAX_WAIT;
 				ll_selected++;
 				if (ll_level)
@@ -240,10 +299,10 @@ void ll_reload()
 void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 {
 	ll_selected = 0;
-	ll_reload();
 	ll_font = font;
-	ll_counter = 0;
+	ll_counter = 10000;//Instead reload
 	ll_surface = spCreateSurface(2*spGetWindowSurface()->w/3-4,spGetWindowSurface()->h-3*font->maxheight);
+	ll_resize = resize;
 	spLoop(ll_draw,ll_calc,10,resize,NULL);
 	spDeleteSurface(ll_surface);
 	if (ll_level)
