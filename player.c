@@ -86,6 +86,7 @@ Sint32 gravitation_y(int x,int y)
 	int g2 = gravity[gx2+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * rx + gravity[gx1+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
 	return g2 * ry + g1 * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION;
 }
+
 Sint32 gravitation_force(int x,int y)
 {
 	int grav_x = gravitation_x(x,y);
@@ -180,8 +181,11 @@ void update_player_sprite(int steps)
 	spUpdateSprite(spActiveSprite(player[active_player]->hase),steps);
 }	
 
+int next_player_go = 0;
+
 void init_player(pPlayer player_list,int pc)
 {
+	next_player_go = 0;
 	player_count = pc;
 	player = (pPlayer*)malloc(sizeof(pPlayer)*pc);
 	while (player_list)
@@ -218,11 +222,9 @@ void init_player(pPlayer player_list,int pc)
 		update_player(0);
 		rotation = -player[i]->rotation;
 		player[i]->health = MAX_HEALTH;
-		switch (i)
-		{
-			case  0:	player[i]->hase = spLoadSpriteCollection("./data/hase.ssc",NULL); break;
-			default:	player[i]->hase = spLoadSpriteCollection("./data/hase2.ssc",NULL); break;
-		}
+		char buffer[256];
+		sprintf(buffer,"./data/hase%i.ssc",rand()%10+1);
+		player[i]->hase = spLoadSpriteCollection(buffer,NULL);
 	}
 	active_player = 0;
 	player[active_player]->shoot = 0;
@@ -233,6 +235,11 @@ void init_player(pPlayer player_list,int pc)
 }
 
 void next_player()
+{
+	next_player_go = 1;
+}
+
+void real_next_player()
 {
 	ai_shoot_tries = 0;
 	lastAIDistance = 100000000;
@@ -245,7 +252,16 @@ void next_player()
 	player[active_player]->bullet = NULL;
 	//if (active_player == 1)
 	//	player[active_player]->direction = rand()&1;
-	countdown = COUNT_DOWN;
+	countdown = hase_game->seconds_per_turn*1000;
 	player[active_player]->hops = 0;
 	player[active_player]->high_hops = 0;
+}
+
+void check_next_player()
+{
+	if (next_player_go && bullet_alpha() == 0)
+	{
+		next_player_go = 0;
+		real_next_player();
+	}
 }

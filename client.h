@@ -31,6 +31,7 @@ typedef struct sGame
 	pGame next;
 	int local;
 	pPlayer local_player;
+	int local_counter;
 } tGame;
 
 typedef struct sThreadData *pThreadData;
@@ -66,6 +67,7 @@ typedef struct sPlayer
 	spSpriteCollectionPointer hase;
 	int shoot;
 	pBullet bullet;
+	int local;
 } tPlayer;
 
 typedef struct sThreadData

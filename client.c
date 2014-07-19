@@ -240,6 +240,7 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 	else
 		game->admin_pw = 0;
 	game->local_player = NULL;
+	game->local_counter = 0;
 	game->next = NULL;
 	pMessage now = result;
 	while (now)
@@ -381,7 +382,7 @@ pPlayer join_game(pGame game,char* name,int ai)
 	pPlayer player = (pPlayer)malloc(sizeof(tPlayer));
 	sprintf(player->name,"%s",name);
 	player->computer = ai;
-	player->id = -1;
+	player->id = game->local_counter++;
 	player->pw = 0;
 	player->game = game;
 	player->next = NULL;

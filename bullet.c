@@ -9,7 +9,7 @@ typedef struct sBullet
 	pBullet next;
 } tBullet;
 
-#define IMPACT_TIME 100
+#define IMPACT_TIME 300
 #define EXPLOSION_COLOR spGetFastRGB(255,255,255)
 #define BULLET_SIZE 4
 #define BULLET_SPEED_DOWN 32
@@ -46,7 +46,7 @@ void drawBullets()
 	pBullet momBullet = firstBullet;
 	while (momBullet)
 	{
-		if (momBullet->impact_state < 2)
+		if (momBullet->impact_state < 1)
 		{
 			Sint32 ox = spMul(momBullet->x-posX,zoom);
 			Sint32 oy = spMul(momBullet->y-posY,zoom);
@@ -219,7 +219,7 @@ int updateBullets(int steps)
 							spFlip();
 							bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
 							spResetLoop();
-							return 0;
+							return 2;
 						}
 						break;
 					case 2:
@@ -280,12 +280,12 @@ Sint32 bullet_alpha()
 		switch (momBullet->impact_state)
 		{
 			case 1:
-				newalpha = SP_ONE-momBullet->impact_counter*SP_ONE/100;
+				newalpha = SP_ONE-momBullet->impact_counter*SP_ONE/IMPACT_TIME;
 				if (newalpha > alpha)
 					alpha = newalpha;
 				break;
 			case 2:
-				newalpha = momBullet->impact_counter*SP_ONE/100;
+				newalpha = momBullet->impact_counter*SP_ONE/IMPACT_TIME;
 				if (newalpha > alpha)
 					alpha = newalpha;
 				break;

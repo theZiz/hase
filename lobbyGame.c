@@ -11,6 +11,7 @@ int lg_reload_now = 0;
 SDL_Surface* lg_level = NULL;
 pPlayer lg_player_list = NULL;
 pPlayer lg_player;
+pPlayer lg_last_player;
 spTextBlockPointer lg_block = NULL;
 char lg_level_string[512];
 
@@ -36,11 +37,12 @@ void lg_draw(void)
 	sprintf(buffer,"Maximum players: %i",lg_game->max_player);
 	spFontDraw(screen->w-w+2, 3*lg_font->maxheight, 0, buffer, lg_font );
 	spFontDraw(screen->w-w+2, 4*lg_font->maxheight, 0, "Players:", lg_font );
-	int h = screen->h-8*lg_font->maxheight;
-	spRectangle(screen->w-2-w/2, 5*lg_font->maxheight+(screen->h-8*lg_font->maxheight)/2, 0,w,h,LL_FG);
+	int h = screen->h-9*lg_font->maxheight;
+	spRectangle(screen->w-2-w/2, 5*lg_font->maxheight+(screen->h-9*lg_font->maxheight)/2, 0,w,h,LL_FG);
 	if (lg_block)
 		spFontDrawTextBlock(middle,screen->w-w+2, 5*lg_font->maxheight, 0,
 			lg_block,h,0,lg_font);
+	spFontDrawMiddle(screen->w-2-w/2, screen->h-4*lg_font->maxheight, 0, "[w] Add player   [s] Remove player", lg_font );
 	if (lg_game->admin_pw == 0)
 	{
 		spFontDrawMiddle(screen->w-2-w/2, screen->h-3*lg_font->maxheight, 0, "The game master will", lg_font );
@@ -49,7 +51,7 @@ void lg_draw(void)
 	else
 	{
 		spFontDrawMiddle(screen->w-2-w/2, screen->h-3*lg_font->maxheight, 0, "[d] New level     [a] Start game", lg_font );
-		spFontDrawMiddle(screen->w-2-w/2, screen->h-2*lg_font->maxheight, 0, "[w] Add AI     [s] Remove all AI", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, screen->h-2*lg_font->maxheight, 0, "[q] Add AI     [e] Remove all AI", lg_font );
 	}
 	if (lg_reload_now)
 	{
@@ -70,12 +72,155 @@ void lg_draw(void)
 
 pPlayer lg_ai_list = NULL;
 
+char* lg_get_name(char* buffer)
+{
+	int i = rand()%50;
+	switch (i)
+	{
+		//Germany
+		case  0: sprintf(buffer,"Elias"); break;
+		case  1: sprintf(buffer,"Alexander"); break;
+		case  2: sprintf(buffer,"Daniel"); break;
+		case  3: sprintf(buffer,"Lucas"); break;
+		case  4: sprintf(buffer,"Michael"); break;
+		case  5: sprintf(buffer,"Julia"); break;
+		case  6: sprintf(buffer,"Laura"); break;
+		case  7: sprintf(buffer,"Anna"); break;
+		case  8: sprintf(buffer,"Lea"); break;
+		case  9: sprintf(buffer,"Emma"); break;
+		//Sweden
+		case 10: sprintf(buffer,"William"); break;
+		case 11: sprintf(buffer,"Oscar"); break;
+		case 12: sprintf(buffer,"Hugo"); break;
+		case 13: sprintf(buffer,"Liam"); break;
+		case 14: sprintf(buffer,"Charlie"); break;
+		case 15: sprintf(buffer,"Alice"); break;
+		case 16: sprintf(buffer,"Elsa"); break;
+		case 17: sprintf(buffer,"Ella"); break;
+		case 18: sprintf(buffer,"Maja"); break;
+		case 19: sprintf(buffer,"Ebba"); break;
+		//USA
+		case 20: sprintf(buffer,"Jacob"); break;
+		case 21: sprintf(buffer,"Mason"); break;
+		case 22: sprintf(buffer,"Ethan"); break;
+		case 23: sprintf(buffer,"Jayden"); break;
+		case 24: sprintf(buffer,"Michael"); break;
+		case 25: sprintf(buffer,"Sophia"); break;
+		case 26: sprintf(buffer,"Isabella"); break;
+		case 27: sprintf(buffer,"Olivia"); break;
+		case 28: sprintf(buffer,"Ava"); break;
+		case 29: sprintf(buffer,"Emily"); break;
+		//France
+		case 30: sprintf(buffer,"Arthur"); break;
+		case 31: sprintf(buffer,"Jules"); break;
+		case 32: sprintf(buffer,"Nolan"); break;
+		case 33: sprintf(buffer,"Louis"); break;
+		case 34: sprintf(buffer,"Sabriel"); break;
+		case 35: sprintf(buffer,"Lilou"); break;
+		case 36: sprintf(buffer,"Chloe"); break;
+		case 37: sprintf(buffer,"Zoe"); break;
+		case 38: sprintf(buffer,"Louise"); break;
+		case 39: sprintf(buffer,"Camille"); break;
+		//Funny
+		case 40: sprintf(buffer,"Heinrich"); break;
+		case 41: sprintf(buffer,"Karl"); break;
+		case 42: sprintf(buffer,"Otto"); break;
+		case 43: sprintf(buffer,"Siegfried"); break;
+		case 44: sprintf(buffer,"Horst"); break;
+		case 45: sprintf(buffer,"Hildegard"); break;
+		case 46: sprintf(buffer,"Ulrike"); break;
+		case 47: sprintf(buffer,"Hendriekje"); break;
+		case 48: sprintf(buffer,"Gudrun"); break;
+		case 49: sprintf(buffer,"Klarabella"); break;
+	}
+	return buffer;
+}
+
+char* lg_get_combi_name(char* buffer)
+{
+	char name1[16],name2[16];
+	sprintf(buffer,"%s-%s",lg_get_name(name1),lg_get_name(name2));
+	return buffer;
+}
+
+char lg_new_name[33] = "";
+
 int lg_calc(Uint32 steps)
 {
 	if (spGetInput()->button[SP_BUTTON_SELECT])
 	{
 		spGetInput()->button[SP_BUTTON_SELECT] = 0;
 		return 1;
+	}
+	if (spGetInput()->button[SP_BUTTON_UP])
+	{
+		spGetInput()->button[SP_BUTTON_UP] = 0;
+		if (lg_game->player_count >= lg_game->max_player)
+			message(lg_font,lg_resize,"Game full!",1,NULL);
+		else
+		{
+			spPollKeyboardInput(lg_new_name,32,SP_BUTTON_UP_MASK);
+			if (message(lg_font,lg_resize,"Enter player name:",2,lg_new_name) == 1)
+			{
+				spStopKeyboardInput();
+				if (lg_new_name[0] == 0)
+					message(lg_font,lg_resize,"No name entered...",1,NULL);
+				else
+				if ((lg_last_player->next = join_game(lg_game,lg_new_name,0)) == NULL)
+					message(lg_font,lg_resize,"Game full...",1,NULL);
+				else
+				{
+					lg_last_player = lg_last_player->next;
+					lg_counter = 10000;
+				}
+			}
+			else
+				spStopKeyboardInput();
+		}
+	}
+	if (spGetInput()->button[SP_BUTTON_DOWN])
+	{
+		spGetInput()->button[SP_BUTTON_DOWN] = 0;
+		char leave_name[33];
+		sprintf(leave_name,"%s",lg_last_player->name);
+		spPollKeyboardInput(leave_name,32,SP_BUTTON_UP_MASK);
+		if (message(lg_font,lg_resize,"Enter player name to leave:",2,leave_name) == 1)
+		{
+			spStopKeyboardInput();
+			if (leave_name[0] == 0)
+				message(lg_font,lg_resize,"No name entered...",1,NULL);
+			else
+			{
+				//Searching player
+				pPlayer l = NULL;
+				pPlayer p = lg_player;
+				while (p)
+				{
+					if (strcmp(p->name,leave_name) == 0)
+						break;
+					l = p;
+					p = p->next;
+				}
+				if (p == NULL)
+					message(lg_font,lg_resize,"Player not found",1,NULL);
+				else
+				{
+					pPlayer n = p->next;
+					leave_game(p);
+					lg_counter = 10000;
+					if (l)
+						l->next = n;
+					else
+						lg_player = n;
+					if (n == NULL)
+						lg_last_player = l;
+				}
+				if (lg_player == NULL)
+					return 1;
+			}
+		}
+		else
+			spStopKeyboardInput();
 	}
 	if (spGetInput()->button[SP_BUTTON_LEFT] && lg_game->admin_pw)
 	{
@@ -86,7 +231,7 @@ int lg_calc(Uint32 steps)
 		{
 			printf("Running game\n");
 			set_status(lg_game,1);
-			hase(lg_resize,lg_game);
+			hase(lg_resize,lg_game,lg_player);
 			return 2;
 		}
 	}
@@ -99,9 +244,9 @@ int lg_calc(Uint32 steps)
 		sprintf(lg_level_string,"%s",lg_game->level_string);
 		set_level(lg_game,lg_level_string);
 	}
-	if (spGetInput()->button[SP_BUTTON_DOWN] && lg_game->admin_pw)
+	if (spGetInput()->button[SP_BUTTON_R] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_DOWN] = 0;
+		spGetInput()->button[SP_BUTTON_R] = 0;
 		while (lg_ai_list)
 		{
 			pPlayer next = lg_ai_list->next;
@@ -110,10 +255,11 @@ int lg_calc(Uint32 steps)
 		}
 		lg_counter = 10000;
 	}
-	if (spGetInput()->button[SP_BUTTON_UP] && lg_game->admin_pw)
+	if (spGetInput()->button[SP_BUTTON_L] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_UP] = 0;
-		pPlayer ai = join_game(lg_game,"AI",1);
+		spGetInput()->button[SP_BUTTON_L] = 0;
+		char buffer[32];
+		pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1);
 		if (ai)
 		{
 			ai->next = lg_ai_list;
@@ -192,6 +338,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 			message(font,resize,"Game full...",1,NULL);
 			return;
 		}
+		lg_last_player = lg_player;
 		lg_level = NULL;
 		lg_level_string[0] = 0;
 		lg_block = NULL;
@@ -200,12 +347,12 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 			spDeleteTextBlock(lg_block);
 		if (res == -1)
 			message(font,resize,"Game was closed...",1,NULL);
-		else
-		if (res == 2)
+		while (lg_player)
 		{
-			printf("Starting game!\n");
+			pPlayer next = lg_player->next;
+			leave_game(lg_player);
+			lg_player = next;
 		}
-		leave_game(lg_player);
 		spDeleteSurface(lg_level);
 		while (lg_ai_list)
 		{

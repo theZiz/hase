@@ -15,6 +15,10 @@ int ll_selected;
 pPlayer ll_player_list = NULL;
 spTextBlockPointer ll_block = NULL;
 void ( *ll_resize )( Uint16 w, Uint16 h );
+char ll_game_name[33] = "";
+int ll_game_players = 8;
+int ll_game_seconds = 30;
+int ll_game_online = 1;
  
 void update_ll_surface()
 {
@@ -101,23 +105,21 @@ int ll_calc(Uint32 steps)
 	if (spGetInput()->button[SP_BUTTON_UP])
 	{
 		spGetInput()->button[SP_BUTTON_UP] = 0;
-		char name[32] = "";
-		int players = 8;
-		int seconds = 30;
-		int online = 1;
 		if (ll_offline)
-			online = -1;
+			ll_game_online = -1;
 		int res = 1;
-		while (name[0] == 0 && res == 1)
+		while (res == 1)
 		{
-			res = message_cg(ll_font,ll_resize,name,&players,&seconds,&online);
-			if (res == 1 && name[0] == 0)
+			res = message_cg(ll_font,ll_resize,ll_game_name,&ll_game_players,&ll_game_seconds,&ll_game_online);
+			if (res == 1 && ll_game_name[0] == 0)
 				message(ll_font,ll_resize,"Please enter a game name",1,NULL);
+			else
+				break;
 		}
 		if (res == 1)
 		{
 			char buffer[512];
-			pGame game = create_game(name,players,seconds,create_level_string(buffer,1536,1536,3,3,3),online<=0);
+			pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),ll_game_online<=0);
 			start_lobby_game(ll_font,ll_resize,game);
 			delete_game(game);
 			ll_counter = 10000;			
