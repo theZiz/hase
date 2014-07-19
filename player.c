@@ -241,6 +241,18 @@ void next_player()
 
 void real_next_player()
 {
+	player_time = 0;
+	memset(send_data,0,1536*sizeof(char));
+	if (!hase_game->local)
+	{
+		if (!player[active_player]->computer)
+		{
+			if (player[active_player]->local)
+				end_push_thread();
+			else
+				end_pull_thread(player[active_player]);
+		}
+	}
 	ai_shoot_tries = 0;
 	lastAIDistance = 100000000;
 	do
@@ -255,6 +267,16 @@ void real_next_player()
 	countdown = hase_game->seconds_per_turn*1000;
 	player[active_player]->hops = 0;
 	player[active_player]->high_hops = 0;
+	if (!hase_game->local)
+	{
+		if (!player[active_player]->computer)
+		{
+			if (player[active_player]->local)
+				start_push_thread();
+			else
+				start_pull_thread(player[active_player]);
+		}
+	}
 }
 
 void check_next_player()

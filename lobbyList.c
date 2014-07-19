@@ -19,6 +19,7 @@ char ll_game_name[33] = "";
 int ll_game_players = 8;
 int ll_game_seconds = 30;
 int ll_game_online = 1;
+int ll_first_version = 0;
  
 void update_ll_surface()
 {
@@ -26,8 +27,8 @@ void update_ll_surface()
 	spClearTarget(LL_FG);
 	int pos = 0;
 	spFontDraw( 2                    , pos*ll_font->maxheight-ll_scroll/1024, 0, "Name", ll_font );
-	spFontDraw( 2+ 7*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Mom. Pl.", ll_font );
-	spFontDraw( 2+10*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Max. Pl.", ll_font );
+	spFontDraw( 2+ 7*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Mom Pl.", ll_font );
+	spFontDraw( 2+10*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Max Pl.", ll_font );
 	spFontDraw( 2+13*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Status", ll_font );
 	pos++;
 	spLine(2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, ll_surface->w-2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, 65535);
@@ -63,7 +64,7 @@ void ll_draw(void)
 	spClearTarget(LL_BG);
 	char buffer[256];
 	if (ll_offline)
-		spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (No internet cnnection)", ll_font );
+		spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (No internet connection)", ll_font );
 	else
 		spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby", ll_font );
 	
@@ -86,7 +87,7 @@ void ll_draw(void)
 	}
 	else
 	{
-		spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[a] Join Game     [w] Create Game     [R] or [B] Exit", ll_font );
+		spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[a]Join   [w]Create   [R]/[B]Exit", ll_font );
 		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
 	}
@@ -283,11 +284,30 @@ void ll_reload()
 		ll_level = NULL;
 		ll_block = NULL;
 	}
+	if (ll_first_version && ll_first_version > LL_VERSION)
+		return;
 	ll_offline = connect_to_server();
+	int version;
 	if (ll_offline == 0)
-		ll_offline = server_info() == 0;
+		ll_offline = (version = server_info()) == 0;
 	if (!ll_offline)
-		ll_game_count = get_games(&ll_game_list);
+	{
+		if (ll_first_version == 0)
+		{
+			ll_first_version = version;
+			if (ll_first_version > LL_VERSION)
+			{
+				ll_game_list = NULL;
+				ll_game_count = 0;
+				ll_offline = 1;
+				message(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!",1,NULL);
+			}
+			else
+				ll_game_count = get_games(&ll_game_list);
+		}
+		else
+			ll_game_count = get_games(&ll_game_list);
+	}
 	else
 	{
 		ll_game_list = NULL;

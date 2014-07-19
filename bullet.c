@@ -218,15 +218,6 @@ int updateBullets(int steps)
 							spClearTarget(EXPLOSION_COLOR);
 							spFlip();
 							bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
-							spResetLoop();
-							return 2;
-						}
-						break;
-					case 2:
-						momBullet->impact_counter--;
-						if (momBullet->impact_counter == 0)
-						{
-							dead = 1;
 							for (j = 0; j < player_count; j++)
 							{
 								if (player[j]->health == 0)
@@ -240,10 +231,19 @@ int updateBullets(int steps)
 								{
 									player[j]->health = 0;
 									alive_count--;
-									if (alive_count < 2)
-										return 1;
 								}
 							}
+							spResetLoop();
+							return 2;
+						}
+						break;
+					case 2:
+						momBullet->impact_counter--;
+						if (momBullet->impact_counter == 0)
+						{
+							dead = 1;
+							if (alive_count < 2)
+								return 1;
 						}
 						break;
 				}

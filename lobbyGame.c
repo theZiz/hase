@@ -32,17 +32,17 @@ void lg_draw(void)
 		spBlitSurface(2+(screen->h-3*lg_font->maxheight)/2, 2*lg_font->maxheight+(screen->h-3*lg_font->maxheight)/2, 0,lg_level);
 	int w = screen->w-8-(screen->h-3*lg_font->maxheight);
 	spFontDrawMiddle(screen->w-2-w/2, 1*lg_font->maxheight, 0, "Game Info", lg_font );
-	sprintf(buffer,"Seconds per turn: %i",lg_game->seconds_per_turn);
-	spFontDraw(screen->w-w+2, 2*lg_font->maxheight, 0, buffer, lg_font );
-	sprintf(buffer,"Maximum players: %i",lg_game->max_player);
-	spFontDraw(screen->w-w+2, 3*lg_font->maxheight, 0, buffer, lg_font );
-	spFontDraw(screen->w-w+2, 4*lg_font->maxheight, 0, "Players:", lg_font );
+	sprintf(buffer,"Sec. per turn: %i",lg_game->seconds_per_turn);
+	spFontDraw(screen->w-w, 2*lg_font->maxheight, 0, buffer, lg_font );
+	sprintf(buffer,"Max. players: %i",lg_game->max_player);
+	spFontDraw(screen->w-w, 3*lg_font->maxheight, 0, buffer, lg_font );
+	spFontDraw(screen->w-w, 4*lg_font->maxheight, 0, "Players:", lg_font );
 	int h = screen->h-9*lg_font->maxheight;
 	spRectangle(screen->w-2-w/2, 5*lg_font->maxheight+(screen->h-9*lg_font->maxheight)/2, 0,w,h,LL_FG);
 	if (lg_block)
 		spFontDrawTextBlock(middle,screen->w-w+2, 5*lg_font->maxheight, 0,
 			lg_block,h,0,lg_font);
-	spFontDrawMiddle(screen->w-2-w/2, screen->h-4*lg_font->maxheight, 0, "[w] Add player   [s] Remove player", lg_font );
+	spFontDrawMiddle(screen->w-2-w/2, screen->h-4*lg_font->maxheight, 0, "[w]Add pl.  [s]Rem. pl.", lg_font );
 	if (lg_game->admin_pw == 0)
 	{
 		spFontDrawMiddle(screen->w-2-w/2, screen->h-3*lg_font->maxheight, 0, "The game master will", lg_font );
@@ -50,8 +50,8 @@ void lg_draw(void)
 	}
 	else
 	{
-		spFontDrawMiddle(screen->w-2-w/2, screen->h-3*lg_font->maxheight, 0, "[d] New level     [a] Start game", lg_font );
-		spFontDrawMiddle(screen->w-2-w/2, screen->h-2*lg_font->maxheight, 0, "[q] Add AI     [e] Remove all AI", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, screen->h-3*lg_font->maxheight, 0, "[d]New level  [a]Start", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, screen->h-2*lg_font->maxheight, 0, "[q]Add AI  [e]Rem. all AI", lg_font );
 	}
 	if (lg_reload_now)
 	{
@@ -61,9 +61,9 @@ void lg_draw(void)
 	else
 	{
 		if (lg_game->admin_pw == 0)
-			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R] or [B] Leave game", lg_font );
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave game", lg_font );
 		else
-			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R] or [B] Leave and close game", lg_font );
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave and close game", lg_font );
 		sprintf(buffer,"Next update: %is",(10000-lg_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-lg_font->maxheight, 0, buffer, lg_font );
 	}
@@ -231,6 +231,7 @@ int lg_calc(Uint32 steps)
 		{
 			printf("Running game\n");
 			set_status(lg_game,1);
+			lg_reload();
 			hase(lg_resize,lg_game,lg_player);
 			return 2;
 		}
@@ -347,6 +348,8 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 			spDeleteTextBlock(lg_block);
 		if (res == -1)
 			message(font,resize,"Game was closed...",1,NULL);
+		if (res == 2)
+			hase(lg_resize,lg_game,lg_player);
 		while (lg_player)
 		{
 			pPlayer next = lg_player->next;

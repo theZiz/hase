@@ -29,6 +29,27 @@ int power_pressed = 0;
 int direction_pressed = 0;
 int alive_count;
 
+int player_time;
+int game_pause = 0;
+
+#define INPUT_AXIS_0_LEFT 0
+#define INPUT_AXIS_0_RIGHT 1
+#define INPUT_AXIS_1_LEFT 2
+#define INPUT_AXIS_1_RIGHT 3
+#define INPUT_BUTTON_LEFT 4
+#define INPUT_BUTTON_UP 5
+#define INPUT_BUTTON_RIGHT 6
+#define INPUT_BUTTON_DOWN 7
+#define INPUT_BUTTON_L 8
+#define INPUT_BUTTON_R 9
+#define INPUT_BUTTON_START 10
+#define INPUT_BUTTON_SELECT 11
+int input_states[12];
+char button_states[SP_INPUT_BUTTON_COUNT];
+unsigned char send_data[1536];
+
+void ( *hase_resize )( Uint16 w, Uint16 h );
+
 void loadInformation(char* information)
 {
 	spClearTarget(0);
@@ -151,6 +172,8 @@ void draw(void)
 	int b_alpha = bullet_alpha();
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
+	if (game_pause)
+		message_draw();
 	spFlip();
 }
 
@@ -192,13 +215,140 @@ int min_d_not_me(int x,int y,int me)
 	return min_d;
 }
 
+
+void add_ms_to_data(int ms)
+{
+	if (ms % 2 == 0)
+	{
+		unsigned char send_byte =
+			((input_states[ 0] & 1) << 0) |
+			((input_states[ 1] & 1) << 1) |
+			((input_states[ 2] & 1) << 2) |
+			((input_states[ 3] & 1) << 3) |
+			((input_states[ 4] & 1) << 4) |
+			((input_states[ 5] & 1) << 5) |
+			((input_states[ 6] & 1) << 6) |
+			((input_states[ 7] & 1) << 7) ;
+		send_data[ms*3/2] = send_byte;
+		send_byte =
+			((input_states[ 8] & 1) << 0) |
+			((input_states[ 9] & 1) << 1) |
+			((input_states[10] & 1) << 2) |
+			((input_states[11] & 1) << 3) ;
+		send_data[ms*3/2+1] |= send_byte;
+	}
+	else
+	{
+		unsigned char send_byte =
+			((input_states[ 0] & 1) << 4) |
+			((input_states[ 1] & 1) << 5) |
+			((input_states[ 2] & 1) << 6) |
+			((input_states[ 3] & 1) << 7) ;
+		send_data[ms*3/2] |= send_byte;
+		send_byte =
+			((input_states[ 4] & 1) << 0) |
+			((input_states[ 5] & 1) << 1) |
+			((input_states[ 6] & 1) << 2) |
+			((input_states[ 7] & 1) << 3) |
+			((input_states[ 8] & 1) << 4) |
+			((input_states[ 9] & 1) << 5) |
+			((input_states[10] & 1) << 6) |
+			((input_states[11] & 1) << 7) ;
+		send_data[ms*3/2+1] = send_byte;
+	}
+}
+void set_input()
+{
+	if (player[active_player]->computer)
+		memset(input_states,0,sizeof(int)*12);
+	else
+	if (player[active_player]->local)
+	{
+		if (spGetInput()->axis[0] < 0)
+		{
+			input_states[INPUT_AXIS_0_LEFT] = 1;
+			input_states[INPUT_AXIS_0_RIGHT] = 0;
+		}
+		else
+		if (spGetInput()->axis[0] > 0)
+		{
+			input_states[INPUT_AXIS_0_LEFT] = 0;
+			input_states[INPUT_AXIS_0_RIGHT] = 1;
+		}
+		else
+		{
+			input_states[INPUT_AXIS_0_LEFT] = 0;
+			input_states[INPUT_AXIS_0_RIGHT] = 0;
+		}		
+		if (spGetInput()->axis[1] < 0)
+		{
+			input_states[INPUT_AXIS_1_LEFT] = 1;
+			input_states[INPUT_AXIS_1_RIGHT] = 0;
+		}
+		else
+		if (spGetInput()->axis[1] > 0)
+		{
+			input_states[INPUT_AXIS_1_LEFT] = 0;
+			input_states[INPUT_AXIS_1_RIGHT] = 1;
+		}
+		else
+		{
+			input_states[INPUT_AXIS_1_LEFT] = 0;
+			input_states[INPUT_AXIS_1_RIGHT] = 0;
+		}		
+		if (spGetInput()->button[SP_BUTTON_LEFT] != button_states[SP_BUTTON_LEFT])
+			input_states[INPUT_BUTTON_LEFT] = spGetInput()->button[SP_BUTTON_LEFT];
+		if (spGetInput()->button[SP_BUTTON_UP] != button_states[SP_BUTTON_UP])
+			input_states[INPUT_BUTTON_UP] = spGetInput()->button[SP_BUTTON_UP];
+		if (spGetInput()->button[SP_BUTTON_RIGHT] != button_states[SP_BUTTON_RIGHT])
+			input_states[INPUT_BUTTON_RIGHT] = spGetInput()->button[SP_BUTTON_RIGHT];
+		if (spGetInput()->button[SP_BUTTON_DOWN] != button_states[SP_BUTTON_DOWN])
+			input_states[INPUT_BUTTON_DOWN] = spGetInput()->button[SP_BUTTON_DOWN];
+		if (spGetInput()->button[SP_BUTTON_L] != button_states[SP_BUTTON_L])
+			input_states[INPUT_BUTTON_L] = spGetInput()->button[SP_BUTTON_L];
+		if (spGetInput()->button[SP_BUTTON_R] != button_states[SP_BUTTON_R])
+			input_states[INPUT_BUTTON_R] = spGetInput()->button[SP_BUTTON_R];
+		if (spGetInput()->button[SP_BUTTON_START] != button_states[SP_BUTTON_START])
+			input_states[INPUT_BUTTON_START] = spGetInput()->button[SP_BUTTON_START];
+		if (spGetInput()->button[SP_BUTTON_SELECT] != button_states[SP_BUTTON_SELECT])
+			input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[SP_BUTTON_SELECT];
+		memcpy(button_states,spGetInput()->button,sizeof(char)*SP_INPUT_BUTTON_COUNT);
+		if (!hase_game->local)
+		{
+			add_ms_to_data(player_time % 1000);
+			if (player_time % 1000 == 999)
+				push_game_thread(player[active_player],player_time/1000,send_data);
+		}
+		player_time++;
+	}
+	else //online
+	{
+		if (player_time % 1000 == 0)
+			game_pause = pull_game_thread(player[active_player],player_time/1000,send_data);
+		if (game_pause == 0)
+		{
+			add_ms_to_data(player_time % 1000);
+			player_time++;
+		}
+		else
+		{
+			char buffer[256];
+			sprintf(buffer,"Waiting for online data\nfrom player %s",player[active_player]->name);
+			message(font,hase_resize,buffer,0,NULL);
+		}
+	}
+}
+
 int calc(Uint32 steps)
 {
+	if (game_pause)
+		spSleep(100000);
 	int i;
 	update_player_sprite(steps);
-	int idle = 0;
+	int result = 0;
 	for (i = 0; i < steps; i++)
 	{
+		set_input();
 		if (spGetInput()->button[SP_BUTTON_L])
 		{
 			zoomAdjust -= 32;
@@ -213,6 +363,7 @@ int calc(Uint32 steps)
 				zoomAdjust = maxZoom;
 			zoom = spMul(zoomAdjust,zoomAdjust);
 		}	
+		
 		Sint32 goal = -player[active_player]->rotation;
 		if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
 			rotation -= 2*SP_PI;
@@ -220,14 +371,14 @@ int calc(Uint32 steps)
 			rotation += 2*SP_PI;
 		rotation = rotation*127/128+goal/128;
 		update_player(1);
-		int res;
-		if (res = do_physics(1))
+		int res = do_physics(1);
+		if (res == 1)
+			result = 1;
+		if (res)
 		{
 			i = steps;
 			continue;
 		}
-		if (idle)
-			continue;
 		if (bullet_alpha() > 0)
 			continue;
 		check_next_player();
@@ -235,9 +386,9 @@ int calc(Uint32 steps)
 			countdown --;
 		if (countdown < 0)
 			next_player();
-		if (spGetInput()->button[SP_BUTTON_START])
+		if (input_states[INPUT_BUTTON_START])
 		{
-			spGetInput()->button[SP_BUTTON_START] = 0;
+			input_states[INPUT_BUTTON_START] = 0;
 			help = 1-help;
 		}
 		if (player[active_player]->computer)
@@ -287,11 +438,11 @@ int calc(Uint32 steps)
 		else
 		{
 			//not AI
-			if (spGetInput()->button[SP_BUTTON_LEFT] && player[active_player]->bums && player[active_player]->hops <= 0)
+			if (input_states[INPUT_BUTTON_LEFT] && player[active_player]->bums && player[active_player]->hops <= 0)
 			{
 				jump(1);
 			}
-			if (spGetInput()->axis[0] < 0)
+			if (input_states[INPUT_AXIS_0_LEFT])
 			{
 				if (player[active_player]->direction == 1)
 				{
@@ -304,7 +455,7 @@ int calc(Uint32 steps)
 					jump(0);
 			}
 			else
-			if (spGetInput()->axis[0] > 0)
+			if (input_states[INPUT_AXIS_0_RIGHT])
 			{
 				if (player[active_player]->direction == 0)
 				{
@@ -319,7 +470,7 @@ int calc(Uint32 steps)
 			else
 				direction_hold = 0;
 			
-			if (spGetInput()->axis[1] < 0)
+			if (input_states[INPUT_AXIS_1_LEFT])
 			{
 				direction_pressed += SP_ONE/20;
 				if (direction_pressed >= 128*SP_ONE)
@@ -330,7 +481,7 @@ int calc(Uint32 steps)
 					player[active_player]->w_direction -= direction_pressed >> SP_ACCURACY;
 			}
 			else
-			if (spGetInput()->axis[1] > 0)
+			if (input_states[INPUT_AXIS_1_RIGHT])
 			{
 				direction_pressed += SP_ONE/20;
 				if (direction_pressed >= 128*SP_ONE)
@@ -343,7 +494,7 @@ int calc(Uint32 steps)
 			else
 				direction_pressed = 0;
 
-			if (spGetInput()->button[SP_BUTTON_UP])
+			if (input_states[INPUT_BUTTON_UP])
 			{
 				power_pressed += SP_ONE/100;
 				player[active_player]->w_power += power_pressed >> SP_ACCURACY;
@@ -351,7 +502,7 @@ int calc(Uint32 steps)
 					player[active_player]->w_power = SP_ONE;
 			}
 			else
-			if (spGetInput()->button[SP_BUTTON_DOWN])
+			if (input_states[INPUT_BUTTON_DOWN])
 			{
 				power_pressed += SP_ONE/100;
 				player[active_player]->w_power -= power_pressed >> SP_ACCURACY;
@@ -360,24 +511,25 @@ int calc(Uint32 steps)
 			}
 			else
 				power_pressed = 0;
-			if (spGetInput()->button[SP_BUTTON_RIGHT] && player[active_player]->shoot == 0)
+			if (input_states[INPUT_BUTTON_RIGHT] && player[active_player]->shoot == 0)
 			{
 				//Shoot!
 				player[active_player]->shoot = 1;
-				spGetInput()->button[SP_BUTTON_RIGHT] = 0;
+				input_states[INPUT_BUTTON_RIGHT] = 0;
 				player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
 			}
 		}
 	}
 	if (player[active_player]->shoot == 0)
 		updateTrace();
-	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
+	if (input_states[INPUT_BUTTON_SELECT])
 		return 1;
-	return idle;
+	return result;
 }
 
 int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 {
+	hase_resize = resize;
 	hase_game = game;
 	get_game(game,&hase_player_list);
 	pPlayer p = hase_player_list;
@@ -420,6 +572,11 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	zoom = spMul(zoomAdjust,zoomAdjust);
 	countdown = hase_game->seconds_per_turn*1000;
 	alive_count = player_count;
+	memset(input_states,0,sizeof(int)*12);
+	memset(button_states,0,sizeof(char)*SP_INPUT_BUTTON_COUNT);
+	memset(send_data,0,1536*sizeof(char));
+	player_time = 0;
+	game_pause = 0;
 	
 	spLoop(draw,calc,10,resize,NULL);
 	

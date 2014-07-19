@@ -17,12 +17,14 @@ void message_draw(void)
 {
 	SDL_Surface* screen = spGetWindowSurface();
 	spSetAlphaPattern4x4(196,0);
-	spRectangle(screen->w/2,screen->h/2,0,screen->w,screen->h,0);
+	spRectangle(screen->w/2,screen->h/2,0,screen->w,screen->h,LL_BG);
 	spDeactivatePattern();
 	char buffer[256];
 	if (mg_button_count < 0)
 	{
-		spRectangle(screen->w/2,screen->h/2,0,screen->w/2,screen->h/2,0);
+		spRectangle(screen->w/2,screen->h/2,0,screen->w/2,screen->h/2,LL_BG);
+		int meow = spGetSizeFactor()*4 >> SP_ACCURACY;
+		spRectangleBorder(screen->w/2,screen->h/2,0,screen->w/2+2*meow,screen->h/2+2*meow,meow,meow,LL_FG);
 		spFontDrawMiddle( screen->w/2, 6*screen->h/23, 0, "Create game", mg_font );
 		sprintf(buffer,"Name: %s",mg_name);
 		spFontDrawMiddle( screen->w/2, 8*screen->h/23, 0, buffer, mg_font );
@@ -58,19 +60,21 @@ void message_draw(void)
 			switch (mg_pos)
 			{
 				case 0:
-					spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "Enter your name   [a] Back", mg_font );
+					spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "Enter your name  [a]Back", mg_font );
 					break;
 				default:
-					spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, SP_PAD_NAME": Change value   [a] Back", mg_font );
+					spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, SP_PAD_NAME": Change  [a]Back", mg_font );
 			}
 		}
 		else
-			spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "[a] Select   [w] Create   [d] Cancel", mg_font );
+			spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "[a]Select  [w]Create  [d]Cancel", mg_font );
 		spFlip();
 	}
 	else
 	{
-		spRectangle(screen->w/2,screen->h/2,0,screen->w/2,screen->h/4,0);
+		spRectangle(screen->w/2,screen->h/2,0,screen->w/2,screen->h/4,LL_BG);
+		int meow = spGetSizeFactor()*4 >> SP_ACCURACY;
+		spRectangleBorder(screen->w/2,screen->h/2,0,screen->w/2+2*meow,screen->h/4+2*meow,meow,meow,LL_FG);
 		spFontDrawMiddle( screen->w/2, 3*screen->h/7, 0, mg_caption, mg_font );
 		if (mg_change_char)
 		{
@@ -82,10 +86,10 @@ void message_draw(void)
 		switch (mg_button_count)
 		{
 			case 1:
-				spFontDrawMiddle( screen->w/2, 4*screen->h/7-mg_font->maxheight, 0, "[a] Ok", mg_font );
+				spFontDrawMiddle( screen->w/2, 4*screen->h/7-mg_font->maxheight, 0, "[a]Ok", mg_font );
 				break;
 			case 2:
-				spFontDrawMiddle( screen->w/2, 4*screen->h/7-mg_font->maxheight, 0, "[a] Ok     [d] Cancel", mg_font );
+				spFontDrawMiddle( screen->w/2, 4*screen->h/7-mg_font->maxheight, 0, "[a]Ok     [d]Cancel", mg_font );
 				break;
 		}
 		if (mg_button_count > 0)

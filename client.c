@@ -372,6 +372,7 @@ pPlayer join_game(pGame game,char* name,int ai)
 		pMessage message = NULL;
 		addToMessage(&message,"player_name",name);
 		numToMessage(&message,"game_id",game->id);
+		numToMessage(&message,"computer",ai);
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
 			result = sendMessage(message,NULL,NULL,0,"join_game.php");
@@ -499,6 +500,7 @@ void get_game(pGame game,pPlayer *playerList)
 		pPlayer player = NULL;
 		while (now)
 		{
+			printf("%s : %s\n",now->name,now->content);
 			if (strcmp(now->name,"player_count") == 0)
 				game->player_count = atoi(now->content);
 			if (playerList)

@@ -14,7 +14,7 @@ void resize( Uint16 w, Uint16 h )
 	if ( font )
 		spFontDelete( font );
 	spFontSetShadeColor(0);
-	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 9 * spGetSizeFactor() >> SP_ACCURACY);
+	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 7 * spGetSizeFactor() >> SP_ACCURACY);
 	spFontAdd( font, SP_FONT_GROUP_ASCII"™", 65535 ); //whole ASCII
 	spFontAddBorder(font , 0);
 	spFontAddButton( font, 'R', SP_BUTTON_START_NAME, 65535, spGetRGB(127,127,127) ); //Return == START
@@ -25,13 +25,13 @@ void resize( Uint16 w, Uint16 h )
 	spFontAddButton( font, 'd', SP_BUTTON_RIGHT_NAME, 65535, spGetRGB(127,127,127) ); // d == right button
 	spFontAddButton( font, 'w', SP_BUTTON_UP_NAME, 65535, spGetRGB(127,127,127) ); // w == up button
 	spFontAddButton( font, 's', SP_BUTTON_DOWN_NAME, 65535, spGetRGB(127,127,127) ); // s == down button
-	spFontMulWidth(font,spFloatToFixed(0.85f));
+	spFontMulWidth(font,spFloatToFixed(0.9f));
 }
 
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
-	spSetDefaultWindowSize( 512, 384 );
+	spSetDefaultWindowSize( 640, 480 );
 	spInitCore();
 	spInitNet();
 	screen = spCreateDefaultWindow();
