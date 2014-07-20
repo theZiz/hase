@@ -233,7 +233,7 @@ int lg_calc(Uint32 steps)
 			set_status(lg_game,1);
 			lg_reload();
 			hase(lg_resize,lg_game,lg_player);
-			return 2;
+			return 3;
 		}
 	}
 	if (spGetInput()->button[SP_BUTTON_RIGHT] && lg_game->admin_pw)

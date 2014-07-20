@@ -68,6 +68,7 @@ typedef struct sPlayer
 	int shoot;
 	pBullet bullet;
 	int local;
+	int time;
 } tPlayer;
 
 typedef struct sThreadData

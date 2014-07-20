@@ -500,7 +500,6 @@ void get_game(pGame game,pPlayer *playerList)
 		pPlayer player = NULL;
 		while (now)
 		{
-			printf("%s : %s\n",now->name,now->content);
 			if (strcmp(now->name,"player_count") == 0)
 				game->player_count = atoi(now->content);
 			if (playerList)
@@ -787,11 +786,13 @@ int pull_thread_function(void* data)
 				player->input_data = next_data;
 			player->last_input_data_write = next_data;
 			SDL_mutexV(player->input_mutex);
+			next_data = (pThreadData)malloc(sizeof(tThreadData));
 			spSleep(50000); //50ms
 		}
 		else
 			spSleep(500000); //500ms
 	}
+	free(next_data);
 	return 0;
 }
 

@@ -183,6 +183,75 @@ void update_player_sprite(int steps)
 
 int next_player_go = 0;
 
+void next_player()
+{
+	next_player_go = 1;
+}
+
+void real_next_player()
+{
+	memset(send_data,0,1536*sizeof(char));
+	if (!hase_game->local && active_player >= 0)
+	{
+		if (!player[active_player]->computer)
+		{
+			if (player[active_player]->local)
+			{
+				printf("Ending Push Thread for player %s (s: %i)\n",player[active_player]->name,player[active_player]->time/1000);
+				push_game_thread(player[active_player],player[active_player]->time/1000,send_data);
+				memset(send_data,0,sizeof(char)*1536);
+				end_push_thread();
+			}
+			else
+			{
+				printf("Ending Pull Thread for player %s\n",player[active_player]->name);
+				end_pull_thread(player[active_player]);
+			}
+		}
+		printf("Setting player time from %i to %i\n",player[active_player]->time,(player[active_player]->time+999)%1000);
+		player[active_player]->time = (player[active_player]->time+999)%1000;
+	}
+	ai_shoot_tries = 0;
+	lastAIDistance = 100000000;
+	do
+	{
+		active_player = (active_player+1)%player_count;
+	}
+	while (player[active_player]->health == 0);
+	player[active_player]->shoot = 0;
+	player[active_player]->bullet = NULL;
+	//if (active_player == 1)
+	//	player[active_player]->direction = rand()&1;
+	countdown = hase_game->seconds_per_turn*1000;
+	player[active_player]->hops = 0;
+	player[active_player]->high_hops = 0;
+	if (!hase_game->local)
+	{
+		if (!player[active_player]->computer)
+		{
+			if (player[active_player]->local)
+			{
+				printf("Starting Push Thread for player %s\n",player[active_player]->name);
+				start_push_thread();
+			}
+			else
+			{
+				printf("Starting Pull Thread for player %s\n",player[active_player]->name);
+				start_pull_thread(player[active_player]);
+			}
+		}
+	}
+}
+
+void check_next_player()
+{
+	if (next_player_go && bullet_alpha() == 0)
+	{
+		next_player_go = 0;
+		real_next_player();
+	}
+}
+
 void init_player(pPlayer player_list,int pc)
 {
 	next_player_go = 0;
@@ -197,6 +266,7 @@ void init_player(pPlayer player_list,int pc)
 	int i;
 	for (i = 0; i < player_count; i ++)
 	{
+		player[i]->time = 0;
 		player[i]->direction = 0;
 		player[i]->w_direction = SP_ONE/2;
 		player[i]->w_power = SP_ONE/2;
@@ -232,58 +302,7 @@ void init_player(pPlayer player_list,int pc)
 	posX = player[active_player]->x;
 	posY = player[active_player]->y;
 	ai_shoot_tries = 0;
+	active_player--;
+	real_next_player();
 }
 
-void next_player()
-{
-	next_player_go = 1;
-}
-
-void real_next_player()
-{
-	player_time = 0;
-	memset(send_data,0,1536*sizeof(char));
-	if (!hase_game->local)
-	{
-		if (!player[active_player]->computer)
-		{
-			if (player[active_player]->local)
-				end_push_thread();
-			else
-				end_pull_thread(player[active_player]);
-		}
-	}
-	ai_shoot_tries = 0;
-	lastAIDistance = 100000000;
-	do
-	{
-		active_player = (active_player+1)%player_count;
-	}
-	while (player[active_player]->health == 0);
-	player[active_player]->shoot = 0;
-	player[active_player]->bullet = NULL;
-	//if (active_player == 1)
-	//	player[active_player]->direction = rand()&1;
-	countdown = hase_game->seconds_per_turn*1000;
-	player[active_player]->hops = 0;
-	player[active_player]->high_hops = 0;
-	if (!hase_game->local)
-	{
-		if (!player[active_player]->computer)
-		{
-			if (player[active_player]->local)
-				start_push_thread();
-			else
-				start_pull_thread(player[active_player]);
-		}
-	}
-}
-
-void check_next_player()
-{
-	if (next_player_go && bullet_alpha() == 0)
-	{
-		next_player_go = 0;
-		real_next_player();
-	}
-}

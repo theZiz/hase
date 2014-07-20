@@ -29,7 +29,6 @@ int power_pressed = 0;
 int direction_pressed = 0;
 int alive_count;
 
-int player_time;
 int game_pause = 0;
 
 #define INPUT_AXIS_0_LEFT 0
@@ -257,6 +256,45 @@ void add_ms_to_data(int ms)
 		send_data[ms*3/2+1] = send_byte;
 	}
 }
+
+void get_ms_from_data(int ms)
+{
+	if (ms % 2 == 0)
+	{
+		unsigned char send_byte = send_data[ms*3/2];
+		input_states[ 0] = (send_byte >> 0) & 1;
+		input_states[ 1] = (send_byte >> 1) & 1;
+		input_states[ 2] = (send_byte >> 2) & 1;
+		input_states[ 3] = (send_byte >> 3) & 1;
+		input_states[ 4] = (send_byte >> 4) & 1;
+		input_states[ 5] = (send_byte >> 5) & 1;
+		input_states[ 6] = (send_byte >> 6) & 1;
+		input_states[ 7] = (send_byte >> 7) & 1;
+		send_byte = send_data[ms*3/2+1];
+		input_states[ 8] = (send_byte >> 0) & 1;
+		input_states[ 9] = (send_byte >> 1) & 1;
+		input_states[10] = (send_byte >> 2) & 1;
+		input_states[11] = (send_byte >> 3) & 1;
+	}
+	else
+	{
+		unsigned char send_byte = send_data[ms*3/2];
+		input_states[ 0] = (send_byte >> 4) & 1;
+		input_states[ 1] = (send_byte >> 5) & 1;
+		input_states[ 2] = (send_byte >> 6) & 1;
+		input_states[ 3] = (send_byte >> 7) & 1;
+		send_byte = send_data[ms*3/2+1];
+		input_states[ 4] = (send_byte >> 0) & 1;
+		input_states[ 5] = (send_byte >> 1) & 1;
+		input_states[ 6] = (send_byte >> 2) & 1;
+		input_states[ 7] = (send_byte >> 3) & 1;
+		input_states[ 8] = (send_byte >> 4) & 1;
+		input_states[ 9] = (send_byte >> 5) & 1;
+		input_states[10] = (send_byte >> 6) & 1;
+		input_states[11] = (send_byte >> 7) & 1;
+	}
+}
+
 void set_input()
 {
 	if (player[active_player]->computer)
@@ -315,54 +353,69 @@ void set_input()
 		memcpy(button_states,spGetInput()->button,sizeof(char)*SP_INPUT_BUTTON_COUNT);
 		if (!hase_game->local)
 		{
-			add_ms_to_data(player_time % 1000);
-			if (player_time % 1000 == 999)
-				push_game_thread(player[active_player],player_time/1000,send_data);
+			add_ms_to_data(player[active_player]->time % 1000);
+			if (player[active_player]->time % 1000 == 999)
+			{
+				printf("Pushing Second %i of player %s...\n",player[active_player]->time/1000,player[active_player]->name);
+				push_game_thread(player[active_player],player[active_player]->time/1000,send_data);
+				printf("Done\n");
+				memset(send_data,0,sizeof(char)*1536);
+			}
 		}
-		player_time++;
+		player[active_player]->time++;
 	}
 	else //online
 	{
-		if (player_time % 1000 == 0)
-			game_pause = pull_game_thread(player[active_player],player_time/1000,send_data);
+		if (player[active_player]->time % 1000 == 0)
+		{
+			printf("Pulling Second %i of player %s...\n",player[active_player]->time/1000,player[active_player]->name);
+			game_pause = pull_game_thread(player[active_player],player[active_player]->time/1000,send_data)*1000;
+			printf("Done with status: %i\n",game_pause);
+			if (game_pause)
+			{
+				char buffer[256];
+				sprintf(buffer,"Waiting for turn data\nfrom player %s...",player[active_player]->name);
+				message(font,hase_resize,buffer,0,NULL);
+			}	
+		}
 		if (game_pause == 0)
 		{
-			add_ms_to_data(player_time % 1000);
-			player_time++;
-		}
-		else
-		{
-			char buffer[256];
-			sprintf(buffer,"Waiting for online data\nfrom player %s",player[active_player]->name);
-			message(font,hase_resize,buffer,0,NULL);
+			get_ms_from_data(player[active_player]->time % 1000);
+			player[active_player]->time++;
 		}
 	}
 }
 
 int calc(Uint32 steps)
 {
-	if (game_pause)
-		spSleep(100000);
+	if (spGetInput()->button[SP_BUTTON_L])
+	{
+		zoomAdjust -= steps*32;
+		if (zoomAdjust < minZoom)
+			zoomAdjust = minZoom;
+		zoom = spMul(zoomAdjust,zoomAdjust);
+	}
+	if (spGetInput()->button[SP_BUTTON_R])
+	{
+		zoomAdjust += steps*32;
+		if (zoomAdjust > maxZoom)
+			zoomAdjust = maxZoom;
+		zoom = spMul(zoomAdjust,zoomAdjust);
+	}	
 	int i;
 	update_player_sprite(steps);
 	int result = 0;
+	if (game_pause)
+		spSleep(200000);
 	for (i = 0; i < steps; i++)
 	{
+		if (game_pause > 0)
+			game_pause--;
+		if (game_pause)
+			continue;
 		set_input();
-		if (spGetInput()->button[SP_BUTTON_L])
-		{
-			zoomAdjust -= 32;
-			if (zoomAdjust < minZoom)
-				zoomAdjust = minZoom;
-			zoom = spMul(zoomAdjust,zoomAdjust);
-		}
-		if (spGetInput()->button[SP_BUTTON_R])
-		{
-			zoomAdjust += 32;
-			if (zoomAdjust > maxZoom)
-				zoomAdjust = maxZoom;
-			zoom = spMul(zoomAdjust,zoomAdjust);
-		}	
+		if (game_pause)
+			continue;
 		
 		Sint32 goal = -player[active_player]->rotation;
 		if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
@@ -542,6 +595,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 			if (p->id == q->id)
 			{
 				p->local = 1;
+				p->pw = q->pw;
 				break;
 			}	
 			q = q->next;
@@ -575,7 +629,6 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	memset(input_states,0,sizeof(int)*12);
 	memset(button_states,0,sizeof(char)*SP_INPUT_BUTTON_COUNT);
 	memset(send_data,0,1536*sizeof(char));
-	player_time = 0;
 	game_pause = 0;
 	
 	spLoop(draw,calc,10,resize,NULL);
