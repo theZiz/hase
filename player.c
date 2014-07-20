@@ -188,9 +188,8 @@ void next_player()
 	next_player_go = 1;
 }
 
-void real_next_player()
+void stop_thread()
 {
-	memset(send_data,0,1536*sizeof(char));
 	if (!hase_game->local && active_player >= 0)
 	{
 		if (!player[active_player]->computer)
@@ -208,9 +207,35 @@ void real_next_player()
 				end_pull_thread(player[active_player]);
 			}
 		}
-		printf("Setting player time from %i to %i\n",player[active_player]->time,(player[active_player]->time+999)%1000);
-		player[active_player]->time = (player[active_player]->time+999)%1000;
+		printf("Setting player time from %i to %i\n",player[active_player]->time,((player[active_player]->time+999)/1000)*1000);
+		player[active_player]->time = ((player[active_player]->time+999)/1000)*1000;
+	}	
+}
+
+void start_thread()
+{
+	if (!hase_game->local)
+	{
+		if (!player[active_player]->computer)
+		{
+			memset(send_data,0,1536*sizeof(char));
+			if (player[active_player]->local)
+			{
+				printf("Starting Push Thread for player %s\n",player[active_player]->name);
+				start_push_thread();
+			}
+			else
+			{
+				printf("Starting Pull Thread for player %s\n",player[active_player]->name);
+				start_pull_thread(player[active_player]);
+			}
+		}
 	}
+}
+
+void real_next_player()
+{
+	stop_thread();
 	ai_shoot_tries = 0;
 	lastAIDistance = 100000000;
 	do
@@ -225,22 +250,8 @@ void real_next_player()
 	countdown = hase_game->seconds_per_turn*1000;
 	player[active_player]->hops = 0;
 	player[active_player]->high_hops = 0;
-	if (!hase_game->local)
-	{
-		if (!player[active_player]->computer)
-		{
-			if (player[active_player]->local)
-			{
-				printf("Starting Push Thread for player %s\n",player[active_player]->name);
-				start_push_thread();
-			}
-			else
-			{
-				printf("Starting Pull Thread for player %s\n",player[active_player]->name);
-				start_pull_thread(player[active_player]);
-			}
-		}
-	}
+	memset(input_states,0,sizeof(int)*12);
+	start_thread();
 }
 
 void check_next_player()
@@ -302,7 +313,6 @@ void init_player(pPlayer player_list,int pc)
 	posX = player[active_player]->x;
 	posY = player[active_player]->y;
 	ai_shoot_tries = 0;
-	active_player--;
-	real_next_player();
+	start_thread();
 }
 
