@@ -21,7 +21,9 @@ while ($row = mysql_fetch_array( $result ))
 {
 	$chat_name = $row['chat_name'];
 	$chat_message = $row['chat_message'];
+	$chat_time = $row['chat_time'];
 	echo "chat_message: $chat_message", PHP_EOL;
+	echo "chat_time: $chat_time", PHP_EOL;
 	echo "chat_name: $chat_name", PHP_EOL;
 	if ($chat_get_time < $row['chat_time'])
 		$chat_get_time = $row['chat_time'];

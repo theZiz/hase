@@ -892,7 +892,9 @@ void get_chat(pPlayer player)
 		if (strcmp(now->name,"chat_name") == 0)
 		{
 			pChatMessage new_chat = (pChatMessage)malloc(sizeof(tChatMessage));
-			new_chat->birthtime = SDL_GetTicks();
+			new_chat->birthtime = time(NULL);
+			new_chat->message[0] = 0;
+			new_chat->realtime = 0;
 			new_chat->next = new_list;
 			if (end_list == NULL)
 				end_list = new_chat;
@@ -901,6 +903,8 @@ void get_chat(pPlayer player)
 		}
 		if (strcmp(now->name,"chat_message") == 0)
 			sprintf(new_list->message,"%s",now->content);
+		if (strcmp(now->name,"chat_time") == 0)
+			new_list->realtime = atoi(now->content);
 		now = now->next;
 	}
 	deleteMessage(&result);

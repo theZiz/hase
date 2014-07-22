@@ -1,5 +1,6 @@
 #include "lobbyGame.h"
 #include "level.h"
+#include <time.h> 
 
 #define LG_WAIT 5000
 
@@ -15,23 +16,31 @@ pPlayer lg_player_list = NULL;
 pPlayer lg_player;
 pPlayer lg_last_player;
 spTextBlockPointer lg_block = NULL;
+spTextBlockPointer lg_chat_block = NULL;
 char lg_level_string[512];
+pChatMessage lg_last_chat = NULL;
+Sint32 lg_scroll;
+
+#define CHAT_LINES 4
 
 void lg_draw(void)
 {
 	SDL_Surface* screen = spGetWindowSurface();
 	spClearTarget(LL_BG);
 	char buffer[256];
+	//Heading
 	if (lg_game->local)
 		sprintf(buffer, "%s (Local)",lg_game->name);
 	else
 		sprintf(buffer, "%s (Internet)",lg_game->name);
 	spFontDrawMiddle( screen->w/2, 0*lg_font->maxheight, 0, buffer, lg_font );
-	int l_w = screen->h-7*lg_font->maxheight;
+	int l_w = screen->h-(4+CHAT_LINES)*lg_font->maxheight;
+	//Preview
 	spFontDrawMiddle(2+l_w/2, 1*lg_font->maxheight, 0, "Preview", lg_font );
 	spRectangle  (2+l_w/2, 2*lg_font->maxheight+l_w/2, 0,l_w,l_w,LL_FG);
 	if (lg_level)
 		spBlitSurface(2+l_w/2, 2*lg_font->maxheight+l_w/2, 0,lg_level);
+	//Informations
 	int w = screen->w-8-l_w;
 	spFontDrawMiddle(screen->w-2-w/2, 1*lg_font->maxheight, 0, "Game Info", lg_font );
 	sprintf(buffer,"Sec. per turn: %i",lg_game->seconds_per_turn);
@@ -39,11 +48,12 @@ void lg_draw(void)
 	sprintf(buffer,"Max. players: %i",lg_game->max_player);
 	spFontDraw(screen->w-w, 3*lg_font->maxheight, 0, buffer, lg_font );
 	spFontDraw(screen->w-w, 4*lg_font->maxheight, 0, "Players:", lg_font );
+	//player block
 	int h = l_w-6*lg_font->maxheight;
 	spRectangle(screen->w-4-w/2, 5*lg_font->maxheight+h/2-1, 0,w,h,LL_FG);
 	if (lg_block)
-		spFontDrawTextBlock(middle,screen->w-w-4, 5*lg_font->maxheight-1, 0,
-			lg_block,h,0,lg_font);
+		spFontDrawTextBlock(middle,screen->w-w-4, 5*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
+	//Instructions on the right
 	spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[w]Add pl.  [s]Rem. pl.", lg_font );
 	if (lg_game->admin_pw == 0)
 	{
@@ -55,6 +65,11 @@ void lg_draw(void)
 		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[d]New level  [a]Start", lg_font );
 		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[q]Add AI  [e]Rem. all AI", lg_font );
 	}
+	//Chat
+	spRectangle(screen->w/2, l_w+(4+CHAT_LINES)*lg_font->maxheight/2+4, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);
+	if (lg_chat_block)
+		spFontDrawTextBlock(left,4, l_w+2*lg_font->maxheight+4, 0,lg_chat_block,CHAT_LINES*lg_font->maxheight,lg_scroll,lg_font);
+	//Footline
 	if (lg_reload_now)
 	{
 		spFontDrawMiddle( screen->w/2, screen->h-lg_font->maxheight, 0, "Reloading list...", lg_font );
@@ -146,9 +161,96 @@ char* lg_get_combi_name(char* buffer)
 }
 
 char lg_new_name[33] = "";
+char lg_chat_text[65536];
 
 int lg_calc(Uint32 steps)
 {
+	if (lg_chat_block)
+	{
+		if (lg_chat_block->line_count <= CHAT_LINES)
+			lg_scroll = 0;
+		else
+		{
+			if (spGetInput()->axis[1] > 0)
+			{
+				spGetInput()->axis[1] = 0;
+				lg_scroll+=SP_ONE/(lg_chat_block->line_count-CHAT_LINES)+1;
+				if (lg_scroll > SP_ONE)
+					lg_scroll = SP_ONE;
+			}
+			if (spGetInput()->axis[1] < 0)
+			{
+				spGetInput()->axis[1] = 0;
+				lg_scroll-=SP_ONE/(lg_chat_block->line_count-CHAT_LINES)+1;
+				if (lg_scroll < 0)
+					lg_scroll = 0;
+			}
+		}
+	}
+	if (lg_last_chat != lg_game->chat)
+	{
+		pChatMessage now = lg_game->chat;
+		char temp1[65536] = "";
+		char temp2[65536] = "";
+		char* t1 = temp1;
+		char* t2 = temp2;
+		while (now != lg_last_chat)
+		{
+			char t[32];
+			time_t birthtime = now->realtime;
+			strftime(t,32,"%T",localtime(&birthtime));
+			printf("%s: %s\n",now->name,now->message);
+			if (now->next == lg_last_chat)
+				sprintf(t1,"%s(%s)%s: %s",t2,t,now->name,now->message);
+			else
+				sprintf(t1,"%s(%s)%s: %s\n",t2,t,now->name,now->message);
+			char* tt = t1;
+			t1 = t2;
+			t2 = tt;
+			now = now->next;
+		}
+		if (lg_chat_text[0] == 0)
+			t1 = t2;
+		else
+			sprintf(t1,"%s\n%s",lg_chat_text,t2);
+		sprintf(lg_chat_text,"%s",t1);
+		if (lg_chat_block)
+			spDeleteTextBlock(lg_chat_block);
+		lg_chat_block = spCreateTextBlock( lg_chat_text, spGetWindowSurface()->w-4, lg_font);
+		lg_last_chat = lg_game->chat;
+		if (lg_chat_block->line_count > CHAT_LINES)
+			lg_scroll = SP_ONE;
+	}
+	if (spGetInput()->button[SP_BUTTON_START])
+	{
+		spGetInput()->button[SP_BUTTON_START] = 0;
+		char m[256] = "";
+		spPollKeyboardInput(m,256,SP_BUTTON_UP_MASK);
+		if (message(lg_font,lg_resize,"Enter Message:",2,m) == 1)
+		{
+			if (lg_player->next)
+			{
+				char temp1[256] = "";
+				char temp2[256] = "";
+				char* t1 = temp1;
+				char* t2 = temp2;
+				sprintf(t2,"%s",lg_player->name);
+				pPlayer p = lg_player->next;
+				while (p)
+				{
+					sprintf(t1,"%s, %s",t2,p->name);
+					char* tt = t1;
+					t1 = t2;
+					t2 = tt;
+					p = p->next;	
+				}
+				send_chat(lg_game,t2,m);
+			}
+			else
+				send_chat(lg_game,lg_player->name,m);
+		}
+		spStopKeyboardInput();
+	}
 	if (spGetInput()->button[SP_BUTTON_SELECT])
 	{
 		spGetInput()->button[SP_BUTTON_SELECT] = 0;
@@ -346,7 +448,12 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		lg_level = NULL;
 		lg_level_string[0] = 0;
 		lg_block = NULL;
+		lg_chat_block = NULL;
+		lg_last_chat = NULL;
+		lg_chat_text[0] = 0;
+		start_chat_listener(lg_player);
 		int res = spLoop(lg_draw,lg_calc,10,resize,NULL);
+		stop_chat_listener(lg_player);
 		if (lg_block)
 			spDeleteTextBlock(lg_block);
 		if (res == -1)

@@ -20,6 +20,7 @@ typedef struct sChatMessage
 	char name[256];
 	char message[256];
 	int birthtime;
+	int realtime;
 	pChatMessage next;
 } tChatMessage;
 
@@ -29,7 +30,7 @@ typedef struct sGame *pGame;
 typedef struct sGame
 {
 	int id;
-	char name[32];
+	char name[33];
 	char level_string[512];
 	int max_player;
 	int player_count;
@@ -52,7 +53,7 @@ typedef struct sBullet *pBullet;
 typedef struct sPlayer
 {
 	int id;
-	char name[32];
+	char name[33];
 	int pw;
 	int position_in_game;
 	pGame game;

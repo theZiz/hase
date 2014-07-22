@@ -72,9 +72,12 @@ void message_draw(void)
 	}
 	else
 	{
-		spRectangle(screen->w/2,screen->h/2,0,screen->w/2,screen->h/4,LL_BG);
+		int width = screen->w/2;
 		int meow = spGetSizeFactor()*4 >> SP_ACCURACY;
-		spRectangleBorder(screen->w/2,screen->h/2,0,screen->w/2+2*meow,screen->h/4+2*meow,meow,meow,LL_FG);
+		if (mg_change_char)
+			width = spMax(width,spFontWidth(mg_change_char, mg_font)+2*meow);
+		spRectangle(screen->w/2,screen->h/2,0,width,screen->h/4,LL_BG);
+		spRectangleBorder(screen->w/2,screen->h/2,0,width+2*meow,screen->h/4+2*meow,meow,meow,LL_FG);
 		spFontDrawMiddle( screen->w/2, 3*screen->h/7, 0, mg_caption, mg_font );
 		if (mg_change_char)
 		{
