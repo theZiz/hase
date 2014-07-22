@@ -156,6 +156,10 @@ void draw(void)
 	if (player[active_player]->shoot == 0)
 		drawTrace();
 	
+	//Error message
+	if (game_pause)
+		message_draw();	
+	
 	//Help
 	draw_help();
 	
@@ -166,13 +170,15 @@ void draw(void)
 	spFontDraw( 2, 2, 0, buffer, font );	
 	sprintf(buffer,"%i / %i\n",alive_count,hase_game->player_count);	
 	spFontDrawRight( screen->w-2, 2, 0, buffer, font );
-	sprintf(buffer,"%i seconds left",countdown / 1000);
+	if (player[active_player]->shoot == 0)
+		sprintf(buffer,"%i seconds left",countdown / 1000);
+	else
+		sprintf(buffer,"Free time until bullet strikes!");
 	spFontDrawMiddle( screen->w >> 1, 2, 0, buffer, font );
 	int b_alpha = bullet_alpha();
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
-	if (game_pause)
-		message_draw();
+	
 	spFlip();
 }
 
@@ -426,7 +432,7 @@ int calc(Uint32 steps)
 		update_player(1);
 		int res = do_physics(1);
 		if (res == 1)
-			result = 1;
+			result = 2;
 		if (res)
 		{
 			i = steps;
@@ -631,9 +637,23 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	memset(send_data,0,1536*sizeof(char));
 	game_pause = 0;
 	
-	spLoop(draw,calc,10,resize,NULL);
-	
+	int result = spLoop(draw,calc,10,resize,NULL);
 	stop_thread();
+	if (result)
+	{
+		int i;
+		for (i = 0; i < player_count; i ++)
+			if (player[i]->health)
+				break;
+		if (i < player_count)
+		{
+			char buffer[256];
+			sprintf(buffer,"%s won!\n",player[i]->name);
+			message(font,hase_resize,buffer,1,NULL);
+		}
+		else
+			message(font,hase_resize,"Nobody won, but why?",1,NULL);
+	}
 	deleteAllBullets();
 	free_gravity();
 	int i;
