@@ -14,6 +14,15 @@ typedef struct sMessage
 	pMessage next;
 } tMessage;
 
+typedef struct sChatMessage *pChatMessage;
+typedef struct sChatMessage
+{
+	char name[256];
+	char message[256];
+	int birthtime;
+	pChatMessage next;
+} tChatMessage;
+
 typedef struct sPlayer *pPlayer;
 
 typedef struct sGame *pGame;
@@ -32,10 +41,12 @@ typedef struct sGame
 	int local;
 	pPlayer local_player;
 	int local_counter;
+	pChatMessage chat;
+	SDL_Thread* chat_thread;
+	int chat_message;
 } tGame;
 
 typedef struct sThreadData *pThreadData;
-
 typedef struct sBullet *pBullet;
 
 typedef struct sPlayer
@@ -102,5 +113,10 @@ void start_pull_thread(pPlayer player);
 void end_pull_thread(pPlayer player);
 
 int connect_to_server();
+
+int send_chat(pGame game,char* name,char* chat_message);
+void get_chat(pPlayer player);
+void start_chat_listener(pPlayer player);
+void stop_chat_listener(pPlayer player);
 
 #endif

@@ -1,6 +1,8 @@
 #include "lobbyGame.h"
 #include "level.h"
 
+#define LG_WAIT 5000
+
 spFontPointer lg_font;
 void ( *lg_resize )( Uint16 w, Uint16 h );
 int lg_counter;
@@ -25,33 +27,33 @@ void lg_draw(void)
 	else
 		sprintf(buffer, "%s (Internet)",lg_game->name);
 	spFontDrawMiddle( screen->w/2, 0*lg_font->maxheight, 0, buffer, lg_font );
-	
-	spFontDrawMiddle(2+(screen->h-3*lg_font->maxheight)/2, 1*lg_font->maxheight, 0, "Preview", lg_font );
-	spRectangle  (2+(screen->h-3*lg_font->maxheight)/2, 2*lg_font->maxheight+(screen->h-3*lg_font->maxheight)/2, 0,screen->h-3*lg_font->maxheight,screen->h-3*lg_font->maxheight,LL_FG);
+	int l_w = screen->h-7*lg_font->maxheight;
+	spFontDrawMiddle(2+l_w/2, 1*lg_font->maxheight, 0, "Preview", lg_font );
+	spRectangle  (2+l_w/2, 2*lg_font->maxheight+l_w/2, 0,l_w,l_w,LL_FG);
 	if (lg_level)
-		spBlitSurface(2+(screen->h-3*lg_font->maxheight)/2, 2*lg_font->maxheight+(screen->h-3*lg_font->maxheight)/2, 0,lg_level);
-	int w = screen->w-8-(screen->h-3*lg_font->maxheight);
+		spBlitSurface(2+l_w/2, 2*lg_font->maxheight+l_w/2, 0,lg_level);
+	int w = screen->w-8-l_w;
 	spFontDrawMiddle(screen->w-2-w/2, 1*lg_font->maxheight, 0, "Game Info", lg_font );
 	sprintf(buffer,"Sec. per turn: %i",lg_game->seconds_per_turn);
 	spFontDraw(screen->w-w, 2*lg_font->maxheight, 0, buffer, lg_font );
 	sprintf(buffer,"Max. players: %i",lg_game->max_player);
 	spFontDraw(screen->w-w, 3*lg_font->maxheight, 0, buffer, lg_font );
 	spFontDraw(screen->w-w, 4*lg_font->maxheight, 0, "Players:", lg_font );
-	int h = screen->h-9*lg_font->maxheight;
-	spRectangle(screen->w-2-w/2, 5*lg_font->maxheight+(screen->h-9*lg_font->maxheight)/2, 0,w,h,LL_FG);
+	int h = l_w-6*lg_font->maxheight;
+	spRectangle(screen->w-4-w/2, 5*lg_font->maxheight+h/2-1, 0,w,h,LL_FG);
 	if (lg_block)
-		spFontDrawTextBlock(middle,screen->w-w+2, 5*lg_font->maxheight, 0,
+		spFontDrawTextBlock(middle,screen->w-w-4, 5*lg_font->maxheight-1, 0,
 			lg_block,h,0,lg_font);
-	spFontDrawMiddle(screen->w-2-w/2, screen->h-4*lg_font->maxheight, 0, "[w]Add pl.  [s]Rem. pl.", lg_font );
+	spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[w]Add pl.  [s]Rem. pl.", lg_font );
 	if (lg_game->admin_pw == 0)
 	{
-		spFontDrawMiddle(screen->w-2-w/2, screen->h-3*lg_font->maxheight, 0, "The game master will", lg_font );
-		spFontDrawMiddle(screen->w-2-w/2, screen->h-2*lg_font->maxheight, 0, "start the game soon™.", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "The game master will", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "start the game soon™.", lg_font );
 	}
 	else
 	{
-		spFontDrawMiddle(screen->w-2-w/2, screen->h-3*lg_font->maxheight, 0, "[d]New level  [a]Start", lg_font );
-		spFontDrawMiddle(screen->w-2-w/2, screen->h-2*lg_font->maxheight, 0, "[q]Add AI  [e]Rem. all AI", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[d]New level  [a]Start", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[q]Add AI  [e]Rem. all AI", lg_font );
 	}
 	if (lg_reload_now)
 	{
@@ -61,10 +63,10 @@ void lg_draw(void)
 	else
 	{
 		if (lg_game->admin_pw == 0)
-			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave game", lg_font );
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave game", lg_font );
 		else
-			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave and close game", lg_font );
-		sprintf(buffer,"Next update: %is",(10000-lg_counter)/1000);
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave and close game", lg_font );
+		sprintf(buffer,"Next update: %is",(LG_WAIT-lg_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-lg_font->maxheight, 0, buffer, lg_font );
 	}
 	spFlip();
@@ -171,7 +173,7 @@ int lg_calc(Uint32 steps)
 				else
 				{
 					lg_last_player = lg_last_player->next;
-					lg_counter = 10000;
+					lg_counter = LG_WAIT;
 				}
 			}
 			else
@@ -207,7 +209,7 @@ int lg_calc(Uint32 steps)
 				{
 					pPlayer n = p->next;
 					leave_game(p);
-					lg_counter = 10000;
+					lg_counter = LG_WAIT;
 					if (l)
 						l->next = n;
 					else
@@ -254,7 +256,7 @@ int lg_calc(Uint32 steps)
 			leave_game(lg_ai_list);
 			lg_ai_list = next;
 		}
-		lg_counter = 10000;
+		lg_counter = LG_WAIT;
 	}
 	if (spGetInput()->button[SP_BUTTON_L] && lg_game->admin_pw)
 	{
@@ -265,7 +267,7 @@ int lg_calc(Uint32 steps)
 		{
 			ai->next = lg_ai_list;
 			lg_ai_list = ai;
-			lg_counter = 10000;
+			lg_counter = LG_WAIT;
 		}
 	}
 	if (lg_reload_now == 2)
@@ -286,7 +288,7 @@ int lg_calc(Uint32 steps)
 	{
 		lg_counter++;
 	}
-	if (lg_counter >= 10000)
+	if (lg_counter >= LG_WAIT)
 		lg_reload_now = 1;
 	return 0;
 }
@@ -305,11 +307,12 @@ int lg_reload()
 	}
 	if (lg_block)
 		spDeleteTextBlock(lg_block);
-	lg_block = spCreateTextBlock(temp,spGetWindowSurface()->w-8-(spGetWindowSurface()->h-3*lg_font->maxheight),lg_font);
+	int l_w = spGetWindowSurface()->h-7*lg_font->maxheight;
+	lg_block = spCreateTextBlock(temp,spGetWindowSurface()->w-8-l_w,lg_font);
 	if (lg_level == NULL || strcmp(lg_level_string,lg_game->level_string))
 	{
 		spDeleteSurface(lg_level);
-		lg_level = create_level(lg_game->level_string,spGetWindowSurface()->h-3*lg_font->maxheight,spGetWindowSurface()->h-3*lg_font->maxheight,LL_BG);
+		lg_level = create_level(lg_game->level_string,l_w,l_w,LL_BG);
 		sprintf(lg_level_string,"%s",lg_game->level_string);
 	}
 
@@ -320,7 +323,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 {
 	lg_game = game;
 	lg_font = font;
-	lg_counter = 10000; //instead reload
+	lg_counter = LG_WAIT; //instead reload
 	lg_local = 0;
 	lg_reload_now = 0;
 	lg_ai_list = NULL;

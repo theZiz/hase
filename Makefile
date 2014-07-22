@@ -58,7 +58,7 @@ lobbyGame.o: lobbyGame.c lobbyGame.h lobbyList.h
 message.o: message.c message.h lobbyList.h
 	$(CPP) $(CFLAGS) -c message.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
-hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h makeBuildDir
+hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h
 	$(CPP) $(CFLAGS) -c hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
 level.o: level.c level.h

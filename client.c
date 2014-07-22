@@ -226,6 +226,9 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 			return NULL;
 	}
 	pGame game = (pGame)malloc(sizeof(tGame));
+	game->chat_message = 0;
+	game->chat_thread = NULL;
+	game->chat = NULL;
 	game->id = -1;
 	sprintf(game->name,"%s",game_name);
 	sprintf(game->level_string,"%s",level_string);
@@ -314,6 +317,9 @@ int get_games(pGame *gameList)
 				*gameList = (pGame)malloc(sizeof(tGame));
 				game = *gameList;
 			}
+			game->chat_message = 0;
+			game->chat_thread = NULL;
+			game->chat = NULL;
 			game->id = atoi(now->content);
 			game->name[0] = 0;
 			game->level_string[0] = 0;
@@ -849,3 +855,89 @@ int connect_to_server()
 	return 0;
 }
 
+int send_chat(pGame game,char* name,char* chat_message)
+{
+	pMessage message = NULL;
+	numToMessage(&message,"game_id",game->id);
+	addToMessage(&message,"chat_name",name);
+	addToMessage(&message,"chat_message",chat_message);
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"send_chat.php");
+	deleteMessage(&message);
+	int res = 0;
+	if (result == NULL)
+		res = 1;
+	deleteMessage(&result);
+	return res;
+}
+
+void get_chat(pPlayer player)
+{
+	pMessage message = NULL;
+	numToMessage(&message,"game_id",player->game->id);
+	numToMessage(&message,"player_id",player->id);
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(NULL,NULL,NULL,0,"get_chat.php");
+	if (result == NULL)
+		return;
+	pChatMessage new_list = NULL;
+	pChatMessage end_list = NULL;
+	pMessage now = result;
+	while (now)
+	{
+		if (strcmp(now->name,"chat_name") == 0)
+		{
+			pChatMessage new_chat = (pChatMessage)malloc(sizeof(tChatMessage));
+			new_chat->birthtime = SDL_GetTicks();
+			new_chat->next = new_list;
+			if (end_list == NULL)
+				end_list = new_chat;
+			new_list = new_chat;
+			sprintf(new_list->name,"%s",now->content);
+		}
+		if (strcmp(now->name,"chat_message") == 0)
+			sprintf(new_list->message,"%s",now->content);
+		now = now->next;
+	}
+	deleteMessage(&result);
+	if (end_list)
+	{
+		end_list->next = player->game->chat;
+		player->game->chat = new_list;
+	}
+}
+
+int chat_thread_function(void* data)
+{
+	pPlayer player = data;
+	while (player->game->chat_message != -1)
+	{
+		get_chat(player);
+		spSleep(5000000); //5s
+	}
+	return 0;
+}
+
+void start_chat_listener(pPlayer player)
+{
+	player->game->chat_message = 0;
+	player->game->chat_thread = SDL_CreateThread(chat_thread_function,(void*)player);	
+}
+
+void stop_chat_listener(pPlayer player)
+{
+	player->game->chat_message = -1;
+	int result;
+	SDL_WaitThread(player->game->chat_thread,&(result));
+	player->game->chat_thread = NULL;
+	while (player->game->chat)
+	{
+		pChatMessage next = player->game->chat;
+		free(player->game->chat);
+		player->game->chat = next;
+	}
+}
