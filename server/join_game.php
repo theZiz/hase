@@ -27,8 +27,8 @@ if ($player_count >= $max_player || $status != 0)
 }
 else
 {
-	$query = "INSERT INTO hase_player_list (game_id, player_pw, player_name, position_in_game, computer) ".
-	"VALUES ( '$game_id', '$player_pw', '$player_name', '0', '$computer')";
+	$query = "INSERT INTO hase_player_list (game_id, player_pw, player_name, position_in_game, computer, chat_get_time) ".
+	"VALUES ( '$game_id', '$player_pw', '$player_name', '0', '$computer', '0')";
 
 	mysql_query($query) or die;
 	$player_id = mysql_insert_id();

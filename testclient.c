@@ -3,6 +3,23 @@
 
 #define TURN_LEN 10
 
+int last_shown_time = 0;
+pGame game = NULL;
+
+void chat_handling()
+{
+	if (game->chat)
+	{
+		pChatMessage chat = game->chat;
+		while (chat && chat->birthtime > last_shown_time)
+		{
+			printf("%i %s: %s\n",last_shown_time,chat->name,chat->message);
+			chat = chat->next;
+		}
+		last_shown_time = game->chat->birthtime;
+	}
+}
+
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
@@ -17,7 +34,7 @@ int main(int argc, char **argv)
 	if (connect_to_server())
 		return 1;
 	printf("Server Version: %i\n",server_info());
-	pGame game,gameList = NULL;
+	pGame gameList = NULL;
 	if (argc > 3)
 	{
 		char buffer[512];
@@ -87,6 +104,7 @@ int main(int argc, char **argv)
 	
 	//Update game last time
 	get_game(game,&playerList);
+	start_chat_listener(player);
 	momplayer = playerList;
 	while (momplayer)
 	{
@@ -105,6 +123,11 @@ int main(int argc, char **argv)
 		int p;
 		for (p = 0; p < game->player_count; p++)
 		{
+			while (rand()%2 == 0)
+			{
+				send_chat(game,player->name,"Kekskuchen!");
+				printf("Send Kekskuchen!\n");
+			}
 			int second;
 			if (player->position_in_game == p)
 			{
@@ -114,6 +137,7 @@ int main(int argc, char **argv)
 					push_game_thread(player,second,data);
 					printf("Player %i sent %i\n",p,second);
 					spSleep(1000000);
+					chat_handling();
 				}
 			}
 			else
@@ -132,6 +156,7 @@ int main(int argc, char **argv)
 					while (pull_game_thread(momplayer,second,data))
 						spSleep(500000); //500ms
 					printf("Player %i recv %i\n",p,second);
+					chat_handling();
 				}
 				end_pull_thread(momplayer);
 			}
@@ -144,6 +169,7 @@ int main(int argc, char **argv)
 	delete_player_list(playerList);
 	
 	printf("Finishing...\n");
+	stop_chat_listener(player);
 	
 	finish:
 	leave_game(player);

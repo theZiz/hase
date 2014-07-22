@@ -881,7 +881,7 @@ void get_chat(pPlayer player)
 	pMessage result = NULL;
 	int i;
 	for (i = 0; i < 3 && result == NULL;i++)
-		result = sendMessage(NULL,NULL,NULL,0,"get_chat.php");
+		result = sendMessage(message,NULL,NULL,0,"get_chat.php");
 	if (result == NULL)
 		return;
 	pChatMessage new_list = NULL;
@@ -936,7 +936,7 @@ void stop_chat_listener(pPlayer player)
 	player->game->chat_thread = NULL;
 	while (player->game->chat)
 	{
-		pChatMessage next = player->game->chat;
+		pChatMessage next = player->game->chat->next;
 		free(player->game->chat);
 		player->game->chat = next;
 	}

@@ -21,6 +21,8 @@ while ($row = mysql_fetch_array( $result ))
 		mysql_query($query) or die;
 		$query = "DELETE FROM hase_data_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
+		$query = "DELETE FROM hase_chat_list WHERE game_id = '$game_id'";
+		mysql_query($query) or die;
 		continue;
 	}
 	$status = $row['status'];
