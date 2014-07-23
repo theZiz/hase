@@ -13,7 +13,7 @@ cat /proc/pandora/nub1/mode > /tmp/nub1mode_before_hase
 echo absolute > /proc/pandora/nub0/mode
 echo absolute > /proc/pandora/nub1/mode
 
-LD_LIBRARY_PATH=. ./hase $*
+LD_LIBRARY_PATH=. ./lobby $*
 
 cat /tmp/nub0mode_before_hase > /proc/pandora/nub0/mode
 cat /tmp/nub1mode_before_hase > /proc/pandora/nub1/mode

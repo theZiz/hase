@@ -27,13 +27,13 @@ void resize( Uint16 w, Uint16 h )
 	spFontAddButton( font, 's', SP_BUTTON_DOWN_NAME, 65535, spGetRGB(127,127,127) ); // s == down button
 	spFontMulWidth(font,spFloatToFixed(0.9f));
 
-	spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_IF_NEEDED,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
+	spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_ALWAYS,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
 }
 
 int main(int argc, char **argv)
 {
 	spSetRand(time(NULL));
-	spSetDefaultWindowSize( 640, 480 );
+	spSetDefaultWindowSize( 320, 240 );
 	spInitCore();
 	spInitNet();
 	screen = spCreateDefaultWindow();

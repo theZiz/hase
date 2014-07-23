@@ -1,1 +1,1 @@
-/opt/pandora-sebt/scripts/pnd_make -p ../../../hase_prototype.pnd -d . -x ./PXML.xml -i ./hase_prototype.png
+/opt/pandora/sdk_utils/pnd_make.sh -c -p ../../../hase.pnd -d . -x ./PXML.xml -i ./hase_prototype.png
