@@ -35,7 +35,7 @@ pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr)
 	bullet->y = y+(10+BULLET_SIZE)*spSin(direction);
 	bullet->dr = dr;
 	bullet->impact_state = 0;
-	bullet->rotation = rand()%(2*SP_PI);
+	bullet->rotation = spRand()%(2*SP_PI);
 	bullet->dx = spMul(spCos(direction),power);
 	bullet->dy = spMul(spSin(direction),power);
 	return bullet;
@@ -180,91 +180,87 @@ void bullet_impact(int X,int Y,int radius)
 	spSelectRenderTarget(screen);
 }
 
-int updateBullets(int steps)
+int updateBullets()
 {
-	int i;
-	for (i = 0; i < steps; i++)
+	pBullet momBullet = firstBullet;
+	pBullet before = NULL;
+	while (momBullet)
 	{
-		pBullet momBullet = firstBullet;
-		pBullet before = NULL;
-		while (momBullet)
+		momBullet->dx -= gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+		momBullet->dy -= gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+		int speed = abs(momBullet->dx)+abs(momBullet->dy);
+		momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;
+		int dead = 0;
+		if (momBullet->impact_state == 0 &&
+			circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,BULLET_SIZE,-1))
 		{
-			momBullet->dx -= gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			momBullet->dy -= gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			int speed = abs(momBullet->dx)+abs(momBullet->dy);
-			momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;
-			int dead = 0;
-			if (momBullet->impact_state == 0 &&
-			    circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,BULLET_SIZE,-1))
+			momBullet->x += momBullet->dx;
+			momBullet->y += momBullet->dy;
+		}
+		else
+		{
+			int j;
+			switch (momBullet->impact_state)
 			{
-				momBullet->x += momBullet->dx;
-				momBullet->y += momBullet->dy;
-			}
-			else
-			{
-				int j;
-				switch (momBullet->impact_state)
-				{
-					case 0:
-						momBullet->impact_state = 1;
+				case 0:
+					momBullet->impact_state = 1;
+					momBullet->impact_counter = IMPACT_TIME;
+					break;
+				case 1:
+					momBullet->impact_counter--;
+					if (momBullet->impact_counter == 0)
+					{
+						momBullet->impact_state = 2;
 						momBullet->impact_counter = IMPACT_TIME;
-						break;
-					case 1:
-						momBullet->impact_counter--;
-						if (momBullet->impact_counter == 0)
+						spClearTarget(EXPLOSION_COLOR);
+						spFlip();
+						bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
+						for (j = 0; j < player_count; j++)
 						{
-							momBullet->impact_state = 2;
-							momBullet->impact_counter = IMPACT_TIME;
-							spClearTarget(EXPLOSION_COLOR);
-							spFlip();
-							bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
-							for (j = 0; j < player_count; j++)
+							if (player[j]->health == 0)
+								continue;
+							int d = spFixedToInt(player[j]->x-momBullet->x)*spFixedToInt(player[j]->x-momBullet->x)+
+									spFixedToInt(player[j]->y-momBullet->y)*spFixedToInt(player[j]->y-momBullet->y);
+								d = 1024-d;
+							if (d > 0)
+								player[j]->health -= d*MAX_HEALTH/2048;
+							if (player[j]->health <= 0)
 							{
-								if (player[j]->health == 0)
-									continue;
-								int d = spFixedToInt(player[j]->x-momBullet->x)*spFixedToInt(player[j]->x-momBullet->x)+
-										spFixedToInt(player[j]->y-momBullet->y)*spFixedToInt(player[j]->y-momBullet->y);
-									d = 1024-d;
-								if (d > 0)
-									player[j]->health -= d*MAX_HEALTH/2048;
-								if (player[j]->health <= 0)
-								{
-									player[j]->health = 0;
-									alive_count--;
-								}
+								player[j]->health = 0;
+								alive_count--;
 							}
-							spResetLoop();
-							return 2;
 						}
-						break;
-					case 2:
-						momBullet->impact_counter--;
-						if (momBullet->impact_counter == 0)
-						{
-							dead = 1;
-							if (alive_count < 2)
-								return 1;
-						}
-						break;
-				}
+						spResetLoop();
+						return 2;
+					}
+					break;
+				case 2:
+					momBullet->impact_counter--;
+					if (momBullet->impact_counter == 0)
+					{
+						dead = 1;
+						if (alive_count < 2)
+							return 1;
+					}
+					break;
 			}
-			if (dead || momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT)
-			{
-				if (momBullet == player[active_player]->bullet)
-					next_player();
-				if (before)
-					before->next = momBullet->next;
-				else
-					firstBullet = momBullet->next;
-				pBullet next = momBullet->next;
-				free(momBullet);
-				momBullet = next;
-			}
+		}
+		if (dead || momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT)
+		{
+			if (momBullet == player[active_player]->bullet)
+				next_player();
+			if (before)
+				before->next = momBullet->next;
 			else
-			{
-				before = momBullet;
-				momBullet = momBullet->next;
-			}
+				firstBullet = momBullet->next;
+			pBullet next = momBullet->next;
+			free(momBullet);
+			momBullet = next;
+		}
+		else
+		{
+			before = momBullet;
+			momBullet = momBullet->next;
 		}
 	}
 	return 0;

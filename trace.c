@@ -17,7 +17,7 @@ void lastPoint(int* x,int* y,int direction,int power)
 	Sint32 dy = spMul(spSin(direction),power);
 	(*x) += (10+BULLET_SIZE)*spCos(direction);
 	(*y) += (10+BULLET_SIZE)*spSin(direction);
-	for (j = 1; j < TRACE_LENGTH; j++)
+	for (j = 1; j < TRACE_LENGTH*2; j++)
 		for (i = 0; i < TRACE_STEP; i++)
 		{
 			dx -= gravitation_x((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;

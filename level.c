@@ -7,7 +7,7 @@ void add_to_string(char* buffer,char* add)
 
 char* create_level_string(char* buffer,int width,int height,int circles,int triangles,int quads)
 {
-	int t = rand()%TEXTURE_COUNT+1;
+	int t = spRand()%TEXTURE_COUNT+1;
 	char temp[16];
 	buffer[0] = 0;
 	add_to_string(buffer,ltostr(t,temp,36));
@@ -18,9 +18,9 @@ char* create_level_string(char* buffer,int width,int height,int circles,int tria
 	int i;
 	for (i = 0; i < circles; i++)
 	{
-		int r = rand()%(spMin(width,height) >> 3);
-		int x = LEVEL_BORDER+r+rand()%(width-2*LEVEL_BORDER-2*r);
-		int y = LEVEL_BORDER+r+rand()%(height-2*LEVEL_BORDER-2*r);
+		int r = spRand()%(spMin(width,height) >> 3);
+		int x = LEVEL_BORDER+r+spRand()%(width-2*LEVEL_BORDER-2*r);
+		int y = LEVEL_BORDER+r+spRand()%(height-2*LEVEL_BORDER-2*r);
 		add_to_string(buffer,"*"); //circle
 		add_to_string(buffer,ltostr(x,temp,36));
 		add_to_string(buffer," ");
@@ -30,12 +30,12 @@ char* create_level_string(char* buffer,int width,int height,int circles,int tria
 	}
 	for (i = 0; i < triangles; i++)
 	{
-		int r = rand()%(spMin(width,height) >> 2);
-		int x = LEVEL_BORDER+r+rand()%(width-2*LEVEL_BORDER-2*r);
-		int y = LEVEL_BORDER+r+rand()%(height-2*LEVEL_BORDER-2*r);
-		int a1 = rand()%(SP_PI*2);
-		int a2 = rand()%(SP_PI*2);
-		int a3 = rand()%(SP_PI*2);
+		int r = spRand()%(spMin(width,height) >> 2);
+		int x = LEVEL_BORDER+r+spRand()%(width-2*LEVEL_BORDER-2*r);
+		int y = LEVEL_BORDER+r+spRand()%(height-2*LEVEL_BORDER-2*r);
+		int a1 = spRand()%(SP_PI*2);
+		int a2 = spRand()%(SP_PI*2);
+		int a3 = spRand()%(SP_PI*2);
 		Sint32 x1 = x + ( r * spCos( a1 ) >> SP_ACCURACY );
 		Sint32 y1 = y + ( r * spSin( a1 ) >> SP_ACCURACY );
 		Sint32 x2 = x + ( r * spCos( a2 ) >> SP_ACCURACY );
@@ -57,10 +57,10 @@ char* create_level_string(char* buffer,int width,int height,int circles,int tria
 	}
 	for (i = 0; i < quads; i++)
 	{
-		int r = rand()%(spMin(width,height) >> 2);
-		int angle = rand()%(SP_PI*2);
-		int x = LEVEL_BORDER+r*3/2+rand()%(width-2*LEVEL_BORDER-3*r); //sqrt(2) ~ 2/3
-		int y = LEVEL_BORDER+r*3/2+rand()%(height-2*LEVEL_BORDER-3*r);//sqrt(2) ~ 2/3
+		int r = spRand()%(spMin(width,height) >> 2);
+		int angle = spRand()%(SP_PI*2);
+		int x = LEVEL_BORDER+r*3/2+spRand()%(width-2*LEVEL_BORDER-3*r); //sqrt(2) ~ 2/3
+		int y = LEVEL_BORDER+r*3/2+spRand()%(height-2*LEVEL_BORDER-3*r);//sqrt(2) ~ 2/3
 		Sint32 x1 = -r >> 1;
 		Sint32 x2 = x1;
 		Sint32 x3 = r >> 1;
@@ -122,7 +122,7 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 	printf("Parse level: %s\n",level_string);
 	//Lets overread the texture...
 	char* mom = level_string;
-	strtol(mom,&mom,36);
+	int dummy_because_strtol_loves_warnings = strtol(mom,&mom,36);
 	//Reading the width
 	int width = strtol(mom,&mom,36);
 	//Reading the height

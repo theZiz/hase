@@ -1,9 +1,10 @@
 #define HOPS_TIME 200
 #define HIGH_HOPS_TIME 403
 #define MAX_HEALTH 256
-#define AI_MAX_TRIES 512
-#define AI_TRIES_PER_FRAME 16
+#define AI_MAX_TRIES 64
+#define AI_TRIES_EVERY_MS 32
 int ai_shoot_tries = 0;
+int last_ai_try = 0;
 
 int lastAIDistance = 100000000;
 
@@ -96,53 +97,68 @@ Sint32 gravitation_force(int x,int y)
 	return spSqrt(spMul(grav_x,grav_x)+spMul(grav_y,grav_y));
 }
 
-void update_player(int steps)
+void update_player()
 {
-	if (player[active_player]->hops > 0)
-	{
-		player[active_player]->hops -= steps;
-		if (player[active_player]->hops <= 0)
-		{
-			Sint32 dx = spSin(player[active_player]->rotation);
-			Sint32 dy = spCos(player[active_player]->rotation);
-			player[active_player]->x += dx;
-			player[active_player]->y -= dy;
-			Sint32 angle = SP_PI/3;
-			Sint32 divisor = 8;
-			if (player[active_player]->high_hops)
-			{
-				angle = SP_PI/10;
-				divisor = 6;
-			}
-			if (player[active_player]->direction)
-			{
-				player[active_player]->dx += spSin(player[active_player]->rotation+angle)/divisor;
-				player[active_player]->dy -= spCos(player[active_player]->rotation+angle)/divisor;
-			}
-			else
-			{
-				player[active_player]->dx += spSin(player[active_player]->rotation-angle)/divisor;
-				player[active_player]->dy -= spCos(player[active_player]->rotation-angle)/divisor;
-			}			
-		}
-	}
 	int j;
 	for (j = 0; j < player_count; j++)
 	{
 		if (player[j]->health == 0)
 			continue;
+		if (player[j]->hops > 0)
+		{
+			player[j]->hops --;
+			if (player[j]->hops <= 0)
+			{
+				Sint32 dx = spSin(player[j]->rotation);
+				Sint32 dy = spCos(player[j]->rotation);
+				Sint32 ox = player[j]->x;
+				Sint32 oy = player[j]->y;
+				int k;
+				for (k = 1; k <= 16; k++)
+				{
+					if (circle_is_empty(spFixedToInt(player[j]->x+k*dx),spFixedToInt(player[j]->y-k*dy),8,j))
+					{
+						player[j]->x += k*dx;
+						player[j]->y -= k*dy;
+						Sint32 angle = SP_PI/3;
+						Sint32 divisor = 8;
+						if (player[j]->high_hops)
+						{
+							angle = SP_PI/10;
+							divisor = 6;
+						}
+						if (player[j]->direction)
+						{
+							player[j]->dx += spSin(player[j]->rotation+angle)/divisor;
+							player[j]->dy -= spCos(player[j]->rotation+angle)/divisor;
+						}
+						else
+						{
+							player[j]->dx += spSin(player[j]->rotation-angle)/divisor;
+							player[j]->dy -= spCos(player[j]->rotation-angle)/divisor;
+						}
+						break;
+					}
+					if (k == 16)
+					{
+						k = -1;
+						printf("Using special magic...\n");
+					}
+				}
+			}
+		}
 		player[j]->rotation = 0;
 		player[j]->bums = 0;
-		Sint32 force = gravitation_force(player[j]->x >> SP_ACCURACY,player[j]->y >> SP_ACCURACY);
+		Sint32 force = gravitation_force(spFixedToInt(player[j]->x),spFixedToInt(player[j]->y));
 		if (force)
 		{
-			Sint32 ac = spDiv(-gravitation_y(player[j]->x >> SP_ACCURACY,player[j]->y >> SP_ACCURACY),force);
+			Sint32 ac = spDiv(-gravitation_y(spFixedToInt(player[j]->x),spFixedToInt(player[j]->y)),force);
 			if (ac < -SP_ONE)
 				ac = -SP_ONE;
 			if (ac > SP_ONE)
 				ac = SP_ONE;
 			player[j]->rotation = -spAcos(ac);
-			if (-gravitation_x(player[j]->x >> SP_ACCURACY,player[j]->y >> SP_ACCURACY) <= 0)
+			if (-gravitation_x(spFixedToInt(player[j]->x),spFixedToInt(player[j]->y)) <= 0)
 				player[j]->rotation = 2*SP_PI-player[j]->rotation;
 			while (player[j]->rotation < 0)
 				player[j]->rotation += 2*SP_PI;
@@ -237,6 +253,7 @@ void real_next_player()
 {
 	stop_thread();
 	ai_shoot_tries = 0;
+	last_ai_try = 0;
 	lastAIDistance = 100000000;
 	do
 	{
@@ -245,8 +262,8 @@ void real_next_player()
 	while (player[active_player]->health == 0);
 	player[active_player]->shoot = 0;
 	player[active_player]->bullet = NULL;
-	//if (active_player == 1)
-	//	player[active_player]->direction = rand()&1;
+	if (player[active_player]->computer)
+		player[active_player]->direction = spRand()&1;
 	countdown = hase_game->seconds_per_turn*1000;
 	player[active_player]->hops = 0;
 	player[active_player]->high_hops = 0;
@@ -286,8 +303,8 @@ void init_player(pPlayer player_list,int pc)
 		int x,y;
 		while (1)
 		{
-			x = rand()%LEVEL_WIDTH;
-			y = rand()%LEVEL_HEIGHT;
+			x = spRand()%LEVEL_WIDTH;
+			y = spRand()%LEVEL_HEIGHT;
 			printf("Tried %i %i... ",x,y);
 			if (circle_is_empty(x,y,16,i) && gravitation_force(x,y)/32768)
 				break;
@@ -304,7 +321,7 @@ void init_player(pPlayer player_list,int pc)
 		rotation = -player[i]->rotation;
 		player[i]->health = MAX_HEALTH;
 		char buffer[256];
-		sprintf(buffer,"./data/hase%i.ssc",rand()%10+1);
+		sprintf(buffer,"./data/hase%i.ssc",spRand()%10+1);
 		player[i]->hase = spLoadSpriteCollection(buffer,NULL);
 	}
 	active_player = 0;
@@ -313,6 +330,7 @@ void init_player(pPlayer player_list,int pc)
 	posX = player[active_player]->x;
 	posY = player[active_player]->y;
 	ai_shoot_tries = 0;
+	last_ai_try = 0;
 	start_thread();
 }
 

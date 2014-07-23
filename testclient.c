@@ -22,7 +22,7 @@ void chat_handling()
 
 int main(int argc, char **argv)
 {
-	srand(time(NULL));
+	spSetRand(time(NULL));
 	if (argc < 3)
 	{
 		printf("testclient game nick [players]\n");
@@ -116,14 +116,14 @@ int main(int argc, char **argv)
 	
 	start_push_thread();
 	int i;
-	srand(time(0));
+	spSetRand(time(0));
 	int round;
 	for (round = 0; round < 3;round++)
 	{
 		int p;
 		for (p = 0; p < game->player_count; p++)
 		{
-			while (rand()%2 == 0)
+			while (spRand()%2 == 0)
 			{
 				send_chat(game,player->name,"Kekskuchen!");
 				printf("Send Kekskuchen!\n");

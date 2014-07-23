@@ -108,6 +108,7 @@ void draw(void)
 	spEllipse(screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(14),zoom) >> SP_ACCURACY),0,
 	          spFixedToInt(zoom*6*(player[active_player]->health)/MAX_HEALTH)+1,
 	          spFixedToInt(zoom*6*(player[active_player]->health)/MAX_HEALTH)+1,spGetRGB(0,255,0));
+
 	//spFontDrawMiddle( screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY)-font->maxheight/2,0,"100", font );
 	if (player[active_player]->computer)
 		sprintf(buffer,"%s (AI)",player[active_player]->name);
@@ -116,6 +117,11 @@ void draw(void)
 	spSetBlending( SP_ONE*2/3 );
 	spFontDrawMiddle( screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(14),zoom) >> SP_ACCURACY),0,buffer, font );
 	spSetBlending( SP_ONE );
+	if (player[active_player]->computer && ai_shoot_tries>1)
+	{
+		sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
+		spFontDrawMiddle( screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(4),zoom) >> SP_ACCURACY),0,buffer, font );
+	}
 	
 	//Not the player:
 	int not_active_player;
@@ -201,22 +207,23 @@ int jump(int high)
 
 int min_d_not_me(int x,int y,int me)
 {
-	int min_d = 10000;
+	int min_d = LEVEL_WIDTH*LEVEL_WIDTH;
 	int i;
 	int my_d = spFixedToInt(player[me]->x-x)*spFixedToInt(player[me]->x-x)+
 			   spFixedToInt(player[me]->y-y)*spFixedToInt(player[me]->y-y);
-	if (my_d < 256)
-		min_d*=2;
-	else
-		for (i = 0; i < 0;i++)
-		{
-			if (i == me)
-				continue;
-			int d = spFixedToInt(player[i]->x-x)*spFixedToInt(player[i]->x-x)+
-					spFixedToInt(player[i]->y-y)*spFixedToInt(player[i]->y-y);
-			if (d < min_d)
-				min_d = d;
-		}
+	if (my_d < 1024)
+		return LEVEL_WIDTH*LEVEL_WIDTH;
+	for (i = 0; i < player_count;i++)
+	{
+		if (i == me)
+			continue;
+		if (player[i]->health == 0)
+			continue;
+		int d = spFixedToInt(player[i]->x-x)*spFixedToInt(player[i]->x-x)+
+				spFixedToInt(player[i]->y-y)*spFixedToInt(player[i]->y-y);
+		if (d < min_d)
+			min_d = d;
+	}
 	return min_d;
 }
 
@@ -429,8 +436,8 @@ int calc(Uint32 steps)
 		if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
 			rotation += 2*SP_PI;
 		rotation = rotation*127/128+goal/128;
-		update_player(1);
-		int res = do_physics(1);
+		update_player();
+		int res = do_physics();
 		if (res == 1)
 			result = 2;
 		if (res)
@@ -455,34 +462,45 @@ int calc(Uint32 steps)
 			//AI
 			if (player[active_player]->shoot == 0)
 			{
-				if (player[active_player]->bums)
+				if (player[active_player]->bums && player[active_player]->hops <= 0)
 				{
-					int j;
-					for (j = 0; j < AI_TRIES_PER_FRAME; j++)
+					if (ai_shoot_tries == 0)
 					{
-						ai_shoot_tries++;
-						if (ai_shoot_tries < AI_MAX_TRIES)
-						{
-							//Lets first try...
-							int x = player[active_player]->x;
-							int y = player[active_player]->y;
-							int w_d = rand()%(2*SP_PI);
-							int w_p = rand()%SP_ONE;
-							lastPoint(&x,&y,player[active_player]->rotation+w_d+SP_PI,w_p/2);
-							int d = min_d_not_me(x,y,active_player);
-							if (d < lastAIDistance)
-							{
-								lastAIDistance = d;
-								player[active_player]->w_direction = w_d;
-								player[active_player]->w_power = w_p;
-							}
-						}
+						jump((spRand()%4==0)?1:0);
+						if (spRand()%4 == 0)
+							ai_shoot_tries = 1;
+					}
+					else
+					{
+						if (last_ai_try < AI_TRIES_EVERY_MS)
+							last_ai_try++;
 						else
 						{
-							//Shoot!
-							player[active_player]->shoot = 1;
-							player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
-							break;
+							last_ai_try = 0;
+							ai_shoot_tries++;
+							if (ai_shoot_tries < AI_MAX_TRIES)
+							{
+								//Lets first try...
+								int x = player[active_player]->x;
+								int y = player[active_player]->y;
+								int w_d = spRand()%(2*SP_PI);
+								int w_p = spRand()%SP_ONE;
+								lastPoint(&x,&y,player[active_player]->rotation+w_d+SP_PI,w_p/2);
+								int d = min_d_not_me(x,y,active_player);
+								if (d < lastAIDistance)
+								{
+									lastAIDistance = d;
+									player[active_player]->w_direction = w_d;
+									player[active_player]->w_power = w_p;
+								}
+							}
+							else
+							{
+								//Shoot!
+								player[active_player]->shoot = 1;
+								player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
+								break;
+							}
 						}
 					}
 				}
@@ -491,7 +509,7 @@ int calc(Uint32 steps)
 			{
 				//RUNNING!
 				if (player[active_player]->bums && player[active_player]->hops <= 0)
-					jump((rand()%4==0)?1:0);
+					jump((spRand()%4==0)?1:0);
 			}
 		}
 		else
@@ -581,8 +599,11 @@ int calc(Uint32 steps)
 	}
 	if (player[active_player]->shoot == 0)
 		updateTrace();
-	if (input_states[INPUT_BUTTON_SELECT])
+	if (spGetInput()->button[SP_BUTTON_SELECT])
+	{
+		spGetInput()->button[SP_BUTTON_SELECT] = 0;
 		return 1;
+	}
 	return result;
 }
 
@@ -608,7 +629,13 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 		}
 		p = p->next;
 	}
-	srand(0);
+	//Getting a deterministic seed
+	Uint32 f[4] = {123,123,123,123};
+	int k;
+	for (k = 0; k < 4 && game->name[k]; k++)
+		f[k] = game->name[k];
+	Uint32 seed = f[0]+f[1]*256+f[2]*65536+f[3]*16777216;
+	spSetRand(seed);
 	loadInformation("Loading images...");
 	arrow = spLoadSurface("./data/gravity.png");
 	weapon = spLoadSurface("./data/weapon.png");
@@ -638,6 +665,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	game_pause = 0;
 	
 	int result = spLoop(draw,calc,10,resize,NULL);
+
 	stop_thread();
 	if (result == 2)
 	{

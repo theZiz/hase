@@ -32,8 +32,8 @@ void resize( Uint16 w, Uint16 h )
 
 int main(int argc, char **argv)
 {
-	srand(time(NULL));
-	spSetDefaultWindowSize( 320, 240 );
+	spSetRand(time(NULL));
+	spSetDefaultWindowSize( 640, 480 );
 	spInitCore();
 	spInitNet();
 	screen = spCreateDefaultWindow();

@@ -620,8 +620,8 @@ void set_status(pGame game,int status)
 		//Shuffle
 		for (i=0;i<game->player_count*10;i++)
 		{
-			int a = rand()%game->player_count;
-			int b = rand()%game->player_count;
+			int a = spRand()%game->player_count;
+			int b = spRand()%game->player_count;
 			if (a == b)
 				continue;
 			int temp = positions[a];

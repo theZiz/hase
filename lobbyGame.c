@@ -101,7 +101,7 @@ pPlayer lg_ai_list = NULL;
 
 char* lg_get_name(char* buffer)
 {
-	int i = rand()%50;
+	int i = spRand()%50;
 	switch (i)
 	{
 		//Germany
