@@ -1,5 +1,5 @@
-#define TRACE_LENGTH 20
-#define TRACE_STEP 100
+#define TRACE_LENGTH 10
+#define TRACE_STEP 150
 #define TRACE_UPDATE 5
 int trace_count = TRACE_UPDATE-1;
 typedef struct sTrace

@@ -639,7 +639,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	
 	int result = spLoop(draw,calc,10,resize,NULL);
 	stop_thread();
-	if (result)
+	if (result == 2)
 	{
 		int i;
 		for (i = 0; i < player_count; i ++)

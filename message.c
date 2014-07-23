@@ -19,6 +19,10 @@ void message_draw(void)
 	spSetAlphaPattern4x4(196,0);
 	spRectangle(screen->w/2,screen->h/2,0,screen->w,screen->h,LL_BG);
 	spDeactivatePattern();
+
+	if (spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
+		spBlitSurface(screen->w/2,screen->h-spGetVirtualKeyboard()->h/2,0,spGetVirtualKeyboard());
+
 	char buffer[256];
 	if (mg_button_count < 0)
 	{
@@ -27,6 +31,10 @@ void message_draw(void)
 		spRectangleBorder(screen->w/2,screen->h/2,0,screen->w/2+2*meow,screen->h/2+2*meow,meow,meow,LL_FG);
 		spFontDrawMiddle( screen->w/2, 6*screen->h/23, 0, "Create game", mg_font );
 		sprintf(buffer,"Name: %s",mg_name);
+		int x = (screen->w+spFontWidth(buffer,mg_font))/2;
+		if (mg_sel == 1 && mg_pos == 0 && (SDL_GetTicks() >> 9) & 1)
+			spLine(x,8*screen->h/23-0*mg_font->maxheight/2, 0,
+			       x,8*screen->h/23+2*mg_font->maxheight/2, 0,65535);
 		spFontDrawMiddle( screen->w/2, 8*screen->h/23, 0, buffer, mg_font );
 		sprintf(buffer,"Maximum players: %i",*mg_players);
 		spFontDrawMiddle( screen->w/2,10*screen->h/23, 0, buffer, mg_font );
@@ -67,7 +75,10 @@ void message_draw(void)
 			}
 		}
 		else
-			spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "[a]Select  [w]Create  [d]Cancel", mg_font );
+		if (*mg_online == -1 && mg_pos == 3)
+			spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "[w]Create  [d]Cancel", mg_font );
+		else
+			spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "[a]Select  [w]Create  [d]Cancel", mg_font );		
 		spFlip();
 	}
 	else
@@ -114,7 +125,7 @@ int message_calc(Uint32 steps)
 			spGetInput()->button[SP_BUTTON_UP] = 0;
 			return 1;
 		}
-		if (spGetInput()->button[SP_BUTTON_LEFT])
+		if (spGetInput()->button[SP_BUTTON_LEFT] && (*mg_online != -1 || mg_pos != 3))
 		{
 			spGetInput()->button[SP_BUTTON_LEFT] = 0;
 			mg_sel = 1-mg_sel;

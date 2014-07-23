@@ -43,9 +43,9 @@ void lg_draw(void)
 	//Informations
 	int w = screen->w-8-l_w;
 	spFontDrawMiddle(screen->w-2-w/2, 1*lg_font->maxheight, 0, "Game Info", lg_font );
-	sprintf(buffer,"Sec. per turn: %i",lg_game->seconds_per_turn);
+	sprintf(buffer,"Seconds per turn: %i",lg_game->seconds_per_turn);
 	spFontDraw(screen->w-w, 2*lg_font->maxheight, 0, buffer, lg_font );
-	sprintf(buffer,"Max. players: %i",lg_game->max_player);
+	sprintf(buffer,"Maximum players: %i",lg_game->max_player);
 	spFontDraw(screen->w-w, 3*lg_font->maxheight, 0, buffer, lg_font );
 	spFontDraw(screen->w-w, 4*lg_font->maxheight, 0, "Players:", lg_font );
 	//player block
@@ -54,7 +54,11 @@ void lg_draw(void)
 	if (lg_block)
 		spFontDrawTextBlock(middle,screen->w-w-4, 5*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
-	spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[w]Add pl.  [s]Rem. pl.", lg_font );
+	#ifdef PANDORA
+		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[w]Add player  [s]Remove player", lg_font );
+	#else
+		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[w]Add player  [s]Remove pl.", lg_font );
+	#endif
 	if (lg_game->admin_pw == 0)
 	{
 		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "The game master will", lg_font );
@@ -62,11 +66,14 @@ void lg_draw(void)
 	}
 	else
 	{
-		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[d]New level  [a]Start", lg_font );
-		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[q]Add AI  [e]Rem. all AI", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[q]Add AI  [e]Remove all AIs", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[a]Start game  [d]New level", lg_font );
 	}
 	//Chat
 	spRectangle(screen->w/2, l_w+(4+CHAT_LINES)*lg_font->maxheight/2+4, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);
+	if (lg_game->local)
+		spFontDrawMiddle(screen->w/2, l_w+(3+CHAT_LINES)*lg_font->maxheight/2+4, 0,"No chat in local game",lg_font);
+	else
 	if (lg_chat_block)
 		spFontDrawTextBlock(left,4, l_w+2*lg_font->maxheight+4, 0,lg_chat_block,CHAT_LINES*lg_font->maxheight,lg_scroll,lg_font);
 	//Footline
@@ -77,6 +84,9 @@ void lg_draw(void)
 	}
 	else
 	{
+		if (lg_game->local)
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave and close game", lg_font );
+		else
 		if (lg_game->admin_pw == 0)
 			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave game", lg_font );
 		else
@@ -221,7 +231,7 @@ int lg_calc(Uint32 steps)
 		if (lg_chat_block->line_count > CHAT_LINES)
 			lg_scroll = SP_ONE;
 	}
-	if (spGetInput()->button[SP_BUTTON_START])
+	if (!lg_game->local && spGetInput()->button[SP_BUTTON_START])
 	{
 		spGetInput()->button[SP_BUTTON_START] = 0;
 		char m[256] = "";
@@ -345,7 +355,8 @@ int lg_calc(Uint32 steps)
 		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
 		create_level_string(lg_game->level_string,1536,1536,3,3,3);
 		spDeleteSurface(lg_level);
-		lg_level = create_level(lg_game->level_string,spGetWindowSurface()->h-3*lg_font->maxheight,spGetWindowSurface()->h-3*lg_font->maxheight,LL_BG);
+		int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+		lg_level = create_level(lg_game->level_string,l_w,l_w,LL_BG);
 		sprintf(lg_level_string,"%s",lg_game->level_string);
 		set_level(lg_game,lg_level_string);
 	}
@@ -409,7 +420,7 @@ int lg_reload()
 	}
 	if (lg_block)
 		spDeleteTextBlock(lg_block);
-	int l_w = spGetWindowSurface()->h-7*lg_font->maxheight;
+	int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
 	lg_block = spCreateTextBlock(temp,spGetWindowSurface()->w-8-l_w,lg_font);
 	if (lg_level == NULL || strcmp(lg_level_string,lg_game->level_string))
 	{
@@ -451,9 +462,11 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		lg_chat_block = NULL;
 		lg_last_chat = NULL;
 		lg_chat_text[0] = 0;
-		start_chat_listener(lg_player);
+		if (!lg_game->local)
+			start_chat_listener(lg_player);
 		int res = spLoop(lg_draw,lg_calc,10,resize,NULL);
-		stop_chat_listener(lg_player);
+		if (!lg_game->local)
+			stop_chat_listener(lg_player);
 		if (lg_block)
 			spDeleteTextBlock(lg_block);
 		if (res == -1)
