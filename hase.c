@@ -68,8 +68,6 @@ void loadInformation(char* information)
 
 void draw(void)
 {
-	posX = player[active_player]->x;
-	posY = player[active_player]->y;	
 	char buffer[256];
 	spClearTarget(0);
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
@@ -81,20 +79,6 @@ void draw(void)
 	spSetVerticalOrigin(SP_CENTER);
 	spSetHorizontalOrigin(SP_CENTER);
 
-	//Arrow
-	if (player[active_player]->w_power)
-	{
-		Sint32 x = spCos(player[active_player]->w_direction)*(-8-spFixedToInt(16*player[active_player]->w_power));
-		Sint32 y = spSin(player[active_player]->w_direction)*(-8-spFixedToInt(16*player[active_player]->w_power));
-		spRotozoomSurface(screen->w/2+(spMul(player[active_player]->x-posX+x,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY+y,zoom) >> SP_ACCURACY),0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player[active_player]->w_power,spMul(zoom,spGetSizeFactor()))/4,player[active_player]->w_direction-SP_PI/2);
-	}
-
-	//Bullets
-	drawBullets();
-	
-	//Weapon
-	spRotozoomSurface(screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player[active_player]->w_direction);
-	
 	//Players:
 	int j;
 	for (j = 0; j < player_count; j++)
@@ -110,6 +94,20 @@ void draw(void)
 		Sint32 oy = spMul(player[j]->y-posY,zoom);
 		Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 		Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+		if (j == active_player)
+		{
+			//Weapon
+			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon,zoom/2,zoom/2,player[j]->w_direction+rotation+player[j]->rotation);
+			//Arrow
+			if (player[j]->w_power)
+			{
+				Sint32 ox = spMul(player[j]->x-posX-14*-spSin(player[j]->rotation+player[j]->w_direction-SP_PI/2),zoom);
+				Sint32 oy = spMul(player[j]->y-posY-14* spCos(player[j]->rotation+player[j]->w_direction-SP_PI/2),zoom);
+				Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player[j]->w_power,spMul(zoom,spGetSizeFactor()))/4,player[j]->w_direction+rotation+player[j]->rotation-SP_PI/2);
+			}
+		}
 		spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 		//Health circle
 		ox = spMul(player[j]->x-posX-14*-spSin(player[j]->rotation),zoom);
@@ -135,6 +133,9 @@ void draw(void)
 			spFontDrawMiddle( screen->w/2+x,screen->h/2+y+font->maxheight,0,buffer, font );
 		}
 	}
+	//Bullets
+	drawBullets();
+		
 	//Trace
 	if (player[active_player]->shoot == 0)
 		drawTrace();
@@ -403,6 +404,8 @@ int calc(Uint32 steps)
 			game_pause--;
 		if (game_pause)
 			continue;
+		posX = (Sint64)posX*(Sint64)255+(Sint64)player[active_player]->x >> 8;
+		posY = (Sint64)posY*(Sint64)255+(Sint64)player[active_player]->y >> 8;
 		set_input();
 		if (game_pause)
 			continue;
