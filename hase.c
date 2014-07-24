@@ -95,68 +95,45 @@ void draw(void)
 	//Weapon
 	spRotozoomSurface(screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY,zoom) >> SP_ACCURACY),0,weapon,zoom/2,zoom/2,player[active_player]->w_direction);
 	
-	//Player
-	spSpritePointer sprite = spActiveSprite(player[active_player]->hase);
-	spSetSpriteZoom(sprite,zoom/2,zoom/2);
-	spSetSpriteRotation(sprite,0);
-	spDrawSprite(screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY,zoom) >> SP_ACCURACY),0,sprite);
-
-	//Health circle
-	spEllipse(screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(14),zoom) >> SP_ACCURACY),0,
-	          spFixedToInt(zoom*6)+1,
-	          spFixedToInt(zoom*6)+1,spGetRGB(255,0,0));	
-	spEllipse(screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(14),zoom) >> SP_ACCURACY),0,
-	          spFixedToInt(zoom*6*(player[active_player]->health)/MAX_HEALTH)+1,
-	          spFixedToInt(zoom*6*(player[active_player]->health)/MAX_HEALTH)+1,spGetRGB(0,255,0));
-
-	//spFontDrawMiddle( screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(10),zoom) >> SP_ACCURACY)-font->maxheight/2,0,"100", font );
-	if (player[active_player]->computer)
-		sprintf(buffer,"%s (AI)",player[active_player]->name);
-	else
-		sprintf(buffer,"%s",player[active_player]->name);
-	spSetBlending( SP_ONE*2/3 );
-	spFontDrawMiddle( screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(14),zoom) >> SP_ACCURACY),0,buffer, font );
-	spSetBlending( SP_ONE );
-	if (player[active_player]->computer && ai_shoot_tries>1)
+	//Players:
+	int j;
+	for (j = 0; j < player_count; j++)
 	{
-		sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
-		spFontDrawMiddle( screen->w/2+(spMul(player[active_player]->x-posX,zoom) >> SP_ACCURACY),screen->h/2+(spMul(player[active_player]->y-posY-spIntToFixed(4),zoom) >> SP_ACCURACY),0,buffer, font );
-	}
-	
-	//Not the player:
-	int not_active_player;
-	for (not_active_player = 0; not_active_player < player_count; not_active_player++)
-	{
-		if (not_active_player == active_player)
+		//if (j == active_player)
+		//	continue;
+		if (player[j]->health == 0)
 			continue;
-		if (player[not_active_player]->health == 0)
-			continue;
-		sprite = spActiveSprite(player[not_active_player]->hase);
+		spSpritePointer sprite = spActiveSprite(player[j]->hase);
 		spSetSpriteZoom(sprite,zoom/2,zoom/2);
-		spSetSpriteRotation(sprite,+rotation+player[not_active_player]->rotation);
-		Sint32 ox = spMul(player[not_active_player]->x-posX,zoom);
-		Sint32 oy = spMul(player[not_active_player]->y-posY,zoom);
+		spSetSpriteRotation(sprite,+rotation+player[j]->rotation);
+		Sint32 ox = spMul(player[j]->x-posX,zoom);
+		Sint32 oy = spMul(player[j]->y-posY,zoom);
 		Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 		Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 		spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 		//Health circle
-		ox = spMul(player[not_active_player]->x-posX-14*-spSin(player[not_active_player]->rotation),zoom);
-		oy = spMul(player[not_active_player]->y-posY-14* spCos(player[not_active_player]->rotation),zoom);
+		ox = spMul(player[j]->x-posX-14*-spSin(player[j]->rotation),zoom);
+		oy = spMul(player[j]->y-posY-14* spCos(player[j]->rotation),zoom);
 		x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 		y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 		spEllipse(screen->w/2+x,screen->h/2+y,0,
 				  spFixedToInt(zoom*6)+1,
 				  spFixedToInt(zoom*6)+1,spGetRGB(255,0,0));	
 		spEllipse(screen->w/2+x,screen->h/2+y,0,
-				  spFixedToInt(zoom*6*(player[not_active_player]->health)/MAX_HEALTH)+1,
-				  spFixedToInt(zoom*6*(player[not_active_player]->health)/MAX_HEALTH)+1,spGetRGB(0,255,0));
-		if (player[not_active_player]->computer)
-			sprintf(buffer,"%s (AI)",player[not_active_player]->name);
+				  spFixedToInt(zoom*6*(player[j]->health)/MAX_HEALTH)+1,
+				  spFixedToInt(zoom*6*(player[j]->health)/MAX_HEALTH)+1,spGetRGB(0,255,0));
+		if (player[j]->computer)
+			sprintf(buffer,"%s (AI)",player[j]->name);
 		else
-			sprintf(buffer,"%s",player[not_active_player]->name);
+			sprintf(buffer,"%s",player[j]->name);
 		spSetBlending( SP_ONE*2/3 );
 		spFontDrawMiddle( screen->w/2+x,screen->h/2+y,0,buffer, font );
 		spSetBlending( SP_ONE );
+		if (j == active_player && player[j]->computer && ai_shoot_tries>1)
+		{
+			sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
+			spFontDrawMiddle( screen->w/2+x,screen->h/2+y+font->maxheight,0,buffer, font );
+		}
 	}
 	//Trace
 	if (player[active_player]->shoot == 0)
