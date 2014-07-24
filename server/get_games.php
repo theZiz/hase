@@ -13,7 +13,7 @@ while ($row = mysql_fetch_array( $result ))
 {
 	$game_id = $row['game_id'];
 	$create_date = $row['create_date'];
-	if ($create_date < $now-3600*24) //1 day
+	if ($create_date < $now-3600*24*7) //7 days
 	{
 		$query = "DELETE FROM hase_game_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
