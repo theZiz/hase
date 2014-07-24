@@ -347,22 +347,22 @@ void set_input()
 			input_states[INPUT_AXIS_1_LEFT] = 0;
 			input_states[INPUT_AXIS_1_RIGHT] = 0;
 		}		
-		if (spGetInput()->button[SP_BUTTON_LEFT] != button_states[SP_BUTTON_LEFT])
-			input_states[INPUT_BUTTON_LEFT] = spGetInput()->button[SP_BUTTON_LEFT];
-		if (spGetInput()->button[SP_BUTTON_UP] != button_states[SP_BUTTON_UP])
-			input_states[INPUT_BUTTON_UP] = spGetInput()->button[SP_BUTTON_UP];
-		if (spGetInput()->button[SP_BUTTON_RIGHT] != button_states[SP_BUTTON_RIGHT])
-			input_states[INPUT_BUTTON_RIGHT] = spGetInput()->button[SP_BUTTON_RIGHT];
-		if (spGetInput()->button[SP_BUTTON_DOWN] != button_states[SP_BUTTON_DOWN])
-			input_states[INPUT_BUTTON_DOWN] = spGetInput()->button[SP_BUTTON_DOWN];
-		if (spGetInput()->button[SP_BUTTON_L] != button_states[SP_BUTTON_L])
-			input_states[INPUT_BUTTON_L] = spGetInput()->button[SP_BUTTON_L];
-		if (spGetInput()->button[SP_BUTTON_R] != button_states[SP_BUTTON_R])
-			input_states[INPUT_BUTTON_R] = spGetInput()->button[SP_BUTTON_R];
-		if (spGetInput()->button[SP_BUTTON_START] != button_states[SP_BUTTON_START])
-			input_states[INPUT_BUTTON_START] = spGetInput()->button[SP_BUTTON_START];
-		if (spGetInput()->button[SP_BUTTON_SELECT] != button_states[SP_BUTTON_SELECT])
-			input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[SP_BUTTON_SELECT];
+		if (spGetInput()->button[SP_BUTTON_LEFT_NOWASD] != button_states[SP_BUTTON_LEFT_NOWASD])
+			input_states[INPUT_BUTTON_LEFT] = spGetInput()->button[SP_BUTTON_LEFT_NOWASD];
+		if (spGetInput()->button[SP_BUTTON_UP_NOWASD] != button_states[SP_BUTTON_UP_NOWASD])
+			input_states[INPUT_BUTTON_UP] = spGetInput()->button[SP_BUTTON_UP_NOWASD];
+		if (spGetInput()->button[SP_BUTTON_RIGHT_NOWASD] != button_states[SP_BUTTON_RIGHT_NOWASD])
+			input_states[INPUT_BUTTON_RIGHT] = spGetInput()->button[SP_BUTTON_RIGHT_NOWASD];
+		if (spGetInput()->button[SP_BUTTON_DOWN_NOWASD] != button_states[SP_BUTTON_DOWN_NOWASD])
+			input_states[INPUT_BUTTON_DOWN] = spGetInput()->button[SP_BUTTON_DOWN_NOWASD];
+		if (spGetInput()->button[SP_BUTTON_L_NOWASD] != button_states[SP_BUTTON_L_NOWASD])
+			input_states[INPUT_BUTTON_L] = spGetInput()->button[SP_BUTTON_L_NOWASD];
+		if (spGetInput()->button[SP_BUTTON_R_NOWASD] != button_states[SP_BUTTON_R_NOWASD])
+			input_states[INPUT_BUTTON_R] = spGetInput()->button[SP_BUTTON_R_NOWASD];
+		if (spGetInput()->button[SP_BUTTON_START_NOWASD] != button_states[SP_BUTTON_START_NOWASD])
+			input_states[INPUT_BUTTON_START] = spGetInput()->button[SP_BUTTON_START_NOWASD];
+		if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD] != button_states[SP_BUTTON_SELECT_NOWASD])
+			input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[SP_BUTTON_SELECT_NOWASD];
 		memcpy(button_states,spGetInput()->button,sizeof(char)*SP_INPUT_BUTTON_COUNT);
 		if (!hase_game->local)
 		{
@@ -401,14 +401,14 @@ void set_input()
 
 int calc(Uint32 steps)
 {
-	if (spGetInput()->button[SP_BUTTON_L])
+	if (spGetInput()->button[SP_BUTTON_L_NOWASD])
 	{
 		zoomAdjust -= steps*32;
 		if (zoomAdjust < minZoom)
 			zoomAdjust = minZoom;
 		zoom = spMul(zoomAdjust,zoomAdjust);
 	}
-	if (spGetInput()->button[SP_BUTTON_R])
+	if (spGetInput()->button[SP_BUTTON_R_NOWASD])
 	{
 		zoomAdjust += steps*32;
 		if (zoomAdjust > maxZoom)
@@ -599,9 +599,9 @@ int calc(Uint32 steps)
 	}
 	if (player[active_player]->shoot == 0)
 		updateTrace();
-	if (spGetInput()->button[SP_BUTTON_SELECT])
+	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_SELECT] = 0;
+		spGetInput()->button[SP_BUTTON_SELECT_NOWASD] = 0;
 		return 1;
 	}
 	return result;

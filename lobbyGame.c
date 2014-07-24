@@ -231,11 +231,11 @@ int lg_calc(Uint32 steps)
 		if (lg_chat_block->line_count > CHAT_LINES)
 			lg_scroll = SP_ONE;
 	}
-	if (!lg_game->local && spGetInput()->button[SP_BUTTON_START])
+	if (!lg_game->local && spGetInput()->button[SP_BUTTON_START_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_START] = 0;
+		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
 		char m[256] = "";
-		spPollKeyboardInput(m,256,SP_BUTTON_UP_MASK);
+		spPollKeyboardInput(m,256,SP_BUTTON_DOWN_NOWASD_MASK);
 		if (message(lg_font,lg_resize,"Enter Message:",2,m) == 1)
 		{
 			if (lg_player->next)
@@ -261,19 +261,19 @@ int lg_calc(Uint32 steps)
 		}
 		spStopKeyboardInput();
 	}
-	if (spGetInput()->button[SP_BUTTON_SELECT])
+	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_SELECT] = 0;
+		spGetInput()->button[SP_BUTTON_SELECT_NOWASD] = 0;
 		return 1;
 	}
-	if (spGetInput()->button[SP_BUTTON_UP])
+	if (spGetInput()->button[SP_BUTTON_UP_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_UP] = 0;
+		spGetInput()->button[SP_BUTTON_UP_NOWASD] = 0;
 		if (lg_game->player_count >= lg_game->max_player)
 			message(lg_font,lg_resize,"Game full!",1,NULL);
 		else
 		{
-			spPollKeyboardInput(lg_new_name,32,SP_BUTTON_UP_MASK);
+			spPollKeyboardInput(lg_new_name,32,SP_BUTTON_DOWN_NOWASD_MASK);
 			if (message(lg_font,lg_resize,"Enter player name:",2,lg_new_name) == 1)
 			{
 				spStopKeyboardInput();
@@ -292,12 +292,12 @@ int lg_calc(Uint32 steps)
 				spStopKeyboardInput();
 		}
 	}
-	if (spGetInput()->button[SP_BUTTON_DOWN])
+	if (spGetInput()->button[SP_BUTTON_DOWN_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_DOWN] = 0;
+		spGetInput()->button[SP_BUTTON_DOWN_NOWASD] = 0;
 		char leave_name[33];
 		sprintf(leave_name,"%s",lg_last_player->name);
-		spPollKeyboardInput(leave_name,32,SP_BUTTON_UP_MASK);
+		spPollKeyboardInput(leave_name,32,SP_BUTTON_DOWN_NOWASD_MASK);
 		if (message(lg_font,lg_resize,"Enter player name to leave:",2,leave_name) == 1)
 		{
 			spStopKeyboardInput();
@@ -336,9 +336,9 @@ int lg_calc(Uint32 steps)
 		else
 			spStopKeyboardInput();
 	}
-	if (spGetInput()->button[SP_BUTTON_LEFT] && lg_game->admin_pw)
+	if (spGetInput()->button[SP_BUTTON_LEFT_NOWASD] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_LEFT] = 0;
+		spGetInput()->button[SP_BUTTON_LEFT_NOWASD] = 0;
 		if (lg_game->player_count < 2)
 			message(lg_font,lg_resize,"At least two players are needed!",1,NULL);
 		else
@@ -350,9 +350,9 @@ int lg_calc(Uint32 steps)
 			return 3;
 		}
 	}
-	if (spGetInput()->button[SP_BUTTON_RIGHT] && lg_game->admin_pw)
+	if (spGetInput()->button[SP_BUTTON_RIGHT_NOWASD] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
+		spGetInput()->button[SP_BUTTON_RIGHT_NOWASD] = 0;
 		create_level_string(lg_game->level_string,1536,1536,3,3,3);
 		spDeleteSurface(lg_level);
 		int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
@@ -360,9 +360,9 @@ int lg_calc(Uint32 steps)
 		sprintf(lg_level_string,"%s",lg_game->level_string);
 		set_level(lg_game,lg_level_string);
 	}
-	if (spGetInput()->button[SP_BUTTON_R] && lg_game->admin_pw)
+	if (spGetInput()->button[SP_BUTTON_R_NOWASD] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_R] = 0;
+		spGetInput()->button[SP_BUTTON_R_NOWASD] = 0;
 		while (lg_ai_list)
 		{
 			pPlayer next = lg_ai_list->next;
@@ -371,9 +371,9 @@ int lg_calc(Uint32 steps)
 		}
 		lg_counter = LG_WAIT;
 	}
-	if (spGetInput()->button[SP_BUTTON_L] && lg_game->admin_pw)
+	if (spGetInput()->button[SP_BUTTON_L_NOWASD] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_L] = 0;
+		spGetInput()->button[SP_BUTTON_L_NOWASD] = 0;
 		char buffer[32];
 		pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1);
 		if (ai)
@@ -441,7 +441,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 	lg_reload_now = 0;
 	lg_ai_list = NULL;
 	lg_resize = resize;
-	spPollKeyboardInput(lg_name,32,SP_BUTTON_UP_MASK);
+	spPollKeyboardInput(lg_name,32,SP_BUTTON_DOWN_NOWASD_MASK);
 	if (message(font,resize,"Enter player name:",2,lg_name) == 1)
 	{
 		spStopKeyboardInput();
