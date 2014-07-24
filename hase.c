@@ -404,8 +404,6 @@ int calc(Uint32 steps)
 			game_pause--;
 		if (game_pause)
 			continue;
-		posX = (Sint64)posX*(Sint64)255+(Sint64)player[active_player]->x >> 8;
-		posY = (Sint64)posY*(Sint64)255+(Sint64)player[active_player]->y >> 8;
 		set_input();
 		if (game_pause)
 			continue;
@@ -576,6 +574,25 @@ int calc(Uint32 steps)
 				player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
 			}
 		}
+		int destX,destY;
+		destX = player[active_player]->x;
+		destY = player[active_player]->y;
+		if (firstBullet)
+		{
+			pBullet momBullet = firstBullet;
+			int c = 1;
+			while (momBullet)
+			{
+				destX += momBullet->x;
+				destY += momBullet->y;
+				momBullet = momBullet->next;
+				c++;
+			}
+			destX /= c;
+			destY /= c;
+		}
+		posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
+		posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
 	}
 	if (player[active_player]->shoot == 0)
 		updateTrace();

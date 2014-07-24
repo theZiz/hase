@@ -41,5 +41,6 @@ $seconds_per_turn = $row['mom_player'];
 echo "mom_player: $mom_player", PHP_EOL;
 $status = $row['status'];
 echo "status: $status";
+
 mysql_close($connection);
 ?>
