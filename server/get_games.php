@@ -25,6 +25,13 @@ while ($row = mysql_fetch_array( $result ))
 		mysql_query($query) or die;
 		continue;
 	}
+	else
+	if ($create_date < $now-60) //1 minute
+	{
+		$query = "UPDATE hase_game_list SET status='-1' WHERE game_id = '$game_id'";
+		mysql_query($query) or die;
+		continue;
+	}
 	$status = $row['status'];
 	if ($status == -1)
 		continue;

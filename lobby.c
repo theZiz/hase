@@ -7,6 +7,9 @@
 SDL_Surface* screen;
 spFontPointer font;
 
+#define BUTTON_BG spGetRGB(64,64,64)
+#define BUTTON_FG spGetRGB(220,220,220)
+
 void resize( Uint16 w, Uint16 h )
 {
 	spSelectRenderTarget(screen);
@@ -14,17 +17,17 @@ void resize( Uint16 w, Uint16 h )
 	if ( font )
 		spFontDelete( font );
 	spFontSetShadeColor(0);
-	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 7 * spGetSizeFactor() >> SP_ACCURACY);
-	spFontAdd( font, SP_FONT_GROUP_ASCII"™", 65535 ); //whole ASCII
+	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+	spFontAdd( font, SP_FONT_GROUP_ASCII"™", BUTTON_FG ); //whole ASCII
 	spFontAddBorder(font , 0);
-	spFontAddButton( font, 'R', SP_BUTTON_START_NAME, 65535, spGetRGB(127,127,127) ); //Return == START
-	spFontAddButton( font, 'B', SP_BUTTON_SELECT_NAME, 65535, spGetRGB(127,127,127) ); //Backspace == SELECT
-	spFontAddButton( font, 'q', SP_BUTTON_L_NAME, 65535, spGetRGB(127,127,127) ); // q == L
-	spFontAddButton( font, 'e', SP_BUTTON_R_NAME, 65535, spGetRGB(127,127,127) ); // e == R
-	spFontAddButton( font, 'a', SP_BUTTON_LEFT_NAME, 65535, spGetRGB(127,127,127) ); //a == left button
-	spFontAddButton( font, 'd', SP_BUTTON_RIGHT_NAME, 65535, spGetRGB(127,127,127) ); // d == right button
-	spFontAddButton( font, 'w', SP_BUTTON_UP_NAME, 65535, spGetRGB(127,127,127) ); // w == up button
-	spFontAddButton( font, 's', SP_BUTTON_DOWN_NAME, 65535, spGetRGB(127,127,127) ); // s == down button
+	spFontAddButton( font, 'R', SP_BUTTON_START_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); //Return == START
+	spFontAddButton( font, 'B', SP_BUTTON_SELECT_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); //Backspace == SELECT
+	spFontAddButton( font, 'q', SP_BUTTON_L_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); // q == L
+	spFontAddButton( font, 'e', SP_BUTTON_R_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); // e == R
+	spFontAddButton( font, 'a', SP_BUTTON_LEFT_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); //a == left button
+	spFontAddButton( font, 'd', SP_BUTTON_RIGHT_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); // d == right button
+	spFontAddButton( font, 'w', SP_BUTTON_UP_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); // w == up button
+	spFontAddButton( font, 's', SP_BUTTON_DOWN_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); // s == down button
 	spFontMulWidth(font,spFloatToFixed(0.9f));
 
 	spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_IF_NEEDED,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));

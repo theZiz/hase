@@ -15,10 +15,10 @@ int ll_selected;
 pPlayer ll_player_list = NULL;
 spTextBlockPointer ll_block = NULL;
 void ( *ll_resize )( Uint16 w, Uint16 h );
-char ll_game_name[33] = "";
+char ll_game_name[33] = "New game";
 int ll_game_players = 8;
 int ll_game_seconds = 30;
-int ll_game_online = 1;
+int ll_game_online = 0;
 int ll_first_version = 0;
  
 void update_ll_surface()
@@ -100,12 +100,12 @@ int ll_wait;
 
 int ll_calc(Uint32 steps)
 {
-	if (spGetInput()->button[SP_BUTTON_SELECT] ||
-		spGetInput()->button[SP_BUTTON_START])
+	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD] ||
+		spGetInput()->button[SP_BUTTON_START_NOWASD])
 		return 1;
-	if (spGetInput()->button[SP_BUTTON_UP])
+	if (spGetInput()->button[SP_BUTTON_UP_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_UP] = 0;
+		spGetInput()->button[SP_BUTTON_UP_NOWASD] = 0;
 		if (ll_offline)
 			ll_game_online = -1;
 		int res = 1;
@@ -127,9 +127,9 @@ int ll_calc(Uint32 steps)
 		}
 		ll_counter = 10000;
 	}		
-	if (spGetInput()->button[SP_BUTTON_LEFT])
+	if (spGetInput()->button[SP_BUTTON_LEFT_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_LEFT] = 0;
+		spGetInput()->button[SP_BUTTON_LEFT_NOWASD] = 0;
 		if (ll_game_count <= 0)
 			message(ll_font,ll_resize,"No game to join!",1,NULL);
 		else

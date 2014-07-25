@@ -54,7 +54,7 @@ void message_draw(void)
 		}
 		spFontDrawMiddle( screen->w/2,14*screen->h/23, 0, buffer, mg_font );
 
-		spFontDrawMiddle( screen->w/2, (8+mg_pos*2)*screen->h/23, 0, ">>                                           <<", mg_font );
+		spFontDrawMiddle( screen->w/2, (8+mg_pos*2)*screen->h/23, 0, ">>                               <<", mg_font );
 
 		/*if (mg_change_char)
 		{
@@ -68,7 +68,10 @@ void message_draw(void)
 			switch (mg_pos)
 			{
 				case 0:
-					spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "Enter your name  [a]Back", mg_font );
+					if (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
+						spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "[s]Enter your name  [a]Back", mg_font );
+					else
+						spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "Enter your name  [a]Back", mg_font );
 					break;
 				default:
 					spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, SP_PAD_NAME": Change  [a]Back", mg_font );
@@ -103,7 +106,10 @@ void message_draw(void)
 				spFontDrawMiddle( screen->w/2, 4*screen->h/7-mg_font->maxheight, 0, "[a]Ok", mg_font );
 				break;
 			case 2:
-				spFontDrawMiddle( screen->w/2, 4*screen->h/7-mg_font->maxheight, 0, "[a]Ok     [d]Cancel", mg_font );
+				if (mg_change_char && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
+					spFontDrawMiddle( screen->w/2, 4*screen->h/7-mg_font->maxheight, 0, "[s]Enter letter  [a]Ok  [d]Cancel", mg_font );
+				else
+					spFontDrawMiddle( screen->w/2, 4*screen->h/7-mg_font->maxheight, 0, "[a]Ok     [d]Cancel", mg_font );
 				break;
 		}
 		if (mg_button_count > 0)
@@ -115,24 +121,14 @@ int message_calc(Uint32 steps)
 {
 	if (mg_button_count < 0)
 	{
-		if (spGetInput()->button[SP_BUTTON_RIGHT])
+		if (spGetInput()->button[SP_BUTTON_LEFT_NOWASD] && (*mg_online != -1 || mg_pos != 3))
 		{
-			spGetInput()->button[SP_BUTTON_RIGHT] = 0;
-			return 2;
-		}
-		if (spGetInput()->button[SP_BUTTON_UP])
-		{
-			spGetInput()->button[SP_BUTTON_UP] = 0;
-			return 1;
-		}
-		if (spGetInput()->button[SP_BUTTON_LEFT] && (*mg_online != -1 || mg_pos != 3))
-		{
-			spGetInput()->button[SP_BUTTON_LEFT] = 0;
+			spGetInput()->button[SP_BUTTON_LEFT_NOWASD] = 0;
 			mg_sel = 1-mg_sel;
 			if (mg_sel == 0 && mg_pos == 0)
 				spStopKeyboardInput();
 			if (mg_sel == 1 && mg_pos == 0)
-				spPollKeyboardInput(mg_name,32,SP_BUTTON_DOWN_MASK);
+				spPollKeyboardInput(mg_name,32,SP_BUTTON_DOWN_NOWASD_MASK);
 		}
 		if (mg_sel)
 		{
@@ -175,6 +171,16 @@ int message_calc(Uint32 steps)
 		}
 		else
 		{
+			if (spGetInput()->button[SP_BUTTON_RIGHT_NOWASD])
+			{
+				spGetInput()->button[SP_BUTTON_RIGHT_NOWASD] = 0;
+				return 2;
+			}
+			if (spGetInput()->button[SP_BUTTON_UP_NOWASD])
+			{
+				spGetInput()->button[SP_BUTTON_UP_NOWASD] = 0;
+				return 1;
+			}
 			if (spGetInput()->axis[1] > 0 && mg_pos < 3)
 			{
 				spGetInput()->axis[1] = 0;
@@ -187,14 +193,14 @@ int message_calc(Uint32 steps)
 			}
 		}
 	}
-	if (mg_button_count > 0 && spGetInput()->button[SP_BUTTON_LEFT])
+	if (mg_button_count > 0 && spGetInput()->button[SP_BUTTON_LEFT_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_LEFT] = 0;
+		spGetInput()->button[SP_BUTTON_LEFT_NOWASD] = 0;
 		return 1;
 	}
-	if (mg_button_count > 1 && spGetInput()->button[SP_BUTTON_RIGHT])
+	if (mg_button_count > 1 && spGetInput()->button[SP_BUTTON_RIGHT_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_RIGHT] = 0;
+		spGetInput()->button[SP_BUTTON_RIGHT_NOWASD] = 0;
 		return 2;
 	}
 
