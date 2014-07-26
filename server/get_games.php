@@ -27,7 +27,7 @@ while ($row = mysql_fetch_array( $result ))
 		continue;
 	}
 	else
-	if ($create_date < $now-60 && $status != -1) //1 minute ingame without reaction...
+	if ($create_date < $now-60 && $status != -1 && statu != -2) //1 minute ingame without reaction...
 	{
 		$query = "UPDATE hase_game_list SET status='-2' WHERE game_id = '$game_id'";
 		mysql_query($query) or die;

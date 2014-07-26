@@ -6,6 +6,8 @@
 int ai_shoot_tries = 0;
 int last_ai_try = 0;
 
+#include "message.h"
+
 int lastAIDistance = 100000000;
 
 int active_player = 0;
@@ -213,6 +215,11 @@ void stop_thread()
 			if (player[active_player]->local)
 			{
 				printf("Ending Push Thread for player %s (s: %i)\n",player[active_player]->name,player[active_player]->time/1000);
+				char buffer[320];
+				sprintf(buffer,"Finishing sending turn data\nfor player %s...",player[active_player]->name);
+				message(font,hase_resize,buffer,0,NULL);
+				message_draw();
+				spFlip();
 				push_game_thread(player[active_player],player[active_player]->time/1000,send_data);
 				memset(send_data,0,sizeof(char)*1536);
 				end_push_thread();

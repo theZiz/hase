@@ -690,5 +690,6 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	spDeleteSurface(level);
 	spDeleteSurface(level_original);
 	spDeleteSurface(gravity_surface);
+	spResetButtonsState();
 	return 0;
 }

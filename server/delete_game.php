@@ -13,8 +13,16 @@ $result = mysql_query($query) or die;
 $row = mysql_fetch_array( $result );
 if ($row['admin_pw'] == $admin_pw)
 {
-	$query = "UPDATE hase_game_list SET status='-1' WHERE game_id = '$game_id'";
-	mysql_query($query) or die;	
+	if ($row['status'] == 1) //closing a running game
+	{
+		$query = "UPDATE hase_game_list SET status='-1' WHERE game_id = '$game_id'";
+		mysql_query($query) or die;	
+	}
+	else
+	{
+		$query = "UPDATE hase_game_list SET status='-2' WHERE game_id = '$game_id'";
+		mysql_query($query) or die;	
+	}
 }
 mysql_close($connection); 
 ?>
