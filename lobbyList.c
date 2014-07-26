@@ -20,7 +20,9 @@ int ll_game_players = 8;
 int ll_game_seconds = 30;
 int ll_game_online = 0;
 int ll_first_version = 0;
- 
+
+pGame mom_game;
+
 void update_ll_surface()
 {
 	spSelectRenderTarget(ll_surface);
@@ -33,10 +35,14 @@ void update_ll_surface()
 	pos++;
 	spLine(2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, ll_surface->w-2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, 65535);
 	pGame game = ll_game_list;
+	mom_game = NULL;
 	while (game)
 	{
 		if (pos-1 == ll_selected)
+		{
 			spRectangle(ll_surface->w/2, 2+(2*pos+1)*ll_font->maxheight/2-ll_scroll/1024,0, ll_surface->w-4,ll_font->maxheight,LL_BG);
+			mom_game = game;
+		}
 		spFontDraw( 2                    , 2+pos*ll_font->maxheight-ll_scroll/1024, 0, game->name, ll_font );
 		char buffer[16];
 		sprintf(buffer,"%i",game->player_count);
@@ -46,6 +52,7 @@ void update_ll_surface()
 		switch (game->status)
 		{
 			case  1: sprintf(buffer,"Running"); break;
+			case -1: sprintf(buffer,"Finished"); break;
 			default: sprintf(buffer,"Open");
 		}
 		spFontDraw( 2+13*ll_surface->w/16, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );
@@ -87,7 +94,10 @@ void ll_draw(void)
 	}
 	else
 	{
-		spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[a]Join   [w]Create   [R]/[B]Exit", ll_font );
+		if (mom_game && mom_game->status == -1)
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[a]Replay   [w]Create   [R]/[B]Exit", ll_font );
+		else
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[a]Join   [w]Create   [R]/[B]Exit", ll_font );
 		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
 	}
@@ -143,8 +153,11 @@ int ll_calc(Uint32 steps)
 				game = game->next;
 				pos++;
 			}
-			if (game->status != 0)
+			if (game->status == 1)
 				message(ll_font,ll_resize,"Game already started!",1,NULL);
+			else
+			if (game->status == -1) //Replay!
+				hase(ll_resize,game,NULL);
 			else
 			if (game->player_count >= game->max_player)
 				message(ll_font,ll_resize,"Game full!",1,NULL);

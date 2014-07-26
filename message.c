@@ -69,9 +69,9 @@ void message_draw(void)
 			{
 				case 0:
 					if (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
-						spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "[s]Enter your name  [a]Back", mg_font );
+						spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "[s]Enter game name  [a]Back", mg_font );
 					else
-						spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "Enter your name  [a]Back", mg_font );
+						spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, "Enter game name  [a]Back", mg_font );
 					break;
 				default:
 					spFontDrawMiddle( screen->w/2,16*screen->h/23, 0, SP_PAD_NAME": Change  [a]Back", mg_font );

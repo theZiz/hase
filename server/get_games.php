@@ -13,6 +13,7 @@ while ($row = mysql_fetch_array( $result ))
 {
 	$game_id = $row['game_id'];
 	$create_date = $row['create_date'];
+	$status = $row['status'];
 	if ($create_date < $now-3600*24*7) //7 days
 	{
 		$query = "DELETE FROM hase_game_list WHERE game_id = '$game_id'";
@@ -26,14 +27,13 @@ while ($row = mysql_fetch_array( $result ))
 		continue;
 	}
 	else
-	if ($create_date < $now-60) //1 minute
+	if ($create_date < $now-60 && $status != -1) //1 minute ingame without reaction...
 	{
-		$query = "UPDATE hase_game_list SET status='-1' WHERE game_id = '$game_id'";
+		$query = "UPDATE hase_game_list SET status='-2' WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
 		continue;
 	}
-	$status = $row['status'];
-	if ($status == -1)
+	if ($status == -2)
 		continue;
 	$game_name = $row['game_name'];
 	$max_player = $row['max_player'];

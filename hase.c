@@ -379,6 +379,11 @@ void set_input()
 
 int calc(Uint32 steps)
 {
+	if (spGetInput()->button[SP_BUTTON_START])
+	{
+		spGetInput()->button[SP_BUTTON_START] = 0;
+		help = 1-help;
+	}
 	if (spGetInput()->button[SP_BUTTON_L_NOWASD])
 	{
 		zoomAdjust -= steps*32;
@@ -430,11 +435,6 @@ int calc(Uint32 steps)
 			countdown --;
 		if (countdown < 0)
 			next_player();
-		if (input_states[INPUT_BUTTON_START])
-		{
-			input_states[INPUT_BUTTON_START] = 0;
-			help = 1-help;
-		}
 		if (player[active_player]->computer)
 		{
 			//AI
