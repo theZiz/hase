@@ -481,6 +481,14 @@ void leave_game(pPlayer player)
 			mom_player = mom_player->next;
 		}
 	}
+	if (player->input_thread)
+		end_pull_thread(player);
+	while (player->input_data)
+	{
+		pThreadData next = player->input_data->next;
+		free(player->input_data);
+		player->input_data = next;
+	}
 	free(player);
 }
 
@@ -781,6 +789,7 @@ int pull_thread_function(void* data)
 			new_second = player->last_input_data_write->second_of_player+1;
 		if (pull_game(player,new_second,next_data->data) == 0) //data!
 		{
+			printf("PULL THREAD: Get second %i of player %s\n",new_second,player->name);
 			//Adding to the list
 			next_data->player = player;
 			next_data->second_of_player = new_second;
@@ -809,7 +818,7 @@ int pull_game_thread(pPlayer player,int second_of_player,void* data)
 	pThreadData thread_data = player->last_input_data_read;
 	if (player->last_input_data_read == NULL ||
 		player->last_input_data_read->second_of_player > second_of_player)
-	thread_data = player->input_data;
+		thread_data = player->input_data;
 	while (thread_data)
 	{
 		if (thread_data->second_of_player == second_of_player)
@@ -841,9 +850,9 @@ void end_pull_thread(pPlayer player)
 	SDL_DestroyMutex(player->input_mutex);
 	player->input_mutex = NULL;
 	player->input_thread = NULL;
-	player->input_data = NULL;
-	player->last_input_data_read = NULL;
-	player->last_input_data_write = NULL;
+	//player->input_data = NULL;
+	//player->last_input_data_read = NULL;
+	//player->last_input_data_write = NULL;
 }
 
 int connect_to_server()
