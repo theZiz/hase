@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="3" release="0" build="0"/>
+<version major="1" minor="3" release="0" build="1"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -20,7 +20,7 @@ Version 2: Now with network support!
 <exec command="./hase.sh"/>
 <version major="1" minor="3" release="0" build="0" type="release"/>
 <!--This program's version-->
-<osversion major="1" minor="0" release="0" build="0"/>
+<osversion major="1" minor="0" release="0" build="1"/>
 <!--The minimum OS version required-->
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <!--Optional email and website, name required-->

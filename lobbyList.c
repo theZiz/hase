@@ -70,10 +70,20 @@ void ll_draw(void)
 	SDL_Surface* screen = spGetWindowSurface();
 	spClearTarget(LL_BG);
 	char buffer[256];
-	if (ll_offline)
-		spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (No internet connection)", ll_font );
+	if (spGetSizeFactor() > SP_ONE)
+	{
+		if (ll_offline)
+			spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (No internet connection)", ll_font );
+		else
+			spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby", ll_font );
+	}
 	else
-		spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby", ll_font );
+	{
+		if (ll_offline)
+			spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (No internet con.) (Font: CC-BY-SA by HiBan)", ll_font );
+		else
+			spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (Font: CC-BY-SA by HiBan)", ll_font );
+	}
 	
 	sprintf(buffer,"%i Games on Server:\n",ll_game_count);
 	spFontDrawMiddle( screen->w/3+2, 1*ll_font->maxheight, 0, buffer, ll_font );
