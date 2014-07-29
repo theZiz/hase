@@ -17,7 +17,10 @@ void resize( Uint16 w, Uint16 h )
 	if ( font )
 		spFontDelete( font );
 	spFontSetShadeColor(0);
-	font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+	if (spGetSizeFactor() > SP_ONE)
+		font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+	else
+		font = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
 	spFontAdd( font, SP_FONT_GROUP_ASCII"™", BUTTON_FG ); //whole ASCII
 	spFontAddBorder(font , 0);
 	spFontAddButton( font, 'R', SP_BUTTON_START_NOWASD_NAME, BUTTON_FG, BUTTON_BG ); //Return == START

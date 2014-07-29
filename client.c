@@ -157,7 +157,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	}
 	pos+=4;
 	
-	if (direction == -1) //incoming file TODO
+	if (direction == -1) //incoming file
 	{
 		if (buffer[pos+1] == 'A' &&
 			buffer[pos+2] == 'C' &&
@@ -166,6 +166,16 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			memcpy(binary,&buffer[pos+4],count);
 			pMessage result = NULL;
 			numToMessage(&result,"Okay",1);
+			return result;
+		}
+		else
+		if (buffer[pos+1] == 'N' &&
+			buffer[pos+2] == 'U' &&
+			buffer[pos+3] == 'L')
+		{
+			memset(binary,255,count);
+			pMessage result = NULL;
+			numToMessage(&result,"Kicked",1);
 			return result;
 		}
 		else

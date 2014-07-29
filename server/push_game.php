@@ -19,6 +19,9 @@ if ($row['player_pw'] == $player_pw)
 	"VALUES ( '$game_id', '$player_id', '$second_of_player', '$data' )";
 	mysql_query($query) or die;
 }
-echo "Error: 0";
+if ($row['status'] == -2) //killed...
+	echo "Error: 1";
+else
+	echo "Error: 0";
 mysql_close($connection);
 ?>

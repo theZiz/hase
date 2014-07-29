@@ -29,7 +29,7 @@ while ($row = mysql_fetch_array( $result ))
 		$chat_get_time = $row['chat_time'];
 }
 
-$query = "UPDATE hase_player_list SET chat_get_time='$chat_get_time' WHERE game_id = '$game_id' AND player_id = '$player_id'";
+$query = "UPDATE hase_player_list SET chat_get_time='$chat_get_time', heartbeat_time='$now' WHERE game_id = '$game_id' AND player_id = '$player_id'";
 mysql_query($query) or die;
 
 $now = time();

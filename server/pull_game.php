@@ -21,8 +21,30 @@ if (mysql_num_rows($result) > 0)
 }
 else
 {
-	header("Content-length: 3");
-	echo 'ERR';
+	$query = "SELECT * FROM hase_player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
+	$result = mysql_query($query) or die;
+	$row = mysql_fetch_assoc( $result );
+	if ($row['status'] < 0)
+	{
+		header("Content-length: 3");
+		echo 'NUL';
+	}
+	else
+	{
+		//Okay, not found. Maybe is the player dead?
+		$now = time();
+		$query = "SELECT * FROM hase_player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
+		$result = mysql_query($query) or die;
+		$row = mysql_fetch_assoc( $result );
+		if ($row['heartbeat_time'] < $now-60) //one minute no reaction
+		{
+			$query = "UPDATE hase_player_list SET status='-2' WHERE game_id = '$game_id' AND player_id = '$player_id'";
+			mysql_query($query) or die;		
+			//this will work on next pull
+		}
+		header("Content-length: 3");
+		echo 'ERR';
+	}
 }
 
 mysql_close($connection);

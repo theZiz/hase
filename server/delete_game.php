@@ -16,7 +16,7 @@ if ($row['admin_pw'] == $admin_pw)
 	if ($row['status'] == 1) //closing a running game
 	{
 		$query = "UPDATE hase_game_list SET status='-1' WHERE game_id = '$game_id'";
-		mysql_query($query) or die;	
+		mysql_query($query) or die;
 	}
 	else
 	{
@@ -24,5 +24,6 @@ if ($row['admin_pw'] == $admin_pw)
 		mysql_query($query) or die;	
 	}
 }
+echo "Error: 0";
 mysql_close($connection); 
 ?>

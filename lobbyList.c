@@ -52,7 +52,7 @@ void update_ll_surface()
 		switch (game->status)
 		{
 			case  1: sprintf(buffer,"Running"); break;
-			case -1: sprintf(buffer,"Finished"); break;
+			case -1: sprintf(buffer,"Done"); break;
 			default: sprintf(buffer,"Open");
 		}
 		spFontDraw( 2+13*ll_surface->w/16, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );

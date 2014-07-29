@@ -54,7 +54,7 @@ void message_draw(void)
 		}
 		spFontDrawMiddle( screen->w/2,14*screen->h/23, 0, buffer, mg_font );
 
-		spFontDrawMiddle( screen->w/2, (8+mg_pos*2)*screen->h/23, 0, ">>                               <<", mg_font );
+		spFontDrawMiddle( screen->w/2, (8+mg_pos*2)*screen->h/23, 0, ">>                      <<", mg_font );
 
 		/*if (mg_change_char)
 		{
