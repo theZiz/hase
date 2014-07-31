@@ -20,6 +20,7 @@ SDL_Surface* weapon;
 SDL_Surface* bullet;
 int posX,posY,rotation;
 Sint32 zoom;
+Sint32 zoom_d; 
 Sint32 zoomAdjust;
 Sint32 minZoom,maxZoom;
 int help = 0;
@@ -30,6 +31,8 @@ int direction_pressed = 0;
 int alive_count;
 
 int game_pause = 0;
+int extra_time = 0;
+int weapon_points = 0;
 
 #define INPUT_AXIS_0_LEFT 0
 #define INPUT_AXIS_0_RIGHT 1
@@ -101,11 +104,13 @@ void draw(void)
 			//Arrow
 			if (player[j]->w_power)
 			{
-				Sint32 ox = spMul(player[j]->x-posX-14*-spSin(player[j]->rotation+player[j]->w_direction-SP_PI/2),zoom);
-				Sint32 oy = spMul(player[j]->y-posY-14* spCos(player[j]->rotation+player[j]->w_direction-SP_PI/2),zoom);
+				Sint32 ox = spMul(player[j]->x-posX-14*-spMul(spSin(player[j]->rotation+player[j]->w_direction-SP_PI/2),player[j]->w_power+SP_ONE*2/3),zoom);
+				Sint32 oy = spMul(player[j]->y-posY-14* spMul(spCos(player[j]->rotation+player[j]->w_direction-SP_PI/2),player[j]->w_power+SP_ONE*2/3),zoom);
 				Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(zoom,spGetSizeFactor())/8,spMul(player[j]->w_power,spMul(zoom,spGetSizeFactor()))/4,player[j]->w_direction+rotation+player[j]->rotation-SP_PI/2);
+				spSetBlending( SP_ONE*2/3 );
+				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(zoom,spGetSizeFactor())/16,spMul(player[j]->w_power,spMul(zoom,spGetSizeFactor()))/4,player[j]->w_direction+rotation+player[j]->rotation-SP_PI/2);
+				spSetBlending( SP_ONE );
 			}
 		}
 		spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
@@ -137,8 +142,7 @@ void draw(void)
 	drawBullets();
 		
 	//Trace
-	if (player[active_player]->shoot == 0)
-		drawTrace();
+	//drawTrace();
 	
 	//Error message
 	if (game_pause)
@@ -148,14 +152,17 @@ void draw(void)
 	draw_help();
 	
 	//HID
-	sprintf(buffer,"FPS: %i",spGetFPS());
+	sprintf(buffer,"Weapon points: %i/3",weapon_points);
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	sprintf(buffer,"Power: %i %%",player[active_player]->w_power*100/SP_ONE);
 	spFontDraw( 2, 2, 0, buffer, font );	
 	sprintf(buffer,"%i / %i\n",alive_count,hase_game->player_count);	
 	spFontDrawRight( screen->w-2, 2, 0, buffer, font );
-	if (player[active_player]->shoot == 0)
+	if (weapon_points)
 		sprintf(buffer,"%i seconds left",countdown / 1000);
+	else
+	if (extra_time)
+		sprintf(buffer,"%i seconds left to escape",extra_time / 1000);
 	else
 		sprintf(buffer,"Free time until bullet strikes!");
 	spFontDrawMiddle( screen->w >> 1, 2, 0, buffer, font );
@@ -379,25 +386,22 @@ void set_input()
 
 int calc(Uint32 steps)
 {
-	if (spGetInput()->button[SP_BUTTON_START])
+	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD] &&
+	    spGetInput()->button[SP_BUTTON_START_NOWASD])
 	{
-		spGetInput()->button[SP_BUTTON_START] = 0;
+		spGetInput()->button[SP_BUTTON_SELECT_NOWASD] = 0;
+		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
+		return 1;
+	}
+	if (spGetInput()->button[SP_BUTTON_START_NOWASD])
+	{
+		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
 		help = 1-help;
 	}
 	if (spGetInput()->button[SP_BUTTON_L_NOWASD])
-	{
-		zoomAdjust -= steps*32;
-		if (zoomAdjust < minZoom)
-			zoomAdjust = minZoom;
-		zoom = spMul(zoomAdjust,zoomAdjust);
-	}
+		zoom_d = -1;
 	if (spGetInput()->button[SP_BUTTON_R_NOWASD])
-	{
-		zoomAdjust += steps*32;
-		if (zoomAdjust > maxZoom)
-			zoomAdjust = maxZoom;
-		zoom = spMul(zoomAdjust,zoomAdjust);
-	}	
+		zoom_d =  1;	
 	int i;
 	update_player_sprite(steps);
 	int result = 0;
@@ -405,6 +409,25 @@ int calc(Uint32 steps)
 		spSleep(200000);
 	for (i = 0; i < steps; i++)
 	{
+		if (zoom_d == -1)
+		{
+			zoomAdjust -= 32;
+			if (zoomAdjust < minZoom)
+				zoomAdjust = minZoom;
+			zoom = spMul(zoomAdjust,zoomAdjust);
+			if ((zoomAdjust & 16383) == 0)
+				zoom_d = 0;
+		}
+		else
+		if (zoom_d == 1)
+		{
+			zoomAdjust += 32;
+			if (zoomAdjust > maxZoom)
+				zoomAdjust = maxZoom;
+			zoom = spMul(zoomAdjust,zoomAdjust);
+			if ((zoomAdjust & 16383) == 0)
+				zoom_d = 0;
+		}
 		if (game_pause > 0)
 			game_pause--;
 		if (game_pause)
@@ -431,14 +454,14 @@ int calc(Uint32 steps)
 		if (bullet_alpha() > 0)
 			continue;
 		check_next_player();
-		if (player[active_player]->shoot == 0)
+		if (weapon_points)
 			countdown --;
 		if (countdown < 0)
 			next_player();
 		if (player[active_player]->computer)
 		{
 			//AI
-			if (player[active_player]->shoot == 0)
+			if (weapon_points)
 			{
 				if (player[active_player]->bums && player[active_player]->hops <= 0)
 				{
@@ -475,8 +498,11 @@ int calc(Uint32 steps)
 							else
 							{
 								//Shoot!
-								player[active_player]->shoot = 1;
-								player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
+								if (weapon_points > 0)
+								{
+									weapon_points--;
+									player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
+								}
 								break;
 							}
 						}
@@ -566,14 +592,28 @@ int calc(Uint32 steps)
 			}
 			else
 				power_pressed = 0;
-			if (input_states[INPUT_BUTTON_RIGHT] && player[active_player]->shoot == 0)
+			if (input_states[INPUT_BUTTON_RIGHT])
 			{
 				//Shoot!
-				player[active_player]->shoot = 1;
-				input_states[INPUT_BUTTON_RIGHT] = 0;
-				player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
+				if (weapon_points > 0)
+				{
+					weapon_points--;
+					input_states[INPUT_BUTTON_RIGHT] = 0;
+					player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
+				}
 			}
 		}
+		if (firstBullet == NULL && weapon_points == 0)
+		{
+			if (extra_time == 0)
+				extra_time = 5000;
+			else
+			if (extra_time == 1)
+				next_player();
+			else
+				extra_time--;
+		}
+		//Camera
 		int destX,destY;
 		destX = player[active_player]->x;
 		destY = player[active_player]->y;
@@ -594,13 +634,7 @@ int calc(Uint32 steps)
 		posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
 		posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
 	}
-	if (player[active_player]->shoot == 0)
-		updateTrace();
-	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
-	{
-		spGetInput()->button[SP_BUTTON_SELECT_NOWASD] = 0;
-		return 1;
-	}
+	//updateTrace();
 	return result;
 }
 
@@ -654,6 +688,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	minZoom = spSqrt(spGetSizeFactor()/8);
 	maxZoom = spSqrt(spGetSizeFactor()*4);
 	zoom = spMul(zoomAdjust,zoomAdjust);
+	zoom_d = 0;
 	countdown = hase_game->seconds_per_turn*1000;
 	alive_count = player_count;
 	memset(input_states,0,sizeof(int)*12);

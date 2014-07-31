@@ -77,7 +77,6 @@ typedef struct sPlayer
 	int high_hops;
 	int health;
 	spSpriteCollectionPointer hase;
-	int shoot;
 	pBullet bullet;
 	int local;
 	int time;

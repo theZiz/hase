@@ -1,8 +1,8 @@
 * README (+opk and pandora link)
+* new message approach
 * particle effect
 * more level details / new level making approach
-* 3 weapon points per turn
-* free time + 5 seconds
+* ingame options menu instead of help
 * more weapons
 	* default missile (3 wp)
 	* low grav missile (3 wp)
@@ -24,10 +24,12 @@
 * different sprites (kangoroo and co)
 * more hares per player
 * color/sprite adjustable
-* locking zoom
+* new health bars
+* global health bar for all hares
 * main menu for local game, online game, options, about, help, quit
 * not closing games "somehow"
-* better aiming
 * Writing down tractory while flying
+* Music
+* Sound FX
 
 http://pastebin.com/P0q6QE86

@@ -247,8 +247,6 @@ int updateBullets()
 		}
 		if (dead || momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT)
 		{
-			if (momBullet == player[active_player]->bullet)
-				next_player();
 			if (before)
 				before->next = momBullet->next;
 			else

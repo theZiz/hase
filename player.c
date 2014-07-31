@@ -267,13 +267,14 @@ void real_next_player()
 		active_player = (active_player+1)%player_count;
 	}
 	while (player[active_player]->health == 0);
-	player[active_player]->shoot = 0;
 	player[active_player]->bullet = NULL;
 	if (player[active_player]->computer)
 		player[active_player]->direction = spRand()&1;
 	countdown = hase_game->seconds_per_turn*1000;
 	player[active_player]->hops = 0;
 	player[active_player]->high_hops = 0;
+	weapon_points = 3;
+	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
 	start_thread();
 }
@@ -332,12 +333,13 @@ void init_player(pPlayer player_list,int pc)
 		player[i]->hase = spLoadSpriteCollection(buffer,NULL);
 	}
 	active_player = 0;
-	player[active_player]->shoot = 0;
 	player[active_player]->bullet = NULL;
 	posX = player[active_player]->x;
 	posY = player[active_player]->y;
 	ai_shoot_tries = 0;
 	last_ai_try = 0;
+	weapon_points = 3;
+	extra_time = 0;
 	start_thread();
 }
 
