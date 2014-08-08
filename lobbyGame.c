@@ -336,7 +336,11 @@ int lg_calc(Uint32 steps)
 		{
 			printf("Running game\n");
 			set_status(lg_game,1);
-			lg_reload();
+			int res = lg_reload();
+			if (res == -1)
+				return -1; //stopped
+			if (res == -3)
+				return -3; //connection error
 			hase(lg_resize,lg_game,lg_player);
 			return 3;
 		}
@@ -383,6 +387,8 @@ int lg_calc(Uint32 steps)
 		lg_counter = a-b;
 		if (res == -1)
 			return -1; //stopped
+		if (res == -3)
+			return -3; //connection error
 		if (res == 1)
 			return 2; //started
 		
@@ -399,7 +405,8 @@ int lg_calc(Uint32 steps)
 
 int lg_reload()
 {
-	get_game(lg_game,&lg_player_list);
+	if (get_game(lg_game,&lg_player_list)) //Connection error!
+		return -1;
 	char temp[4096] = "";
 	pPlayer player = lg_player_list;
 	while (player)
@@ -419,7 +426,6 @@ int lg_reload()
 		lg_level = create_level(lg_game->level_string,l_w,l_w,LL_BG);
 		sprintf(lg_level_string,"%s",lg_game->level_string);
 	}
-
 	return lg_game->status;
 }
 
@@ -453,13 +459,17 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		lg_chat_text[0] = 0;
 		if (!lg_game->local)
 			start_chat_listener(lg_player);
+		
 		int res = spLoop(lg_draw,lg_calc,10,resize,NULL);
+		
 		if (!lg_game->local)
 			stop_chat_listener(lg_player);
 		if (lg_block)
 			spDeleteTextBlock(lg_block);
 		if (res == -1)
 			message_box(font,resize,"Game was closed...");
+		if (res == -3)
+			message_box(font,resize,"Lost connection...");
 		if (res == 2)
 			hase(lg_resize,lg_game,lg_player);
 		while (lg_player)

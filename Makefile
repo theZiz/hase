@@ -41,10 +41,10 @@ testclient: testclient.c client.o level.o
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
 	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
 
-lobby: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o makeBuildDir
+lobby: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o makeBuildDir
 	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
 	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
+	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
 	
 client.o: client.c client.h
 	$(CPP) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
@@ -57,6 +57,9 @@ lobbyGame.o: lobbyGame.c lobbyGame.h lobbyList.h
 
 window.o: window.c window.h lobbyList.h
 	$(CPP) $(CFLAGS) -c window.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+about.o: about.c about.h lobbyList.h
+	$(CPP) $(CFLAGS) -c about.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
 hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h
 	$(CPP) $(CFLAGS) -c hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)

@@ -9,7 +9,6 @@ spFontPointer ll_font;
 int ll_counter;
 pGame ll_game_list;
 int ll_game_count;
-int ll_offline;
 int ll_scroll;
 int ll_selected;
 pPlayer ll_player_list = NULL;
@@ -18,8 +17,6 @@ void ( *ll_resize )( Uint16 w, Uint16 h );
 char ll_game_name[33] = "New game";
 int ll_game_players = 8;
 int ll_game_seconds = 30;
-int ll_game_online = 0;
-int ll_first_version = 0;
 
 pGame mom_game;
 
@@ -70,20 +67,7 @@ void ll_draw(void)
 	SDL_Surface* screen = spGetWindowSurface();
 	spClearTarget(LL_BG);
 	char buffer[256];
-	if (spGetSizeFactor() > SP_ONE)
-	{
-		if (ll_offline)
-			spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (No internet connection)", ll_font );
-		else
-			spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby", ll_font );
-	}
-	else
-	{
-		if (ll_offline)
-			spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (No internet con.) (Font: CC-BY-SA by HiBan)", ll_font );
-		else
-			spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby (Font: CC-BY-SA by HiBan)", ll_font );
-	}
+	spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby", ll_font );
 	
 	sprintf(buffer,"%i Games on Server:\n",ll_game_count);
 	spFontDrawMiddle( screen->w/3+2, 1*ll_font->maxheight, 0, buffer, ll_font );
@@ -105,9 +89,9 @@ void ll_draw(void)
 	else
 	{
 		if (mom_game && mom_game->status == -1)
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Replay   [3]Create   [R]/[B]Exit", ll_font );
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Replay   [3]Create   [R]/[B]Back", ll_font );
 		else
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Join   [3]Create   [R]/[B]Exit", ll_font );
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Join   [3]Create   [R]/[B]Back", ll_font );
 		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
 	}
@@ -133,9 +117,6 @@ int create_game_feedback( pWindowElement elem, int action )
 					if (ll_game_seconds > 5)
 						ll_game_seconds -= 5;
 					break;
-				case 3:
-					ll_game_online = 1-ll_game_online;
-					break;
 			}
 			break;
 		case WN_ACT_RIGHT:
@@ -146,9 +127,6 @@ int create_game_feedback( pWindowElement elem, int action )
 					break;
 				case 2:
 					ll_game_seconds += 5;
-					break;
-				case 3:
-					ll_game_online = 1-ll_game_online;
 					break;
 			}
 			break;
@@ -164,12 +142,6 @@ int create_game_feedback( pWindowElement elem, int action )
 		case 0: sprintf(elem->text,"Name: %s",ll_game_name); break;
 		case 1: sprintf(elem->text,"Maximum players: %i",ll_game_players); break;
 		case 2: sprintf(elem->text,"Seconds per turn: %i",ll_game_seconds); break;
-		case 3: switch (ll_game_online)
-			{
-				case -1: sprintf(elem->text,"Local game (no internet)"); break;
-				case 0: sprintf(elem->text,"Local game"); break;
-				case 1: sprintf(elem->text,"Online game"); break;
-			} break;
 	}
 	return 0;
 }
@@ -182,8 +154,6 @@ int ll_calc(Uint32 steps)
 	if (spGetInput()->button[MY_PRACTICE_3])
 	{
 		spGetInput()->button[MY_PRACTICE_3] = 0;
-		if (ll_offline)
-			ll_game_online = -1;
 		int res = 1;
 		while (res == 1)
 		{
@@ -191,10 +161,6 @@ int ll_calc(Uint32 steps)
 			add_window_element(window,1,0);
 			add_window_element(window,0,1);
 			add_window_element(window,0,2);
-			if (ll_game_online == -1)
-				add_window_element(window,-1,3);
-			else
-				add_window_element(window,0,3);
 			res = modal_window(window,ll_resize);
 			delete_window(window);
 			if (res == 1 && ll_game_name[0] == 0)
@@ -205,7 +171,7 @@ int ll_calc(Uint32 steps)
 		if (res == 1)
 		{
 			char buffer[512];
-			pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),ll_game_online<=0);
+			pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0);
 			start_lobby_game(ll_font,ll_resize,game);
 			delete_game(game);
 			ll_counter = 10000;			
@@ -246,7 +212,8 @@ int ll_calc(Uint32 steps)
 	if (ll_reload_now == 2)
 	{
 		int a = SDL_GetTicks();
-		ll_reload();
+		if (ll_reload())
+			return 1;
 		int b = SDL_GetTicks();
 		ll_reload_now = 0;
 		ll_counter = a-b;
@@ -363,7 +330,7 @@ int ll_calc(Uint32 steps)
 	return 0;
 }
 
-void ll_reload()
+int ll_reload()
 {
 	if (ll_level)
 	{
@@ -372,37 +339,20 @@ void ll_reload()
 		ll_level = NULL;
 		ll_block = NULL;
 	}
-	if (ll_first_version && ll_first_version > LL_VERSION)
-		return;
-	ll_offline = connect_to_server();
-	int version;
-	if (ll_offline == 0)
-		ll_offline = (version = server_info()) == 0;
-	if (!ll_offline)
+	if (connect_to_server())
 	{
-		if (ll_first_version == 0)
-		{
-			ll_first_version = version;
-			if (ll_first_version > LL_VERSION)
-			{
-				ll_game_list = NULL;
-				ll_game_count = 0;
-				ll_offline = 1;
-				message_box(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!");
-			}
-			else
-				ll_game_count = get_games(&ll_game_list);
-		}
-		else
-			ll_game_count = get_games(&ll_game_list);
+		message_box(ll_font,ll_resize,"No Connection to server!");
+		return 1;
 	}
-	else
+	if (server_info() > LL_VERSION)
 	{
-		ll_game_list = NULL;
-		ll_game_count = 0;
+		message_box(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!");
+		return 1;
 	}
+	ll_game_count = get_games(&ll_game_list);
 	if (ll_game_count == 0)
-		ll_selected = -1;	
+		ll_selected = -1;
+	return 0;
 }
 
 
@@ -413,6 +363,7 @@ void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 	ll_counter = 10000;//Instead reload
 	ll_surface = spCreateSurface(2*spGetWindowSurface()->w/3-4,spGetWindowSurface()->h-3*font->maxheight);
 	ll_resize = resize;
+	ll_reload_now = 0;
 	spLoop(ll_draw,ll_calc,10,resize,NULL);
 	spDeleteSurface(ll_surface);
 	if (ll_level)

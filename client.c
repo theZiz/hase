@@ -306,7 +306,7 @@ int get_games(pGame *gameList)
 	for (i = 0; i < 3 && result == NULL;i++)
 		result = sendMessage(NULL,NULL,NULL,0,"get_games.php");
 	if (result == NULL)
-		return;
+		return 0;
 	pMessage now = result;
 	*gameList = NULL;
 	pGame game = NULL;
@@ -502,7 +502,7 @@ void leave_game(pPlayer player)
 	free(player);
 }
 
-void get_game(pGame game,pPlayer *playerList)
+int get_game(pGame game,pPlayer *playerList)
 {
 	if (game->local == 0)
 	{
@@ -514,7 +514,7 @@ void get_game(pGame game,pPlayer *playerList)
 			result = sendMessage(message,NULL,NULL,0,"get_game.php");
 		deleteMessage(&message);
 		if (result == NULL)
-			return;
+			return 1;
 		pMessage now = result;
 		if (playerList)
 		{
@@ -599,8 +599,8 @@ void get_game(pGame game,pPlayer *playerList)
 			mom_player = mom_player->next;
 			game->player_count++;
 		}
-		
 	}
+	return 0;
 }
 
 void set_status(pGame game,int status)

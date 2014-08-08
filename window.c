@@ -8,22 +8,25 @@ void update_window_width(pWindow window)
 	pWindowElement elem = window->firstElement;
 	while (elem)
 	{
-		window->width = spMin(spMax(window->width,elem->width+(spGetSizeFactor()*4 >> SP_ACCURACY)*2),spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
+		window->width = spMax(window->width,elem->width+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
 		elem = elem->next;
 	}
+	window->width = spMin(window->width,spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
 }
 
 pWindow create_window(int ( *feedback )( pWindowElement elem, int action ),spFontPointer font,char* title)
 {
 	pWindow window = (pWindow)malloc(sizeof(tWindow));
-	window->height = font->maxheight*4+(spGetSizeFactor()*4 >> SP_ACCURACY);
+	window->height = font->maxheight*4+(spGetSizeFactor()*4 >> SP_ACCURACY)*2;
 	window->font = font;
 	window->feedback = feedback;
 	window->selection = 0;
 	window->firstElement = NULL;
 	sprintf(window->title,"%s",title);
-	window->width = spGetWindowSurface()->w/2;
+	window->width = spMax(spGetWindowSurface()->w/2,spFontWidth(title,font)+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
+	update_window_width(window);
 	window->do_flip = 1;
+	window->main_menu = 0;
 	return window;
 }
 
@@ -98,7 +101,7 @@ void window_draw(void)
 		nr++;
 		elem = elem->next;
 	}
-	y+=window->font->maxheight*2;
+	y = (screen->h + window->height) / 2 - meow - 3*window->font->maxheight/2;
 	if (selElem)
 	{
 		switch (selElem->type)
@@ -123,7 +126,10 @@ void window_draw(void)
 					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel", window->font );
 				break;
 			case -1:
-				spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay  [c]Cancel", window->font );
+				if (window->main_menu)
+					spFontDrawMiddle( screen->w/2,y, 0, "[o]Select  [c]Exit", window->font );
+				else
+					spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay  [c]Cancel", window->font );
 				break;
 			case -2:
 				spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay", window->font );

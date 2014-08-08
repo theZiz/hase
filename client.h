@@ -130,7 +130,7 @@ int get_games(pGame *gameList);
 void delete_player_list(pPlayer player);
 pPlayer join_game(pGame game,char* name,int ai);
 void leave_game(pPlayer player);
-void get_game(pGame game,pPlayer *playerList);
+int get_game(pGame game,pPlayer *playerList);
 void set_status(pGame game,int status);
 void set_level(pGame game,char* level_string);
 

@@ -23,6 +23,7 @@ typedef struct sWindow
 	spFontPointer font;
 	pWindowElement firstElement;
 	int do_flip;
+	int main_menu;
 } tWindow;
 
 #define WN_ACT_UPDATE 0

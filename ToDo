@@ -1,18 +1,20 @@
 * README (+opk and pandora link)
+* more hares per player
+* weapons menu
+* global health bar for all hares
 * particle effect
-* more level details / new level making approach
 * ingame options menu instead of help == pause. With kick timeout
+* Internet check cancelable
+
+* more level details / new level making approach
 * ingame chat
 * unique keyboard
 * different sprites (kangoroo and co)
-* more hares per player
 * color/sprite adjustable
-* global health bar for all hares
-* main menu for local game, online game, options, about, help, quit
 * not closing games "somehow"
 * Music
 * Sound FX
-* Internet check cancelable
+
 * more weapons
 	* default missile (3 wp)
 	* low grav missile (3 wp)

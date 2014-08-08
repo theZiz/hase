@@ -16,6 +16,7 @@ Changelog
 - improved button mapping, using SP_PRACTICE
 - Writing down tractory while flying
 - New window approach
+- Menu
 
 
 1.3:
