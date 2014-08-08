@@ -1,7 +1,7 @@
 #include "lobbyList.h"
 #include "client.h"
 #include "level.h"
-#include "message.h"
+#include "window.h"
 
 SDL_Surface* ll_surface;
 SDL_Surface* ll_level = NULL;
@@ -105,9 +105,9 @@ void ll_draw(void)
 	else
 	{
 		if (mom_game && mom_game->status == -1)
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[a]Replay   [w]Create   [R]/[B]Exit", ll_font );
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Replay   [3]Create   [R]/[B]Exit", ll_font );
 		else
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[a]Join   [w]Create   [R]/[B]Exit", ll_font );
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Join   [3]Create   [R]/[B]Exit", ll_font );
 		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
 	}
@@ -118,22 +118,87 @@ int ll_wait;
 #define MAX_WAIT 300
 #define MIN_WAIT 50
 
+int create_game_feedback( pWindowElement elem, int action )
+{
+	switch (action)
+	{
+		case WN_ACT_LEFT:
+			switch (elem->reference)
+			{
+				case 1:
+					if (ll_game_players > 2)
+						ll_game_players--;
+					break;
+				case 2:
+					if (ll_game_seconds > 5)
+						ll_game_seconds -= 5;
+					break;
+				case 3:
+					ll_game_online = 1-ll_game_online;
+					break;
+			}
+			break;
+		case WN_ACT_RIGHT:
+			switch (elem->reference)
+			{
+				case 1:
+					ll_game_players++;
+					break;
+				case 2:
+					ll_game_seconds += 5;
+					break;
+				case 3:
+					ll_game_online = 1-ll_game_online;
+					break;
+			}
+			break;
+		case WN_ACT_START_POLL:
+			spPollKeyboardInput(ll_game_name,32,KEY_POLL_MASK);
+			break;
+		case WN_ACT_END_POLL:
+			spStopKeyboardInput();
+			break;
+	}
+	switch (elem->reference)
+	{
+		case 0: sprintf(elem->text,"Name: %s",ll_game_name); break;
+		case 1: sprintf(elem->text,"Maximum players: %i",ll_game_players); break;
+		case 2: sprintf(elem->text,"Seconds per turn: %i",ll_game_seconds); break;
+		case 3: switch (ll_game_online)
+			{
+				case -1: sprintf(elem->text,"Local game (no internet)"); break;
+				case 0: sprintf(elem->text,"Local game"); break;
+				case 1: sprintf(elem->text,"Online game"); break;
+			} break;
+	}
+	return 0;
+}
+
 int ll_calc(Uint32 steps)
 {
-	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD] ||
-		spGetInput()->button[SP_BUTTON_START_NOWASD])
+	if (spGetInput()->button[MY_BUTTON_SELECT] ||
+		spGetInput()->button[MY_BUTTON_START])
 		return 1;
-	if (spGetInput()->button[SP_BUTTON_UP_NOWASD])
+	if (spGetInput()->button[MY_PRACTICE_3])
 	{
-		spGetInput()->button[SP_BUTTON_UP_NOWASD] = 0;
+		spGetInput()->button[MY_PRACTICE_3] = 0;
 		if (ll_offline)
 			ll_game_online = -1;
 		int res = 1;
 		while (res == 1)
 		{
-			res = message_cg(ll_font,ll_resize,ll_game_name,&ll_game_players,&ll_game_seconds,&ll_game_online);
+			pWindow window = create_window(create_game_feedback,ll_font,"Create game");
+			add_window_element(window,1,0);
+			add_window_element(window,0,1);
+			add_window_element(window,0,2);
+			if (ll_game_online == -1)
+				add_window_element(window,-1,3);
+			else
+				add_window_element(window,0,3);
+			res = modal_window(window,ll_resize);
+			delete_window(window);
 			if (res == 1 && ll_game_name[0] == 0)
-				message(ll_font,ll_resize,"Please enter a game name",1,NULL);
+				message_box(ll_font,ll_resize,"Please enter a game name");
 			else
 				break;
 		}
@@ -147,11 +212,11 @@ int ll_calc(Uint32 steps)
 		}
 		ll_counter = 10000;
 	}		
-	if (spGetInput()->button[SP_BUTTON_LEFT_NOWASD])
+	if (spGetInput()->button[MY_PRACTICE_OK])
 	{
-		spGetInput()->button[SP_BUTTON_LEFT_NOWASD] = 0;
+		spGetInput()->button[MY_PRACTICE_OK] = 0;
 		if (ll_game_count <= 0)
-			message(ll_font,ll_resize,"No game to join!",1,NULL);
+			message_box(ll_font,ll_resize,"No game to join!");
 		else
 		{
 			pGame game = ll_game_list;
@@ -164,13 +229,13 @@ int ll_calc(Uint32 steps)
 				pos++;
 			}
 			if (game->status == 1)
-				message(ll_font,ll_resize,"Game already started!",1,NULL);
+				message_box(ll_font,ll_resize,"Game already started!");
 			else
 			if (game->status == -1) //Replay!
 				hase(ll_resize,game,NULL);
 			else
 			if (game->player_count >= game->max_player)
-				message(ll_font,ll_resize,"Game full!",1,NULL);
+				message_box(ll_font,ll_resize,"Game full!");
 			else
 			{
 				start_lobby_game(ll_font,ll_resize,game);
@@ -323,7 +388,7 @@ void ll_reload()
 				ll_game_list = NULL;
 				ll_game_count = 0;
 				ll_offline = 1;
-				message(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!",1,NULL);
+				message_box(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!");
 			}
 			else
 				ll_game_count = get_games(&ll_game_list);

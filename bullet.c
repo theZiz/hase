@@ -6,13 +6,17 @@ typedef struct sBullet
 	Sint32 dr;
 	Sint32 impact_state;
 	Sint32 impact_counter;
+	int age;
+	pBulletTrace* trace;
 	pBullet next;
 } tBullet;
 
-#define IMPACT_TIME 300
+#define IMPACT_TIME 30
+#define OUTPACT_TIME 300
 #define EXPLOSION_COLOR spGetFastRGB(255,255,255)
 #define BULLET_SIZE 4
 #define BULLET_SPEED_DOWN 32
+#define TRACE_STEP 150
 
 pBullet firstBullet = NULL;
 
@@ -26,7 +30,10 @@ void deleteAllBullets()
 	}
 }
 
-pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr)
+void addToTrace(pBulletTrace* firstTrace,Sint32 x,Sint32 y,pBullet bullet);
+pBulletTrace* registerTrace(pPlayer player);
+
+pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer tracePlayer)
 {
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 	bullet->next = firstBullet;
@@ -38,6 +45,15 @@ pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr)
 	bullet->rotation = spRand()%(2*SP_PI);
 	bullet->dx = spMul(spCos(direction),power);
 	bullet->dy = spMul(spSin(direction),power);
+	bullet->age = 0;
+	if (tracePlayer)
+	{
+		bullet->trace = registerTrace(tracePlayer);
+		addToTrace(bullet->trace,bullet->x,bullet->y,bullet);
+		addToTrace(bullet->trace,bullet->x,bullet->y,bullet);
+	}
+	else
+		bullet->trace = NULL;
 	return bullet;
 }
 
@@ -186,6 +202,17 @@ int updateBullets()
 	pBullet before = NULL;
 	while (momBullet)
 	{
+		if (momBullet->trace)
+		{
+			momBullet->age++;
+			if (momBullet->age%TRACE_STEP == 0)
+				addToTrace(momBullet->trace,momBullet->x,momBullet->y,momBullet);
+			else
+			{
+				(*(momBullet->trace))->x = momBullet->x;
+				(*(momBullet->trace))->y = momBullet->y;
+			}
+		}
 		momBullet->dx -= gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
 		momBullet->dy -= gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
 		int speed = abs(momBullet->dx)+abs(momBullet->dy);
@@ -211,7 +238,7 @@ int updateBullets()
 					if (momBullet->impact_counter == 0)
 					{
 						momBullet->impact_state = 2;
-						momBullet->impact_counter = IMPACT_TIME;
+						momBullet->impact_counter = OUTPACT_TIME;
 						spClearTarget(EXPLOSION_COLOR);
 						spFlip();
 						bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
@@ -252,6 +279,8 @@ int updateBullets()
 			else
 				firstBullet = momBullet->next;
 			pBullet next = momBullet->next;
+			if (momBullet->trace)
+				(*(momBullet->trace))->bullet = NULL;
 			free(momBullet);
 			momBullet = next;
 		}
@@ -279,7 +308,7 @@ Sint32 bullet_alpha()
 					alpha = newalpha;
 				break;
 			case 2:
-				newalpha = momBullet->impact_counter*SP_ONE/IMPACT_TIME;
+				newalpha = momBullet->impact_counter*SP_ONE/OUTPACT_TIME;
 				if (newalpha > alpha)
 					alpha = newalpha;
 				break;

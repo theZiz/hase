@@ -11,11 +11,11 @@ void draw_help()
 	spDeactivatePattern();
 	spFontDrawMiddle( screen->w/2, screen->h-2-10*font->maxheight, 0, "[R]: Close help", font );
 	spFontDrawMiddle( screen->w/2, screen->h-2- 8*font->maxheight, 0, SP_PAD_NAME" Left & Right: direction & low jumps", font );
-	spFontDrawMiddle( screen->w/2, screen->h-2- 7*font->maxheight, 0, "[a]: high jump", font );
+	spFontDrawMiddle( screen->w/2, screen->h-2- 7*font->maxheight, 0, "[o]: high jump", font );
 	spFontDrawMiddle( screen->w/2, screen->h-2- 6*font->maxheight, 0, "[B] Choose weapon", font );
 	spFontDrawMiddle( screen->w/2, screen->h-2- 5*font->maxheight, 0, SP_PAD_NAME" Up & Down: direction of the weapon", font );
-	spFontDrawMiddle( screen->w/2, screen->h-2- 4*font->maxheight, 0, "[w] & [s]: Weapon strength!", font );
-	spFontDrawMiddle( screen->w/2, screen->h-2- 3*font->maxheight, 0, "[d]: Shoot!", font );
-	spFontDrawMiddle( screen->w/2, screen->h-2- 2*font->maxheight, 0, "[q] & [e]: Zoom in & out", font );
+	spFontDrawMiddle( screen->w/2, screen->h-2- 4*font->maxheight, 0, "[3] & [4]: Weapon strength!", font );
+	spFontDrawMiddle( screen->w/2, screen->h-2- 3*font->maxheight, 0, "[c]: Shoot!", font );
+	spFontDrawMiddle( screen->w/2, screen->h-2- 2*font->maxheight, 0, "[l] & [r]: Zoom in & out", font );
 	spFontDrawMiddle( screen->w/2, screen->h-2- 1*font->maxheight, 0, "[R][B]: Exit", font );
 }

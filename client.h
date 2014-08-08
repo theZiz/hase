@@ -5,6 +5,28 @@
 #include <sparrowNet.h>
 #include <sparrow3d.h>
 
+#define TRACE_COUNT 16
+
+#define MY_BUTTON_START SP_BUTTON_START
+#define MY_BUTTON_SELECT SP_BUTTON_SELECT
+#define MY_BUTTON_L SP_BUTTON_L
+#define MY_BUTTON_R SP_BUTTON_R
+#define MY_PRACTICE_OK SP_PRACTICE_OK
+#define MY_PRACTICE_CANCEL SP_PRACTICE_CANCEL
+#define MY_PRACTICE_3 SP_PRACTICE_3
+#define MY_PRACTICE_4 SP_PRACTICE_4
+
+#define MY_BUTTON_START_NAME SP_BUTTON_START_NAME
+#define MY_BUTTON_SELECT_NAME SP_BUTTON_SELECT_NAME
+#define MY_BUTTON_L_NAME SP_BUTTON_L_NAME
+#define MY_BUTTON_R_NAME SP_BUTTON_R_NAME
+#define MY_PRACTICE_OK_NAME SP_PRACTICE_OK_NAME
+#define MY_PRACTICE_CANCEL_NAME SP_PRACTICE_CANCEL_NAME
+#define MY_PRACTICE_3_NAME SP_PRACTICE_3_NAME
+#define MY_PRACTICE_4_NAME SP_PRACTICE_4_NAME
+
+#define KEY_POLL_MASK SP_PRACTICE_3_MASK
+
 typedef struct sMessage *pMessage;
 typedef struct sMessage
 {
@@ -49,6 +71,14 @@ typedef struct sGame
 
 typedef struct sThreadData *pThreadData;
 typedef struct sBullet *pBullet;
+typedef struct sBulletTrace *pBulletTrace;
+
+typedef struct sBulletTrace
+{
+	Sint32 x,y;
+	pBullet bullet;
+	pBulletTrace next;
+} tBulletTrace;
 
 typedef struct sPlayer
 {
@@ -80,6 +110,8 @@ typedef struct sPlayer
 	pBullet bullet;
 	int local;
 	int time;
+	pBulletTrace trace[TRACE_COUNT];
+	int tracePos;
 } tPlayer;
 
 typedef struct sThreadData

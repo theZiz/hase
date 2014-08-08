@@ -1,6 +1,7 @@
 #include "lobbyGame.h"
 #include "level.h"
 #include <time.h> 
+#include "window.h"
 
 #define LG_WAIT 5000
 
@@ -55,9 +56,9 @@ void lg_draw(void)
 		spFontDrawTextBlock(middle,screen->w-w-4, 5*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
 	#ifdef PANDORA
-		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[w]Add player  [s]Remove player", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[3]Add player  [4]Remove player", lg_font );
 	#else
-		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[w]Add player  [s]Remove pl.", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "[3]Add player  [4]Remove pl.", lg_font );
 	#endif
 	if (lg_game->admin_pw == 0)
 	{
@@ -66,8 +67,8 @@ void lg_draw(void)
 	}
 	else
 	{
-		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[q]Add AI  [e]Remove all AIs", lg_font );
-		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[a]Start game  [d]New level", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[l]Add AI  [r]Remove all AIs", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[o]Start game  [c]New level", lg_font );
 	}
 	//Chat
 	spRectangle(screen->w/2, l_w+(4+CHAT_LINES)*lg_font->maxheight/2+4, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);
@@ -231,12 +232,11 @@ int lg_calc(Uint32 steps)
 		if (lg_chat_block->line_count > CHAT_LINES)
 			lg_scroll = SP_ONE;
 	}
-	if (!lg_game->local && spGetInput()->button[SP_BUTTON_START_NOWASD])
+	if (!lg_game->local && spGetInput()->button[MY_BUTTON_START])
 	{
-		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
+		spGetInput()->button[MY_BUTTON_START] = 0;
 		char m[256] = "";
-		spPollKeyboardInput(m,256,SP_BUTTON_DOWN_NOWASD_MASK);
-		if (message(lg_font,lg_resize,"Enter Message:",2,m) == 1)
+		if (text_box(lg_font,lg_resize,"Enter Message:",m,256) == 1)
 		{
 			if (lg_player->next)
 			{
@@ -259,50 +259,43 @@ int lg_calc(Uint32 steps)
 			else
 				send_chat(lg_game,lg_player->name,m);
 		}
-		spStopKeyboardInput();
 	}
-	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD])
+	if (spGetInput()->button[MY_BUTTON_SELECT])
 	{
-		spGetInput()->button[SP_BUTTON_SELECT_NOWASD] = 0;
+		spGetInput()->button[MY_BUTTON_SELECT] = 0;
 		return 1;
 	}
-	if (spGetInput()->button[SP_BUTTON_UP_NOWASD])
+	if (spGetInput()->button[MY_PRACTICE_3])
 	{
-		spGetInput()->button[SP_BUTTON_UP_NOWASD] = 0;
+		spGetInput()->button[MY_PRACTICE_3] = 0;
 		if (lg_game->player_count >= lg_game->max_player)
-			message(lg_font,lg_resize,"Game full!",1,NULL);
+			message_box(lg_font,lg_resize,"Game full!");
 		else
 		{
-			spPollKeyboardInput(lg_new_name,32,SP_BUTTON_DOWN_NOWASD_MASK);
-			if (message(lg_font,lg_resize,"Enter player name:",2,lg_new_name) == 1)
+			if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32) == 1)
 			{
-				spStopKeyboardInput();
 				if (lg_new_name[0] == 0)
-					message(lg_font,lg_resize,"No name entered...",1,NULL);
+					message_box(lg_font,lg_resize,"No name entered...");
 				else
 				if ((lg_last_player->next = join_game(lg_game,lg_new_name,0)) == NULL)
-					message(lg_font,lg_resize,"Game full...",1,NULL);
+					message_box(lg_font,lg_resize,"Game full...");
 				else
 				{
 					lg_last_player = lg_last_player->next;
 					lg_counter = LG_WAIT;
 				}
 			}
-			else
-				spStopKeyboardInput();
 		}
 	}
-	if (spGetInput()->button[SP_BUTTON_DOWN_NOWASD])
+	if (spGetInput()->button[MY_PRACTICE_4])
 	{
-		spGetInput()->button[SP_BUTTON_DOWN_NOWASD] = 0;
+		spGetInput()->button[MY_PRACTICE_4] = 0;
 		char leave_name[33];
 		sprintf(leave_name,"%s",lg_last_player->name);
-		spPollKeyboardInput(leave_name,32,SP_BUTTON_DOWN_NOWASD_MASK);
-		if (message(lg_font,lg_resize,"Enter player name to leave:",2,leave_name) == 1)
+		if (text_box(lg_font,lg_resize,"Enter player name to leave:",leave_name,32) == 1)
 		{
-			spStopKeyboardInput();
 			if (leave_name[0] == 0)
-				message(lg_font,lg_resize,"No name entered...",1,NULL);
+				message_box(lg_font,lg_resize,"No name entered...");
 			else
 			{
 				//Searching player
@@ -316,7 +309,7 @@ int lg_calc(Uint32 steps)
 					p = p->next;
 				}
 				if (p == NULL)
-					message(lg_font,lg_resize,"Player not found",1,NULL);
+					message_box(lg_font,lg_resize,"Player not found");
 				else
 				{
 					pPlayer n = p->next;
@@ -333,14 +326,12 @@ int lg_calc(Uint32 steps)
 					return 1;
 			}
 		}
-		else
-			spStopKeyboardInput();
 	}
-	if (spGetInput()->button[SP_BUTTON_LEFT_NOWASD] && lg_game->admin_pw)
+	if (spGetInput()->button[MY_PRACTICE_OK] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_LEFT_NOWASD] = 0;
+		spGetInput()->button[MY_PRACTICE_OK] = 0;
 		if (lg_game->player_count < 2)
-			message(lg_font,lg_resize,"At least two players are needed!",1,NULL);
+			message_box(lg_font,lg_resize,"At least two players are needed!");
 		else
 		{
 			printf("Running game\n");
@@ -350,9 +341,9 @@ int lg_calc(Uint32 steps)
 			return 3;
 		}
 	}
-	if (spGetInput()->button[SP_BUTTON_RIGHT_NOWASD] && lg_game->admin_pw)
+	if (spGetInput()->button[MY_PRACTICE_CANCEL] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_RIGHT_NOWASD] = 0;
+		spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
 		create_level_string(lg_game->level_string,1536,1536,3,3,3);
 		spDeleteSurface(lg_level);
 		int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
@@ -360,9 +351,9 @@ int lg_calc(Uint32 steps)
 		sprintf(lg_level_string,"%s",lg_game->level_string);
 		set_level(lg_game,lg_level_string);
 	}
-	if (spGetInput()->button[SP_BUTTON_R_NOWASD] && lg_game->admin_pw)
+	if (spGetInput()->button[MY_BUTTON_R] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_R_NOWASD] = 0;
+		spGetInput()->button[MY_BUTTON_R] = 0;
 		while (lg_ai_list)
 		{
 			pPlayer next = lg_ai_list->next;
@@ -371,9 +362,9 @@ int lg_calc(Uint32 steps)
 		}
 		lg_counter = LG_WAIT;
 	}
-	if (spGetInput()->button[SP_BUTTON_L_NOWASD] && lg_game->admin_pw)
+	if (spGetInput()->button[MY_BUTTON_L] && lg_game->admin_pw)
 	{
-		spGetInput()->button[SP_BUTTON_L_NOWASD] = 0;
+		spGetInput()->button[MY_BUTTON_L] = 0;
 		char buffer[32];
 		pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1);
 		if (ai)
@@ -441,18 +432,16 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 	lg_reload_now = 0;
 	lg_ai_list = NULL;
 	lg_resize = resize;
-	spPollKeyboardInput(lg_name,32,SP_BUTTON_DOWN_NOWASD_MASK);
-	if (message(font,resize,"Enter player name:",2,lg_name) == 1)
+	if (text_box(font,resize,"Enter player name:",lg_name,32) == 1)
 	{
-		spStopKeyboardInput();
 		if (lg_name[0] == 0)
 		{
-			message(font,resize,"No name entered...",1,NULL);
+			message_box(font,resize,"No name entered...");
 			return;
 		}
 		if ((lg_player = join_game(game,lg_name,0)) == NULL)
 		{
-			message(font,resize,"Game full...",1,NULL);
+			message_box(font,resize,"Game full...");
 			return;
 		}
 		lg_last_player = lg_player;
@@ -470,7 +459,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		if (lg_block)
 			spDeleteTextBlock(lg_block);
 		if (res == -1)
-			message(font,resize,"Game was closed...",1,NULL);
+			message_box(font,resize,"Game was closed...");
 		if (res == 2)
 			hase(lg_resize,lg_game,lg_player);
 		while (lg_player)
@@ -488,7 +477,5 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		}
 			
 	}
-	else
-		spStopKeyboardInput();
 }
 

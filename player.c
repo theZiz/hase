@@ -1,12 +1,12 @@
 #define HOPS_TIME 200
 #define HIGH_HOPS_TIME 403
-#define MAX_HEALTH 256
+#define MAX_HEALTH 100
 #define AI_MAX_TRIES 64
 #define AI_TRIES_EVERY_MS 32
 int ai_shoot_tries = 0;
 int last_ai_try = 0;
 
-#include "message.h"
+#include "window.h"
 
 int lastAIDistance = 100000000;
 
@@ -217,8 +217,8 @@ void stop_thread()
 				printf("Ending Push Thread for player %s (s: %i)\n",player[active_player]->name,player[active_player]->time/1000);
 				char buffer[320];
 				sprintf(buffer,"Finishing sending turn data\nfor player %s...",player[active_player]->name);
-				message(font,hase_resize,buffer,0,NULL);
-				message_draw();
+				set_message(font,buffer);
+				draw_message();
 				spFlip();
 				push_game_thread(player[active_player],player[active_player]->time/1000,send_data);
 				memset(send_data,0,sizeof(char)*1536);
@@ -331,6 +331,10 @@ void init_player(pPlayer player_list,int pc)
 		char buffer[256];
 		sprintf(buffer,"./data/hase%i.ssc",spRand()%10+1);
 		player[i]->hase = spLoadSpriteCollection(buffer,NULL);
+		int j;
+		for (j = 0; j < TRACE_COUNT; j++)
+			player[i]->trace[j] = NULL;
+		player[i]->tracePos = 0;
 	}
 	active_player = 0;
 	player[active_player]->bullet = NULL;

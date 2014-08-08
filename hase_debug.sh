@@ -1,2 +1,2 @@
 #!/bin/sh
-LD_LIBRARY_PATH=. gdb ./hase $*
+LD_LIBRARY_PATH=. gdb ./lobby $*

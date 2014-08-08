@@ -1,8 +1,18 @@
 * README (+opk and pandora link)
-* new message approach
 * particle effect
 * more level details / new level making approach
-* ingame options menu instead of help
+* ingame options menu instead of help == pause. With kick timeout
+* ingame chat
+* unique keyboard
+* different sprites (kangoroo and co)
+* more hares per player
+* color/sprite adjustable
+* global health bar for all hares
+* main menu for local game, online game, options, about, help, quit
+* not closing games "somehow"
+* Music
+* Sound FX
+* Internet check cancelable
 * more weapons
 	* default missile (3 wp)
 	* low grav missile (3 wp)
@@ -19,17 +29,5 @@
 	* mine (3 wp)
 	* gravitation trap (1 wp)
 	* Fart bomb (1 wp)
-* ingame chat
-* unique keyboard
-* different sprites (kangoroo and co)
-* more hares per player
-* color/sprite adjustable
-* new health bars
-* global health bar for all hares
-* main menu for local game, online game, options, about, help, quit
-* not closing games "somehow"
-* Writing down tractory while flying
-* Music
-* Sound FX
 
 http://pastebin.com/P0q6QE86

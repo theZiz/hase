@@ -114,39 +114,37 @@ void draw(void)
 			}
 		}
 		spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
-		//Health circle
-		ox = spMul(player[j]->x-posX-14*-spSin(player[j]->rotation),zoom);
-		oy = spMul(player[j]->y-posY-14* spCos(player[j]->rotation),zoom);
-		x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
-		y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-		spEllipse(screen->w/2+x,screen->h/2+y,0,
-				  spFixedToInt(zoom*6)+1,
-				  spFixedToInt(zoom*6)+1,spGetRGB(255,0,0));	
-		spEllipse(screen->w/2+x,screen->h/2+y,0,
-				  spFixedToInt(zoom*6*(player[j]->health)/MAX_HEALTH)+1,
-				  spFixedToInt(zoom*6*(player[j]->health)/MAX_HEALTH)+1,spGetRGB(0,255,0));
+		//Health bar
+		y-=zoom*3>>14;
+		spSetBlending( SP_ONE*2/3 );
+		spRectangle( screen->w/2+x,screen->h/2+y,0,zoom >> 12,zoom >> 15,spGetRGB(255,0,0));
+		spSetBlending( SP_ONE );
+		spRectangle( screen->w/2+x-((MAX_HEALTH-player[j]->health)*zoom/MAX_HEALTH >> 13),screen->h/2+y,0,
+			player[j]->health*zoom/MAX_HEALTH >> 12,zoom >> 15,spGetRGB(0,255,0));
+		//labels
+		y-=zoom>>15;
 		if (player[j]->computer)
 			sprintf(buffer,"%s (AI)",player[j]->name);
 		else
 			sprintf(buffer,"%s",player[j]->name);
 		spSetBlending( SP_ONE*2/3 );
-		spFontDrawMiddle( screen->w/2+x,screen->h/2+y,0,buffer, font );
-		spSetBlending( SP_ONE );
+		spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
 		if (j == active_player && player[j]->computer && ai_shoot_tries>1)
 		{
 			sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
-			spFontDrawMiddle( screen->w/2+x,screen->h/2+y+font->maxheight,0,buffer, font );
+			spFontDrawMiddle( screen->w/2+x,screen->h/2+y-2*font->maxheight,0,buffer, font );
 		}
+		spSetBlending( SP_ONE );
 	}
 	//Bullets
 	drawBullets();
 		
 	//Trace
-	//drawTrace();
+	drawTrace(player[active_player]);
 	
 	//Error message
 	if (game_pause)
-		message_draw();	
+		draw_message();	
 	
 	//Help
 	draw_help();
@@ -332,22 +330,22 @@ void set_input()
 			input_states[INPUT_AXIS_1_LEFT] = 0;
 			input_states[INPUT_AXIS_1_RIGHT] = 0;
 		}		
-		if (spGetInput()->button[SP_BUTTON_LEFT_NOWASD] != button_states[SP_BUTTON_LEFT_NOWASD])
-			input_states[INPUT_BUTTON_LEFT] = spGetInput()->button[SP_BUTTON_LEFT_NOWASD];
-		if (spGetInput()->button[SP_BUTTON_UP_NOWASD] != button_states[SP_BUTTON_UP_NOWASD])
-			input_states[INPUT_BUTTON_UP] = spGetInput()->button[SP_BUTTON_UP_NOWASD];
-		if (spGetInput()->button[SP_BUTTON_RIGHT_NOWASD] != button_states[SP_BUTTON_RIGHT_NOWASD])
-			input_states[INPUT_BUTTON_RIGHT] = spGetInput()->button[SP_BUTTON_RIGHT_NOWASD];
-		if (spGetInput()->button[SP_BUTTON_DOWN_NOWASD] != button_states[SP_BUTTON_DOWN_NOWASD])
-			input_states[INPUT_BUTTON_DOWN] = spGetInput()->button[SP_BUTTON_DOWN_NOWASD];
-		if (spGetInput()->button[SP_BUTTON_L_NOWASD] != button_states[SP_BUTTON_L_NOWASD])
-			input_states[INPUT_BUTTON_L] = spGetInput()->button[SP_BUTTON_L_NOWASD];
-		if (spGetInput()->button[SP_BUTTON_R_NOWASD] != button_states[SP_BUTTON_R_NOWASD])
-			input_states[INPUT_BUTTON_R] = spGetInput()->button[SP_BUTTON_R_NOWASD];
-		if (spGetInput()->button[SP_BUTTON_START_NOWASD] != button_states[SP_BUTTON_START_NOWASD])
-			input_states[INPUT_BUTTON_START] = spGetInput()->button[SP_BUTTON_START_NOWASD];
-		if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD] != button_states[SP_BUTTON_SELECT_NOWASD])
-			input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[SP_BUTTON_SELECT_NOWASD];
+		if (spGetInput()->button[MY_PRACTICE_OK] != button_states[MY_PRACTICE_OK])
+			input_states[INPUT_BUTTON_LEFT] = spGetInput()->button[MY_PRACTICE_OK];
+		if (spGetInput()->button[MY_PRACTICE_3] != button_states[MY_PRACTICE_3])
+			input_states[INPUT_BUTTON_UP] = spGetInput()->button[MY_PRACTICE_3];
+		if (spGetInput()->button[MY_PRACTICE_CANCEL] != button_states[MY_PRACTICE_CANCEL])
+			input_states[INPUT_BUTTON_RIGHT] = spGetInput()->button[MY_PRACTICE_CANCEL];
+		if (spGetInput()->button[MY_PRACTICE_4] != button_states[MY_PRACTICE_4])
+			input_states[INPUT_BUTTON_DOWN] = spGetInput()->button[MY_PRACTICE_4];
+		if (spGetInput()->button[MY_BUTTON_L] != button_states[MY_BUTTON_L])
+			input_states[INPUT_BUTTON_L] = spGetInput()->button[MY_BUTTON_L];
+		if (spGetInput()->button[MY_BUTTON_R] != button_states[MY_BUTTON_R])
+			input_states[INPUT_BUTTON_R] = spGetInput()->button[MY_BUTTON_R];
+		if (spGetInput()->button[MY_BUTTON_START] != button_states[MY_BUTTON_START])
+			input_states[INPUT_BUTTON_START] = spGetInput()->button[MY_BUTTON_START];
+		if (spGetInput()->button[MY_BUTTON_SELECT] != button_states[MY_BUTTON_SELECT])
+			input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[MY_BUTTON_SELECT];
 		memcpy(button_states,spGetInput()->button,sizeof(char)*SP_INPUT_BUTTON_COUNT);
 		if (!hase_game->local)
 		{
@@ -373,7 +371,7 @@ void set_input()
 			{
 				char buffer[256];
 				sprintf(buffer,"Waiting for turn data\nfrom player %s...",player[active_player]->name);
-				message(font,hase_resize,buffer,0,NULL);
+				set_message(font,buffer);
 			}	
 		}
 		if (game_pause == 0)
@@ -386,21 +384,21 @@ void set_input()
 
 int calc(Uint32 steps)
 {
-	if (spGetInput()->button[SP_BUTTON_SELECT_NOWASD] &&
-	    spGetInput()->button[SP_BUTTON_START_NOWASD])
+	if (spGetInput()->button[MY_BUTTON_SELECT] &&
+	    spGetInput()->button[MY_BUTTON_START])
 	{
-		spGetInput()->button[SP_BUTTON_SELECT_NOWASD] = 0;
-		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
+		spGetInput()->button[MY_BUTTON_SELECT] = 0;
+		spGetInput()->button[MY_BUTTON_START] = 0;
 		return 1;
 	}
-	if (spGetInput()->button[SP_BUTTON_START_NOWASD])
+	if (spGetInput()->button[MY_BUTTON_START])
 	{
-		spGetInput()->button[SP_BUTTON_START_NOWASD] = 0;
+		spGetInput()->button[MY_BUTTON_START] = 0;
 		help = 1-help;
 	}
-	if (spGetInput()->button[SP_BUTTON_L_NOWASD])
+	if (spGetInput()->button[MY_BUTTON_L])
 		zoom_d = -1;
-	if (spGetInput()->button[SP_BUTTON_R_NOWASD])
+	if (spGetInput()->button[MY_BUTTON_R])
 		zoom_d =  1;	
 	int i;
 	update_player_sprite(steps);
@@ -501,7 +499,7 @@ int calc(Uint32 steps)
 								if (weapon_points > 0)
 								{
 									weapon_points--;
-									player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
+									player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1,player[active_player]);
 								}
 								break;
 							}
@@ -599,7 +597,7 @@ int calc(Uint32 steps)
 				{
 					weapon_points--;
 					input_states[INPUT_BUTTON_RIGHT] = 0;
-					player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1);
+					player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1,player[active_player]);
 				}
 			}
 		}
@@ -634,7 +632,6 @@ int calc(Uint32 steps)
 		posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
 		posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
 	}
-	//updateTrace();
 	return result;
 }
 
@@ -683,7 +680,6 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	realloc_gravity();
 	init_gravity();
 	init_player(hase_player_list,game->player_count);
-	updateTrace();
 	zoomAdjust = spSqrt(spGetSizeFactor());
 	minZoom = spSqrt(spGetSizeFactor()/8);
 	maxZoom = spSqrt(spGetSizeFactor()*4);
@@ -709,16 +705,19 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 		{
 			char buffer[256];
 			sprintf(buffer,"%s won!\n",player[i]->name);
-			message(font,hase_resize,buffer,1,NULL);
+			message_box(font,hase_resize,buffer);
 		}
 		else
-			message(font,hase_resize,"Nobody won, but why?",1,NULL);
+			message_box(font,hase_resize,"Nobody won, but why?");
 	}
 	deleteAllBullets();
 	free_gravity();
 	int i;
 	for (i = 0; i < player_count; i++)
+	{
 		spDeleteSpriteCollection(player[i]->hase,0);
+		deleteAllTraces(player[i]);
+	}
 	spDeleteSurface(arrow);
 	spDeleteSurface(weapon);
 	spDeleteSurface(bullet);
