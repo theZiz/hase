@@ -6,12 +6,13 @@ void ( *ab_resize )( Uint16 w, Uint16 h );
 
 void start_about(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 {
-	pWindow window = create_window(NULL,font,"About\n\n"
-	"Developer: Ziz\nzizsdl@googlemail.com\n\n"
-	"Font: CC-BY-SA by HiBan\n\n"
+	pWindow window = create_window(NULL,font,"About Hase\n"
+	"Version: "VERSION"\n\n"
+	"Developer:\nZiz (zizsdl@googlemail.com)\n\n"
+	"Fonts:\nPixel Mania by HiBan (CC-BY-SA)\nDejaVu Sans (Public Domain)\n\n"
 	"Game licensed under GPLv2+\n\n"
 	"All your hares belong to us!");
-	window->height += font->maxheight*9;
+	window->height += font->maxheight*12;
 	modal_window(window,resize);
 	delete_window(window);	
 }

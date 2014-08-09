@@ -5,11 +5,11 @@
 #include "lobbyList.h"
 #include "window.h"
 #include "level.h"
+#include "about.h"
 
 SDL_Surface* screen;
 spFontPointer font;
 
-#define VERSION "1.4"
 #define BUTTON_BG spGetRGB(64,64,64)
 #define BUTTON_FG spGetRGB(220,220,220)
 
