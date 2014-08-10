@@ -38,10 +38,10 @@ int weapon_points = 0;
 #define INPUT_AXIS_0_RIGHT 1
 #define INPUT_AXIS_1_LEFT 2
 #define INPUT_AXIS_1_RIGHT 3
-#define INPUT_BUTTON_LEFT 4
-#define INPUT_BUTTON_UP 5
-#define INPUT_BUTTON_RIGHT 6
-#define INPUT_BUTTON_DOWN 7
+#define INPUT_BUTTON_OK 4
+#define INPUT_BUTTON_CANCEL 5
+#define INPUT_BUTTON_3 6
+#define INPUT_BUTTON_4 7
 #define INPUT_BUTTON_L 8
 #define INPUT_BUTTON_R 9
 #define INPUT_BUTTON_START 10
@@ -86,55 +86,60 @@ void draw(void)
 	int j;
 	for (j = 0; j < player_count; j++)
 	{
-		//if (j == active_player)
-		//	continue;
-		if (player[j]->health == 0)
+		if (player[j]->firstHare == NULL)
 			continue;
-		spSpritePointer sprite = spActiveSprite(player[j]->hase);
-		spSetSpriteZoom(sprite,zoom/2,zoom/2);
-		spSetSpriteRotation(sprite,+rotation+player[j]->rotation);
-		Sint32 ox = spMul(player[j]->x-posX,zoom);
-		Sint32 oy = spMul(player[j]->y-posY,zoom);
-		Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
-		Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-		if (j == active_player)
-		{
-			//Weapon
-			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon,zoom/2,zoom/2,player[j]->w_direction+rotation+player[j]->rotation);
-			//Arrow
-			if (player[j]->w_power)
+		pHare hare = player[j]->firstHare;
+		if (hare)
+		do
+		{							
+			spSpritePointer sprite = spActiveSprite(hare->hase);
+			spSetSpriteZoom(sprite,zoom/2,zoom/2);
+			spSetSpriteRotation(sprite,+rotation+hare->rotation);
+			Sint32 ox = spMul(hare->x-posX,zoom);
+			Sint32 oy = spMul(hare->y-posY,zoom);
+			Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+			Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+			if (j == active_player)
 			{
-				Sint32 ox = spMul(player[j]->x-posX-14*-spMul(spSin(player[j]->rotation+player[j]->w_direction-SP_PI/2),player[j]->w_power+SP_ONE*2/3),zoom);
-				Sint32 oy = spMul(player[j]->y-posY-14* spMul(spCos(player[j]->rotation+player[j]->w_direction-SP_PI/2),player[j]->w_power+SP_ONE*2/3),zoom);
-				Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
-				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-				spSetBlending( SP_ONE*2/3 );
-				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(zoom,spGetSizeFactor())/16,spMul(player[j]->w_power,spMul(zoom,spGetSizeFactor()))/4,player[j]->w_direction+rotation+player[j]->rotation-SP_PI/2);
-				spSetBlending( SP_ONE );
+				//Weapon
+				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon,zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
+				//Arrow
+				if (hare->w_power)
+				{
+					Sint32 ox = spMul(hare->x-posX-14*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
+					Sint32 oy = spMul(hare->y-posY-14* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
+					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+					spSetBlending( SP_ONE*2/3 );
+					spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(zoom,spGetSizeFactor())/16,spMul(hare->w_power,spMul(zoom,spGetSizeFactor()))/4,hare->w_direction+rotation+hare->rotation-SP_PI/2);
+					spSetBlending( SP_ONE );
+				}
 			}
+			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
+			//Health bar
+			y-=zoom*3>>14;
+			spSetBlending( SP_ONE*2/3 );
+			spRectangle( screen->w/2+x,screen->h/2+y,0,zoom >> 12,zoom >> 15,spGetRGB(255,0,0));
+			spSetBlending( SP_ONE );
+			spRectangle( screen->w/2+x-((MAX_HEALTH-hare->health)*zoom/MAX_HEALTH >> 13),screen->h/2+y,0,
+				hare->health*zoom/MAX_HEALTH >> 12,zoom >> 15,spGetRGB(0,255,0));
+			//labels
+			y-=zoom>>15;
+			if (player[j]->computer)
+				sprintf(buffer,"%s (AI)",player[j]->name);
+			else
+				sprintf(buffer,"%s",player[j]->name);
+			spSetBlending( SP_ONE*2/3 );
+			spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
+			if (j == active_player && player[j]->computer && ai_shoot_tries>1)
+			{
+				sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
+				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-2*font->maxheight,0,buffer, font );
+			}
+			spSetBlending( SP_ONE );
+			hare = hare->next;
 		}
-		spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
-		//Health bar
-		y-=zoom*3>>14;
-		spSetBlending( SP_ONE*2/3 );
-		spRectangle( screen->w/2+x,screen->h/2+y,0,zoom >> 12,zoom >> 15,spGetRGB(255,0,0));
-		spSetBlending( SP_ONE );
-		spRectangle( screen->w/2+x-((MAX_HEALTH-player[j]->health)*zoom/MAX_HEALTH >> 13),screen->h/2+y,0,
-			player[j]->health*zoom/MAX_HEALTH >> 12,zoom >> 15,spGetRGB(0,255,0));
-		//labels
-		y-=zoom>>15;
-		if (player[j]->computer)
-			sprintf(buffer,"%s (AI)",player[j]->name);
-		else
-			sprintf(buffer,"%s",player[j]->name);
-		spSetBlending( SP_ONE*2/3 );
-		spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
-		if (j == active_player && player[j]->computer && ai_shoot_tries>1)
-		{
-			sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
-			spFontDrawMiddle( screen->w/2+x,screen->h/2+y-2*font->maxheight,0,buffer, font );
-		}
-		spSetBlending( SP_ONE );
+		while (hare != player[j]->firstHare);
 	}
 	//Bullets
 	drawBullets();
@@ -152,10 +157,8 @@ void draw(void)
 	//HID
 	sprintf(buffer,"Weapon points: %i/3",weapon_points);
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
-	sprintf(buffer,"Power: %i %%",player[active_player]->w_power*100/SP_ONE);
+	sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
 	spFontDraw( 2, 2, 0, buffer, font );	
-	sprintf(buffer,"%i / %i\n",alive_count,hase_game->player_count);	
-	spFontDrawRight( screen->w-2, 2, 0, buffer, font );
 	if (weapon_points)
 		sprintf(buffer,"%i seconds left",countdown / 1000);
 	else
@@ -176,36 +179,46 @@ int direction_hold = 0;
 
 int jump(int high)
 {
-	Sint32 dx = spSin(player[active_player]->rotation);
-	Sint32 dy = spCos(player[active_player]->rotation);
+	Sint32 dx = spSin(player[active_player]->activeHare->rotation);
+	Sint32 dy = spCos(player[active_player]->activeHare->rotation);
 	//if (circle_is_empty(player[active_player]->x+dx >> SP_ACCURACY,player[active_player]->y+dy >> SP_ACCURACY,6,0xDEAD))
 	{
 		if (high)
-			player[active_player]->hops = HIGH_HOPS_TIME;
+			player[active_player]->activeHare->hops = HIGH_HOPS_TIME;
 		else
-			player[active_player]->hops = HOPS_TIME;
-		player[active_player]->high_hops = high;
+			player[active_player]->activeHare->hops = HOPS_TIME;
+		player[active_player]->activeHare->high_hops = high;
 	}
 }
 
-int min_d_not_me(int x,int y,int me)
+int min_d_not_me(int x,int y,pHare me)
 {
 	int min_d = LEVEL_WIDTH*LEVEL_WIDTH;
 	int i;
-	int my_d = spFixedToInt(player[me]->x-x)*spFixedToInt(player[me]->x-x)+
-			   spFixedToInt(player[me]->y-y)*spFixedToInt(player[me]->y-y);
+	int my_d = spFixedToInt(me->x-x)*spFixedToInt(me->x-x)+
+			   spFixedToInt(me->y-y)*spFixedToInt(me->y-y);
 	if (my_d < 1024)
 		return LEVEL_WIDTH*LEVEL_WIDTH;
 	for (i = 0; i < player_count;i++)
 	{
-		if (i == me)
+		if (player[i]->firstHare == NULL)
 			continue;
-		if (player[i]->health == 0)
-			continue;
-		int d = spFixedToInt(player[i]->x-x)*spFixedToInt(player[i]->x-x)+
-				spFixedToInt(player[i]->y-y)*spFixedToInt(player[i]->y-y);
-		if (d < min_d)
-			min_d = d;
+		pHare hare = player[i]->firstHare;
+		if (hare)
+		do
+		{							
+				if (hare == me)
+				{
+					hare = hare->next;
+					continue;
+				}
+				int d = spFixedToInt(hare->x-x)*spFixedToInt(hare->x-x)+
+						spFixedToInt(hare->y-y)*spFixedToInt(hare->y-y);
+				if (d < min_d)
+					min_d = d;
+			hare = hare->next;
+		}
+		while (hare != player[i]->firstHare);
 	}
 	return min_d;
 }
@@ -298,50 +311,60 @@ void set_input()
 	else
 	if (player[active_player]->local)
 	{
-		if (spGetInput()->axis[0] < 0)
+		if (spGetInput()->button[MY_PRACTICE_4] == 0)
 		{
-			input_states[INPUT_AXIS_0_LEFT] = 1;
-			input_states[INPUT_AXIS_0_RIGHT] = 0;
+			if (spGetInput()->axis[0] < 0)
+			{
+				input_states[INPUT_AXIS_0_LEFT] = 1;
+				input_states[INPUT_AXIS_0_RIGHT] = 0;
+			}
+			else
+			if (spGetInput()->axis[0] > 0)
+			{
+				input_states[INPUT_AXIS_0_LEFT] = 0;
+				input_states[INPUT_AXIS_0_RIGHT] = 1;
+			}
+			else
+			{
+				input_states[INPUT_AXIS_0_LEFT] = 0;
+				input_states[INPUT_AXIS_0_RIGHT] = 0;
+			}		
+			if (spGetInput()->axis[1] < 0)
+			{
+				input_states[INPUT_AXIS_1_LEFT] = 1;
+				input_states[INPUT_AXIS_1_RIGHT] = 0;
+			}
+			else
+			if (spGetInput()->axis[1] > 0)
+			{
+				input_states[INPUT_AXIS_1_LEFT] = 0;
+				input_states[INPUT_AXIS_1_RIGHT] = 1;
+			}
+			else
+			{
+				input_states[INPUT_AXIS_1_LEFT] = 0;
+				input_states[INPUT_AXIS_1_RIGHT] = 0;
+			}
+			if (spGetInput()->button[MY_BUTTON_L] != button_states[MY_BUTTON_L])
+				input_states[INPUT_BUTTON_L] = spGetInput()->button[MY_BUTTON_L];
+			if (spGetInput()->button[MY_BUTTON_R] != button_states[MY_BUTTON_R])
+				input_states[INPUT_BUTTON_R] = spGetInput()->button[MY_BUTTON_R];
 		}
 		else
-		if (spGetInput()->axis[0] > 0)
 		{
 			input_states[INPUT_AXIS_0_LEFT] = 0;
-			input_states[INPUT_AXIS_0_RIGHT] = 1;
-		}
-		else
-		{
-			input_states[INPUT_AXIS_0_LEFT] = 0;
 			input_states[INPUT_AXIS_0_RIGHT] = 0;
-		}		
-		if (spGetInput()->axis[1] < 0)
-		{
-			input_states[INPUT_AXIS_1_LEFT] = 1;
-			input_states[INPUT_AXIS_1_RIGHT] = 0;
-		}
-		else
-		if (spGetInput()->axis[1] > 0)
-		{
-			input_states[INPUT_AXIS_1_LEFT] = 0;
-			input_states[INPUT_AXIS_1_RIGHT] = 1;
-		}
-		else
-		{
 			input_states[INPUT_AXIS_1_LEFT] = 0;
 			input_states[INPUT_AXIS_1_RIGHT] = 0;
-		}		
+		}
 		if (spGetInput()->button[MY_PRACTICE_OK] != button_states[MY_PRACTICE_OK])
-			input_states[INPUT_BUTTON_LEFT] = spGetInput()->button[MY_PRACTICE_OK];
+			input_states[INPUT_BUTTON_OK] = spGetInput()->button[MY_PRACTICE_OK];
 		if (spGetInput()->button[MY_PRACTICE_3] != button_states[MY_PRACTICE_3])
-			input_states[INPUT_BUTTON_UP] = spGetInput()->button[MY_PRACTICE_3];
+			input_states[INPUT_BUTTON_3] = spGetInput()->button[MY_PRACTICE_3];
 		if (spGetInput()->button[MY_PRACTICE_CANCEL] != button_states[MY_PRACTICE_CANCEL])
-			input_states[INPUT_BUTTON_RIGHT] = spGetInput()->button[MY_PRACTICE_CANCEL];
+			input_states[INPUT_BUTTON_CANCEL] = spGetInput()->button[MY_PRACTICE_CANCEL];
 		if (spGetInput()->button[MY_PRACTICE_4] != button_states[MY_PRACTICE_4])
-			input_states[INPUT_BUTTON_DOWN] = spGetInput()->button[MY_PRACTICE_4];
-		if (spGetInput()->button[MY_BUTTON_L] != button_states[MY_BUTTON_L])
-			input_states[INPUT_BUTTON_L] = spGetInput()->button[MY_BUTTON_L];
-		if (spGetInput()->button[MY_BUTTON_R] != button_states[MY_BUTTON_R])
-			input_states[INPUT_BUTTON_R] = spGetInput()->button[MY_BUTTON_R];
+			input_states[INPUT_BUTTON_4] = spGetInput()->button[MY_PRACTICE_4];
 		if (spGetInput()->button[MY_BUTTON_START] != button_states[MY_BUTTON_START])
 			input_states[INPUT_BUTTON_START] = spGetInput()->button[MY_BUTTON_START];
 		if (spGetInput()->button[MY_BUTTON_SELECT] != button_states[MY_BUTTON_SELECT])
@@ -396,10 +419,33 @@ int calc(Uint32 steps)
 		spGetInput()->button[MY_BUTTON_START] = 0;
 		help = 1-help;
 	}
-	if (spGetInput()->button[MY_BUTTON_L])
-		zoom_d = -1;
-	if (spGetInput()->button[MY_BUTTON_R])
-		zoom_d =  1;	
+	if (spGetInput()->button[MY_PRACTICE_4])
+	{
+		if (spGetInput()->button[MY_BUTTON_L])
+			zoom_d = -1;
+		if (spGetInput()->button[MY_BUTTON_R])
+			zoom_d =  1;
+		if (spGetInput()->axis[0] < 0)
+		{
+			posX -= spDiv(spCos(-rotation),zoom*3/4)*steps;
+			posY -= spDiv(spSin(-rotation),zoom*3/4)*steps;
+		}
+		if (spGetInput()->axis[0] > 0)
+		{
+			posX -= spDiv(spCos(-rotation+SP_PI),zoom*3/4)*steps;
+			posY -= spDiv(spSin(-rotation+SP_PI),zoom*3/4)*steps;
+		}
+		if (spGetInput()->axis[1] < 0)
+		{
+			posX -= spDiv(spCos(-rotation+SP_PI/2),zoom*3/4)*steps;
+			posY -= spDiv(spSin(-rotation+SP_PI/2),zoom*3/4)*steps;
+		}
+		if (spGetInput()->axis[1] > 0)
+		{
+			posX -= spDiv(spCos(-rotation+3*SP_PI/2),zoom*3/4)*steps;
+			posY -= spDiv(spSin(-rotation+3*SP_PI/2),zoom*3/4)*steps;
+		}
+	}
 	int i;
 	update_player_sprite(steps);
 	int result = 0;
@@ -426,6 +472,26 @@ int calc(Uint32 steps)
 			if ((zoomAdjust & 16383) == 0)
 				zoom_d = 0;
 		}
+		//Camera
+		int destX,destY;
+		destX = player[active_player]->activeHare->x;
+		destY = player[active_player]->activeHare->y;
+		if (firstBullet)
+		{
+			pBullet momBullet = firstBullet;
+			int c = 1;
+			while (momBullet)
+			{
+				destX += momBullet->x;
+				destY += momBullet->y;
+				momBullet = momBullet->next;
+				c++;
+			}
+			destX /= c;
+			destY /= c;
+		}
+		posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
+		posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
 		if (game_pause > 0)
 			game_pause--;
 		if (game_pause)
@@ -434,7 +500,7 @@ int calc(Uint32 steps)
 		if (game_pause)
 			continue;
 		
-		Sint32 goal = -player[active_player]->rotation;
+		Sint32 goal = -player[active_player]->activeHare->rotation;
 		if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
 			rotation -= 2*SP_PI;
 		if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
@@ -461,7 +527,7 @@ int calc(Uint32 steps)
 			//AI
 			if (weapon_points)
 			{
-				if (player[active_player]->bums && player[active_player]->hops <= 0)
+				if (player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
 				{
 					if (ai_shoot_tries == 0)
 					{
@@ -480,17 +546,17 @@ int calc(Uint32 steps)
 							if (ai_shoot_tries < AI_MAX_TRIES)
 							{
 								//Lets first try...
-								int x = player[active_player]->x;
-								int y = player[active_player]->y;
+								int x = player[active_player]->activeHare->x;
+								int y = player[active_player]->activeHare->y;
 								int w_d = spRand()%(2*SP_PI);
 								int w_p = spRand()%SP_ONE;
-								lastPoint(&x,&y,player[active_player]->rotation+w_d+SP_PI,w_p/2);
-								int d = min_d_not_me(x,y,active_player);
+								lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/2);
+								int d = min_d_not_me(x,y,player[active_player]->activeHare);
 								if (d < lastAIDistance)
 								{
 									lastAIDistance = d;
-									player[active_player]->w_direction = w_d;
-									player[active_player]->w_power = w_p;
+									player[active_player]->activeHare->w_direction = w_d;
+									player[active_player]->activeHare->w_power = w_p;
 								}
 							}
 							else
@@ -499,7 +565,7 @@ int calc(Uint32 steps)
 								if (weapon_points > 0)
 								{
 									weapon_points--;
-									player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1,player[active_player]);
+									shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player]);
 								}
 								break;
 							}
@@ -510,40 +576,40 @@ int calc(Uint32 steps)
 			else
 			{
 				//RUNNING!
-				if (player[active_player]->bums && player[active_player]->hops <= 0)
+				if (player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
 					jump((spRand()%4==0)?1:0);
 			}
 		}
 		else
 		{
 			//not AI
-			if (input_states[INPUT_BUTTON_LEFT] && player[active_player]->bums && player[active_player]->hops <= 0)
+			if (input_states[INPUT_BUTTON_OK] && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
 			{
 				jump(1);
 			}
 			if (input_states[INPUT_AXIS_0_LEFT])
 			{
-				if (player[active_player]->direction == 1)
+				if (player[active_player]->activeHare->direction == 1)
 				{
-					player[active_player]->direction = 0;
-					player[active_player]->w_direction = SP_PI-player[active_player]->w_direction;
+					player[active_player]->activeHare->direction = 0;
+					player[active_player]->activeHare->w_direction = SP_PI-player[active_player]->activeHare->w_direction;
 					direction_hold = 0;
 				}
 				direction_hold++;
-				if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player]->bums && player[active_player]->hops <= 0)
+				if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
 					jump(0);
 			}
 			else
 			if (input_states[INPUT_AXIS_0_RIGHT])
 			{
-				if (player[active_player]->direction == 0)
+				if (player[active_player]->activeHare->direction == 0)
 				{
-					player[active_player]->direction = 1;
-					player[active_player]->w_direction = SP_PI-player[active_player]->w_direction;
+					player[active_player]->activeHare->direction = 1;
+					player[active_player]->activeHare->w_direction = SP_PI-player[active_player]->activeHare->w_direction;
 					direction_hold = 0;
 				}
 				direction_hold++;
-				if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player]->bums && player[active_player]->hops <= 0)
+				if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
 					jump(0);
 			}
 			else
@@ -554,10 +620,10 @@ int calc(Uint32 steps)
 				direction_pressed += SP_ONE/20;
 				if (direction_pressed >= 128*SP_ONE)
 					direction_pressed = 128*SP_ONE;
-				if (player[active_player]->direction == 0)
-					player[active_player]->w_direction += direction_pressed >> SP_ACCURACY;
+				if (player[active_player]->activeHare->direction == 0)
+					player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
 				else
-					player[active_player]->w_direction -= direction_pressed >> SP_ACCURACY;
+					player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
 			}
 			else
 			if (input_states[INPUT_AXIS_1_RIGHT])
@@ -565,39 +631,39 @@ int calc(Uint32 steps)
 				direction_pressed += SP_ONE/20;
 				if (direction_pressed >= 128*SP_ONE)
 					direction_pressed = 128*SP_ONE;
-				if (player[active_player]->direction == 0)
-					player[active_player]->w_direction -= direction_pressed >> SP_ACCURACY;
+				if (player[active_player]->activeHare->direction == 0)
+					player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
 				else
-					player[active_player]->w_direction += direction_pressed >> SP_ACCURACY;
+					player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
 			}
 			else
 				direction_pressed = 0;
 
-			if (input_states[INPUT_BUTTON_UP])
+			if (input_states[INPUT_BUTTON_R])
 			{
 				power_pressed += SP_ONE/100;
-				player[active_player]->w_power += power_pressed >> SP_ACCURACY;
-				if (player[active_player]->w_power >= SP_ONE)
-					player[active_player]->w_power = SP_ONE;
+				player[active_player]->activeHare->w_power += power_pressed >> SP_ACCURACY;
+				if (player[active_player]->activeHare->w_power >= SP_ONE)
+					player[active_player]->activeHare->w_power = SP_ONE;
 			}
 			else
-			if (input_states[INPUT_BUTTON_DOWN])
+			if (input_states[INPUT_BUTTON_L])
 			{
 				power_pressed += SP_ONE/100;
-				player[active_player]->w_power -= power_pressed >> SP_ACCURACY;
-				if (player[active_player]->w_power < 0)
-					player[active_player]->w_power = 0;
+				player[active_player]->activeHare->w_power -= power_pressed >> SP_ACCURACY;
+				if (player[active_player]->activeHare->w_power < 0)
+					player[active_player]->activeHare->w_power = 0;
 			}
 			else
 				power_pressed = 0;
-			if (input_states[INPUT_BUTTON_RIGHT])
+			if (input_states[INPUT_BUTTON_CANCEL])
 			{
 				//Shoot!
 				if (weapon_points > 0)
 				{
 					weapon_points--;
-					input_states[INPUT_BUTTON_RIGHT] = 0;
-					player[active_player]->bullet = shootBullet(player[active_player]->x,player[active_player]->y,player[active_player]->w_direction+player[active_player]->rotation+SP_PI,player[active_player]->w_power/2,player[active_player]->direction?1:-1,player[active_player]);
+					input_states[INPUT_BUTTON_CANCEL] = 0;
+					shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player]);
 				}
 			}
 		}
@@ -611,26 +677,6 @@ int calc(Uint32 steps)
 			else
 				extra_time--;
 		}
-		//Camera
-		int destX,destY;
-		destX = player[active_player]->x;
-		destY = player[active_player]->y;
-		if (firstBullet)
-		{
-			pBullet momBullet = firstBullet;
-			int c = 1;
-			while (momBullet)
-			{
-				destX += momBullet->x;
-				destY += momBullet->y;
-				momBullet = momBullet->next;
-				c++;
-			}
-			destX /= c;
-			destY /= c;
-		}
-		posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
-		posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
 	}
 	return result;
 }
@@ -679,7 +725,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	level_pixel = (Uint16*)level_original->pixels;
 	realloc_gravity();
 	init_gravity();
-	init_player(hase_player_list,game->player_count);
+	init_player(hase_player_list,game->player_count,game->hares_per_player);
 	zoomAdjust = spSqrt(spGetSizeFactor());
 	minZoom = spSqrt(spGetSizeFactor()/8);
 	maxZoom = spSqrt(spGetSizeFactor()*4);
@@ -699,7 +745,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	{
 		int i;
 		for (i = 0; i < player_count; i ++)
-			if (player[i]->health)
+			if (player[i]->firstHare)
 				break;
 		if (i < player_count)
 		{
@@ -715,7 +761,16 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	int i;
 	for (i = 0; i < player_count; i++)
 	{
-		spDeleteSpriteCollection(player[i]->hase,0);
+		pHare hare = player[i]->firstHare;
+		while (hare)
+		{
+			spDeleteSpriteCollection(hare->hase,0);
+			pHare next = hare->next;
+			free(hare);
+			hare = next;
+			if (hare == player[i]->firstHare)
+				break;
+		}
 		deleteAllTraces(player[i]);
 	}
 	spDeleteSurface(arrow);

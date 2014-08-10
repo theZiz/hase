@@ -37,8 +37,8 @@ $max_player = $row['max_player'];
 echo "max_player: $max_player", PHP_EOL;
 $seconds_per_turn = $row['seconds_per_turn'];
 echo "seconds_per_turn: $seconds_per_turn", PHP_EOL;
-$seconds_per_turn = $row['mom_player'];
-echo "mom_player: $mom_player", PHP_EOL;
+$hares_per_player = $row['hares_per_player'];
+echo "hares_per_player: $hares_per_player", PHP_EOL;
 $status = $row['status'];
 echo "status: $status";
 

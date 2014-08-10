@@ -38,6 +38,7 @@ while ($row = mysql_fetch_array( $result ))
 	$game_name = $row['game_name'];
 	$max_player = $row['max_player'];
 	$seconds_per_turn = $row['seconds_per_turn'];
+	$hares_per_player = $row['hares_per_player'];
 	//count player
 	$subresult = mysql_query("SELECT COUNT(*) AS total FROM hase_player_list WHERE game_id='$game_id'");
 	$subrow = mysql_fetch_assoc($subresult);
@@ -46,6 +47,7 @@ while ($row = mysql_fetch_array( $result ))
 	echo "create_date: $create_date", PHP_EOL;
 	echo "status: $status", PHP_EOL;
 	echo "seconds_per_turn: $seconds_per_turn", PHP_EOL;
+	echo "hares_per_player: $hares_per_player", PHP_EOL;
 	echo "max_player: $max_player", PHP_EOL;
 	echo "game_name: $game_name", PHP_EOL;
 	echo "game_id: $game_id", PHP_EOL;

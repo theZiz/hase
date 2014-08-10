@@ -17,6 +17,8 @@ Changelog
 - Writing down tractory while flying
 - New window approach
 - Menu
+- Multiple hares per player
+- New controls
 
 
 1.3:

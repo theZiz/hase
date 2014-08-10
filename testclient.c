@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	if (argc > 3)
 	{
 		char buffer[512];
-		game = create_game(argv[1],atoi(argv[3]),TURN_LEN,create_level_string(buffer,1536,1536,3,3,3),0);
+		game = create_game(argv[1],atoi(argv[3]),TURN_LEN,create_level_string(buffer,1536,1536,3,3,3),0,0);
 		printf("Created game %s (%i) with pw %i at time %i\n",game->name,game->id,game->admin_pw,game->create_date);
 	}
 	else

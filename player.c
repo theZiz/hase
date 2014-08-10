@@ -14,7 +14,7 @@ int active_player = 0;
 int player_count;
 pPlayer *player;
 
-int circle_is_empty(int x, int y, int r,int except)
+int circle_is_empty(int x, int y, int r,pHare except)
 {
 	int a,b;
 	int start_a = x-r;
@@ -40,19 +40,26 @@ int circle_is_empty(int x, int y, int r,int except)
 	}
 	
 	int i;
-	if (except < 0xDEAD)
-		for (i = 0; i < player_count; i++)
+	for (i = 0; i < player_count; i++)
+	{
+		pHare hare = player[i]->firstHare;
+		if (hare)
+		do
 		{
-			if (player[i]->health == 0)
+			if (hare->health == 0 || hare == except)
+			{
+				hare = hare->next;
 				continue;
-			if (i == except)
-				continue;
-			int px = player[i]->x >> SP_ACCURACY;
-			int py = player[i]->y >> SP_ACCURACY;
+			}
+			int px = hare->x >> SP_ACCURACY;
+			int py = hare->y >> SP_ACCURACY;
 			int d = (x-px)*(x-px)+(y-py)*(y-py);
 			if (d <= (r+8)*(r+8))
 				return 0;
+			hare = hare->next;
 		}
+		while (hare != player[i]->firstHare);
+	}
 	return 1;
 }
 
@@ -104,99 +111,116 @@ void update_player()
 	int j;
 	for (j = 0; j < player_count; j++)
 	{
-		if (player[j]->health == 0)
-			continue;
-		if (player[j]->hops > 0)
+		pHare hare = player[j]->firstHare;
+		if (hare)
+		do
 		{
-			player[j]->hops --;
-			if (player[j]->hops <= 0)
+			if (hare->health == 0)
 			{
-				Sint32 dx = spSin(player[j]->rotation);
-				Sint32 dy = spCos(player[j]->rotation);
-				Sint32 ox = player[j]->x;
-				Sint32 oy = player[j]->y;
-				int k;
-				for (k = 1; k <= 16; k++)
+				hare = hare->next;
+				continue;
+			}
+			if (hare->hops > 0)
+			{
+				hare->hops --;
+				if (hare->hops <= 0)
 				{
-					if (circle_is_empty(spFixedToInt(player[j]->x+k*dx),spFixedToInt(player[j]->y-k*dy),8,j))
+					Sint32 dx = spSin(hare->rotation);
+					Sint32 dy = spCos(hare->rotation);
+					Sint32 ox = hare->x;
+					Sint32 oy = hare->y;
+					int k;
+					for (k = 1; k <= 16; k++)
 					{
-						player[j]->x += k*dx;
-						player[j]->y -= k*dy;
-						Sint32 angle = SP_PI/3;
-						Sint32 divisor = 8;
-						if (player[j]->high_hops)
+						if (circle_is_empty(spFixedToInt(hare->x+k*dx),spFixedToInt(hare->y-k*dy),8,hare))
 						{
-							angle = SP_PI/10;
-							divisor = 6;
+							hare->x += k*dx;
+							hare->y -= k*dy;
+							Sint32 angle = SP_PI/3;
+							Sint32 divisor = 8;
+							if (hare->high_hops)
+							{
+								angle = SP_PI/10;
+								divisor = 6;
+							}
+							if (hare->direction)
+							{
+								hare->dx += spSin(hare->rotation+angle)/divisor;
+								hare->dy -= spCos(hare->rotation+angle)/divisor;
+							}
+							else
+							{
+								hare->dx += spSin(hare->rotation-angle)/divisor;
+								hare->dy -= spCos(hare->rotation-angle)/divisor;
+							}
+							break;
 						}
-						if (player[j]->direction)
+						if (k == 16)
 						{
-							player[j]->dx += spSin(player[j]->rotation+angle)/divisor;
-							player[j]->dy -= spCos(player[j]->rotation+angle)/divisor;
+							k = -1;
+							printf("Using special magic...\n");
 						}
-						else
-						{
-							player[j]->dx += spSin(player[j]->rotation-angle)/divisor;
-							player[j]->dy -= spCos(player[j]->rotation-angle)/divisor;
-						}
-						break;
-					}
-					if (k == 16)
-					{
-						k = -1;
-						printf("Using special magic...\n");
 					}
 				}
 			}
+			hare->rotation = 0;
+			hare->bums = 0;
+			Sint32 force = gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y));
+			if (force)
+			{
+				Sint32 ac = spDiv(-gravitation_y(spFixedToInt(hare->x),spFixedToInt(hare->y)),force);
+				if (ac < -SP_ONE)
+					ac = -SP_ONE;
+				if (ac > SP_ONE)
+					ac = SP_ONE;
+				hare->rotation = -spAcos(ac);
+				if (-gravitation_x(spFixedToInt(hare->x),spFixedToInt(hare->y)) <= 0)
+					hare->rotation = 2*SP_PI-hare->rotation;
+				while (hare->rotation < 0)
+					hare->rotation += 2*SP_PI;
+				while (hare->rotation >= 2*SP_PI)
+					hare->rotation -= 2*SP_PI;
+			}
+			hare = hare->next;
 		}
-		player[j]->rotation = 0;
-		player[j]->bums = 0;
-		Sint32 force = gravitation_force(spFixedToInt(player[j]->x),spFixedToInt(player[j]->y));
-		if (force)
-		{
-			Sint32 ac = spDiv(-gravitation_y(spFixedToInt(player[j]->x),spFixedToInt(player[j]->y)),force);
-			if (ac < -SP_ONE)
-				ac = -SP_ONE;
-			if (ac > SP_ONE)
-				ac = SP_ONE;
-			player[j]->rotation = -spAcos(ac);
-			if (-gravitation_x(spFixedToInt(player[j]->x),spFixedToInt(player[j]->y)) <= 0)
-				player[j]->rotation = 2*SP_PI-player[j]->rotation;
-			while (player[j]->rotation < 0)
-				player[j]->rotation += 2*SP_PI;
-			while (player[j]->rotation >= 2*SP_PI)
-				player[j]->rotation -= 2*SP_PI;
-		}
+		while (hare != player[j]->firstHare);
 	}
 }
 
 void update_player_sprite(int steps)
 {
-	if (player[active_player]->hops > 0)
+	pHare hare = player[active_player]->firstHare;
+	if (hare)
+	do
 	{
-		if (player[active_player]->high_hops)
+		if (hare->hops > 0)
 		{
-			if (player[active_player]->direction == 0)
-				spSelectSprite(player[active_player]->hase,"high jump left");
+			if (hare->high_hops)
+			{
+				if (hare->direction == 0)
+					spSelectSprite(hare->hase,"high jump left");
+				else
+					spSelectSprite(hare->hase,"high jump right");
+			}
 			else
-				spSelectSprite(player[active_player]->hase,"high jump right");
+			{
+				if (hare->direction == 0)
+					spSelectSprite(hare->hase,"jump left");
+				else
+					spSelectSprite(hare->hase,"jump right");
+			}
 		}
 		else
 		{
-			if (player[active_player]->direction == 0)
-				spSelectSprite(player[active_player]->hase,"jump left");
+			if (hare->direction == 0)
+				spSelectSprite(hare->hase,"stand left");
 			else
-				spSelectSprite(player[active_player]->hase,"jump right");
+				spSelectSprite(hare->hase,"stand right");
 		}
+		spUpdateSprite(spActiveSprite(hare->hase),steps);
+		hare = hare->next;
 	}
-	else
-	{
-		if (player[active_player]->direction == 0)
-			spSelectSprite(player[active_player]->hase,"stand left");
-		else
-			spSelectSprite(player[active_player]->hase,"stand right");
-	}
-	spUpdateSprite(spActiveSprite(player[active_player]->hase),steps);
+	while (hare != player[active_player]->firstHare);
 }	
 
 int next_player_go = 0;
@@ -266,13 +290,20 @@ void real_next_player()
 	{
 		active_player = (active_player+1)%player_count;
 	}
-	while (player[active_player]->health == 0);
-	player[active_player]->bullet = NULL;
+	while (player[active_player]->firstHare == NULL);
+	player[active_player]->activeHare = player[active_player]->activeHare->next;
 	if (player[active_player]->computer)
-		player[active_player]->direction = spRand()&1;
+		player[active_player]->activeHare->direction = spRand()&1;
 	countdown = hase_game->seconds_per_turn*1000;
-	player[active_player]->hops = 0;
-	player[active_player]->high_hops = 0;
+	pHare hare = player[active_player]->firstHare;
+	if (hare)
+	do
+	{
+		hare->hops = 0;
+		hare->high_hops = 0;
+		hare = hare->next;
+	}
+	while (hare != player[active_player]->firstHare);
 	weapon_points = 3;
 	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
@@ -288,7 +319,44 @@ void check_next_player()
 	}
 }
 
-void init_player(pPlayer player_list,int pc)
+pHare add_hare(pHare* firstHare)
+{
+	pHare hare = (pHare)malloc(sizeof(tHare));
+	if (*firstHare)
+	{
+		pHare last = (*firstHare)->before;
+		last->next = hare;
+		hare->before = last;
+		hare->next = *firstHare;
+		(*firstHare)->before = hare;
+	}
+	else
+	{
+		*firstHare = hare;
+		hare->next = hare;
+		hare->before = hare;
+	}
+	return hare;
+}
+
+pHare del_hare(pHare hare,pHare* firstHare)
+{
+	pHare next = NULL;
+	if (hare->next == hare)
+		*firstHare = NULL;
+	else
+	{
+		hare->before->next = hare->next;
+		hare->next->before = hare->before;
+		if (*firstHare == hare)
+			*firstHare = hare->next;
+		next = hare->next;
+	}
+	free(hare);
+	return next;
+}
+
+void init_player(pPlayer player_list,int pc,int hc)
 {
 	next_player_go = 0;
 	player_count = pc;
@@ -299,47 +367,51 @@ void init_player(pPlayer player_list,int pc)
 		player[player_list->position_in_game] = player_list;
 		player_list = player_list->next;
 	}
-	int i;
-	for (i = 0; i < player_count; i ++)
+	int i,j;
+	for (i = 0; i < player_count; i++)
+		player[i]->firstHare = NULL;
+	for (i = 0; i < player_count; i++)
 	{
 		player[i]->time = 0;
-		player[i]->direction = 0;
-		player[i]->w_direction = SP_ONE/2;
-		player[i]->w_power = SP_ONE/2;
-		player[i]->hops = 0;
-		player[i]->high_hops = 0;
-		int x,y;
-		while (1)
+		int nr = spRand()%10+1;
+		for (j = 0; j < hc; j++)
 		{
-			x = spRand()%LEVEL_WIDTH;
-			y = spRand()%LEVEL_HEIGHT;
-			printf("Tried %i %i... ",x,y);
-			if (circle_is_empty(x,y,16,i) && gravitation_force(x,y)/32768)
-				break;
-			printf("NOT!\n");
+			pHare hare = add_hare(&(player[i]->firstHare));
+			hare->direction = 0;
+			hare->w_direction = SP_ONE/2;
+			hare->w_power = SP_ONE/2;
+			hare->hops = 0;
+			hare->high_hops = 0;
+			int x,y;
+			while (1)
+			{
+				x = spRand()%LEVEL_WIDTH;
+				y = spRand()%LEVEL_HEIGHT;
+				printf("Tried %i %i... ",x,y);
+				if (circle_is_empty(x,y,16,hare) && gravitation_force(x,y)/32768)
+					break;
+				printf("NOT!\n");
+			}
+			printf("Fine.\n");
+			hare->x = x << SP_ACCURACY;
+			hare->y = y << SP_ACCURACY;
+			hare->dx = 0;
+			hare->dy = 0;
+			hare->health = MAX_HEALTH;
+			char buffer[256];
+			sprintf(buffer,"./data/hase%i.ssc",nr);
+			hare->hase = spLoadSpriteCollection(buffer,NULL);
 		}
-		printf("Fine.\n");
-		player[i]->x = x << SP_ACCURACY;
-		player[i]->y = y << SP_ACCURACY;
-		player[i]->dx = 0;
-		player[i]->dy = 0;
-		posX = player[i]->x;
-		posY = player[i]->y;
-		update_player(0);
-		rotation = -player[i]->rotation;
-		player[i]->health = MAX_HEALTH;
-		char buffer[256];
-		sprintf(buffer,"./data/hase%i.ssc",spRand()%10+1);
-		player[i]->hase = spLoadSpriteCollection(buffer,NULL);
-		int j;
+		player[i]->activeHare = player[i]->firstHare;
 		for (j = 0; j < TRACE_COUNT; j++)
 			player[i]->trace[j] = NULL;
 		player[i]->tracePos = 0;
 	}
+	update_player();
 	active_player = 0;
-	player[active_player]->bullet = NULL;
-	posX = player[active_player]->x;
-	posY = player[active_player]->y;
+	posX = player[active_player]->firstHare->x;
+	posY = player[active_player]->firstHare->y;
+	rotation = -player[active_player]->firstHare->rotation;
 	ai_shoot_tries = 0;
 	last_ai_try = 0;
 	weapon_points = 3;

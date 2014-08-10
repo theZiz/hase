@@ -3,31 +3,40 @@ int do_physics()
 	int j;
 	for (j = 0; j < player_count; j++)
 	{
-		if (player[j]->health == 0)
+		if (player[j]->firstHare == NULL)
 			continue;
-		player[j]->dx -= gravitation_x(spFixedToInt(player[j]->x),spFixedToInt(player[j]->y)) >> PHYSIC_IMPACT;
-		player[j]->dy -= gravitation_y(spFixedToInt(player[j]->x),spFixedToInt(player[j]->y)) >> PHYSIC_IMPACT;
-		if (circle_is_empty(spFixedToInt(player[j]->x+player[j]->dx),spFixedToInt(player[j]->y+player[j]->dy),8,j))
-		{
-			player[j]->x += player[j]->dx;
-			player[j]->y += player[j]->dy;
+		pHare hare = player[j]->firstHare;
+		if (hare)
+		do
+		{							
+			hare->dx -= gravitation_x(spFixedToInt(hare->x),spFixedToInt(hare->y)) >> PHYSIC_IMPACT;
+			hare->dy -= gravitation_y(spFixedToInt(hare->x),spFixedToInt(hare->y)) >> PHYSIC_IMPACT;
+			if (circle_is_empty(spFixedToInt(hare->x+hare->dx),spFixedToInt(hare->y+hare->dy),8,hare))
+			{
+				hare->x += hare->dx;
+				hare->y += hare->dy;
+			}
+			else
+			{
+				hare->dx = 0;
+				hare->dy = 0;
+				hare->bums = 1;
+			}
+			if (hare->x <  0           || hare->y < 0 ||
+				hare->x >= spIntToFixed(LEVEL_WIDTH) || hare->y >= spIntToFixed(LEVEL_HEIGHT))
+			{
+				hare = del_hare(hare,&(player[j]->firstHare));
+				if (player[j]->firstHare == NULL)
+					alive_count--;
+				if (alive_count < 2)
+					return 1;
+				if (j == active_player)
+					next_player();
+			}
+			else
+				hare = hare->next;
 		}
-		else
-		{
-			player[j]->dx = 0;
-			player[j]->dy = 0;
-			player[j]->bums = 1;
-		}
-		if (player[j]->x <  0           || player[j]->y < 0 ||
-			player[j]->x >= spIntToFixed(LEVEL_WIDTH) || player[j]->y >= spIntToFixed(LEVEL_HEIGHT))
-		{
-			player[j]->health = 0;
-			alive_count--;
-			if (alive_count < 2)
-				return 1;
-			if (j == active_player)
-				next_player();
-		}
+		while (hare != player[j]->firstHare);
 	}
 	return updateBullets();
 }

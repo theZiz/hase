@@ -219,7 +219,7 @@ int updateBullets()
 		momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;
 		int dead = 0;
 		if (momBullet->impact_state == 0 &&
-			circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,BULLET_SIZE,-1))
+			circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,BULLET_SIZE,NULL))
 		{
 			momBullet->x += momBullet->dx;
 			momBullet->y += momBullet->dy;
@@ -244,18 +244,27 @@ int updateBullets()
 						bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
 						for (j = 0; j < player_count; j++)
 						{
-							if (player[j]->health == 0)
+							if (player[j]->firstHare == NULL)
 								continue;
-							int d = spFixedToInt(player[j]->x-momBullet->x)*spFixedToInt(player[j]->x-momBullet->x)+
-									spFixedToInt(player[j]->y-momBullet->y)*spFixedToInt(player[j]->y-momBullet->y);
-								d = 1024-d;
-							if (d > 0)
-								player[j]->health -= d*MAX_HEALTH/2048;
-							if (player[j]->health <= 0)
-							{
-								player[j]->health = 0;
-								alive_count--;
+							pHare hare = player[j]->firstHare;
+							if (hare)
+							do
+							{							
+								int d = spFixedToInt(hare->x-momBullet->x)*spFixedToInt(hare->x-momBullet->x)+
+										spFixedToInt(hare->y-momBullet->y)*spFixedToInt(hare->y-momBullet->y);
+									d = 1024-d;
+								if (d > 0)
+									hare->health -= d*MAX_HEALTH/2048;
+								if (hare->health <= 0)
+								{
+									hare = del_hare(hare,&(player[j]->firstHare));
+									if (player[j]->firstHare == NULL)
+										alive_count--;
+								}
+								else
+									hare = hare->next;
 							}
+							while (hare != player[j]->firstHare);
 						}
 						spResetLoop();
 						return 2;

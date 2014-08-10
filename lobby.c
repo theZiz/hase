@@ -54,6 +54,7 @@ int main_menu_feedback( pWindowElement elem, int action )
 
 int lo_game_players = 8;
 int lo_game_seconds = 30;
+int lo_game_hares = 5;
 
 int local_game_feedback( pWindowElement elem, int action )
 {
@@ -70,6 +71,10 @@ int local_game_feedback( pWindowElement elem, int action )
 					if (lo_game_seconds > 5)
 						lo_game_seconds -= 5;
 					break;
+				case 3:
+					if (lo_game_hares > 1)
+						lo_game_hares--;
+					break;
 			}
 			break;
 		case WN_ACT_RIGHT:
@@ -81,6 +86,9 @@ int local_game_feedback( pWindowElement elem, int action )
 				case 2:
 					lo_game_seconds += 5;
 					break;
+				case 3:
+					lo_game_hares++;
+					break;
 			}
 			break;
 	}
@@ -88,6 +96,7 @@ int local_game_feedback( pWindowElement elem, int action )
 	{
 		case 1: sprintf(elem->text,"Maximum players: %i",lo_game_players); break;
 		case 2: sprintf(elem->text,"Seconds per turn: %i",lo_game_seconds); break;
+		case 3: sprintf(elem->text,"Hares per player: %i",lo_game_hares); break;
 	}
 	return 0;
 }
@@ -123,12 +132,13 @@ int main(int argc, char **argv)
 					window = create_window(local_game_feedback,font,"Create local game");
 					add_window_element(window,0,1);
 					add_window_element(window,0,2);
+					add_window_element(window,0,3);
 					res = modal_window(window,resize);
 					delete_window(window);
 					if (res == 1)
 					{
 						char buffer[512];
-						pGame game = create_game("New game",lo_game_players,lo_game_seconds,create_level_string(buffer,1536,1536,3,3,3),1);
+						pGame game = create_game("New game",lo_game_players,lo_game_seconds,create_level_string(buffer,1536,1536,3,3,3),1,lo_game_hares);
 						start_lobby_game(font,resize,game);
 						delete_game(game);
 					}

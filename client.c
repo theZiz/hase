@@ -218,7 +218,7 @@ int server_info()
 	return r;
 }
 
-pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string,int local)
+pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string,int local,int hares_per_player)
 {
 	pMessage result = NULL;
 	if (local == 0)
@@ -227,6 +227,7 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 		addToMessage(&message,"game_name",game_name);
 		numToMessage(&message,"max_player",max_player);
 		numToMessage(&message,"seconds_per_turn",seconds_per_turn);
+		numToMessage(&message,"hares_per_player",hares_per_player);
 		addToMessage(&message,"level_string",level_string);
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
@@ -246,6 +247,7 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 	game->player_count = 0;
 	game->create_date = 0;
 	game->seconds_per_turn = seconds_per_turn;
+	game->hares_per_player = hares_per_player;
 	game->status = 0;
 	game->local = local;
 	if (local)
@@ -352,6 +354,8 @@ int get_games(pGame *gameList)
 			game->create_date = atoi(now->content);
 		if (strcmp(now->name,"seconds_per_turn") == 0)
 			game->seconds_per_turn = atoi(now->content);
+		if (strcmp(now->name,"hares_per_player") == 0)
+			game->hares_per_player = atoi(now->content);
 		if (strcmp(now->name,"status") == 0)
 			game->status = atoi(now->content);
 		now = now->next;
@@ -564,6 +568,8 @@ int get_game(pGame game,pPlayer *playerList)
 				game->create_date = atoi(now->content);
 			if (strcmp(now->name,"seconds_per_turn") == 0)
 				game->seconds_per_turn = atoi(now->content);
+			if (strcmp(now->name,"hares_per_player") == 0)
+				game->hares_per_player = atoi(now->content);
 			if (strcmp(now->name,"status") == 0)
 				game->status = atoi(now->content);
 			now = now->next;
@@ -605,27 +611,19 @@ int get_game(pGame game,pPlayer *playerList)
 
 void set_status(pGame game,int status)
 {
-	printf("set_status in\n");
 	int old_status = game->status;
 	game->status = status;
 	if (game->local == 0)
 	{
 		pMessage message = NULL;
-		printf("1\n");
 		numToMessage(&message,"game_id",game->id);
-		printf("2\n");
 		numToMessage(&message,"admin_pw",game->admin_pw);
-		printf("3\n");
 		numToMessage(&message,"status",game->status);
-		printf("4\n");
 		pMessage result = NULL;
-		printf("5\n");
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
 			result = sendMessage(message,NULL,NULL,0,"set_status.php");
-		printf("6\n");
 		deleteMessage(&message);
-		printf("7\n");
 		deleteMessage(&result);	
 	}
 	else
@@ -655,7 +653,6 @@ void set_status(pGame game,int status)
 			i++;
 		}
 	}
-	printf("set_status out\n");
 }
 
 void set_level(pGame game,char* level_string)

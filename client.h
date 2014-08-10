@@ -58,6 +58,7 @@ typedef struct sGame
 	int player_count;
 	int create_date;
 	int seconds_per_turn;
+	int hares_per_player;
 	int status;
 	int admin_pw;
 	pGame next;
@@ -80,6 +81,23 @@ typedef struct sBulletTrace
 	pBulletTrace next;
 } tBulletTrace;
 
+typedef struct sHare *pHare;
+typedef struct sHare
+{
+	int direction;
+	int w_direction;
+	int w_power;
+	Sint32 x,y;
+	Sint32 dx,dy;
+	Sint32 rotation;
+	int bums;
+	int hops;
+	int high_hops;
+	int health;
+	spSpriteCollectionPointer hase;	
+	pHare before,next;
+} tHare;
+
 typedef struct sPlayer
 {
 	int id;
@@ -96,18 +114,8 @@ typedef struct sPlayer
 	int input_message;
 	int computer;
 	//ingame
-	int direction;
-	int w_direction;
-	int w_power;
-	Sint32 x,y;
-	Sint32 dx,dy;
-	Sint32 rotation;
-	int bums;
-	int hops;
-	int high_hops;
-	int health;
-	spSpriteCollectionPointer hase;
-	pBullet bullet;
+	pHare firstHare;
+	pHare activeHare;
 	int local;
 	int time;
 	pBulletTrace trace[TRACE_COUNT];
@@ -123,7 +131,7 @@ typedef struct sThreadData
 } tThreadData;
 
 int server_info();
-pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string,int local);
+pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string,int local,int hares_per_player);
 void delete_game_list(pGame game);
 void delete_game(pGame game);
 int get_games(pGame *gameList);

@@ -17,6 +17,7 @@ void ( *ll_resize )( Uint16 w, Uint16 h );
 char ll_game_name[33] = "New game";
 int ll_game_players = 8;
 int ll_game_seconds = 30;
+int ll_game_hares = 5;
 
 pGame mom_game;
 
@@ -117,6 +118,10 @@ int create_game_feedback( pWindowElement elem, int action )
 					if (ll_game_seconds > 5)
 						ll_game_seconds -= 5;
 					break;
+				case 3:
+					if (ll_game_hares > 1)
+						ll_game_hares--;
+					break;
 			}
 			break;
 		case WN_ACT_RIGHT:
@@ -127,6 +132,9 @@ int create_game_feedback( pWindowElement elem, int action )
 					break;
 				case 2:
 					ll_game_seconds += 5;
+					break;
+				case 3:
+					ll_game_hares++;
 					break;
 			}
 			break;
@@ -142,6 +150,7 @@ int create_game_feedback( pWindowElement elem, int action )
 		case 0: sprintf(elem->text,"Name: %s",ll_game_name); break;
 		case 1: sprintf(elem->text,"Maximum players: %i",ll_game_players); break;
 		case 2: sprintf(elem->text,"Seconds per turn: %i",ll_game_seconds); break;
+		case 3: sprintf(elem->text,"Hares per player: %i",ll_game_players); break;
 	}
 	return 0;
 }
@@ -161,6 +170,7 @@ int ll_calc(Uint32 steps)
 			add_window_element(window,1,0);
 			add_window_element(window,0,1);
 			add_window_element(window,0,2);
+			add_window_element(window,0,3);
 			res = modal_window(window,ll_resize);
 			delete_window(window);
 			if (res == 1 && ll_game_name[0] == 0)
@@ -171,7 +181,7 @@ int ll_calc(Uint32 steps)
 		if (res == 1)
 		{
 			char buffer[512];
-			pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0);
+			pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0,ll_game_hares);
 			start_lobby_game(ll_font,ll_resize,game);
 			delete_game(game);
 			ll_counter = 10000;			
