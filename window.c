@@ -23,7 +23,7 @@ pWindow create_window(int ( *feedback )( pWindowElement elem, int action ),spFon
 	window->selection = 0;
 	window->firstElement = NULL;
 	sprintf(window->title,"%s",title);
-	window->width = spMax(spGetWindowSurface()->w/2,spFontWidth(title,font)+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
+	window->width = spMax(spGetWindowSurface()->h,spFontWidth(title,font)+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
 	update_window_width(window);
 	window->do_flip = 1;
 	window->main_menu = 0;

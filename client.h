@@ -116,6 +116,7 @@ typedef struct sPlayer
 	//ingame
 	pHare firstHare;
 	pHare activeHare;
+	pHare setActiveHare;
 	int local;
 	int time;
 	pBulletTrace trace[TRACE_COUNT];

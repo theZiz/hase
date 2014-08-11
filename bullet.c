@@ -257,7 +257,18 @@ int updateBullets()
 									hare->health -= d*MAX_HEALTH/2048;
 								if (hare->health <= 0)
 								{
+									int active = 0;
+									if (hare == player[active_player]->activeHare)
+									{
+										active = 1; //Suicid?
+										player[active_player]->setActiveHare = hare->next;
+									}
 									hare = del_hare(hare,&(player[j]->firstHare));
+									if (active)
+									{
+										player[active_player]->activeHare = NULL;
+										next_player();
+									}
 									if (player[j]->firstHare == NULL)
 										alive_count--;
 								}

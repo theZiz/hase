@@ -49,6 +49,7 @@ int weapon_points = 0;
 int input_states[12];
 char button_states[SP_INPUT_BUTTON_COUNT];
 unsigned char send_data[1536];
+spParticleBunchPointer particles = NULL;
 
 void ( *hase_resize )( Uint16 w, Uint16 h );
 
@@ -141,6 +142,9 @@ void draw(void)
 		}
 		while (hare != player[j]->firstHare);
 	}
+	//Particles
+	spParticleDraw(particles);
+	
 	//Bullets
 	drawBullets();
 		
@@ -181,8 +185,11 @@ void draw(void)
 	
 	sprintf(buffer,"Weapon points: %i/3",weapon_points);
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
-	sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
-	spFontDraw( 2, 2, 0, buffer, font );	
+	if (player[active_player]->activeHare)
+	{
+		sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
+		spFontDraw( 2, 2, 0, buffer, font );	
+	}
 	if (weapon_points)
 		sprintf(buffer,"%i seconds left",countdown / 1000);
 	else
@@ -205,8 +212,10 @@ void draw(void)
 int direction_hold = 0;
 #define DIRECTION_HOLD_TIME 200
 
-int jump(int high)
+void jump(int high)
 {
+	if (player[active_player]->activeHare == NULL)
+		return;
 	Sint32 dx = spSin(player[active_player]->activeHare->rotation);
 	Sint32 dy = spCos(player[active_player]->activeHare->rotation);
 	//if (circle_is_empty(player[active_player]->x+dx >> SP_ACCURACY,player[active_player]->y+dy >> SP_ACCURACY,6,0xDEAD))
@@ -501,25 +510,28 @@ int calc(Uint32 steps)
 				zoom_d = 0;
 		}
 		//Camera
-		int destX,destY;
-		destX = player[active_player]->activeHare->x;
-		destY = player[active_player]->activeHare->y;
-		if (firstBullet)
+		if (player[active_player]->activeHare)
 		{
-			pBullet momBullet = firstBullet;
-			int c = 1;
-			while (momBullet)
+			int destX,destY;
+			destX = player[active_player]->activeHare->x;
+			destY = player[active_player]->activeHare->y;
+			if (firstBullet)
 			{
-				destX += momBullet->x;
-				destY += momBullet->y;
-				momBullet = momBullet->next;
-				c++;
+				pBullet momBullet = firstBullet;
+				int c = 1;
+				while (momBullet)
+				{
+					destX += momBullet->x;
+					destY += momBullet->y;
+					momBullet = momBullet->next;
+					c++;
+				}
+				destX /= c;
+				destY /= c;
 			}
-			destX /= c;
-			destY /= c;
+			posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
+			posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
 		}
-		posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
-		posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
 		if (game_pause > 0)
 			game_pause--;
 		if (game_pause)
@@ -528,12 +540,15 @@ int calc(Uint32 steps)
 		if (game_pause)
 			continue;
 		
-		Sint32 goal = -player[active_player]->activeHare->rotation;
-		if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
-			rotation -= 2*SP_PI;
-		if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
-			rotation += 2*SP_PI;
-		rotation = rotation*127/128+goal/128;
+		if (player[active_player]->activeHare)
+		{
+			Sint32 goal = -player[active_player]->activeHare->rotation;
+			if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
+				rotation -= 2*SP_PI;
+			if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
+				rotation += 2*SP_PI;
+			rotation = rotation*127/128+goal/128;
+		}
 		update_player();
 		int res = do_physics();
 		if (res == 1)
@@ -543,6 +558,7 @@ int calc(Uint32 steps)
 			i = steps;
 			continue;
 		}
+		spParticleUpdate(&particles,1);
 		if (bullet_alpha() > 0)
 			continue;
 		check_next_player();
@@ -550,8 +566,8 @@ int calc(Uint32 steps)
 			countdown --;
 		if (countdown < 0)
 			next_player();
-		if (player[active_player]->computer)
-		{
+		if (player[active_player]->computer && player[active_player]->activeHare)
+		{		
 			//AI
 			if (weapon_points)
 			{
@@ -609,6 +625,7 @@ int calc(Uint32 steps)
 			}
 		}
 		else
+		if (player[active_player]->activeHare)
 		{
 			//not AI
 			if (input_states[INPUT_BUTTON_OK] && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
@@ -807,6 +824,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	spDeleteSurface(level);
 	spDeleteSurface(level_original);
 	spDeleteSurface(gravity_surface);
+	spParticleDelete(&particles);
 	spResetButtonsState();
 	return 0;
 }
