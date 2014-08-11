@@ -20,6 +20,7 @@ Changelog
 - Multiple hares per player
 - New controls
 - Global health bar
+- Particle Effect
 
 
 1.3:

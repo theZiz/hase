@@ -46,7 +46,7 @@ int circle_is_empty(int x, int y, int r,pHare except)
 		if (hare)
 		do
 		{
-			if (hare->health == 0 || hare == except)
+			if (hare == except)
 			{
 				hare = hare->next;
 				continue;
@@ -60,6 +60,21 @@ int circle_is_empty(int x, int y, int r,pHare except)
 		}
 		while (hare != player[i]->firstHare);
 	}
+	return 1;
+}
+
+int pixel_is_empty(int x, int y)
+{
+	if (x < 0)
+		return 1;
+	if (x >= LEVEL_WIDTH)
+		return 1;
+	if (y < 0)
+		return 1;
+	if (y >= LEVEL_WIDTH)
+		return 1;
+	if (level_pixel[x+y*LEVEL_WIDTH] != SP_ALPHA_COLOR)
+		return 0;
 	return 1;
 }
 
@@ -115,11 +130,6 @@ void update_player()
 		if (hare)
 		do
 		{
-			if (hare->health == 0)
-			{
-				hare = hare->next;
-				continue;
-			}
 			if (hare->hops > 0)
 			{
 				hare->hops --;
@@ -283,6 +293,13 @@ void start_thread()
 void real_next_player()
 {
 	stop_thread();
+	int j;
+	for (j = 0; j < hase_game->player_count; j++)
+		if (player[j]->activeHare == NULL)
+		{
+			player[j]->activeHare = player[j]->setActiveHare;
+			player[j]->setActiveHare = NULL;
+		}
 	ai_shoot_tries = 0;
 	last_ai_try = 0;
 	lastAIDistance = 100000000;
@@ -339,6 +356,49 @@ pHare add_hare(pHare* firstHare)
 	return hare;
 }
 
+int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32 extra_data)
+{
+	if (action == SP_PARTICLE_UPDATE)
+	{
+		if (bunch->age > 5000)
+			return 1;
+		int particleSize = spMax(1,zoom >> SP_ACCURACY+1);
+		int i;
+		int touched = 0;
+		for (i = 0; i < bunch->count; i++)
+			if (bunch->particle[i].status >= 0)
+			{
+				touched = 1;
+				bunch->particle[i].dx -= gravitation_x(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+				bunch->particle[i].dy -= gravitation_y(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+				if (pixel_is_empty(bunch->particle[i].x+bunch->particle[i].dx >> SP_ACCURACY,bunch->particle[i].y+bunch->particle[i].dy >> SP_ACCURACY))
+				{
+					bunch->particle[i].x += bunch->particle[i].dx;
+					bunch->particle[i].y += bunch->particle[i].dy;
+				}
+				else
+					bunch->particle[i].status = -1;
+			}
+		if (touched == 0)
+			return 1;
+	}
+	if (action == SP_PARTICLE_DRAW)
+	{
+		int particleSize = spMax(1,zoom >> SP_ACCURACY+1);
+		int i;
+		for (i = 0; i < bunch->count; i++)
+			if (bunch->particle[i].status >= 0)
+			{
+				Sint32 ox = spMul(bunch->particle[i].x-posX,zoom);
+				Sint32 oy = spMul(bunch->particle[i].y-posY,zoom);
+				Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+				spEllipse(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
+			}
+	}
+	return 0;
+}
+
 pHare del_hare(pHare hare,pHare* firstHare)
 {
 	pHare next = NULL;
@@ -352,6 +412,20 @@ pHare del_hare(pHare hare,pHare* firstHare)
 			*firstHare = hare->next;
 		next = hare->next;
 	}
+	spParticleBunchPointer bunch = spParticleFromSprite(hare->hase->active,hare_explosion_feedback,&particles);
+	//Calculating the real position
+	//rotating + tranforming to fixed point
+	int i;
+	for (i = 0; i < bunch->count; i++)
+	{
+		Sint32 tx = spCos(hare->rotation) * (bunch->particle[i].x-16) - spSin(hare->rotation) * (bunch->particle[i].y-16) >> 1;
+		Sint32 ty = spSin(hare->rotation) * (bunch->particle[i].x-16) + spCos(hare->rotation) * (bunch->particle[i].y-16) >> 1;
+		bunch->particle[i].x = hare->x + tx;
+		bunch->particle[i].y = hare->y + ty;
+		bunch->particle[i].dx /= 4;
+		bunch->particle[i].dy /= 4;
+	}
+	spDeleteSpriteCollection(hare->hase,0);
 	free(hare);
 	return next;
 }
@@ -403,6 +477,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 			hare->hase = spLoadSpriteCollection(buffer,NULL);
 		}
 		player[i]->activeHare = player[i]->firstHare;
+		player[i]->setActiveHare = NULL;
 		for (j = 0; j < TRACE_COUNT; j++)
 			player[i]->trace[j] = NULL;
 		player[i]->tracePos = 0;
