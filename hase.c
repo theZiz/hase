@@ -170,7 +170,7 @@ void draw(void)
 			hare = hare->next;
 		}
 		while (hare != player[j]->firstHare);
-		int w = health*screen->w/(hase_game->hares_per_player*MAX_HEALTH*4);
+		int w = health*screen->w/(hase_game->hares_per_player*MAX_HEALTH*5);
 		spRectangle(screen->w/2+w/2,y+font->maxheight/2,0,w,font->maxheight*3/4,spSpriteAverageColor(hare->hase->active));
 		sprintf(buffer,"%i/%i",count,hase_game->hares_per_player);
 		spFontDraw( screen->w/2+w+2, y, 0, buffer, font );
