@@ -19,6 +19,7 @@ Changelog
 - Menu
 - Multiple hares per player
 - New controls
+- Global health bar
 
 
 1.3:

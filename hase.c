@@ -149,12 +149,36 @@ void draw(void)
 	
 	//Error message
 	if (game_pause)
-		draw_message();	
-	
-	//Help
-	draw_help();
+		draw_message();
 	
 	//HID
+	int y = screen->h - font->maxheight - 1;
+	spSetBlending( SP_ONE*2/3 );
+	for (j = 0; j < player_count; j++)
+	{
+		if (player[j]->firstHare == NULL)
+			continue;
+		sprintf(buffer,"%s ",player[j]->name);
+		spFontDrawRight( screen->w/2, y, 0, buffer, font );
+		int health = 0;
+		int count = 0;
+		pHare hare = player[j]->firstHare;
+		do
+		{
+			health += hare->health;
+			count++;
+			hare = hare->next;
+		}
+		while (hare != player[j]->firstHare);
+		int w = health*screen->w/(hase_game->hares_per_player*MAX_HEALTH*4);
+		spRectangle(screen->w/2+w/2,y+font->maxheight/2,0,w,font->maxheight*3/4,spSpriteAverageColor(hare->hase->active));
+		sprintf(buffer,"%i/%i",count,hase_game->hares_per_player);
+		spFontDraw( screen->w/2+w+2, y, 0, buffer, font );
+		y -= font->maxheight;
+	}
+	spSetBlending( SP_ONE );
+	
+	
 	sprintf(buffer,"Weapon points: %i/3",weapon_points);
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
@@ -167,6 +191,10 @@ void draw(void)
 	else
 		sprintf(buffer,"Free time until bullet strikes!");
 	spFontDrawMiddle( screen->w >> 1, 2, 0, buffer, font );
+
+	//Help
+	draw_help();
+
 	int b_alpha = bullet_alpha();
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);

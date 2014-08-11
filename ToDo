@@ -1,4 +1,3 @@
-* global health bar for all hares
 * weapons menu
 * particle effect
 * ingame options menu instead of help == pause. With kick timeout
@@ -13,6 +12,7 @@
 * not closing games "somehow"
 * Music
 * Sound FX
+* Items
 
 * more weapons
 	* default missile (3 wp)
