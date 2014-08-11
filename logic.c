@@ -25,13 +25,22 @@ int do_physics()
 			if (hare->x <  0           || hare->y < 0 ||
 				hare->x >= spIntToFixed(LEVEL_WIDTH) || hare->y >= spIntToFixed(LEVEL_HEIGHT))
 			{
+				int active = 0;
+				if (hare == player[active_player]->activeHare)
+				{
+					active = 1; //Suicid?
+					player[active_player]->setActiveHare = hare->next;
+				}
 				hare = del_hare(hare,&(player[j]->firstHare));
+				if (active)
+				{
+					player[active_player]->activeHare = NULL;
+					next_player();
+				}
 				if (player[j]->firstHare == NULL)
 					alive_count--;
 				if (alive_count < 2)
 					return 1;
-				if (j == active_player)
-					next_player();
 			}
 			else
 				hare = hare->next;
