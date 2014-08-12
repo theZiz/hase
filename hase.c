@@ -156,14 +156,16 @@ void draw(void)
 		draw_message();
 	
 	//HID
-	int y = screen->h - font->maxheight - 1;
-	spSetBlending( SP_ONE*2/3 );
+	int y = screen->h - (alive_count+1) * font->maxheight - 1;
 	for (j = 0; j < player_count; j++)
 	{
 		if (player[j]->firstHare == NULL)
 			continue;
+		int x = screen->w/2;
+		if  (j == active_player)
+			y += font->maxheight/2;
 		sprintf(buffer,"%s ",player[j]->name);
-		spFontDrawRight( screen->w/2, y, 0, buffer, font );
+		spFontDrawRight(x, y, 0, buffer, font );
 		int health = 0;
 		int count = 0;
 		pHare hare = player[j]->firstHare;
@@ -175,12 +177,21 @@ void draw(void)
 		}
 		while (hare != player[j]->firstHare);
 		int w = health*screen->w/(hase_game->hares_per_player*MAX_HEALTH*5);
-		spRectangle(screen->w/2+w/2,y+font->maxheight/2,0,w,font->maxheight*3/4,spSpriteAverageColor(hare->hase->active));
+		if  (j == active_player)
+			spRectangle(x+w/2, y+font->maxheight/2,0,w,font->maxheight*5/4,spSpriteAverageColor(hare->hase->active));
+		else
+		{
+			spSetPattern8(153,60,102,195,153,60,102,195);
+			spRectangle(x+w/2, y+font->maxheight/2,0,w,font->maxheight*3/4,spSpriteAverageColor(hare->hase->active));
+			spDeactivatePattern();
+			
+		}
 		sprintf(buffer,"%i/%i",count,hase_game->hares_per_player);
-		spFontDraw( screen->w/2+w+2, y, 0, buffer, font );
-		y -= font->maxheight;
+		spFontDraw(x+w+2, y, 0, buffer, font );
+		y += font->maxheight;
+		if  (j == active_player)
+			y += font->maxheight/2;
 	}
-	spSetBlending( SP_ONE );
 	
 	
 	sprintf(buffer,"Weapon points: %i/3",weapon_points);
