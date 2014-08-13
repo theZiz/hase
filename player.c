@@ -326,6 +326,9 @@ void real_next_player()
 	weapon_points = 3;
 	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
+	wp_choose = 0;
+	wp_x = 0;
+	wp_y = 0;
 	start_thread();
 }
 

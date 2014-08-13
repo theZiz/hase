@@ -150,7 +150,7 @@ int create_game_feedback( pWindowElement elem, int action )
 		case 0: sprintf(elem->text,"Name: %s",ll_game_name); break;
 		case 1: sprintf(elem->text,"Maximum players: %i",ll_game_players); break;
 		case 2: sprintf(elem->text,"Seconds per turn: %i",ll_game_seconds); break;
-		case 3: sprintf(elem->text,"Hares per player: %i",ll_game_players); break;
+		case 3: sprintf(elem->text,"Hares per player: %i",ll_game_hares); break;
 	}
 	return 0;
 }

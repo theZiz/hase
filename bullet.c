@@ -18,8 +18,8 @@ const int weapon_reference[WEAPON_Y][WEAPON_X] =
  {4,5,6}};
  
 char weapon_filename[WEAPON_Y][WEAPON_X][64] =
-{{"./data/weapon.png","./data/weapon.png","./data/weapon.png"},
- {"./data/weapon.png","./data/weapon.png","./data/weapon.png"}};
+{{"./data/weapon.png","./data/weapon2.png","./data/weapon3.png"},
+ {"./data/weapon4.png","./data/weapon5.png","./data/weapon6.png"}};
  
 typedef SDL_Surface *PSDL_Surface;
 PSDL_Surface weapon_surface[WEAPON_Y][WEAPON_X] =
@@ -56,9 +56,12 @@ void draw_weapons()
 	for (x = 0;x<WEAPON_X;x++)
 		for (y = 0;y<WEAPON_Y;y++)
 			spBlitSurface((screen->w-(WEAPON_X-x-2)*96)/2,(screen->h-h+y*96)/2+24+font->maxheight,0,weapon_surface[y][x]);
-	spRectangleBorder((screen->w-(WEAPON_X-wp_x-2)*96)/2-1,(screen->h-h+wp_y*96)/2+24+font->maxheight-1,0,44,44,2,2,LL_FG);
+	spRectangleBorder((screen->w-(WEAPON_X-wp_x-2)*96)/2-1,(screen->h-h+wp_y*96)/2+24+font->maxheight-1,0,44,44,2,2,BORDER_COLOR);
 	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[wp_y][wp_x],font);
-	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"To Do",font);
+	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"[o]/[3]Choose",font);
+	char buffer[32];
+	sprintf(buffer,"Cost: %i",weapon_cost[wp_y][wp_x]);
+	spFontDrawRight((screen->w+w)/2,(screen->h+h)/2-font->maxheight*1,0,buffer,font);
 }
 
 typedef struct sBullet
@@ -72,6 +75,7 @@ typedef struct sBullet
 	int age;
 	pBulletTrace* trace;
 	pBullet next;
+	int kind;
 } tBullet;
 
 #define IMPACT_TIME 30
@@ -109,6 +113,7 @@ pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer traceP
 	bullet->dx = spMul(spCos(direction),power);
 	bullet->dy = spMul(spSin(direction),power);
 	bullet->age = 0;
+	bullet->kind = 0;
 	if (tracePlayer)
 	{
 		bullet->trace = registerTrace(tracePlayer);
@@ -304,7 +309,8 @@ int updateBullets()
 						momBullet->impact_counter = OUTPACT_TIME;
 						spClearTarget(EXPLOSION_COLOR);
 						spFlip();
-						bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,32);
+						int rad = 38-(momBullet->kind*6);
+						bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,rad);
 						for (j = 0; j < player_count; j++)
 						{
 							if (player[j]->firstHare == NULL)
@@ -315,7 +321,7 @@ int updateBullets()
 							{							
 								int d = spFixedToInt(hare->x-momBullet->x)*spFixedToInt(hare->x-momBullet->x)+
 										spFixedToInt(hare->y-momBullet->y)*spFixedToInt(hare->y-momBullet->y);
-									d = 1024-d;
+									d = rad*rad-d;
 								if (d > 0)
 									hare->health -= d*MAX_HEALTH/2048;
 								if (hare->health <= 0)

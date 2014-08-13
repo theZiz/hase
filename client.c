@@ -711,11 +711,12 @@ int push_thread_function(void* data)
 					break;
 			}
 			if (i == 3)
-				printf("BIG PANIC!\n");
+				printf("BIG PANIC at second %i!\n",thread_data->second_of_player);
 			else
 			{
 				if (i != 0)
 					printf("Little panic... %i\n",i);
+				printf("Sent second %i!\n",thread_data->second_of_player);
 				//PULL STACK
 				SDL_mutexP(push_mutex);
 				push_thread_first = push_thread_first->next;

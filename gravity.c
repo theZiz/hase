@@ -142,7 +142,7 @@ void init_gravity()
 						if (a*a+b*b > BORDER_SQUARE)
 							continue;
 						if (pixel[x+a+(y+b)*LEVEL_WIDTH] != SP_ALPHA_COLOR)
-							pixel[x+a+(y+b)*LEVEL_WIDTH] = spGetFastRGB(255,200,0);
+							pixel[x+a+(y+b)*LEVEL_WIDTH] = BORDER_COLOR;
 					}
 		}
 	}
