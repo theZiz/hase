@@ -459,11 +459,9 @@ void set_input()
 
 int calc(Uint32 steps)
 {
-	if (spGetInput()->button[MY_BUTTON_SELECT] &&
-	    spGetInput()->button[MY_BUTTON_START])
+	if (spGetInput()->button[MY_BUTTON_SELECT])
 	{
 		spGetInput()->button[MY_BUTTON_SELECT] = 0;
-		spGetInput()->button[MY_BUTTON_START] = 0;
 		return 1;
 	}
 	if (spGetInput()->button[MY_BUTTON_START])
