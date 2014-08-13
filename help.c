@@ -5,10 +5,10 @@ void draw_help()
 		spFontDraw( 2, screen->h-font->maxheight-2, 0, "[R]Show help", font );
 		return;
 	}
-	spSetAlphaPattern4x4(127,0);
+	spSetPattern8(153,60,102,195,153,60,102,195);
 	int h = 10*font->maxheight+4;
-	int w = screen->w*5/8;
-	spRectangle( w/2,screen->h-h/2,0,w,h,spGetRGB(127,127,127));
+	int w = screen->w*4/8;
+	spRectangle( w/2,screen->h-h/2,0,w,h,LL_BG);
 	spDeactivatePattern();
 	spFontDraw( 2, screen->h-2-10*font->maxheight, 0, SP_PAD_NAME" Left & Right: direction & low jumps", font );
 	spFontDraw( 2, screen->h-2- 9*font->maxheight, 0, SP_PAD_NAME" Up & Down: direction of the weapon", font );

@@ -1,3 +1,66 @@
+#define WEAPON_X 3
+#define WEAPON_Y 2
+
+const char weapon_name[WEAPON_Y][WEAPON_X][64] =
+{{"Big carrot bazooka","Middle carrot bazooka","Small carrot bazooka"},
+ {"Build circle","Previous hare","Next hare"}};
+
+const char weapon_description[WEAPON_Y][WEAPON_X][64] =
+{{"Makes big holes","Makes middle holes","Makes small holes"},
+ {"Protect yourself with dirt","Choose the previous hare","Choose the next hare"}};
+ 
+const int weapon_cost[WEAPON_Y][WEAPON_X] =
+{{3,2,1},
+ {2,1,1}};
+ 
+const int weapon_reference[WEAPON_Y][WEAPON_X] =
+{{1,2,3},
+ {4,5,6}};
+ 
+char weapon_filename[WEAPON_Y][WEAPON_X][64] =
+{{"./data/weapon.png","./data/weapon.png","./data/weapon.png"},
+ {"./data/weapon.png","./data/weapon.png","./data/weapon.png"}};
+ 
+typedef SDL_Surface *PSDL_Surface;
+PSDL_Surface weapon_surface[WEAPON_Y][WEAPON_X] =
+{{NULL,NULL,NULL},
+ {NULL,NULL,NULL}};
+ 
+void load_weapons()
+{
+	int x,y;
+	for (x = 0;x<WEAPON_X;x++)
+		for (y = 0;y<WEAPON_Y;y++)
+			weapon_surface[y][x] = spLoadSurface(weapon_filename[y][x]);
+}
+
+void delete_weapons()
+{
+	int x,y;
+	for (x = 0;x<WEAPON_X;x++)
+		for (y = 0;y<WEAPON_Y;y++)
+			spDeleteSurface(weapon_surface[y][x]);
+}
+
+void draw_weapons()
+{
+	int x,y,w = 0;
+	for (x = 0;x<WEAPON_X;x++)
+		for (y = 0;y<WEAPON_Y;y++)
+			w = spMax(spFontWidth(weapon_description[y][x],font),w);
+	int h = WEAPON_Y*48 + 3*font->maxheight;
+	spSetPattern8(153,60,102,195,153,60,102,195);
+	spRectangle(screen->w/2,screen->h/2,0,w,h,LL_BG);
+	spDeactivatePattern();
+	spFontDrawMiddle(screen->w/2,(screen->h-h)/2,0,weapon_name[wp_y][wp_x],font);
+	for (x = 0;x<WEAPON_X;x++)
+		for (y = 0;y<WEAPON_Y;y++)
+			spBlitSurface((screen->w-(WEAPON_X-x-2)*96)/2,(screen->h-h+y*96)/2+24+font->maxheight,0,weapon_surface[y][x]);
+	spRectangleBorder((screen->w-(WEAPON_X-wp_x-2)*96)/2-1,(screen->h-h+wp_y*96)/2+24+font->maxheight-1,0,44,44,2,2,LL_FG);
+	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[wp_y][wp_x],font);
+	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"To Do",font);
+}
+
 typedef struct sBullet
 {
 	Sint32 x,y;

@@ -65,7 +65,7 @@ pWindow recent_window = NULL;
 void window_draw(void)
 {
 	SDL_Surface* screen = spGetWindowSurface();
-	spSetAlphaPattern4x4(196,0);
+	spSetPattern8(153,60,102,195,153,60,102,195);
 	spRectangle(screen->w/2,screen->h/2,0,screen->w,screen->h,LL_BG);
 	spDeactivatePattern();
 

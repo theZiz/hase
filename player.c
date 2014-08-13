@@ -13,6 +13,8 @@ int lastAIDistance = 100000000;
 int active_player = 0;
 int player_count;
 pPlayer *player;
+ 
+int wp_x,wp_y;
 
 int circle_is_empty(int x, int y, int r,pHare except)
 {
@@ -491,6 +493,8 @@ void init_player(pPlayer player_list,int pc,int hc)
 	last_ai_try = 0;
 	weapon_points = 3;
 	extra_time = 0;
+	wp_x = 0;
+	wp_y = 0;
 	start_thread();
 }
 

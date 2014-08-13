@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "lobbyList.h"
 #include "hase.h"
 
 pGame hase_game;
@@ -209,6 +210,8 @@ void draw(void)
 	else
 		sprintf(buffer,"Free time until bullet strikes!");
 	spFontDrawMiddle( screen->w >> 1, 2, 0, buffer, font );
+	
+	draw_weapons();
 
 	//Help
 	draw_help();
@@ -770,6 +773,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	arrow = spLoadSurface("./data/gravity.png");
 	weapon = spLoadSurface("./data/weapon.png");
 	bullet = spLoadSurface("./data/bullet.png");
+	load_weapons();
 	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
 	loadInformation("Creating level...");
 	level_original = create_level(game->level_string,0,0,65535);
@@ -835,6 +839,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	spDeleteSurface(level);
 	spDeleteSurface(level_original);
 	spDeleteSurface(gravity_surface);
+	delete_weapons();
 	spParticleDelete(&particles);
 	spResetButtonsState();
 	return 0;
