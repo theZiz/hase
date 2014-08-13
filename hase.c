@@ -162,7 +162,7 @@ void draw(void)
 	{
 		if (player[j]->firstHare == NULL)
 			continue;
-		int x = screen->w/2;
+		int x = screen->w/3;
 		if  (j == active_player)
 			y += font->maxheight/2;
 		sprintf(buffer,"%s ",player[j]->name);

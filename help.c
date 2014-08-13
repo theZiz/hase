@@ -2,12 +2,12 @@ void draw_help()
 {
 	if (help == 0)
 	{
-		spFontDraw( 2, screen->h-font->maxheight-2, 0, "[R]Show help", font );
+		spFontDraw( 2, screen->h-font->maxheight-2, 0, "[R]Help", font );
 		return;
 	}
 	spSetPattern8(153,60,102,195,153,60,102,195);
 	int h = 10*font->maxheight+4;
-	int w = screen->w*4/8;
+	int w = spFontWidth(SP_PAD_NAME" Left & Right: direction & low jumps",font)+4;
 	spRectangle( w/2,screen->h-h/2,0,w,h,LL_BG);
 	spDeactivatePattern();
 	spFontDraw( 2, screen->h-2-10*font->maxheight, 0, SP_PAD_NAME" Left & Right: direction & low jumps", font );
