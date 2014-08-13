@@ -360,7 +360,7 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 {
 	if (action == SP_PARTICLE_UPDATE)
 	{
-		if (bunch->age > 5000)
+		if (bunch->age > 10000)
 			return 1;
 		int particleSize = spMax(1,zoom >> SP_ACCURACY+1);
 		int i;
@@ -377,13 +377,40 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 					bunch->particle[i].y += bunch->particle[i].dy;
 				}
 				else
-					bunch->particle[i].status = -1;
+				{
+					//bounce!
+					Sint32 speed = spSqrt(spSquare(bunch->particle[i].dx)+spSquare(bunch->particle[i].dy));
+					if (speed == 0)
+						bunch->particle[i].status = -1;
+					else
+					{
+						Sint32 ax = spDiv(bunch->particle[i].dx,speed);
+						Sint32 ay = spDiv(bunch->particle[i].dy,speed);
+						Sint32 ex = gravitation_x(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY);
+						Sint32 ey = gravitation_y(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY);
+						Sint32 len = spSqrt(spSquare(ex)+spSquare(ey));
+						if (len == 0)
+							bunch->particle[i].status = -1;
+						else
+						{
+							ex = spDiv(ex,len);
+							ey = spDiv(ey,len);
+							Sint32 p = -2*(spMul(ex,ax)+spMul(ey,ay));
+							bunch->particle[i].dx = spMul(p,ex)+ax;
+							bunch->particle[i].dy = spMul(p,ey)+ay;
+							bunch->particle[i].dx = spMul(bunch->particle[i].dx,speed*3/4);
+							bunch->particle[i].dy = spMul(bunch->particle[i].dy,speed*3/4);
+						}
+					}
+				}
 			}
 		if (touched == 0)
 			return 1;
 	}
 	if (action == SP_PARTICLE_DRAW)
 	{
+		if (bunch->age > 9000)
+			spSetBlending(SP_ONE*(1000-bunch->age)/1000);
 		int particleSize = spMax(1,zoom >> SP_ACCURACY+1);
 		int i;
 		for (i = 0; i < bunch->count; i++)
@@ -395,6 +422,7 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 				spEllipse(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
 			}
+		spSetBlending(SP_ONE);
 	}
 	return 0;
 }
