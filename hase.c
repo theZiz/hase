@@ -158,14 +158,14 @@ void draw(void)
 		draw_message();
 	
 	//HID
-	int y = screen->h - (alive_count+1) * font->maxheight - 1;
+	int y = screen->h - (alive_count+1) * font->maxheight*(spGetSizeFactor() > SP_ONE?4:3)/4 - 1;
 	for (j = 0; j < player_count; j++)
 	{
 		if (player[j]->firstHare == NULL)
 			continue;
 		int x = screen->w/3;
 		if  (j == active_player)
-			y += font->maxheight/2;
+			y += font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4;
 		sprintf(buffer,"%s ",player[j]->name);
 		spFontDrawRight(x, y, 0, buffer, font );
 		int health = 0;
@@ -180,19 +180,19 @@ void draw(void)
 		while (hare != player[j]->firstHare);
 		int w = health*screen->w/(hase_game->hares_per_player*MAX_HEALTH*5);
 		if  (j == active_player)
-			spRectangle(x+w/2, y+font->maxheight/2,0,w,font->maxheight*5/4,spSpriteAverageColor(hare->hase->active));
+			spRectangle(x+w/2, y+font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4,0,w,font->maxheight*5/4*(spGetSizeFactor() > SP_ONE?4:3)/4,spSpriteAverageColor(hare->hase->active));
 		else
 		{
 			spSetPattern8(153,60,102,195,153,60,102,195);
-			spRectangle(x+w/2, y+font->maxheight/2,0,w,font->maxheight*3/4,spSpriteAverageColor(hare->hase->active));
+			spRectangle(x+w/2, y+font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4,0,w,font->maxheight*3/4*(spGetSizeFactor() > SP_ONE?4:3)/4,spSpriteAverageColor(hare->hase->active));
 			spDeactivatePattern();
 			
 		}
 		sprintf(buffer,"%i/%i",count,hase_game->hares_per_player);
 		spFontDraw(x+w+2, y, 0, buffer, font );
-		y += font->maxheight;
+		y += font->maxheight*(spGetSizeFactor() > SP_ONE?4:3)/4;
 		if  (j == active_player)
-			y += font->maxheight/2;
+			y += font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4;
 	}
 	
 	
