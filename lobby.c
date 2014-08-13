@@ -37,6 +37,8 @@ void resize( Uint16 w, Uint16 h )
 	spFontMulWidth(font,spFloatToFixed(0.9f));
 
 	spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_IF_NEEDED,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
+	//if (spGetSizeFactor() <= SP_ONE)
+	//	font->maxheight = font->maxheight*4/5;
 }
 
 int main_menu_feedback( pWindowElement elem, int action )
@@ -104,8 +106,8 @@ int local_game_feedback( pWindowElement elem, int action )
 int main(int argc, char **argv)
 {
 	spSetRand(time(NULL));
-	//spSetDefaultWindowSize( 320, 240 );
-	spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 320, 240 );
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	spInitNet();
 	screen = spCreateDefaultWindow();
