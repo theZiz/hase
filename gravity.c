@@ -101,6 +101,36 @@ void negate_gravity(int mx,int my,int r)
 	SDL_UnlockSurface(level_original);	
 }
 
+void posivate_gravity(int mx,int my,int r)
+{
+	SDL_LockSurface(level_original);
+	int x,y;
+	int start_x = mx-r;
+	int end_x = mx+r;
+	int start_y = my-r;
+	int end_y = my+r;
+	if (start_x < 0)
+		start_x = 0;
+	if (start_y < 0)
+		start_y = 0;
+	if (end_x > (LEVEL_WIDTH >> GRAVITY_RESOLUTION))
+		end_x = (LEVEL_WIDTH >> GRAVITY_RESOLUTION);
+	if (end_y > (LEVEL_HEIGHT >> GRAVITY_RESOLUTION))
+		end_y = (LEVEL_HEIGHT >> GRAVITY_RESOLUTION);	
+	for (x = start_x; x < end_x; x++)
+		for (y = start_y; y < end_y; y++)
+			//if (gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass)
+			{
+				int new_mass = calc_mass(level_pixel,x,y);
+				int diff = new_mass-gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass;
+				if (diff)
+				{
+					impact_gravity(diff,x,y);
+					gravity[x+y*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].mass = new_mass;
+				}
+			}
+	SDL_UnlockSurface(level_original);	
+}
 void update_gravity()
 {
 	SDL_LockSurface(level_original);

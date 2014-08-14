@@ -109,14 +109,21 @@ void draw(void)
 				//building
 				if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] == 4)
 				{
-					int r = spMul(zoom,spGetSizeFactor())*48 >> SP_ACCURACY+2;
+					int r = (zoom*48 >> SP_ACCURACY+1);
 					int d = 60+(hare->w_power*60 >> SP_ACCURACY);
 					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
 					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
 					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+
+					ox = hare->x-d*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
+					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
+
 					spSetBlending( SP_ONE*2/3 );
-					spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
+					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,24,NULL))
+						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,0));
+					else
+						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
 					spSetBlending( SP_ONE );
 				}
 				else
@@ -218,7 +225,7 @@ void draw(void)
 			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_power*30/SP_ONE+30);
 		else
 			sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
-		spFontDraw( 2, 2, 0, buffer, font );
+		spFontDraw( 2, 0, 0, buffer, font );
 	}
 	if (weapon_points)
 		sprintf(buffer,"%i seconds left",countdown / 1000);
@@ -227,7 +234,7 @@ void draw(void)
 		sprintf(buffer,"%i seconds left to escape",extra_time / 1000);
 	else
 		sprintf(buffer,"Free time until bullet strikes!");
-	spFontDrawMiddle( screen->w >> 1, 2, 0, buffer, font );
+	spFontDrawMiddle( screen->w >> 1, 0, 0, buffer, font );
 	
 	if (wp_choose)
 		draw_weapons();
@@ -474,12 +481,25 @@ void set_input()
 	}
 }
 
+
+
+int quit_feedback( pWindowElement elem, int action )
+{
+	sprintf(elem->text,"Do really really want to quit?");
+	return 0;
+}
+
 int calc(Uint32 steps)
 {
 	if (spGetInput()->button[MY_BUTTON_SELECT])
 	{
 		spGetInput()->button[MY_BUTTON_SELECT] = 0;
-		return 1;
+		pWindow window = create_window(quit_feedback,font,"Sure?");
+		add_window_element(window,-1,0);
+		int res = modal_window(window,hase_resize);
+		delete_window(window);
+		if (res == 1)
+			return 1;
 	}
 	if (spGetInput()->button[MY_BUTTON_START])
 	{
@@ -518,6 +538,7 @@ int calc(Uint32 steps)
 	int result = 0;
 	if (game_pause)
 		spSleep(200000);
+	spParticleUpdate(&particles,steps);
 	for (i = 0; i < steps; i++)
 	{
 		if (zoom_d == -1)
@@ -587,7 +608,6 @@ int calc(Uint32 steps)
 			i = steps;
 			continue;
 		}
-		spParticleUpdate(&particles,1);
 		if (bullet_alpha() > 0)
 			continue;
 		check_next_player();
@@ -748,6 +768,16 @@ int calc(Uint32 steps)
 						switch (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x])
 						{
 							case 4:
+								{
+									int d = 60+(player[active_player]->activeHare->w_power*60 >> SP_ACCURACY);
+									int r = 48;
+									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
+									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
+									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,24,NULL))
+										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
+									else
+										weapon_points+=weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+								}
 								break;
 							case 5:
 								player[active_player]->activeHare = player[active_player]->activeHare->before;

@@ -1,24 +1,44 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="3" release="0" build="1"/>
+<version major="1" minor="4" release="0" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
-Hase Prototype 2
+Hase
 </title>
 </titles>
 <descriptions>
 <description lang="en_US">
-A prototype of a 2D worms like game with gravitation and stuff...
-Version 2: Now with network support!
+Hase is a worms like game with gravitation. And hares instead of worms.
+
+Changelog:
+Version 1.3:
+- Network support
+
+Version 1.4:
+- 5s extra time after last bullet
+- 3 weapon points per turn
+- Locking zoom
+- Improved Aiming
+- New health bar
+- Fixed a bug in the bullet calculation
+- improved button mapping, using SP_PRACTICE
+- Writing down tractory while flying
+- New window approach
+- Menu
+- Multiple hares per player
+- New controls
+- Global health bar
+- Particle Effect
+- 6 Weapons
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="3" release="0" build="0" type="release"/>
+<version major="1" minor="4" release="0" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="1"/>
 <!--The minimum OS version required-->
@@ -26,22 +46,20 @@ Version 2: Now with network support!
 <!--Optional email and website, name required-->
 <titles>
 <title lang="en_US">
-Hase Prototype 2
+Hase
 </title>
 </titles>
 <title lang="en_US">
-Hase Prototype 2
+Hase
 </title>
 <!--Extra <title> block for compatibility with OS versions before HF6-->
 <descriptions>
 <description lang="en_US">
-A prototype of a 2D worms like game with gravitation and stuff...
-Version 2: Now with network support!
+Hase is a worms like game with gravitation. And hares instead of worms.
 </description>
 </descriptions>
 <description lang="en_US">
-A prototype of a 2D worms like game with gravitation and stuff...
-Version 2: Now with network support!
+Hase is a worms like game with gravitation. And hares instead of worms.
 </description>
 <!--Extra <description> block for compatibility with OS versions before HF6-->
 <icon src="./hase_prototype.png"/>
@@ -52,7 +70,7 @@ Version 2: Now with network support!
 <previewpics>
 <pic src="previews/screenshot1.png"/>
 </previewpics>
-<info name="Readme" type="text/x-markdown" src="hase.md"/>
+<info name="Readme" type="text" src="hase_readme.txt"/>
 <!--the categories has to conform to the FDO categories, those will be enforced by the schema and libpnd!-->
 <categories>
 <category name="Game">

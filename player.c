@@ -370,12 +370,12 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 			if (bunch->particle[i].status >= 0)
 			{
 				touched = 1;
-				bunch->particle[i].dx -= gravitation_x(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-				bunch->particle[i].dy -= gravitation_y(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-				if (pixel_is_empty(bunch->particle[i].x+bunch->particle[i].dx >> SP_ACCURACY,bunch->particle[i].y+bunch->particle[i].dy >> SP_ACCURACY))
+				bunch->particle[i].dx -= gravitation_x(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) * extra_data >> PHYSIC_IMPACT;
+				bunch->particle[i].dy -= gravitation_y(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) * extra_data >> PHYSIC_IMPACT;
+				if (pixel_is_empty(bunch->particle[i].x+bunch->particle[i].dx * extra_data >> SP_ACCURACY,bunch->particle[i].y+bunch->particle[i].dy * extra_data >> SP_ACCURACY))
 				{
-					bunch->particle[i].x += bunch->particle[i].dx;
-					bunch->particle[i].y += bunch->particle[i].dy;
+					bunch->particle[i].x += bunch->particle[i].dx * extra_data;
+					bunch->particle[i].y += bunch->particle[i].dy * extra_data;
 				}
 				else
 				{
@@ -411,7 +411,7 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 	if (action == SP_PARTICLE_DRAW)
 	{
 		if (bunch->age > 9000)
-			spSetBlending(SP_ONE*(1000-bunch->age)/1000);
+			spSetBlending(SP_ONE*(10000-bunch->age)/1000);
 		int particleSize = spMax(1,zoom >> SP_ACCURACY);
 		int i;
 		for (i = 0; i < bunch->count; i++)
@@ -422,6 +422,7 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 				Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 				spEllipse(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
+				//spRectangle(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
 			}
 		spSetBlending(SP_ONE);
 	}

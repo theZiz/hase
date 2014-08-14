@@ -1,7 +1,9 @@
 Hase 
 ====
 
-TODO
+Hase is a game about hares in space. It is like Worms, but with gravitation.
+The game itself is licsensed under GPLv2+.
+The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domain)
 
 Changelog
 =========
@@ -25,4 +27,5 @@ Changelog
 
 
 1.3:
+- network support
 - Start of change logging

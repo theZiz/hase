@@ -7,3 +7,4 @@ Type=Application
 StartupNotify=true
 Icon=hase_prototype
 Categories=games;
+X-OD-Manual=hase/hase_readme.txt

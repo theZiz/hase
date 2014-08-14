@@ -50,18 +50,15 @@ void lg_draw(void)
 	spFontDraw(screen->w-w, 3*lg_font->maxheight, 0, buffer, lg_font );
 	sprintf(buffer,"Maximum players: %i",lg_game->max_player);
 	spFontDraw(screen->w-w, 4*lg_font->maxheight, 0, buffer, lg_font );
-	spFontDraw(screen->w-w, 5*lg_font->maxheight, 0, "Players:", lg_font );
+	sprintf(buffer,"Players: %i",lg_game->player_count);
+	spFontDraw(screen->w-w, 5*lg_font->maxheight, 0, buffer, lg_font );
 	//player block
 	int h = l_w-7*lg_font->maxheight;
 	spRectangle(screen->w-4-w/2, 6*lg_font->maxheight+h/2-1, 0,w,h,LL_FG);
 	if (lg_block)
 		spFontDrawTextBlock(middle,screen->w-w-4, 6*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
-	#ifdef PANDORA
-		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[3]Add player  [4]Remove player", lg_font );
-	#else
-		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[3]Add player  [4]Remove pl.", lg_font );
-	#endif
+	spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[3]Add player  [4]Remove player", lg_font );
 	if (lg_game->admin_pw == 0)
 	{
 		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "The game master will", lg_font );
@@ -169,7 +166,8 @@ char* lg_get_name(char* buffer)
 char* lg_get_combi_name(char* buffer)
 {
 	char name1[16],name2[16];
-	sprintf(buffer,"%s-%s",lg_get_name(name1),lg_get_name(name2));
+	//sprintf(buffer,"%s-%s",lg_get_name(name1),lg_get_name(name2));
+	sprintf(buffer,"%s",lg_get_name(name1));
 	return buffer;
 }
 

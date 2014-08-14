@@ -1,6 +1,6 @@
 #!/bin/sh
 PROGRAM="hase"
-VERSION="1.3.0.1"
+VERSION="1.4.0.0"
 DEST=./build/*
 echo "<html>" > index.htm
 echo "<head>" >> index.htm
@@ -17,7 +17,7 @@ do
 		echo "--> Copy temporary folders"
 		cp -r data "$f/$PROGRAM"
 		cp -r textures "$f/$PROGRAM"
-		cp hase.md "$f/$PROGRAM"
+		cp hase_readme.txt "$f/$PROGRAM"
 		cd $f
 		echo "--> Create archive"
 		if [ $NAME = "pandora" ]; then
@@ -47,7 +47,7 @@ do
 		echo "--> Remove temporary folders"
 		rm -r $PROGRAM/data
 		rm -r $PROGRAM/textures
-		rm $PROGRAM/hase.md
+		rm $PROGRAM/hase_readme.txt
 		cd ..
 		cd ..
 	fi
