@@ -52,16 +52,19 @@ void draw_weapons()
 	spSetPattern8(153,60,102,195,153,60,102,195);
 	spRectangle(screen->w/2,screen->h/2,0,w,h,LL_BG);
 	spDeactivatePattern();
-	spFontDrawMiddle(screen->w/2,(screen->h-h)/2,0,weapon_name[wp_y][wp_x],font);
 	for (x = 0;x<WEAPON_X;x++)
 		for (y = 0;y<WEAPON_Y;y++)
 			spBlitSurface((screen->w-(WEAPON_X-x-2)*96)/2,(screen->h-h+y*96)/2+24+font->maxheight,0,weapon_surface[y][x]);
-	spRectangleBorder((screen->w-(WEAPON_X-wp_x-2)*96)/2-1,(screen->h-h+wp_y*96)/2+24+font->maxheight-1,0,44,44,2,2,BORDER_COLOR);
-	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[wp_y][wp_x],font);
 	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"[o]/[3]Choose",font);
-	char buffer[32];
-	sprintf(buffer,"Cost: %i",weapon_cost[wp_y][wp_x]);
-	spFontDrawRight((screen->w+w)/2,(screen->h+h)/2-font->maxheight*1,0,buffer,font);
+	if (player[active_player]->activeHare)
+	{
+		spFontDrawMiddle(screen->w/2,(screen->h-h)/2,0,weapon_name[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x],font);
+		spRectangleBorder((screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-2)*96)/2-1,(screen->h-h+player[active_player]->activeHare->wp_y*96)/2+24+font->maxheight-1,0,44,44,2,2,BORDER_COLOR);
+		spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x],font);
+		char buffer[32];
+		sprintf(buffer,"Cost: %i",weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x]);
+		spFontDrawRight((screen->w+w)/2,(screen->h+h)/2-font->maxheight*1,0,buffer,font);
+	}
 }
 
 typedef struct sBullet
@@ -323,7 +326,7 @@ int updateBullets()
 										spFixedToInt(hare->y-momBullet->y)*spFixedToInt(hare->y-momBullet->y);
 									d = rad*rad-d;
 								if (d > 0)
-									hare->health -= d*MAX_HEALTH/2048;
+									hare->health -= d*MAX_HEALTH/(2048+momBullet->kind*128);
 								if (hare->health <= 0)
 								{
 									if (hare == player[j]->activeHare ||

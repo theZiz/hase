@@ -96,6 +96,7 @@ typedef struct sHare
 	int health;
 	spSpriteCollectionPointer hase;	
 	pHare before,next;
+	int wp_x,wp_y;
 } tHare;
 
 typedef struct sPlayer

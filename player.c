@@ -13,8 +13,6 @@ int lastAIDistance = 100000000;
 int active_player = 0;
 int player_count;
 pPlayer *player;
- 
-int wp_x,wp_y;
 
 int circle_is_empty(int x, int y, int r,pHare except)
 {
@@ -327,8 +325,6 @@ void real_next_player()
 	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
 	wp_choose = 0;
-	wp_x = 0;
-	wp_y = 0;
 	start_thread();
 }
 
@@ -484,6 +480,8 @@ void init_player(pPlayer player_list,int pc,int hc)
 		for (j = 0; j < hc; j++)
 		{
 			pHare hare = add_hare(&(player[i]->firstHare));
+			hare->wp_x = 0;
+			hare->wp_y = 0;
 			hare->direction = 0;
 			hare->w_direction = SP_ONE/2;
 			hare->w_power = SP_ONE/2;
@@ -524,8 +522,6 @@ void init_player(pPlayer player_list,int pc,int hc)
 	last_ai_try = 0;
 	weapon_points = 3;
 	extra_time = 0;
-	wp_x = 0;
-	wp_y = 0;
 	start_thread();
 }
 

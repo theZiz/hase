@@ -102,10 +102,24 @@ void draw(void)
 			Sint32 oy = spMul(hare->y-posY,zoom);
 			Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 			Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-			if (j == active_player)
+			if (j == active_player && hare == player[j]->activeHare)
 			{
 				//Weapon
-				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[wp_y][wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
+				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[hare->wp_y][hare->wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
+				//building
+				if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] == 4)
+				{
+					int r = spMul(zoom,spGetSizeFactor())*48 >> SP_ACCURACY+2;
+					int d = 60+(hare->w_power*60 >> SP_ACCURACY);
+					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
+					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
+					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+					spSetBlending( SP_ONE*2/3 );
+					spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
+					spSetBlending( SP_ONE );
+				}
+				else
 				//Arrow
 				if (hare->w_power)
 				{
@@ -134,7 +148,7 @@ void draw(void)
 				sprintf(buffer,"%s",player[j]->name);
 			spSetBlending( SP_ONE*2/3 );
 			spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
-			if (j == active_player && player[j]->computer && ai_shoot_tries>1)
+			if (j == active_player && player[j]->computer && ai_shoot_tries>1  && hare == player[j]->activeHare)
 			{
 				sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-2*font->maxheight,0,buffer, font );
@@ -185,8 +199,7 @@ void draw(void)
 		{
 			spSetPattern8(153,60,102,195,153,60,102,195);
 			spRectangle(x+w/2, y+font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4,0,w,font->maxheight*3/4*(spGetSizeFactor() > SP_ONE?4:3)/4,spSpriteAverageColor(hare->hase->active));
-			spDeactivatePattern();
-			
+			spDeactivatePattern();			
 		}
 		sprintf(buffer,"%i/%i",count,hase_game->hares_per_player);
 		spFontDraw(x+w+2, y, 0, buffer, font );
@@ -200,8 +213,12 @@ void draw(void)
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	if (player[active_player]->activeHare)
 	{
-		sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
-		spFontDraw( 2, 2, 0, buffer, font );	
+		spFontDrawRight( screen->w-1, screen->h-1-font->maxheight*2, 0, weapon_name[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x], font );
+		if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] == 4)
+			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_power*30/SP_ONE+30);
+		else
+			sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
+		spFontDraw( 2, 2, 0, buffer, font );
 	}
 	if (weapon_points)
 		sprintf(buffer,"%i seconds left",countdown / 1000);
@@ -622,8 +639,8 @@ int calc(Uint32 steps)
 									//Shoot!
 									if (weapon_points > 0)
 									{
-										weapon_points--;
-										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player]);
+										weapon_points-=3;
+										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player])->kind = 1;
 									}
 									break;
 								}
@@ -715,20 +732,20 @@ int calc(Uint32 steps)
 				}
 				else
 					power_pressed = 0;
-				if (input_states[INPUT_BUTTON_CANCEL])
+				if (input_states[INPUT_BUTTON_CANCEL] && player[active_player]->activeHare)
 				{
 					//Shoot!
-					if (weapon_points - weapon_cost[wp_y][wp_x] >= 0)
+					if (weapon_points - weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] >= 0)
 					{
 						input_states[INPUT_BUTTON_CANCEL] = 0;
-						weapon_points-=weapon_cost[wp_y][wp_x];
-						if (weapon_reference[wp_y][wp_x] < 4)
+						weapon_points-=weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+						if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] < 4)
 						{
 							pBullet bullet = shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player]);
-							bullet->kind = weapon_reference[wp_y][wp_x];
+							bullet->kind = weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 						}
 						else
-						switch (weapon_reference[wp_y][wp_x])
+						switch (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x])
 						{
 							case 4:
 								break;
@@ -755,39 +772,39 @@ int calc(Uint32 steps)
 		}
 		if (wp_choose)
 		{
-			if (input_states[INPUT_AXIS_0_LEFT])
+			if (input_states[INPUT_AXIS_0_LEFT] && player[active_player]->activeHare)
 			{
 				if (wp_choose == 1)
 				{
 					wp_choose = 300;
-					wp_x = (wp_x + WEAPON_X - 1) % WEAPON_X;
+					player[active_player]->activeHare->wp_x = (player[active_player]->activeHare->wp_x + WEAPON_X - 1) % WEAPON_X;
 				}
 			}
 			else
-			if (input_states[INPUT_AXIS_0_RIGHT])
+			if (input_states[INPUT_AXIS_0_RIGHT] && player[active_player]->activeHare)
 			{
 				if (wp_choose == 1)
 				{
 					wp_choose = 300;
-					wp_x = (wp_x + 1) % WEAPON_X;
+					player[active_player]->activeHare->wp_x = (player[active_player]->activeHare->wp_x + 1) % WEAPON_X;
 				}
 			}
 			else
-			if (input_states[INPUT_AXIS_1_LEFT])
+			if (input_states[INPUT_AXIS_1_LEFT] && player[active_player]->activeHare)
 			{
 				if (wp_choose == 1)
 				{
 					wp_choose = 300;
-					wp_y = (wp_y + WEAPON_Y - 1) % WEAPON_Y;
+					player[active_player]->activeHare->wp_y = (player[active_player]->activeHare->wp_y + WEAPON_Y - 1) % WEAPON_Y;
 				}
 			}
 			else
-			if (input_states[INPUT_AXIS_1_RIGHT])
+			if (input_states[INPUT_AXIS_1_RIGHT] && player[active_player]->activeHare)
 			{
 				if (wp_choose == 1)
 				{
 					wp_choose = 300;
-					wp_y = (wp_y + 1) % WEAPON_Y;
+					player[active_player]->activeHare->wp_y = (player[active_player]->activeHare->wp_y + 1) % WEAPON_Y;
 				}
 			}
 			else

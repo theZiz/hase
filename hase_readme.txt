@@ -21,6 +21,7 @@ Changelog
 - New controls
 - Global health bar
 - Particle Effect
+- 6 Weapons
 
 
 1.3:
