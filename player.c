@@ -412,7 +412,7 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 	{
 		if (bunch->age > 9000)
 			spSetBlending(SP_ONE*(1000-bunch->age)/1000);
-		int particleSize = spMax(1,zoom >> SP_ACCURACY+1);
+		int particleSize = spMax(1,zoom >> SP_ACCURACY);
 		int i;
 		for (i = 0; i < bunch->count; i++)
 			if (bunch->particle[i].status >= 0)

@@ -157,6 +157,8 @@ void bullet_impact(int X,int Y,int radius)
 	Uint16* pixel = spGetTargetPixel();
 	int inner_radius = radius*radius;
 	int outer_radius = (radius+BORDER_SIZE)*(radius+BORDER_SIZE);
+	spParticleBunchPointer p = spParticleCreate(4*(radius+1)*(radius+1),hare_explosion_feedback,&particles);
+	int c = 0;
 	for (x = -radius-BORDER_SIZE; x < radius+BORDER_SIZE+1; x++)
 	{
 		for (y = -radius-BORDER_SIZE; y < radius+BORDER_SIZE+1; y++)
@@ -167,12 +169,26 @@ void bullet_impact(int X,int Y,int radius)
 			if (sum > inner_radius)
 			{
 				if (pixel[X+x+(Y+y)*LEVEL_WIDTH] != SP_ALPHA_COLOR)
-					pixel[X+x+(Y+y)*LEVEL_WIDTH] = spGetFastRGB(255,200,0);
+					pixel[X+x+(Y+y)*LEVEL_WIDTH] = BORDER_COLOR;
 			}
 			else
+			if (pixel[X+x+(Y+y)*LEVEL_WIDTH] != SP_ALPHA_COLOR)
+			{
+				p->particle[c].x = X+x << SP_ACCURACY;
+				p->particle[c].y = Y+y << SP_ACCURACY;
+				p->particle[c].z = 0;
+				p->particle[c].dx = ((spRand() & 131071) - SP_ONE)/4;
+				p->particle[c].dy = ((spRand() & 131071) - SP_ONE)/4;
+				p->particle[c].dz = 0;
+				p->particle[c].data.color = BORDER_COLOR;
+				p->particle[c].status = 0;
+				c++;
 				pixel[X+x+(Y+y)*LEVEL_WIDTH] = SP_ALPHA_COLOR;
+			}
 		}
-	}	
+	}
+	for (;c < 4*(radius+1)*(radius+1); c++)
+		p->particle[c].status = -1;
 	Sint32 end = SDL_GetTicks();
 	printf("* Recalculating level:\n");
 	printf("  Drawing Ellipse: %i\n",end-begin);
