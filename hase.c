@@ -268,14 +268,10 @@ void jump(int high)
 	}
 }
 
-int min_d_not_me(int x,int y,pHare me)
+int min_d_not_me(int x,int y,int me)
 {
 	int min_d = LEVEL_WIDTH*LEVEL_WIDTH;
 	int i;
-	int my_d = spFixedToInt(me->x-x)*spFixedToInt(me->x-x)+
-			   spFixedToInt(me->y-y)*spFixedToInt(me->y-y);
-	if (my_d < 1024)
-		return LEVEL_WIDTH*LEVEL_WIDTH;
 	for (i = 0; i < player_count;i++)
 	{
 		if (player[i]->firstHare == NULL)
@@ -284,15 +280,18 @@ int min_d_not_me(int x,int y,pHare me)
 		if (hare)
 		do
 		{							
-				if (hare == me)
-				{
-					hare = hare->next;
-					continue;
-				}
-				int d = spFixedToInt(hare->x-x)*spFixedToInt(hare->x-x)+
-						spFixedToInt(hare->y-y)*spFixedToInt(hare->y-y);
+			int d = spFixedToInt(hare->x-x)*spFixedToInt(hare->x-x)+
+					spFixedToInt(hare->y-y)*spFixedToInt(hare->y-y);
+			if (i != me)
+			{
 				if (d < min_d)
 					min_d = d;
+			}
+			else
+			{
+				if (d < 1024) //to near to me!!!
+					return LEVEL_WIDTH*LEVEL_WIDTH;
+			}
 			hare = hare->next;
 		}
 		while (hare != player[i]->firstHare);
@@ -646,7 +645,7 @@ int calc(Uint32 steps)
 									int w_d = spRand()%(2*SP_PI);
 									int w_p = spRand()%SP_ONE;
 									lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/2);
-									int d = min_d_not_me(x,y,player[active_player]->activeHare);
+									int d = min_d_not_me(x,y,active_player);
 									if (d < lastAIDistance)
 									{
 										lastAIDistance = d;
@@ -924,7 +923,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	
 	int result = spLoop(draw,calc,10,resize,NULL);
 
-	stop_thread();
+	stop_thread(result == 1);
 	if (result == 2)
 	{
 		int i;
@@ -965,5 +964,5 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	delete_weapons();
 	spParticleDelete(&particles);
 	spResetButtonsState();
-	return 0;
+	return result;
 }

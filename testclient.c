@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 
 	
 	printf("Waiting for push thread\n");
-	end_push_thread();
+	end_push_thread(0);
 	delete_player_list(playerList);
 	
 	printf("Finishing...\n");

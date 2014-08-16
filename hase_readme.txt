@@ -8,6 +8,12 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.4.1:
+- Fixed little bug after finished turn in online game
+- AI is smarter (no friendly fire)
+- Faster canceling online game
+- Canceled online game will have no replay
+
 1.4:
 - 5s extra time after last bullet
 - 3 weapon points per turn

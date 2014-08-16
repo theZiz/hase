@@ -1,7 +1,7 @@
 #define HOPS_TIME 200
 #define HIGH_HOPS_TIME 403
 #define MAX_HEALTH 100
-#define AI_MAX_TRIES 64
+#define AI_MAX_TRIES 96
 #define AI_TRIES_EVERY_MS 32
 int ai_shoot_tries = 0;
 int last_ai_try = 0;
@@ -240,7 +240,7 @@ void next_player()
 	next_player_go = 1;
 }
 
-void stop_thread()
+void stop_thread(int kill)
 {
 	if (!hase_game->local && active_player >= 0)
 	{
@@ -256,7 +256,8 @@ void stop_thread()
 				spFlip();
 				push_game_thread(player[active_player],player[active_player]->time/1000,send_data);
 				memset(send_data,0,sizeof(char)*1536);
-				end_push_thread();
+				end_push_thread(kill);
+				spResetLoop();
 			}
 			else
 			{
@@ -292,7 +293,7 @@ void start_thread()
 
 void real_next_player()
 {
-	stop_thread();
+	stop_thread(0);
 	int j;
 	for (j = 0; j < hase_game->player_count; j++)
 		if (player[j]->activeHare == NULL)

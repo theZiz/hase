@@ -699,17 +699,18 @@ int push_message = 0;
 
 int push_thread_function(void* data)
 {
-	while (push_message != -1 || push_thread_first)
+	while (push_message >= 0 || push_thread_first)
 	{
 		if (push_thread_first)
 		{
 			pThreadData thread_data = push_thread_first;
-			int i;
-			for (i = 0; i < 3; i++)
-			{
-				if (push_game(thread_data->player,thread_data->second_of_player,thread_data->data) == 0)
-					break;
-			}
+			int i = 0;
+			if (push_message != -2)
+				for (; i < 3; i++)
+				{
+					if (push_game(thread_data->player,thread_data->second_of_player,thread_data->data) == 0)
+						break;
+				}
 			if (i == 3)
 				printf("BIG PANIC at second %i!\n",thread_data->second_of_player);
 			else
@@ -757,9 +758,9 @@ void start_push_thread()
 	push_thread = SDL_CreateThread(push_thread_function,NULL);
 }
 
-void end_push_thread()
+void end_push_thread(int kill)
 {
-	push_message = -1;
+	push_message = -2;
 	int result;
 	SDL_WaitThread(push_thread,&(result));
 	SDL_DestroyMutex(push_mutex);
