@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="4" release="0" build="0"/>
+<version major="1" minor="4" release="1" build="1"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -32,13 +32,22 @@ Version 1.4:
 - Global health bar
 - Particle Effect
 - 6 Weapons
+
+Version 1.4.1:
+- Fixed little bug after finished turn in online game
+- AI is smarter (no friendly fire)
+- Faster canceling online game
+- Canceled online game will have no replay
+
+Version 1.4.1.1:
+- Added clock preference (900 Mhz) to PXML
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="4" release="0" build="0" type="release"/>
+<version major="1" minor="4" release="1" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="1"/>
 <!--The minimum OS version required-->
@@ -77,5 +86,6 @@ Hase is a worms like game with gravitation. And hares instead of worms.
 <subcategory name="ActionGame"/>
 </category>
 </categories>
+<clockspeed frequency="900"/>
 </application>
 </PXML>
