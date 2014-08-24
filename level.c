@@ -190,6 +190,20 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 	return level;
 }
 
+Uint16 level_color = 0;
+
+Uint16 get_level_color()
+{
+	return level_color;
+}
+
+Uint16 border_color = 0;
+
+Uint16 get_border_color()
+{
+	return border_color;
+}
+
 void texturize_level(SDL_Surface* level,char* level_string)
 {
 	int t = strtol(level_string,NULL,36);
@@ -202,6 +216,24 @@ void texturize_level(SDL_Surface* level,char* level_string)
 	int texture_width = texture->pitch/texture->format->BytesPerPixel;
 	Uint16* texture_pixel = (Uint16*)texture->pixels;
 	int x,y;
+	int r=0,g=0,b=0;
+	int c = 0;
+	for (x = 0; x < texture->w; x+=2)
+		for (y = 0; y < texture->h; y+=2)
+		{
+			r += spGetRawRFromColor( texture_pixel[x+y*texture_width] );
+			g += spGetRawGFromColor( texture_pixel[x+y*texture_width] );
+			b += spGetRawBFromColor( texture_pixel[x+y*texture_width] );
+			c++;
+		}
+	r /= c;
+	g /= c;
+	b /= c;
+	level_color = (r<<11) | (g<<5) | b;
+	Sint32 h = spGetHFromColor(level_color);
+	Sint32 s = spGetSFromColor(level_color);
+	Sint32 v = spGetVFromColor(level_color);
+	border_color = spGetHSV(h,spMin(255,s*3/2),v);
 	for (x = 0; x < level->w; x++)
 		for (y = 0; y < level->h; y++)
 			if (level_pixel[x+y*level->w]!= SP_ALPHA_COLOR)

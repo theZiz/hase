@@ -3,8 +3,7 @@
 #define GRAVITY_PER_PIXEL 32
 #define GRAVITY_PER_PIXEL_CORRECTION 16
 #define GRAVITY_CIRCLE 16
-
-int color_mode = 2;
+#include "level.h"
 
 typedef struct {
 	Sint32 mass,x,y;
@@ -157,6 +156,7 @@ void init_gravity()
 	loadInformation("Drawing level borders...");
 	spSelectRenderTarget(level_original);
 	Uint16* pixel = spGetTargetPixel();
+	int BORDER_COLOR = get_border_color();
 	for (x = BORDER_SIZE; x < LEVEL_WIDTH-BORDER_SIZE; x++)
 	{
 		for (y = BORDER_SIZE; y < LEVEL_HEIGHT-BORDER_SIZE; y++)
@@ -228,36 +228,29 @@ void fill_gravity_surface()
 	spSelectRenderTarget(gravity_surface);
 	spClearTarget( SP_ALPHA_COLOR );
 	spBindTexture( arrow );
-	int x,y,s;
-	Uint16 color;
-	s = 1 << SP_ACCURACY+GRAVITY_RESOLUTION;
+	int x,y;
+	Sint32 h = spGetHFromColor(get_level_color());
+	Sint32 s = spGetSFromColor(get_level_color());
+	Sint32 v = spGetVFromColor(get_level_color());
 	for (x = 0; x < GRAVITY_DENSITY; x++)
 	{
 		int angle = (GRAVITY_DENSITY-1-x)*SP_PI*2/GRAVITY_DENSITY;
-		if (color_mode == 0)
-			color = spGetHSV(angle,255,255);
 		for (y = 0; y < GRAVITY_DENSITY; y++)
 		{
-			int S;
-			if (color_mode & 1)
-				S = s*(GRAVITY_DENSITY-1)/GRAVITY_DENSITY/2;
-			else
-				S = s*(GRAVITY_DENSITY-1-y)/GRAVITY_DENSITY*3/5;
-			if (color_mode)
-			{
-				int v = (GRAVITY_DENSITY*2-1-y)*256/(GRAVITY_DENSITY*2);
-				color = spGetRGB(v,v/2,v/4);
-			}
-			int X = (x<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
-			int Y = (y<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+s;
-			int x1 = spFixedToInt(X+spMul(spCos(angle),+S)-spMul(spSin(angle),+S));
-			int y1 = spFixedToInt(Y+spMul(spSin(angle),+S)+spMul(spCos(angle),+S));
-			int x2 = spFixedToInt(X+spMul(spCos(angle),+S)-spMul(spSin(angle),-S));
-			int y2 = spFixedToInt(Y+spMul(spSin(angle),+S)+spMul(spCos(angle),-S));
-			int x3 = spFixedToInt(X+spMul(spCos(angle),-S)-spMul(spSin(angle),-S));
-			int y3 = spFixedToInt(Y+spMul(spSin(angle),-S)+spMul(spCos(angle),-S));
-			int x4 = spFixedToInt(X+spMul(spCos(angle),-S)-spMul(spSin(angle),+S));
-			int y4 = spFixedToInt(Y+spMul(spSin(angle),-S)+spMul(spCos(angle),+S));
+			int V = (GRAVITY_DENSITY*2-1-y)*150/(GRAVITY_DENSITY*2);
+			Uint16 color = spGetHSV(h,s,V);
+			Sint32 d = 1 << SP_ACCURACY+GRAVITY_RESOLUTION;
+			Sint32 D = d*(GRAVITY_DENSITY-1-y)/GRAVITY_DENSITY*3/5;
+			int X = (x<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+d;
+			int Y = (y<<GRAVITY_RESOLUTION+1+SP_ACCURACY)+d;
+			int x1 = spFixedToInt(X+spMul(spCos(angle),+D)-spMul(spSin(angle),+D));
+			int y1 = spFixedToInt(Y+spMul(spSin(angle),+D)+spMul(spCos(angle),+D));
+			int x2 = spFixedToInt(X+spMul(spCos(angle),+D)-spMul(spSin(angle),-D));
+			int y2 = spFixedToInt(Y+spMul(spSin(angle),+D)+spMul(spCos(angle),-D));
+			int x3 = spFixedToInt(X+spMul(spCos(angle),-D)-spMul(spSin(angle),-D));
+			int y3 = spFixedToInt(Y+spMul(spSin(angle),-D)+spMul(spCos(angle),-D));
+			int x4 = spFixedToInt(X+spMul(spCos(angle),-D)-spMul(spSin(angle),+D));
+			int y4 = spFixedToInt(Y+spMul(spSin(angle),-D)+spMul(spCos(angle),+D));
 			spQuad_tex( x1, y1,0,arrow->w-1,arrow->h-1,
 			            x2, y2,0,arrow->w-1,         0,
 			            x3, y3,0,         0,         0,

@@ -8,6 +8,8 @@
 #define TEXTURE_COUNT 8
 #define LEVEL_BORDER 256
 
+Uint16 get_border_color();
+Uint16 get_level_color();
 void add_to_string(char* buffer,char* add);
 char* ltostr(unsigned int l,char* buffer,int base);
 char* create_level_string(char* buffer,int width,int height,int circles,int triangles,int quads);

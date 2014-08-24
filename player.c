@@ -413,7 +413,7 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 	{
 		if (bunch->age > 9000)
 			spSetBlending(SP_ONE*(10000-bunch->age)/1000);
-		int particleSize = spMax(1,zoom >> SP_ACCURACY);
+		int particleSize = spMax(0,zoom >> SP_ACCURACY);
 		int i;
 		for (i = 0; i < bunch->count; i++)
 			if (bunch->particle[i].status >= 0)
@@ -422,8 +422,8 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 				Sint32 oy = spMul(bunch->particle[i].y-posY,zoom);
 				Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-				spEllipse(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
-				//spRectangle(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
+				//spEllipse(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
+				spRectangle(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
 			}
 		spSetBlending(SP_ONE);
 	}

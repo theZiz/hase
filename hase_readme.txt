@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.4.2
+- An option to hide the player names on demand for better aiming when you have a lot of the screen area covered with the names
+- Improved colours
+
 1.4.1:
 - Fixed little bug after finished turn in online game
 - AI is smarter (no friendly fire)

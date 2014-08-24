@@ -10,12 +10,12 @@ SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
 
-#TARGET = nativ
+TARGET = nativ
 
 ifdef TARGET
 include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
 
-#TARGET = pandora
+TARGET = pandora
 
 BUILD = ./build/$(TARGET)/hase
 SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
