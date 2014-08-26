@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Hase Prototype
+Name=Hase
 Comment=A game about bunnies in space
 Exec=hase.sh
 Terminal=false

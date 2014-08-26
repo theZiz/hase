@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 	int done = 0;
 	while (!done)
 	{
-		spClearTarget(LL_BG);
+		spClearTarget(LL_FG);
 		pWindow window = create_window(main_menu_feedback,font,"HASE ("VERSION")");
 		window->main_menu = 1;
 		add_window_element(window,-1,0);
