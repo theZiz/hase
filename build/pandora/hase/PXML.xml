@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="4" release="1" build="2"/>
+<version major="1" minor="4" release="2" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -41,13 +41,18 @@ Version 1.4.1:
 
 Version 1.4.1.1:
 - Added clock preference (900 Mhz) to PXML
+
+Version 1.4.2:
+- An option to hide the player names on demand for better aiming when you have a lot of the screen area covered with the names
+- Improved colours
+
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="4" release="1" build="0" type="release"/>
+<version major="1" minor="4" release="2" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="1"/>
 <!--The minimum OS version required-->

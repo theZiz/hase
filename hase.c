@@ -10,7 +10,6 @@ pPlayer hase_player_list;
 
 #define LEVEL_WIDTH 1536
 #define LEVEL_HEIGHT 1536
-#define BORDER_COLOR spGetFastRGB(255,200,0)
 
 SDL_Surface* screen;
 spFontPointer font;
@@ -35,6 +34,8 @@ int game_pause = 0;
 int extra_time = 0;
 int weapon_points = 0;
 int wp_choose = 0;
+
+int show_names = 1;
 
 #define INPUT_AXIS_0_LEFT 0
 #define INPUT_AXIS_0_RIGHT 1
@@ -154,11 +155,12 @@ void draw(void)
 			else
 				sprintf(buffer,"%s",player[j]->name);
 			spSetBlending( SP_ONE*2/3 );
-			spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
+			if (show_names)
+				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
 			if (j == active_player && player[j]->computer && ai_shoot_tries>1  && hare == player[j]->activeHare)
 			{
 				sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
-				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-2*font->maxheight,0,buffer, font );
+				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+show_names)*font->maxheight,0,buffer, font );
 			}
 			spSetBlending( SP_ONE );
 			hare = hare->next;
@@ -425,6 +427,14 @@ void set_input()
 				input_states[INPUT_BUTTON_L] = spGetInput()->button[MY_BUTTON_L];
 			if (spGetInput()->button[MY_BUTTON_R] != button_states[MY_BUTTON_R])
 				input_states[INPUT_BUTTON_R] = spGetInput()->button[MY_BUTTON_R];
+			if (spGetInput()->button[MY_PRACTICE_OK] != button_states[MY_PRACTICE_OK])
+				input_states[INPUT_BUTTON_OK] = spGetInput()->button[MY_PRACTICE_OK];
+			if (spGetInput()->button[MY_PRACTICE_3] != button_states[MY_PRACTICE_3])
+				input_states[INPUT_BUTTON_3] = spGetInput()->button[MY_PRACTICE_3];
+			if (spGetInput()->button[MY_PRACTICE_CANCEL] != button_states[MY_PRACTICE_CANCEL])
+				input_states[INPUT_BUTTON_CANCEL] = spGetInput()->button[MY_PRACTICE_CANCEL];
+			if (spGetInput()->button[MY_PRACTICE_4] != button_states[MY_PRACTICE_4])
+				input_states[INPUT_BUTTON_4] = spGetInput()->button[MY_PRACTICE_4];
 		}
 		else
 		{
@@ -433,14 +443,6 @@ void set_input()
 			input_states[INPUT_AXIS_1_LEFT] = 0;
 			input_states[INPUT_AXIS_1_RIGHT] = 0;
 		}
-		if (spGetInput()->button[MY_PRACTICE_OK] != button_states[MY_PRACTICE_OK])
-			input_states[INPUT_BUTTON_OK] = spGetInput()->button[MY_PRACTICE_OK];
-		if (spGetInput()->button[MY_PRACTICE_3] != button_states[MY_PRACTICE_3])
-			input_states[INPUT_BUTTON_3] = spGetInput()->button[MY_PRACTICE_3];
-		if (spGetInput()->button[MY_PRACTICE_CANCEL] != button_states[MY_PRACTICE_CANCEL])
-			input_states[INPUT_BUTTON_CANCEL] = spGetInput()->button[MY_PRACTICE_CANCEL];
-		if (spGetInput()->button[MY_PRACTICE_4] != button_states[MY_PRACTICE_4])
-			input_states[INPUT_BUTTON_4] = spGetInput()->button[MY_PRACTICE_4];
 		if (spGetInput()->button[MY_BUTTON_START] != button_states[MY_BUTTON_START])
 			input_states[INPUT_BUTTON_START] = spGetInput()->button[MY_BUTTON_START];
 		if (spGetInput()->button[MY_BUTTON_SELECT] != button_states[MY_BUTTON_SELECT])
@@ -507,6 +509,21 @@ int calc(Uint32 steps)
 	}
 	if (spGetInput()->button[MY_PRACTICE_4])
 	{
+		if (spGetInput()->button[MY_PRACTICE_OK])
+		{
+			spGetInput()->button[MY_PRACTICE_OK] = 0;
+			show_names = 1-show_names;
+		}
+		if (spGetInput()->button[MY_PRACTICE_3])
+		{
+			spGetInput()->button[MY_PRACTICE_3] = 0;
+			show_names = 1-show_names;
+		}
+		if (spGetInput()->button[MY_PRACTICE_CANCEL])
+		{
+			spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
+			show_names = 1-show_names;
+		}
 		if (spGetInput()->button[MY_BUTTON_L])
 			zoom_d = -1;
 		if (spGetInput()->button[MY_BUTTON_R])
@@ -913,6 +930,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	maxZoom = spSqrt(spGetSizeFactor()*4);
 	zoom = spMul(zoomAdjust,zoomAdjust);
 	zoom_d = 0;
+	show_names = 1;
 	countdown = hase_game->seconds_per_turn*1000;
 	alive_count = player_count;
 	memset(input_states,0,sizeof(int)*12);

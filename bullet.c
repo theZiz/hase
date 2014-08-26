@@ -59,7 +59,7 @@ void draw_weapons()
 	if (player[active_player]->activeHare)
 	{
 		spFontDrawMiddle(screen->w/2,(screen->h-h)/2,0,weapon_name[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x],font);
-		spRectangleBorder((screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-2)*96)/2-1,(screen->h-h+player[active_player]->activeHare->wp_y*96)/2+24+font->maxheight-1,0,44,44,2,2,BORDER_COLOR);
+		spRectangleBorder((screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-2)*96)/2-1,(screen->h-h+player[active_player]->activeHare->wp_y*96)/2+24+font->maxheight-1,0,44,44,2,2,get_border_color());
 		spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x],font);
 		char buffer[32];
 		sprintf(buffer,"Cost: %i",weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x]);
@@ -171,6 +171,7 @@ void bullet_impact(int X,int Y,int radius)
 	}
 	spParticleBunchPointer p = spParticleCreate(c/2,hare_explosion_feedback,&particles);	
 	c = 0;
+	int BORDER_COLOR = get_border_color();
 	for (x = -radius-BORDER_SIZE; x < radius+BORDER_SIZE+1; x++)
 	{
 		for (y = -radius-BORDER_SIZE; y < radius+BORDER_SIZE+1; y++)
@@ -308,6 +309,7 @@ void negative_impact(int X,int Y,int radius)
 	Uint16* pixel = spGetTargetPixel();
 	int inner_radius = (radius-BORDER_SIZE)*(radius-BORDER_SIZE);
 	int outer_radius = radius*radius;
+	int BORDER_COLOR = get_border_color();
 	for (x = -radius; x < radius+1; x++)
 		for (y = -radius; y < radius+1; y++)
 		{
