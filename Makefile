@@ -10,12 +10,12 @@ SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
 
-TARGET = nativ
+#TARGET = nativ
 
 ifdef TARGET
 include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
 
-TARGET = pandora
+#TARGET = pandora
 
 BUILD = ./build/$(TARGET)/hase
 SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
@@ -26,7 +26,7 @@ SPARROW_LIB = $(SPARROW_FOLDER)
 endif
 LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
-DYNAMIC += -lsparrow3d -lsparrowNet
+DYNAMIC += -lsparrow3d -lsparrowNet -lsparrowSound
 
 CPP += -g
 
@@ -39,11 +39,13 @@ targets:
 testclient: testclient.c client.o level.o
 	cp -u $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
 	cp -u $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
+	cp -u $(SPARROW_LIB)/libsparrowSound.so $(BUILD)
 	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
 
 lobby: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o makeBuildDir
 	cp -u $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
 	cp -u $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
+	cp -u $(SPARROW_LIB)/libsparrowSound.so $(BUILD)
 	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
 	
 client.o: client.c client.h

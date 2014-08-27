@@ -105,6 +105,7 @@ pBulletTrace* registerTrace(pPlayer player);
 
 pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer tracePlayer)
 {
+	spSoundPlay(snd_shoot,-1,0,0,-1);
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 	bullet->next = firstBullet;
 	firstBullet = bullet;
@@ -299,6 +300,7 @@ void bullet_impact(int X,int Y,int radius)
 	begin=end;
 	//spSetBlending(SP_ONE);
 	spSelectRenderTarget(screen);
+	spSoundPlay(snd_explosion,-1,0,0,-1);
 }
 
 void negative_impact(int X,int Y,int radius)

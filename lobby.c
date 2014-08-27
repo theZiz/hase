@@ -108,14 +108,17 @@ int local_game_feedback( pWindowElement elem, int action )
 int main(int argc, char **argv)
 {
 	spSetRand(time(NULL));
-	spSetDefaultWindowSize( 320, 240 );
-	//spSetDefaultWindowSize( 800, 480 );
+	//spSetDefaultWindowSize( 320, 240 );
+	spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	spInitNet();
+	spSoundInit();
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);
 	spSetZTest(0);
 	load_options();
+	spSoundSetMusic("./sounds/Ouroboros.ogg");
+	spSoundPlayMusic(0,-1);
 	resize( screen->w, screen->h );
 	int done = 0;
 	while (!done)
@@ -169,7 +172,9 @@ int main(int argc, char **argv)
 		else
 			done = 1;
 	}
+	spSoundStopMusic(0);
 	spQuitNet();
 	spQuitCore();
+	spSoundQuit();
 	return 0;
 }

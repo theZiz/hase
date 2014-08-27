@@ -171,6 +171,10 @@ void update_player()
 							printf("Using special magic...\n");
 						}
 					}
+					if (hare->high_hops)
+						spSoundPlay(snd_high,-1,0,0,-1);
+					else
+						spSoundPlay(snd_low,-1,0,0,-1);
 				}
 			}
 			hare->rotation = 0;

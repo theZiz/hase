@@ -11,6 +11,11 @@ pPlayer hase_player_list;
 #define LEVEL_WIDTH 1536
 #define LEVEL_HEIGHT 1536
 
+spSound* snd_explosion;
+spSound* snd_high;
+spSound* snd_low;
+spSound* snd_shoot;
+
 SDL_Surface* screen;
 spFontPointer font;
 SDL_Surface* level;
@@ -953,8 +958,18 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	memset(send_data,0,1536*sizeof(char));
 	game_pause = 0;
 	wp_choose = 0;
+	snd_explosion = spSoundLoad("./sounds/explosion.wav");
+	snd_high = spSoundLoad("./sounds/high_jump.wav");
+	snd_low = spSoundLoad("./sounds/short_jump.wav");
+	snd_shoot = spSoundLoad("./sounds/plop.wav");
 	
 	int result = spLoop(draw,calc,10,resize,NULL);
+	
+	spSoundStop(-1,0);
+	spSoundDelete(snd_explosion);
+	spSoundDelete(snd_high);
+	spSoundDelete(snd_low);
+	spSoundDelete(snd_shoot);
 
 	stop_thread(result == 1);
 	if (result == 2)

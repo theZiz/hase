@@ -13,6 +13,7 @@ Changelog
 - Circle around active hare to tell which of your characters you are currently controlling
 - Options menu for setting like volume, zooming behaviour and hare markation
 - Changeable particle size
+- Added Sound
 
 1.4.2
 - An option to hide the player names on demand for better aiming when you have a lot of the screen area covered with the names
