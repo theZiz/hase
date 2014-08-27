@@ -27,6 +27,7 @@ pWindow create_window(int ( *feedback )( pWindowElement elem, int action ),spFon
 	update_window_width(window);
 	window->do_flip = 1;
 	window->main_menu = 0;
+	window->oldScreen = NULL;
 	window->only_ok = 0;
 	window->count = 0;
 	return window;
@@ -58,7 +59,7 @@ pWindowElement add_window_element(pWindow window,int type,int reference)
 	window->feedback(elem,WN_ACT_UPDATE);
 	update_elem_width(elem,window);
 	update_window_width(window);
-	window->height+=2*window->font->maxheight;
+	window->height+=3*window->font->maxheight/2;
 	window->count++;
 	return elem;
 }
@@ -68,6 +69,8 @@ pWindow recent_window = NULL;
 void window_draw(void)
 {
 	SDL_Surface* screen = spGetWindowSurface();
+	if (recent_window->oldScreen)
+		spBlitSurface(screen->w/2,screen->h/2,0,recent_window->oldScreen);
 	spSetPattern8(153,60,102,195,153,60,102,195);
 	spRectangle(screen->w/2,screen->h/2,0,screen->w,screen->h,LL_BG);
 	spDeactivatePattern();
@@ -87,7 +90,7 @@ void window_draw(void)
 	int nr = 0;
 	while (elem)
 	{
-		y+=window->font->maxheight*2;
+		y+=window->font->maxheight*3/2;
 		if (nr == window->selection)
 		{
 			if (window->firstElement->next) //more than one element
@@ -311,6 +314,9 @@ int window_calc(Uint32 steps)
 
 int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 {
+	spUnlockRenderTarget();
+	window->oldScreen = spUniqueCopySurface( spGetWindowSurface() );
+	spLockRenderTarget();
 	pWindow save_window = recent_window;
 	recent_window = window;
 	int res = spLoop(window_draw,window_calc,10,resize,NULL);
@@ -328,6 +334,8 @@ int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 		window->feedback(selElem,WN_ACT_END_POLL);
 	}
 	recent_window = save_window;
+	spDeleteSurface( window->oldScreen );
+	window->oldScreen = NULL;
 	return res;
 }
 

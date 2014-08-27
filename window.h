@@ -8,7 +8,7 @@ typedef struct sWindowElement
 {
 	int type;
 	int reference;
-	char text[256];
+	char text[512];
 	int width;
 	pWindowElement next;
 } tWindowElement;
@@ -19,11 +19,12 @@ typedef struct sWindow
 	int width,height;
 	int selection;
 	int ( *feedback )( pWindowElement elem, int action );
-	char title[256];
+	char title[512];
 	spFontPointer font;
 	pWindowElement firstElement;
 	int do_flip;
 	int main_menu;
+	SDL_Surface* oldScreen;
 	int only_ok;
 	int count;
 } tWindow;

@@ -463,8 +463,6 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		
 		int res = spLoop(lg_draw,lg_calc,10,resize,NULL);
 		
-		if (!lg_game->local)
-			stop_chat_listener(lg_player);
 		if (lg_block)
 			spDeleteTextBlock(lg_block);
 		if (res == -1)
@@ -473,6 +471,10 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 			message_box(font,resize,"Lost connection...");
 		if (res == 2)
 			hase(lg_resize,lg_game,lg_player);
+
+		if (!lg_game->local)
+			stop_chat_listener(lg_player);
+
 		while (lg_player)
 		{
 			pPlayer next = lg_player->next;

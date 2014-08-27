@@ -354,7 +354,13 @@ int ll_reload()
 		message_box(ll_font,ll_resize,"No Connection to server!");
 		return 1;
 	}
-	if (server_info() > LL_VERSION)
+	int info = server_info();
+	if (info < 0)
+	{
+		message_box(ll_font,ll_resize,"The server is under repair. Please try again later!");
+		return 1;
+	}
+	if (info > LL_VERSION)
 	{
 		message_box(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!");
 		return 1;

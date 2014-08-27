@@ -173,7 +173,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			buffer[pos+2] == 'U' &&
 			buffer[pos+3] == 'L')
 		{
-			memset(binary,255,count);
+			memset(binary,1+2+16+32,count);
 			pMessage result = NULL;
 			numToMessage(&result,"Kicked",1);
 			return result;
@@ -760,7 +760,10 @@ void start_push_thread()
 
 void end_push_thread(int kill)
 {
-	push_message = -2;
+	if (kill)
+		push_message = -2;
+	else
+		push_message = -1;
 	int result;
 	SDL_WaitThread(push_thread,&(result));
 	SDL_DestroyMutex(push_mutex);
@@ -780,6 +783,8 @@ int pull_game(pPlayer player,int second_of_player,void* data)
 	deleteMessage(&message);
 	if (result)
 	{
+		if (result->name[0] == 'K')
+			printf("player %s kicked\n",player->name);
 		deleteMessage(&result);
 		return 0; //Okay
 	}
