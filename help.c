@@ -19,6 +19,6 @@ void draw_help()
 	spFontDraw( 2, screen->h-2- 5*font->maxheight, 0, "[4]+[l]/[r]Zoom in or out", font );
 	spFontDraw( 2, screen->h-2- 4*font->maxheight, 0, "[4]+"SP_PAD_NAME": Look around", font );
 	spFontDraw( 2, screen->h-2- 3*font->maxheight, 0, "[4]+[o]/[c]/[3]: Show player names", font );
-	spFontDraw( 2, screen->h-2- 2*font->maxheight, 0, "[B]Exit", font );
+	spFontDraw( 2, screen->h-2- 2*font->maxheight, 0, "[B]Options and Exit", font );
 	spFontDraw( 2, screen->h-2- 1*font->maxheight, 0, "[R]Hide help", font );
 }

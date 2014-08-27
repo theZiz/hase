@@ -24,7 +24,8 @@ typedef struct sWindow
 	pWindowElement firstElement;
 	int do_flip;
 	int main_menu;
-	SDL_Surface* oldScreen;
+	int only_ok;
+	int count;
 } tWindow;
 
 #define WN_ACT_UPDATE 0

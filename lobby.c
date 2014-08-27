@@ -6,6 +6,7 @@
 #include "window.h"
 #include "level.h"
 #include "about.h"
+#include "options.h"
 
 SDL_Surface* screen;
 spFontPointer font;
@@ -47,9 +48,10 @@ int main_menu_feedback( pWindowElement elem, int action )
 	{
 		case 0: sprintf(elem->text,"Local Game"); break;
 		case 1: sprintf(elem->text,"Online Game"); break;
-		case 2: sprintf(elem->text,"Help"); break;
-		case 3: sprintf(elem->text,"About"); break;
-		case 4: sprintf(elem->text,"Exit"); break;
+		case 2: sprintf(elem->text,"Options"); break;
+		case 3: sprintf(elem->text,"Help"); break;
+		case 4: sprintf(elem->text,"About"); break;
+		case 5: sprintf(elem->text,"Exit"); break;
 	}
 	return 0;
 }
@@ -113,11 +115,12 @@ int main(int argc, char **argv)
 	screen = spCreateDefaultWindow();
 	spSetZSet(0);
 	spSetZTest(0);
+	load_options();
 	resize( screen->w, screen->h );
 	int done = 0;
 	while (!done)
 	{
-		spClearTarget(LL_FG);
+		spClearTarget(LL_BG);
 		pWindow window = create_window(main_menu_feedback,font,"HASE ("VERSION")");
 		window->main_menu = 1;
 		add_window_element(window,-1,0);
@@ -125,6 +128,7 @@ int main(int argc, char **argv)
 		add_window_element(window,-1,2);
 		add_window_element(window,-1,3);
 		add_window_element(window,-1,4);
+		add_window_element(window,-1,5);
 		int res = modal_window(window,resize);
 		int sel = window->selection;
 		delete_window(window);
@@ -150,12 +154,15 @@ int main(int argc, char **argv)
 					start_lobby(font,resize);
 					break;
 				case 2:
-					start_help(font,resize);
+					options_window(font,resize,0);
 					break;
 				case 3:
-					start_about(font,resize);
+					start_help(font,resize);
 					break;
 				case 4:
+					start_about(font,resize);
+					break;
+				case 5:
 					done = 1;
 					break;
 			}

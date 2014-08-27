@@ -8,6 +8,12 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.4.3
+- Arrow stays at minimal size while zooming to see where you are aiming at large zoom-outs
+- Circle around active hare to tell which of your characters you are currently controlling
+- Options menu for setting like volume, zooming behaviour and hare markation
+- Changeable particle size
+
 1.4.2
 - An option to hide the player names on demand for better aiming when you have a lot of the screen area covered with the names
 - Improved colours

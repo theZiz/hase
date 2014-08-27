@@ -27,7 +27,8 @@ pWindow create_window(int ( *feedback )( pWindowElement elem, int action ),spFon
 	update_window_width(window);
 	window->do_flip = 1;
 	window->main_menu = 0;
-	window->oldScreen = NULL;
+	window->only_ok = 0;
+	window->count = 0;
 	return window;
 }
 
@@ -58,6 +59,7 @@ pWindowElement add_window_element(pWindow window,int type,int reference)
 	update_elem_width(elem,window);
 	update_window_width(window);
 	window->height+=2*window->font->maxheight;
+	window->count++;
 	return elem;
 }
 
@@ -66,8 +68,6 @@ pWindow recent_window = NULL;
 void window_draw(void)
 {
 	SDL_Surface* screen = spGetWindowSurface();
-	if (recent_window->oldScreen)
-		spBlitSurface(screen->w/2,screen->h/2,0,recent_window->oldScreen);
 	spSetPattern8(153,60,102,195,153,60,102,195);
 	spRectangle(screen->w/2,screen->h/2,0,screen->w,screen->h,LL_BG);
 	spDeactivatePattern();
@@ -109,28 +109,50 @@ void window_draw(void)
 	{
 		switch (selElem->type)
 		{
-			case 0:
-				spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  [o]Okay  [c]Cancel", window->font );
+			case 0: case 2:
+				if (window->only_ok)
+					spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  [o]Okay", window->font );
+				else
+					spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  [o]Okay  [c]Cancel", window->font );
 				break;
 			case 1:
 				if (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
 				{
 					if (spIsKeyboardPolled())
 					{
-						if (window->firstElement->next)
-							spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]/[c]Back", window->font );
+						if (window->only_ok)
+						{
+							if (window->firstElement->next)
+								spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]Back", window->font );
+							else
+								spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]Okay", window->font );
+						}
 						else
-							spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]Okay  [c]Cancel", window->font );
+						{
+							if (window->firstElement->next)
+								spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]/[c]Back", window->font );
+							else
+								spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]Okay  [c]Cancel", window->font );
+						}
 					}
+					else
+					if (window->only_ok)
+						spFontDrawMiddle( screen->w/2,y, 0, "[3]Change  [o]Okay", window->font );
 					else
 						spFontDrawMiddle( screen->w/2,y, 0, "[3]Change  [o]Okay  [c]Cancel", window->font );
 				}
+				else
+				if (window->only_ok)
+					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay", window->font );
 				else
 					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel", window->font );
 				break;
 			case -1:
 				if (window->main_menu)
 					spFontDrawMiddle( screen->w/2,y, 0, "[o]Select  [c]Exit", window->font );
+				else
+				if (window->only_ok)
+					spFontDrawMiddle( screen->w/2,y, 0, "[o]Select  [c]Back", window->font );
 				else
 					spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay  [c]Cancel", window->font );
 				break;
@@ -169,27 +191,36 @@ int window_calc(Uint32 steps)
 		}
 		return 0;
 	}
+	if (befElem == NULL)
+	{
+		befElem = window->firstElement;
+		while (befElem->next)
+			befElem = befElem->next;
+	}
 	if (selElem->type != 1 ||
 		!spIsKeyboardPolled() ||
 		spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
 	{
-		if (spGetInput()->axis[1] < 0 && befElem)
+		if (spGetInput()->axis[1] < 0)
 		{
 			spGetInput()->axis[1] = 0;
 			if (selElem->type == 1 &&
 				spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
 				window->feedback(selElem,WN_ACT_END_POLL);
-			window->selection--;
+			window->selection = (window->selection + window->count - 1) % window->count;
 			selElem = befElem;
 		}
-		if (spGetInput()->axis[1] > 0 && selElem->next)
+		if (spGetInput()->axis[1] > 0)
 		{
 			spGetInput()->axis[1] = 0;
 			if (selElem->type == 1 &&
 				spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
 				window->feedback(selElem,WN_ACT_END_POLL);
-			window->selection++;
-			selElem = selElem->next;
+			window->selection = (window->selection + 1) % window->count;
+			if (selElem->next)
+				selElem = selElem->next;
+			else
+				selElem = window->firstElement;
 		}
 	}
 	if (spGetInput()->button[MY_PRACTICE_OK])
@@ -211,7 +242,8 @@ int window_calc(Uint32 steps)
 				return 1;
 		}
 	}
-	if (spGetInput()->button[MY_PRACTICE_CANCEL])
+	if (spGetInput()->button[MY_PRACTICE_CANCEL] &&
+		(window->only_ok == 0 || selElem->type == -1))
 	{
 		spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
 		switch (selElem->type)
@@ -245,16 +277,31 @@ int window_calc(Uint32 steps)
 		spGetInput()->button[MY_PRACTICE_3] = 0;
 		window->feedback(selElem,WN_ACT_START_POLL);
 	}
-
-	if (selElem->type == 0 && spGetInput()->axis[0] < 0)
+	int i;
+	
+	if (spGetInput()->axis[0] < 0)
 	{
-		spGetInput()->axis[0] = 0;
-		window->feedback(selElem,WN_ACT_LEFT);
+		if (selElem->type == 0)
+		{
+			spGetInput()->axis[0] = 0;
+			window->feedback(selElem,WN_ACT_LEFT);
+		}
+		else
+		if (selElem->type == 2)
+			for (i = 0; i < steps;i++)
+				window->feedback(selElem,WN_ACT_LEFT);
 	}
-	if (selElem->type == 0 && spGetInput()->axis[0] > 0)
+	if (spGetInput()->axis[0] > 0)
 	{
-		spGetInput()->axis[0] = 0;
-		window->feedback(selElem,WN_ACT_RIGHT);
+		if (selElem->type == 0)
+		{
+			spGetInput()->axis[0] = 0;
+			window->feedback(selElem,WN_ACT_RIGHT);
+		}
+		else
+		if (selElem->type == 2)
+			for (i = 0; i < steps;i++)
+				window->feedback(selElem,WN_ACT_RIGHT);
 	}
 	window->feedback(selElem,WN_ACT_UPDATE);
 	update_elem_width(selElem,window);
@@ -264,9 +311,6 @@ int window_calc(Uint32 steps)
 
 int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 {
-	spUnlockRenderTarget();
-	window->oldScreen = spUniqueCopySurface( spGetWindowSurface() );
-	spLockRenderTarget();
 	pWindow save_window = recent_window;
 	recent_window = window;
 	int res = spLoop(window_draw,window_calc,10,resize,NULL);
@@ -284,8 +328,6 @@ int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 		window->feedback(selElem,WN_ACT_END_POLL);
 	}
 	recent_window = save_window;
-	spDeleteSurface( window->oldScreen );
-	window->oldScreen = NULL;
 	return res;
 }
 

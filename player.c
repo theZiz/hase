@@ -360,11 +360,11 @@ pHare add_hare(pHare* firstHare)
 
 int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32 extra_data)
 {
+	int particleSize = spMax(0,zoom*gop_particles() >> SP_ACCURACY);
 	if (action == SP_PARTICLE_UPDATE)
 	{
 		if (bunch->age > 10000)
 			return 1;
-		int particleSize = spMax(1,zoom >> SP_ACCURACY+1);
 		int i;
 		int touched = 0;
 		for (i = 0; i < bunch->count; i++)
@@ -413,7 +413,6 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 	{
 		if (bunch->age > 9000)
 			spSetBlending(SP_ONE*(10000-bunch->age)/1000);
-		int particleSize = spMax(0,zoom >> SP_ACCURACY);
 		int i;
 		for (i = 0; i < bunch->count; i++)
 			if (bunch->particle[i].status >= 0)
@@ -422,8 +421,8 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 				Sint32 oy = spMul(bunch->particle[i].y-posY,zoom);
 				Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-				//spEllipse(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
-				spRectangle(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
+				spEllipse(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
+				//spRectangle(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
 			}
 		spSetBlending(SP_ONE);
 	}
@@ -443,18 +442,27 @@ pHare del_hare(pHare hare,pHare* firstHare)
 			*firstHare = hare->next;
 		next = hare->next;
 	}
-	spParticleBunchPointer bunch = spParticleFromSprite(hare->hase->active,hare_explosion_feedback,&particles);
-	//Calculating the real position
-	//rotating + tranforming to fixed point
-	int i;
-	for (i = 0; i < bunch->count; i++)
+	if (gop_particles() != 4)
 	{
-		Sint32 tx = spCos(hare->rotation) * (bunch->particle[i].x-16) - spSin(hare->rotation) * (bunch->particle[i].y-16) >> 1;
-		Sint32 ty = spSin(hare->rotation) * (bunch->particle[i].x-16) + spCos(hare->rotation) * (bunch->particle[i].y-16) >> 1;
-		bunch->particle[i].x = hare->x + tx;
-		bunch->particle[i].y = hare->y + ty;
-		bunch->particle[i].dx /= 4;
-		bunch->particle[i].dy /= 4;
+		int inc = (1<<gop_particles()+gop_particles()-1)-1;
+		spParticleBunchPointer bunch = spParticleFromSprite(hare->hase->active,hare_explosion_feedback,&particles);
+		//Calculating the real position
+		//rotating + tranforming to fixed point
+		int i;
+		for (i = 0; i < bunch->count; i++)
+		{
+			if ((i & inc) != inc)
+			{
+				bunch->particle[i].status = -1;
+				continue;
+			}
+			Sint32 tx = spCos(hare->rotation) * (bunch->particle[i].x-16) - spSin(hare->rotation) * (bunch->particle[i].y-16) >> 1;
+			Sint32 ty = spSin(hare->rotation) * (bunch->particle[i].x-16) + spCos(hare->rotation) * (bunch->particle[i].y-16) >> 1;
+			bunch->particle[i].x = hare->x + tx;
+			bunch->particle[i].y = hare->y + ty;
+			bunch->particle[i].dx /= 4;
+			bunch->particle[i].dy /= 4;
+		}
 	}
 	spDeleteSpriteCollection(hare->hase,0);
 	free(hare);

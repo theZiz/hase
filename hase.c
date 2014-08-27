@@ -105,6 +105,13 @@ void draw(void)
 			Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 			if (j == active_player && hare == player[j]->activeHare)
 			{
+				if (gop_circle())
+				{
+					spSetBlending( SP_ONE/2 );
+					int r = zoom*3 >> SP_ACCURACY-2;
+					spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,65535);
+					spSetBlending( SP_ONE );
+				}
 				//Weapon
 				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[hare->wp_y][hare->wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
 				//building
@@ -131,12 +138,13 @@ void draw(void)
 				//Arrow
 				if (hare->w_power)
 				{
-					Sint32 ox = spMul(hare->x-posX-14*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
-					Sint32 oy = spMul(hare->y-posY-14* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
+					Sint32 w_zoom = spMax(SP_ONE,zoom);
+					Sint32 ox = spMul(hare->x-posX-14*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),w_zoom);
+					Sint32 oy = spMul(hare->y-posY-14* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),w_zoom);
 					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 					spSetBlending( SP_ONE*2/3 );
-					spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(zoom,spGetSizeFactor())/16,spMul(hare->w_power,spMul(zoom,spGetSizeFactor()))/4,hare->w_direction+rotation+hare->rotation-SP_PI/2);
+					spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(w_zoom,spGetSizeFactor())/16,spMul(hare->w_power,spMul(w_zoom,spGetSizeFactor()))/4,hare->w_direction+rotation+hare->rotation-SP_PI/2);
 					spSetBlending( SP_ONE );
 				}
 			}
@@ -495,12 +503,15 @@ int calc(Uint32 steps)
 	if (spGetInput()->button[MY_BUTTON_SELECT])
 	{
 		spGetInput()->button[MY_BUTTON_SELECT] = 0;
-		pWindow window = create_window(quit_feedback,font,"Sure?");
-		add_window_element(window,-1,0);
-		int res = modal_window(window,hase_resize);
-		delete_window(window);
-		if (res == 1)
-			return 1;
+		if (options_window(font,hase_resize,1))
+		{
+			pWindow window = create_window(quit_feedback,font,"Sure?");
+			add_window_element(window,-1,0);
+			int res = modal_window(window,hase_resize);
+			delete_window(window);
+			if (res == 1)
+				return 1;
+		}
 	}
 	if (spGetInput()->button[MY_BUTTON_START])
 	{
@@ -563,7 +574,9 @@ int calc(Uint32 steps)
 			if (zoomAdjust < minZoom)
 				zoomAdjust = minZoom;
 			zoom = spMul(zoomAdjust,zoomAdjust);
-			if ((zoomAdjust & 16383) == 0)
+			if ((zoomAdjust & 16383) == 0 && gop_zoom())
+				zoom_d = 0;
+			if (gop_zoom() == 0 && spGetInput()->button[MY_BUTTON_L] == 0)
 				zoom_d = 0;
 		}
 		else
@@ -573,7 +586,9 @@ int calc(Uint32 steps)
 			if (zoomAdjust > maxZoom)
 				zoomAdjust = maxZoom;
 			zoom = spMul(zoomAdjust,zoomAdjust);
-			if ((zoomAdjust & 16383) == 0)
+			if ((zoomAdjust & 16383) == 0 && gop_zoom())
+				zoom_d = 0;
+			if (gop_zoom() == 0 && spGetInput()->button[MY_BUTTON_R] == 0)
 				zoom_d = 0;
 		}
 		//Camera

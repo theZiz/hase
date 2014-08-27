@@ -10,12 +10,12 @@ SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
 
-#TARGET = nativ
+TARGET = nativ
 
 ifdef TARGET
 include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
 
-#TARGET = pandora
+TARGET = pandora
 
 BUILD = ./build/$(TARGET)/hase
 SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
@@ -37,14 +37,14 @@ targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
 testclient: testclient.c client.o level.o
-	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
-	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
+	cp -u $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
+	cp -u $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
 	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
 
-lobby: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o makeBuildDir
-	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
-	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
+lobby: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o makeBuildDir
+	cp -u $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
+	cp -u $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
+	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
 	
 client.o: client.c client.h
 	$(CPP) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
@@ -66,6 +66,9 @@ hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h
 
 level.o: level.c level.h
 	$(CPP) $(CFLAGS) -c level.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+options.o: options.c options.h
+	$(CPP) $(CFLAGS) -c options.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
 makeBuildDir:
 	 @if [ ! -d $(BUILD:/hase=/) ]; then mkdir $(BUILD:/hase=/);fi
