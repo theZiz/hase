@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="4" release="1" build="1"/>
+<version major="1" minor="4" release="3" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -41,15 +41,26 @@ Version 1.4.1:
 
 Version 1.4.1.1:
 - Added clock preference (900 Mhz) to PXML
+
+1.4.2
+- An option to hide the player names on demand for better aiming when you have a lot of the screen area covered with the names
+- Improved colours
+
+1.4.3
+- Arrow stays at minimal size while zooming to see where you are aiming at large zoom-outs
+- Circle around active hare to tell which of your characters you are currently controlling
+- Options menu for setting like volume, zooming behaviour and hare markation
+- Changeable particle size
+- Added Sound
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="4" release="1" build="0" type="release"/>
+<version major="1" minor="4" release="3" build="0" type="release"/>
 <!--This program's version-->
-<osversion major="1" minor="0" release="0" build="1"/>
+<osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <!--Optional email and website, name required-->
