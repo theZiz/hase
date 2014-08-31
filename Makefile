@@ -44,7 +44,7 @@ testclient: testclient.c client.o level.o
 	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
 	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
 	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
-	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient$(SUFFX)
+	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient$(SUFFIX)
 
 hase: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o makeBuildDir
 	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
