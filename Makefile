@@ -10,6 +10,10 @@ SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
 
+SPARROW3D_LIB = libsparrow3d.so
+SPARROWNET_LIB = libsparrowNet.so
+SPARROWSOUND_LIB = libsparrowSound.so
+
 #TARGET = nativ
 
 ifdef TARGET
@@ -30,23 +34,23 @@ DYNAMIC += -lsparrow3d -lsparrowNet -lsparrowSound
 
 CPP += -g
 
-all: lobby testclient
+all: hase
 	@echo "=== Built for Target "$(TARGET)" ==="
 
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
 testclient: testclient.c client.o level.o
-	cp -u $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
-	cp -u $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	cp -u $(SPARROW_LIB)/libsparrowSound.so $(BUILD)
-	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
+	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
+	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
+	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
+	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient$(SUFFX)
 
-lobby: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o makeBuildDir
-	cp -u $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
-	cp -u $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	cp -u $(SPARROW_LIB)/libsparrowSound.so $(BUILD)
-	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
+hase: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o makeBuildDir
+	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
+	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
+	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
+	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/hase$(SUFFIX)
 	
 client.o: client.c client.h
 	$(CPP) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
@@ -79,4 +83,5 @@ makeBuildDir:
 clean:
 	rm -f *.o
 	rm -f $(BUILD)/lobby
-	rm -f $(BUILD)/testclient
+	rm -f $(BUILD)/hase$(SUFFIX)
+	rm -f $(BUILD)/testclient$(SUFFIX)
