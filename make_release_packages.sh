@@ -33,7 +33,9 @@ do
 				echo "<a href=$PROGRAM-$NAME-$VERSION.tar.gz>$NAME</a></br>" >> ../../index.htm
 			else
 				#no Pandora, no PC. So we have a low resolution device!
-				cp ../../small_resolution_data/* "$PROGRAM/data"
+				if [ $NAME != "win32" ]; then
+					cp ../../small_resolution_data/* "$PROGRAM/data"
+				fi
 				if [ $NAME = "gcw" ]; then
 					mksquashfs * "$PROGRAM.opk" -all-root -noappend -no-exports -no-xattrs
 					mv "$PROGRAM.opk" ../..
