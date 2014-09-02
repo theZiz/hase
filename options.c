@@ -89,6 +89,8 @@ void load_options()
 			sop_particles(atoi(entry->value));
 		entry = entry->next;
 	}
+	sop_music_volume(gop_music_volume());
+	sop_sample_volume(gop_sample_volume());
 	spConfigFree(conf);
 }
 
