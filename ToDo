@@ -1,20 +1,23 @@
+For next version:
+* Rotation option
+* Control change if rotated
 * Showing how health is removed
-* smarter AI
-* more level details / new level making approach
 * ingame chat
-* unique keyboard
 * different sprites (kangoroo and co)
 * sprite adjustable
 * not closing games "somehow"
 * Items
-
-* more weapons
-	* default missile (3 wp)
+* Weapons
+	* small circle building tool (1 wp)
 	* low grav missile (3 wp)
 	* neg grav missile (3 wp)
 	* no grav missile (3 wp)
-	* circle building tool (2 wp)
-	* small circle building tool (1 wp)
+
+* smarter AI
+* more level details / new level making approach
+* unique keyboard
+
+* more weapons
 	* super jump (1 wp)
 	* pistole (1 wp)
 	* digger (2 wp)
