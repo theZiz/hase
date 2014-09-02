@@ -1,6 +1,8 @@
-For next version:
+For this version:
 * Rotation option
 * Control change if rotated
+
+For next version:
 * Showing how health is removed
 * ingame chat
 * different sprites (kangoroo and co)
@@ -13,10 +15,10 @@ For next version:
 	* neg grav missile (3 wp)
 	* no grav missile (3 wp)
 
+General:
 * smarter AI
 * more level details / new level making approach
 * unique keyboard
-
 * more weapons
 	* super jump (1 wp)
 	* pistole (1 wp)
