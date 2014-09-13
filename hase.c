@@ -85,6 +85,8 @@ void draw(void)
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
 	spSetVerticalOrigin(SP_FIXED);
 	spSetHorizontalOrigin(SP_FIXED);
+	if (gop_rotation() == 0)
+		rotation = 0;
 	
 	//Level
 	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
@@ -420,6 +422,12 @@ void set_input()
 				input_states[INPUT_AXIS_0_LEFT] = 0;
 				input_states[INPUT_AXIS_0_RIGHT] = 0;
 			}		
+			if (player[active_player]->activeHare->rotation > SP_PI/2 && player[active_player]->activeHare->rotation < SP_PI*3/2)
+			{
+				int temp = input_states[INPUT_AXIS_0_LEFT];
+				input_states[INPUT_AXIS_0_LEFT] = input_states[INPUT_AXIS_0_RIGHT];
+				input_states[INPUT_AXIS_0_RIGHT] = temp;
+			}
 			if (spGetInput()->axis[1] < 0)
 			{
 				input_states[INPUT_AXIS_1_LEFT] = 1;

@@ -9,7 +9,7 @@
 #include "options.h"
 
 SDL_Surface* screen;
-spFontPointer font;
+spFontPointer font = NULL;
 
 #define BUTTON_BG spGetRGB(64,64,64)
 #define BUTTON_FG spGetRGB(220,220,220)

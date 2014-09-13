@@ -6,6 +6,8 @@ int op_circle = 1;
 int op_music_volume = SP_VOLUME_MAX << VOLUME_SHIFT-1;
 int op_sample_volume = SP_VOLUME_MAX << VOLUME_SHIFT;
 int op_particles = 2;
+int op_rotation = 1;
+int op_direction_flip = 0;
 
 int gop_zoom()
 {
@@ -30,6 +32,16 @@ int gop_sample_volume()
 int gop_particles()
 {
 	return op_particles;
+}
+
+int gop_rotation()
+{
+	return op_rotation;
+}
+
+int gop_direction_flip()
+{
+	return op_direction_flip;
 }
 
 void sop_zoom(int v)
@@ -69,7 +81,17 @@ void sop_particles(int v)
 	if (v > 4)
 		v = 4;
 	op_particles = v;
-}	
+}
+
+void sop_rotation(int v)
+{
+	op_rotation = v & 1;
+}
+
+void sop_direction_flip(int v)
+{
+	op_direction_flip = v & 1;
+}
 
 void load_options()
 {
@@ -87,6 +109,10 @@ void load_options()
 			sop_sample_volume(atoi(entry->value));
 		if (strcmp(entry->key,"particles") == 0)
 			sop_particles(atoi(entry->value));
+		if (strcmp(entry->key,"rotation") == 0)
+			sop_rotation(atoi(entry->value));
+		if (strcmp(entry->key,"direction_flip") == 0)
+			sop_direction_flip(atoi(entry->value));
 		entry = entry->next;
 	}
 	sop_music_volume(gop_music_volume());
@@ -102,6 +128,8 @@ void save_options()
 	spConfigSetInt(conf,"music_volume",op_music_volume);
 	spConfigSetInt(conf,"sample_volume",op_sample_volume);
 	spConfigSetInt(conf,"particles",op_particles);
+	spConfigSetInt(conf,"rotation",op_rotation);
+	spConfigSetInt(conf,"direction_flip",op_direction_flip);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }
@@ -128,6 +156,13 @@ int options_feedback( pWindowElement elem, int action )
 				case 5:
 					sop_particles(gop_particles()-1);
 					break;
+				case 6:
+					sop_rotation(1-gop_rotation());
+					options_feedback(elem->next,WN_ACT_UPDATE);
+					break;
+				case 7:
+					sop_direction_flip(1-gop_direction_flip());
+					break;
 			}
 			break;
 		case WN_ACT_RIGHT:
@@ -147,6 +182,13 @@ int options_feedback( pWindowElement elem, int action )
 					break;
 				case 5:
 					sop_particles(gop_particles()+1);
+					break;
+				case 6:
+					sop_rotation(1-gop_rotation());
+					options_feedback(elem->next,WN_ACT_UPDATE);
+					break;
+				case 7:
+					sop_direction_flip(1-gop_direction_flip());
 					break;
 			}
 			break;
@@ -190,6 +232,21 @@ int options_feedback( pWindowElement elem, int action )
 			}
 			break;
 		case 6:
+			if (gop_rotation())
+				sprintf(elem->text,"Rotating level: Yes");
+			else
+				sprintf(elem->text,"Rotating level: No");
+			break;
+		case 7:
+			if (gop_rotation())
+				sprintf(elem->text,"(Setting deactivated)");
+			else
+			if (gop_direction_flip())
+				sprintf(elem->text,"Flip direction controls: Yes");
+			else
+				sprintf(elem->text,"Flip direction controls: No");
+			break;
+		case 8:
 			sprintf(elem->text,"Quit game");
 			break;
 	}
@@ -205,11 +262,13 @@ int options_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),in
 	add_window_element(window,2,3);
 	add_window_element(window,2,4);
 	add_window_element(window,0,5);
+	add_window_element(window,0,6);
+	add_window_element(window,0,7);
 	if (quit)
-		add_window_element(window,-1,6);
+		add_window_element(window,-1,8);
 	int res = modal_window(window,resize);
 	int ret = 0;
-	if (window->selection == 5)
+	if (window->selection == 7)
 		ret = 1;
 	delete_window(window);
 	save_options();

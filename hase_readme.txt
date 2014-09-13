@@ -8,6 +8,14 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.4.5
+- Added option to not rotate the level, but the bunny
+- Added option to invert the controls of the bunny is upside down
+- Improved the particle effect (should be faster)
+
+1.4.4
+- Fixed broken network play
+
 1.4.3
 - Arrow stays at minimal size while zooming to see where you are aiming at large zoom-outs
 - Circle around active hare to tell which of your characters you are currently controlling

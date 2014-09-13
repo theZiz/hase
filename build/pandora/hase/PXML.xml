@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="4" release="4" build="0"/>
+<version major="1" minor="4" release="5" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -56,13 +56,18 @@ Version 1.4.1.1:
 1.4.4
 - Fixed the broken network play
 
+1.4.5
+- Added option to not rotate the level, but the bunny
+- Added option to invert the controls of the bunny is upside down
+- Improved the particle effect (should be faster)
+
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="4" release="4" build="0" type="release"/>
+<version major="1" minor="4" release="5" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
