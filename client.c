@@ -893,6 +893,7 @@ int send_chat(pGame game,char* name,char* chat_message)
 	if (result == NULL)
 		res = 1;
 	deleteMessage(&result);
+	game->chat_sleep = 0;
 	return res;
 }
 
@@ -944,7 +945,14 @@ int chat_thread_function(void* data)
 	while (player->game->chat_message != -1)
 	{
 		get_chat(player);
-		spSleep(5000000); //5s
+		int count = 0;
+		while (count < 50 && player->game->chat_sleep)
+		{
+			spSleep(100000);
+			count++;
+		}
+		if (player->game->chat_sleep == 0)
+			player->game->chat_sleep = 1;
 	}
 	return 0;
 }
@@ -958,6 +966,7 @@ void start_chat_listener(pPlayer player)
 void stop_chat_listener(pPlayer player)
 {
 	player->game->chat_message = -1;
+	player->game->chat_sleep = 1;
 	int result;
 	SDL_WaitThread(player->game->chat_thread,&(result));
 	player->game->chat_thread = NULL;

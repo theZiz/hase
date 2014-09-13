@@ -88,6 +88,7 @@ typedef struct sGame
 	pChatMessage chat;
 	SDL_Thread* chat_thread;
 	int chat_message;
+	int chat_sleep;
 } tGame;
 
 typedef struct sThreadData *pThreadData;
