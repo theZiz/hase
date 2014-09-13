@@ -417,7 +417,7 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 					float l_2 = spFixedToFloat(vector_length_approx(bunch->particle[i].dx,bunch->particle[i].dy));
 					float l_3 = spFixedToFloat(vector_length_guess(bunch->particle[i].dx,bunch->particle[i].dy));
 					printf("Real: %.4f Approx: %.4f (+-%.2f) Guess: %.4f (+-%.2f)\n",l_1,l_2,fabs((l_1-l_2)/l_1)*100.0f,l_3,fabs((l_1-l_3)/l_1)*100.0f);*/
-					if (speed == 0)
+					if (speed <= (SP_ONE >> 4))
 						bunch->particle[i].status = -1;
 					else
 					{

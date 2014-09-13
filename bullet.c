@@ -159,7 +159,7 @@ void bullet_impact(int X,int Y,int radius)
 	int inner_radius = radius*radius;
 	int outer_radius = (radius+BORDER_SIZE)*(radius+BORDER_SIZE);
 	int c = 0;
-	int inc = (1<<gop_particles())-1;
+	int inc = (1<<gop_particles()-1)-1;
 	for (x = -radius-BORDER_SIZE; x < radius+BORDER_SIZE+1; x++)
 	{
 		for (y = -radius-BORDER_SIZE; y < radius+BORDER_SIZE+1; y++)
