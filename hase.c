@@ -422,7 +422,7 @@ void set_input()
 				input_states[INPUT_AXIS_0_LEFT] = 0;
 				input_states[INPUT_AXIS_0_RIGHT] = 0;
 			}		
-			if (player[active_player]->activeHare->rotation > SP_PI/2 && player[active_player]->activeHare->rotation < SP_PI*3/2)
+			if (gop_direction_flip() && !gop_rotation() && player[active_player]->activeHare->rotation > SP_PI/2 && player[active_player]->activeHare->rotation < SP_PI*3/2)
 			{
 				int temp = input_states[INPUT_AXIS_0_LEFT];
 				input_states[INPUT_AXIS_0_LEFT] = input_states[INPUT_AXIS_0_RIGHT];

@@ -8,6 +8,9 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.4.6
+- faster showing of own messages in chat
+
 1.4.5
 - Added option to not rotate the level, but the bunny
 - Added option to invert the controls of the bunny is upside down
