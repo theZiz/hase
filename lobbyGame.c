@@ -9,7 +9,6 @@ spFontPointer lg_font;
 void ( *lg_resize )( Uint16 w, Uint16 h );
 int lg_counter;
 char lg_name[32] = "";
-int lg_local;
 pGame lg_game;
 int lg_reload_now = 0;
 SDL_Surface* lg_level = NULL;
@@ -91,8 +90,11 @@ void lg_draw(void)
 			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave game", lg_font );
 		else
 			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave and close game", lg_font );
-		sprintf(buffer,"Next update: %is",(LG_WAIT-lg_counter)/1000);
-		spFontDrawRight( screen->w-2, screen->h-lg_font->maxheight, 0, buffer, lg_font );
+		if (!lg_game->local)
+		{
+			sprintf(buffer,"Next update: %is",(LG_WAIT-lg_counter)/1000);
+			spFontDrawRight( screen->w-2, screen->h-lg_font->maxheight, 0, buffer, lg_font );
+		}
 	}
 	spFlip();
 }
@@ -394,11 +396,8 @@ int lg_calc(Uint32 steps)
 			return 2; //started
 		
 	}
-	int step;
-	for (step = 0; step < steps; step++)
-	{
-		lg_counter++;
-	}
+	if (!lg_game->local)
+		lg_counter+=steps;
 	if (lg_counter >= LG_WAIT)
 		lg_reload_now = 1;
 	return 0;
@@ -435,7 +434,6 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 	lg_game = game;
 	lg_font = font;
 	lg_counter = LG_WAIT; //instead reload
-	lg_local = 0;
 	lg_reload_now = 0;
 	lg_ai_list = NULL;
 	lg_resize = resize;
