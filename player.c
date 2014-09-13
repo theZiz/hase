@@ -7,6 +7,7 @@ int ai_shoot_tries = 0;
 int last_ai_try = 0;
 
 #include "window.h"
+#include <math.h>
 
 int lastAIDistance = 100000000;
 
@@ -362,6 +363,31 @@ pHare add_hare(pHare* firstHare)
 	return hare;
 }
 
+#define SQRT_2 92672
+
+Sint32 vector_length_approx(Sint32 x,Sint32 y)
+{
+	x = abs(x);
+	y = abs(y);
+	if (x > y)
+	{
+		Sint32 factor = spDiv(y,x);
+		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),x);
+	}
+	else
+	{
+		Sint32 factor = spDiv(x,y);
+		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),y);
+	}
+}
+
+Sint32 vector_length_guess(Sint32 x,Sint32 y)
+{
+	x = abs(x);
+	y = abs(y);
+	return spMax(x,y);
+}
+
 int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32 extra_data)
 {
 	int particleSize = spMax(0,zoom*gop_particles() >> SP_ACCURACY);
@@ -385,7 +411,12 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 				else
 				{
 					//bounce!
-					Sint32 speed = spSqrt(spSquare(bunch->particle[i].dx)+spSquare(bunch->particle[i].dy));
+					//Sint32 speed = spSqrt(spSquare(bunch->particle[i].dx)+spSquare(bunch->particle[i].dy));
+					Sint32 speed = vector_length_approx(bunch->particle[i].dx,bunch->particle[i].dy);
+					/*float l_1 = spFixedToFloat(speed);
+					float l_2 = spFixedToFloat(vector_length_approx(bunch->particle[i].dx,bunch->particle[i].dy));
+					float l_3 = spFixedToFloat(vector_length_guess(bunch->particle[i].dx,bunch->particle[i].dy));
+					printf("Real: %.4f Approx: %.4f (+-%.2f) Guess: %.4f (+-%.2f)\n",l_1,l_2,fabs((l_1-l_2)/l_1)*100.0f,l_3,fabs((l_1-l_3)/l_1)*100.0f);*/
 					if (speed == 0)
 						bunch->particle[i].status = -1;
 					else
@@ -394,7 +425,8 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 						Sint32 ay = spDiv(bunch->particle[i].dy,speed);
 						Sint32 ex = gravitation_x(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY);
 						Sint32 ey = gravitation_y(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY);
-						Sint32 len = spSqrt(spSquare(ex)+spSquare(ey));
+						//Sint32 len = spSqrt(spSquare(ex)+spSquare(ey));
+						Sint32 len = vector_length_approx(ex,ey);
 						if (len == 0)
 							bunch->particle[i].status = -1;
 						else
