@@ -57,7 +57,9 @@ void lg_draw(void)
 	if (lg_block)
 		spFontDrawTextBlock(middle,screen->w-w-4, 6*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
-	spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[3]Add player  [4]Remove player", lg_font );
+	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[3]Add player  [4]Remove player", lg_font );
+	spFontDraw(screen->w-2-w  , h+6*lg_font->maxheight, 0, "[3]Add player", lg_font );
+	spFontDraw(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[4]Remove player", lg_font );
 	if (lg_game->admin_pw == 0)
 	{
 		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "The game master will", lg_font );
@@ -65,8 +67,18 @@ void lg_draw(void)
 	}
 	else
 	{
-		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[l]Add AI  [r]Remove all AIs", lg_font );
-		spFontDrawMiddle(screen->w-2-w/2, h+8*lg_font->maxheight, 0, "[o]Start game  [c]New level", lg_font );
+		if (spGetSizeFactor() <= SP_ONE)
+		{
+			spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[l]Add AI  [r]Remove all AIs", lg_font );
+			spFontDrawMiddle(screen->w-2-w/2, h+8*lg_font->maxheight, 0, "[o]Start game  [c]New level", lg_font );
+		}
+		else
+		{
+			spFontDraw(screen->w-2-w  , h+7*lg_font->maxheight, 0, "[l]Add AI", lg_font );
+			spFontDraw(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[r]Remove all AIs", lg_font );
+			spFontDraw(screen->w-2-w  , h+8*lg_font->maxheight, 0, "[o]Start game", lg_font );
+			spFontDraw(screen->w-2-w/2, h+8*lg_font->maxheight, 0, "[c]New level", lg_font );
+		}
 	}
 	//Chat
 	spRectangle(screen->w/2, l_w+(4+CHAT_LINES)*lg_font->maxheight/2+4, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);

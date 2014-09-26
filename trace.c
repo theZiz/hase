@@ -69,6 +69,7 @@ pBulletTrace* registerTrace(pPlayer player)
 
 void drawTrace(pPlayer player)
 {
+	int BORDER_COLOR = get_border_color();
 	int i,j;
 	for (i = 0; i < TRACE_COUNT; i++)
 		if (player->trace[i])
@@ -85,7 +86,7 @@ void drawTrace(pPlayer player)
 				oy = spMul(trace->y-posY,zoom);
 				Sint32 x1 = screen->w/2+(spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY);
 				Sint32 y1 = screen->h/2+(spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY);
-				spLine(x0,y0,0,x1,y1,0,spGetFastRGB(255,160,0));
+				spLine(x0,y0,0,x1,y1,0,BORDER_COLOR);
 				x0 = x1;
 				y0 = y1;
 				trace = trace->next;
