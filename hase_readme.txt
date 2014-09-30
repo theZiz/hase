@@ -10,6 +10,8 @@ Changelog
 
 1.4.6
 - faster showing of own messages in chat
+- level color for the bullet traces
+- better and new default values for creating a game
 
 1.4.5
 - Added option to not rotate the level, but the bunny

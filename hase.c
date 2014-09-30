@@ -146,8 +146,8 @@ void draw(void)
 				if (hare->w_power)
 				{
 					Sint32 w_zoom = spMax(SP_ONE,zoom);
-					Sint32 ox = spMul(hare->x-posX-14*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),w_zoom);
-					Sint32 oy = spMul(hare->y-posY-14* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),w_zoom);
+					Sint32 ox = spMul(hare->x-posX-14*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
+					Sint32 oy = spMul(hare->y-posY-14* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
 					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 					spSetBlending( SP_ONE*2/3 );
@@ -954,8 +954,8 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	init_gravity();
 	init_player(hase_player_list,game->player_count,game->hares_per_player);
 	zoomAdjust = spSqrt(spGetSizeFactor());
-	minZoom = spSqrt(spGetSizeFactor()/8);
-	maxZoom = spSqrt(spGetSizeFactor()*4);
+	minZoom = spSqrt(spGetSizeFactor()/4)/16384*16384;
+	maxZoom = spSqrt(spGetSizeFactor()*4)/16384*16384;
 	zoom = spMul(zoomAdjust,zoomAdjust);
 	zoom_d = 0;
 	show_names = 1;

@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="4" release="5" build="0"/>
+<version major="1" minor="4" release="6" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -61,13 +61,18 @@ Version 1.4.1.1:
 - Added option to invert the controls of the bunny is upside down
 - Improved the particle effect (should be faster)
 
+1.4.6
+- faster showing of own messages in chat
+- level color for the bullet traces
+- better and new default values for creating a game
+
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="4" release="5" build="0" type="release"/>
+<version major="1" minor="4" release="6" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
@@ -99,7 +104,7 @@ Hase is a worms like game with gravitation. And hares instead of worms.
 <previewpics>
 <pic src="previews/screenshot1.png"/>
 </previewpics>
-<info name="Readme" type="text" src="hase_readme.txt"/>
+<info name="Hase Readme" type="text" src="hase_readme.txt"/>
 <!--the categories has to conform to the FDO categories, those will be enforced by the schema and libpnd!-->
 <categories>
 <category name="Game">

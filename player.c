@@ -450,6 +450,20 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 		if (bunch->age > 9000)
 			spSetBlending(SP_ONE*(10000-bunch->age)/1000);
 		int i;
+		if (particleSize == 0)
+		{
+			for (i = 0; i < bunch->count; i++)
+				if (bunch->particle[i].status >= 0)
+				{
+					Sint32 ox = spMul(bunch->particle[i].x-posX,zoom);
+					Sint32 oy = spMul(bunch->particle[i].y-posY,zoom);
+					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+					spRectangle(screen->w/2+x,screen->h/2+y,0,0,0,bunch->particle[i].data.color);
+					
+				}
+		}
+		else
 		for (i = 0; i < bunch->count; i++)
 			if (bunch->particle[i].status >= 0)
 			{
@@ -458,7 +472,6 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 				Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 				Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 				spEllipse(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
-				//spRectangle(screen->w/2+x,screen->h/2+y,0,particleSize,particleSize,bunch->particle[i].data.color);
 			}
 		spSetBlending(SP_ONE);
 	}

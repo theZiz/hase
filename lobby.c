@@ -56,9 +56,9 @@ int main_menu_feedback( pWindowElement elem, int action )
 	return 0;
 }
 
-int lo_game_players = 8;
-int lo_game_seconds = 30;
-int lo_game_hares = 5;
+int lo_game_players = 4;
+int lo_game_seconds = 45;
+int lo_game_hares = 3;
 
 int local_game_feedback( pWindowElement elem, int action )
 {
