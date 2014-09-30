@@ -507,7 +507,7 @@ void set_input()
 
 int quit_feedback( pWindowElement elem, int action )
 {
-	sprintf(elem->text,"Do really really want to quit?");
+	sprintf(elem->text,"Do you really want to quit?");
 	return 0;
 }
 

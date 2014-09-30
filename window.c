@@ -187,9 +187,10 @@ int window_calc(Uint32 steps)
 	}
 	if (selElem	== NULL)
 	{
-		if (spGetInput()->button[MY_PRACTICE_OK])
+		if (spGetInput()->button[MY_PRACTICE_OK] || spGetInput()->button[MY_BUTTON_SELECT])
 		{
 			spGetInput()->button[MY_PRACTICE_OK] = 0;
+			spGetInput()->button[MY_BUTTON_SELECT] = 0;
 			return 1;
 		}
 		return 0;
@@ -226,9 +227,12 @@ int window_calc(Uint32 steps)
 				selElem = window->firstElement;
 		}
 	}
-	if (spGetInput()->button[MY_PRACTICE_OK])
+	if (spGetInput()->button[MY_PRACTICE_OK] ||
+		(spGetInput()->button[MY_BUTTON_SELECT] && window->only_ok && selElem->type != -1))
 	{
 		spGetInput()->button[MY_PRACTICE_OK] = 0;
+		if (window->only_ok && selElem->type != -1)
+			spGetInput()->button[MY_BUTTON_SELECT] = 0;
 		switch (selElem->type)
 		{
 			case 1:
@@ -245,10 +249,11 @@ int window_calc(Uint32 steps)
 				return 1;
 		}
 	}
-	if (spGetInput()->button[MY_PRACTICE_CANCEL] &&
+	if ((spGetInput()->button[MY_PRACTICE_CANCEL] || spGetInput()->button[MY_BUTTON_SELECT]) &&
 		(window->only_ok == 0 || selElem->type == -1))
 	{
 		spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
+		spGetInput()->button[MY_BUTTON_SELECT] = 0;
 		switch (selElem->type)
 		{
 			case 1:

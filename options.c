@@ -268,7 +268,7 @@ int options_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),in
 		add_window_element(window,-1,8);
 	int res = modal_window(window,resize);
 	int ret = 0;
-	if (window->selection == 7)
+	if (window->selection == 7 && res == 1)
 		ret = 1;
 	delete_window(window);
 	save_options();
