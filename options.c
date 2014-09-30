@@ -5,7 +5,7 @@ int op_zoom = 1;
 int op_circle = 1;
 int op_music_volume = SP_VOLUME_MAX << VOLUME_SHIFT-1;
 int op_sample_volume = SP_VOLUME_MAX << VOLUME_SHIFT;
-int op_particles = 2;
+int op_particles = 1;
 int op_rotation = 1;
 int op_direction_flip = 0;
 
