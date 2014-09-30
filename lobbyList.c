@@ -15,9 +15,9 @@ pPlayer ll_player_list = NULL;
 spTextBlockPointer ll_block = NULL;
 void ( *ll_resize )( Uint16 w, Uint16 h );
 char ll_game_name[33] = "New game";
-int ll_game_players = 8;
-int ll_game_seconds = 30;
-int ll_game_hares = 5;
+int ll_game_players = 4;
+int ll_game_seconds = 45;
+int ll_game_hares = 3;
 
 pGame mom_game;
 

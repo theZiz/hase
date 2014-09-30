@@ -8,7 +8,7 @@
 spFontPointer lg_font;
 void ( *lg_resize )( Uint16 w, Uint16 h );
 int lg_counter;
-char lg_name[32] = "";
+char lg_name[32] = SP_DEVICE_STRING" User";
 pGame lg_game;
 int lg_reload_now = 0;
 SDL_Surface* lg_level = NULL;
