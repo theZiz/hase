@@ -1,5 +1,4 @@
-#define TRACE_LENGTH 20
-#define TRACE_STEP 100
+#define TRACE_LENGTH 30
 #define TRACE_UPDATE 5
 int trace_count = TRACE_UPDATE-1;
 typedef struct sTrace
@@ -22,7 +21,7 @@ void lastPoint(int* x,int* y,int direction,int power)
 		{
 			dx -= gravitation_x((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;
 			dy -= gravitation_y((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			if (circle_is_empty((*x)+dx >> SP_ACCURACY,(*y)+dy >> SP_ACCURACY,BULLET_SIZE,-1) &&
+			if (circle_is_empty((*x)+dx >> SP_ACCURACY,(*y)+dy >> SP_ACCURACY,BULLET_SIZE,NULL) &&
 			    (*x) >= 0 && (*y) >= 0 &&
 			    spFixedToInt((*x)) < LEVEL_WIDTH && spFixedToInt((*y)) < LEVEL_HEIGHT)
 			{
@@ -34,70 +33,71 @@ void lastPoint(int* x,int* y,int direction,int power)
 		}
 }
 
-void updateTrace()
+void deleteTrace(pBulletTrace bt)
 {
-	if (spGetFPS() < 30)
+	while (bt)
 	{
-		trace_count++;
-		if (trace_count >= TRACE_UPDATE)
-			trace_count = 0;
-		else
-			return;
+		pBulletTrace next = bt->next;
+		free(bt);
+		bt = next;
 	}
-	int i,j;
-	traceLength = 0;
-	Sint32 dx = spMul(spCos(player[active_player].w_direction+player[active_player].rotation+SP_PI),player[active_player].w_power/2);
-	Sint32 dy = spMul(spSin(player[active_player].w_direction+player[active_player].rotation+SP_PI),player[active_player].w_power/2);
-	Sint32 x = player[active_player].x+(10+BULLET_SIZE)*spCos(player[active_player].w_direction+player[active_player].rotation+SP_PI);
-	Sint32 y = player[active_player].y+(10+BULLET_SIZE)*spSin(player[active_player].w_direction+player[active_player].rotation+SP_PI);
-	trace[0].x = x;
-	trace[0].y = y;
-	for (j = 1; j < TRACE_LENGTH; j++)
-	{
-		int dead = 0;
-		for (i = 0; i < TRACE_STEP; i++)
-		{
-			dx -= gravitation_x(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			dy -= gravitation_y(x >> SP_ACCURACY,y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			if (circle_is_empty(x+dx >> SP_ACCURACY,y+dy >> SP_ACCURACY,BULLET_SIZE,-1) &&
-			    x >= 0 && y >= 0 &&
-			    spFixedToInt(x) < LEVEL_WIDTH && spFixedToInt(y) < LEVEL_HEIGHT)
-			{
-				x += dx;
-				y += dy;
-			}
-			else
-			{
-				dead = 1;
-				break;
-			}
-		}
-		trace[j].x = x;
-		trace[j].y = y;
-		if (dead)
-		{
-			j++;
-			break;
-		}
-	}
-	traceLength = j;
 }
 
-void drawTrace()
+void addToTrace(pBulletTrace* firstTrace,Sint32 x,Sint32 y,pBullet bullet)
 {
-	Sint32 ox = spMul(trace[0].x-posX,zoom);
-	Sint32 oy = spMul(trace[0].y-posY,zoom);
-	Sint32 x0 = screen->w/2+(spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY);
-	Sint32 y0 = screen->h/2+(spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY);
-	int j;
-	for (j = 1; j < traceLength; j++)
+	pBulletTrace bt = (pBulletTrace)malloc(sizeof(tBulletTrace));
+	bt->x = x;
+	bt->y = y;
+	bt->bullet = bullet;
+	bt->next = *firstTrace;
+	*firstTrace = bt;
+}
+
+pBulletTrace* registerTrace(pPlayer player)
+{
+	if (player->trace[player->tracePos])
 	{
-		ox = spMul(trace[j].x-posX,zoom);
-		oy = spMul(trace[j].y-posY,zoom);
-		Sint32 x1 = screen->w/2+(spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY);
-		Sint32 y1 = screen->h/2+(spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY);
-		spLine(x0,y0,0,x1,y1,0,spGetFastRGB(255,160,0));
-		x0 = x1;
-		y0 = y1;
+		if (player->trace[player->tracePos]->bullet)
+			player->trace[player->tracePos]->bullet->trace = NULL;
+		deleteTrace(player->trace[player->tracePos]);
+		player->trace[player->tracePos] = NULL;
 	}
+	pBulletTrace* r = &(player->trace[player->tracePos]);
+	player->tracePos = (player->tracePos+1)%TRACE_COUNT;
+	return r;
+}
+
+void drawTrace(pPlayer player)
+{
+	int BORDER_COLOR = get_border_color();
+	int i,j;
+	for (i = 0; i < TRACE_COUNT; i++)
+		if (player->trace[i])
+		{
+			pBulletTrace trace = player->trace[i];
+			Sint32 ox = spMul(trace->x-posX,zoom);
+			Sint32 oy = spMul(trace->y-posY,zoom);
+			Sint32 x0 = screen->w/2+(spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY);
+			Sint32 y0 = screen->h/2+(spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY);
+			trace = trace->next;
+			while (trace)
+			{
+				ox = spMul(trace->x-posX,zoom);
+				oy = spMul(trace->y-posY,zoom);
+				Sint32 x1 = screen->w/2+(spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY);
+				Sint32 y1 = screen->h/2+(spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY);
+				spLine(x0,y0,0,x1,y1,0,BORDER_COLOR);
+				x0 = x1;
+				y0 = y1;
+				trace = trace->next;
+			}
+		}
+}
+
+void deleteAllTraces(pPlayer player)
+{
+	int i;
+	for (i = 0; i < TRACE_COUNT; i++)
+		if (player->trace[i])
+			deleteTrace(player->trace[i]);
 }

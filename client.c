@@ -65,6 +65,8 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	}
 	length += 2+boundary_len+2+4; //4 + boundary_end + 2 returns;
 	spNetTCPConnection server_connection = spNetOpenClientTCP(ip);
+	if (server_connection == NULL)
+		return NULL;
 	//int buffer_size = 2048+count;//spMax(length+1,512);
 	int buffer_size = 65536;
 	char buffer[buffer_size];
@@ -155,7 +157,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	}
 	pos+=4;
 	
-	if (direction == -1) //incoming file TODO
+	if (direction == -1) //incoming file
 	{
 		if (buffer[pos+1] == 'A' &&
 			buffer[pos+2] == 'C' &&
@@ -164,6 +166,16 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			memcpy(binary,&buffer[pos+4],count);
 			pMessage result = NULL;
 			numToMessage(&result,"Okay",1);
+			return result;
+		}
+		else
+		if (buffer[pos+1] == 'N' &&
+			buffer[pos+2] == 'U' &&
+			buffer[pos+3] == 'L')
+		{
+			memset(binary,1+2+16+32,count);
+			pMessage result = NULL;
+			numToMessage(&result,"Kicked",1);
 			return result;
 		}
 		else
@@ -206,17 +218,28 @@ int server_info()
 	return r;
 }
 
-pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string)
+pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string,int local,int hares_per_player)
 {
-	pMessage message = NULL;
-	addToMessage(&message,"game_name",game_name);
-	numToMessage(&message,"max_player",max_player);
-	numToMessage(&message,"seconds_per_turn",seconds_per_turn);
-	addToMessage(&message,"level_string",level_string);
-	pMessage result = sendMessage(message,NULL,NULL,0,"create_game.php");
-	deleteMessage(&message);
-	pMessage now = result;
+	pMessage result = NULL;
+	if (local == 0)
+	{
+		pMessage message = NULL;
+		addToMessage(&message,"game_name",game_name);
+		numToMessage(&message,"max_player",max_player);
+		numToMessage(&message,"seconds_per_turn",seconds_per_turn);
+		numToMessage(&message,"hares_per_player",hares_per_player);
+		addToMessage(&message,"level_string",level_string);
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"create_game.php");
+		deleteMessage(&message);
+		if (result == NULL)
+			return NULL;
+	}
 	pGame game = (pGame)malloc(sizeof(tGame));
+	game->chat_message = 0;
+	game->chat_thread = NULL;
+	game->chat = NULL;
 	game->id = -1;
 	sprintf(game->name,"%s",game_name);
 	sprintf(game->level_string,"%s",level_string);
@@ -224,9 +247,17 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 	game->player_count = 0;
 	game->create_date = 0;
 	game->seconds_per_turn = seconds_per_turn;
+	game->hares_per_player = hares_per_player;
 	game->status = 0;
-	game->admin_pw = 0;
+	game->local = local;
+	if (local)
+		game->admin_pw = 12345;
+	else
+		game->admin_pw = 0;
+	game->local_player = NULL;
+	game->local_counter = 0;
 	game->next = NULL;
+	pMessage now = result;
 	while (now)
 	{
 		if (strcmp(now->name,"game_id") == 0)
@@ -253,18 +284,31 @@ void delete_game_list(pGame game)
 
 void delete_game(pGame game)
 {
-	pMessage message = NULL;
-	numToMessage(&message,"game_id",game->id);
-	numToMessage(&message,"admin_pw",game->admin_pw);
-	pMessage result = sendMessage(message,NULL,NULL,0,"delete_game.php");
-	deleteMessage(&message);
-	deleteMessage(&result);
+	if (game->local == 0)
+	{
+		pMessage message = NULL;
+		numToMessage(&message,"game_id",game->id);
+		numToMessage(&message,"admin_pw",game->admin_pw);
+		pMessage result = NULL;
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"delete_game.php");
+		deleteMessage(&message);
+		deleteMessage(&result);
+	}
+	else
+		delete_player_list(game->local_player);
 	delete_game_list(game);
 }
 
 int get_games(pGame *gameList)
 {
-	pMessage result = sendMessage(NULL,NULL,NULL,0,"get_games.php");
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(NULL,NULL,NULL,0,"get_games.php");
+	if (result == NULL)
+		return 0;
 	pMessage now = result;
 	*gameList = NULL;
 	pGame game = NULL;
@@ -285,6 +329,9 @@ int get_games(pGame *gameList)
 				*gameList = (pGame)malloc(sizeof(tGame));
 				game = *gameList;
 			}
+			game->chat_message = 0;
+			game->chat_thread = NULL;
+			game->chat = NULL;
 			game->id = atoi(now->content);
 			game->name[0] = 0;
 			game->level_string[0] = 0;
@@ -294,7 +341,8 @@ int get_games(pGame *gameList)
 			game->seconds_per_turn = 0;
 			game->status = 0;
 			game->admin_pw = 0;
-			game->next = NULL;			
+			game->next = NULL;
+			game->local = 0;	
 		}
 		if (strcmp(now->name,"game_name") == 0)
 			sprintf(game->name,"%s",now->content);
@@ -306,6 +354,8 @@ int get_games(pGame *gameList)
 			game->create_date = atoi(now->content);
 		if (strcmp(now->name,"seconds_per_turn") == 0)
 			game->seconds_per_turn = atoi(now->content);
+		if (strcmp(now->name,"hares_per_player") == 0)
+			game->hares_per_player = atoi(now->content);
 		if (strcmp(now->name,"status") == 0)
 			game->status = atoi(now->content);
 		now = now->next;
@@ -334,15 +384,26 @@ void delete_player_list(pPlayer player)
 	}
 }
 
-pPlayer join_game(pGame game,char* name)
+pPlayer join_game(pGame game,char* name,int ai)
 {
-	pMessage message = NULL;
-	addToMessage(&message,"player_name",name);
-	numToMessage(&message,"game_id",game->id);
-	pMessage result = sendMessage(message,NULL,NULL,0,"join_game.php");
+	pMessage result = NULL;
+	if (game->local == 0)
+	{
+		pMessage message = NULL;
+		addToMessage(&message,"player_name",name);
+		numToMessage(&message,"game_id",game->id);
+		numToMessage(&message,"computer",ai);
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"join_game.php");
+		deleteMessage(&message);
+		if (result == NULL)
+			return NULL;
+	}
 	pPlayer player = (pPlayer)malloc(sizeof(tPlayer));
 	sprintf(player->name,"%s",name);
-	player->id = -1;
+	player->computer = ai;
+	player->id = game->local_counter++;
 	player->pw = 0;
 	player->game = game;
 	player->next = NULL;
@@ -367,95 +428,255 @@ pPlayer join_game(pGame game,char* name)
 			player->pw = atoi(now->content);
 		now = now->next;
 	}
-	deleteMessage(&message);
 	deleteMessage(&result);
+	if (game->local)
+	{
+		int count = 0;
+		pPlayer p = game->local_player;
+		while (p)
+		{
+			count++;
+			p = p->next;
+		}
+		if (count >= game->max_player)
+		{
+			free(player);
+			return NULL;
+		}
+		pPlayer new_player = (pPlayer)malloc(sizeof(tPlayer));
+		sprintf(new_player->name,"%s",player->name);
+		new_player->computer = player->computer;
+		new_player->id = player->id;
+		new_player->pw = player->pw;
+		new_player->game = player->game;
+		new_player->input_data = NULL;
+		new_player->last_input_data_write = NULL;
+		new_player->last_input_data_read = NULL;
+		new_player->input_message = 0;
+		new_player->input_mutex = NULL;
+		new_player->input_thread = NULL;
+		new_player->next = game->local_player;
+		game->local_player = new_player;
+	}
 	return player;
 }
 
 void leave_game(pPlayer player)
 {
-	pMessage message = NULL;
-	numToMessage(&message,"game_id",player->game->id);
-	numToMessage(&message,"player_id",player->id);
-	numToMessage(&message,"player_pw",player->pw);
-	pMessage result = sendMessage(message,NULL,NULL,0,"leave_game.php");
-	deleteMessage(&message);
-	deleteMessage(&result);
-	delete_player_list(player);
+	if (player->game->local == 0)
+	{
+		pMessage message = NULL;
+		numToMessage(&message,"game_id",player->game->id);
+		numToMessage(&message,"player_id",player->id);
+		numToMessage(&message,"player_pw",player->pw);
+		pMessage result = NULL;
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"leave_game.php");
+		deleteMessage(&message);
+		deleteMessage(&result);
+	}
+	else
+	{
+		pPlayer last_player = NULL;
+		pPlayer mom_player = player->game->local_player;
+		while (mom_player)
+		{
+			if (mom_player->id == player->id)
+			{
+				if (last_player)
+					last_player->next = mom_player->next;
+				else
+					player->game->local_player = mom_player->next;
+				free(mom_player);
+				break;
+			}
+			last_player = mom_player;
+			mom_player = mom_player->next;
+		}
+	}
+	if (player->input_thread)
+		end_pull_thread(player);
+	while (player->input_data)
+	{
+		pThreadData next = player->input_data->next;
+		free(player->input_data);
+		player->input_data = next;
+	}
+	free(player);
 }
 
-void get_game(pGame game,pPlayer *playerList)
+int get_game(pGame game,pPlayer *playerList)
 {
-	pMessage message = NULL;
-	numToMessage(&message,"game_id",game->id);
-	pMessage result = sendMessage(message,NULL,NULL,0,"get_game.php");
-	pMessage now = result;
-	if (playerList)
+	if (game->local == 0)
 	{
-		delete_player_list(*playerList);
-		*playerList = NULL;
-	}
-	pPlayer player = NULL;
-	while (now)
-	{
-		if (strcmp(now->name,"player_count") == 0)
-			game->player_count = atoi(now->content);
+		pMessage message = NULL;
+		numToMessage(&message,"game_id",game->id);
+		pMessage result = NULL;
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"get_game.php");
+		deleteMessage(&message);
+		if (result == NULL)
+			return 1;
+		pMessage now = result;
 		if (playerList)
 		{
-			if (strcmp(now->name,"player_id") == 0)
-			{
-				player = (pPlayer)malloc(sizeof(tPlayer));
-				player->next = *playerList;
-				*playerList = player;
-				player->id = atoi(now->content);
-				player->name[0] = 0;
-				player->pw = 0;
-				player->game = game;
-				player->input_data = NULL;
-				player->last_input_data_read = NULL;
-				player->last_input_data_write = NULL;
-				player->input_message = 0;
-				player->input_mutex = NULL;
-				player->input_thread = NULL;
-			}
-			if (strcmp(now->name,"player_name") == 0)
-				sprintf(player->name,"%s",now->content);
-			if (strcmp(now->name,"position_in_game") == 0)
-				player->position_in_game = atoi(now->content);
+			delete_player_list(*playerList);
+			*playerList = NULL;
 		}
-		if (strcmp(now->name,"game_name") == 0)
-			sprintf(game->name,"%s",now->content);
-		if (strcmp(now->name,"level_string") == 0)
-			sprintf(game->level_string,"%s",now->content);
-		if (strcmp(now->name,"max_player") == 0)
-			game->max_player = atoi(now->content);
-		if (strcmp(now->name,"player_count") == 0)
-			game->player_count = atoi(now->content);
-		if (strcmp(now->name,"create_date") == 0)
-			game->create_date = atoi(now->content);
-		if (strcmp(now->name,"seconds_per_turn") == 0)
-			game->seconds_per_turn = atoi(now->content);
-		if (strcmp(now->name,"status") == 0)
-			game->status = atoi(now->content);
-		now = now->next;
+		pPlayer player = NULL;
+		while (now)
+		{
+			if (strcmp(now->name,"player_count") == 0)
+				game->player_count = atoi(now->content);
+			if (playerList)
+			{
+				if (strcmp(now->name,"player_id") == 0)
+				{
+					player = (pPlayer)malloc(sizeof(tPlayer));
+					player->computer = 0;
+					player->next = *playerList;
+					*playerList = player;
+					player->id = atoi(now->content);
+					player->name[0] = 0;
+					player->pw = 0;
+					player->game = game;
+					player->input_data = NULL;
+					player->last_input_data_read = NULL;
+					player->last_input_data_write = NULL;
+					player->input_message = 0;
+					player->input_mutex = NULL;
+					player->input_thread = NULL;
+				}
+				if (strcmp(now->name,"player_name") == 0)
+					sprintf(player->name,"%s",now->content);
+				if (strcmp(now->name,"computer") == 0)
+					player->computer = atoi(now->content);
+				if (strcmp(now->name,"position_in_game") == 0)
+					player->position_in_game = atoi(now->content);
+			}
+			if (strcmp(now->name,"game_name") == 0)
+				sprintf(game->name,"%s",now->content);
+			if (strcmp(now->name,"level_string") == 0)
+				sprintf(game->level_string,"%s",now->content);
+			if (strcmp(now->name,"max_player") == 0)
+				game->max_player = atoi(now->content);
+			if (strcmp(now->name,"player_count") == 0)
+				game->player_count = atoi(now->content);
+			if (strcmp(now->name,"create_date") == 0)
+				game->create_date = atoi(now->content);
+			if (strcmp(now->name,"seconds_per_turn") == 0)
+				game->seconds_per_turn = atoi(now->content);
+			if (strcmp(now->name,"hares_per_player") == 0)
+				game->hares_per_player = atoi(now->content);
+			if (strcmp(now->name,"status") == 0)
+				game->status = atoi(now->content);
+			now = now->next;
+		}
+		deleteMessage(&result);
 	}
-	deleteMessage(&result);
+	else
+	{
+		if (playerList)
+		{
+			delete_player_list(*playerList);
+			*playerList = NULL;
+		}
+		pPlayer mom_player = game->local_player;
+		game->player_count = 0;
+		while (mom_player)
+		{
+			pPlayer player = (pPlayer)malloc(sizeof(tPlayer));
+			player->computer = mom_player->computer;
+			player->next = *playerList;
+			*playerList = player;
+			player->id = mom_player->id;
+			sprintf(player->name,"%s",mom_player->name);
+			player->pw = mom_player->pw;
+			player->game = mom_player->game;
+			player->position_in_game = mom_player->position_in_game;
+			player->input_data = NULL;
+			player->last_input_data_read = NULL;
+			player->last_input_data_write = NULL;
+			player->input_message = 0;
+			player->input_mutex = NULL;
+			player->input_thread = NULL;			
+			mom_player = mom_player->next;
+			game->player_count++;
+		}
+	}
+	return 0;
 }
 
 void set_status(pGame game,int status)
 {
-	pMessage message = NULL;
-	numToMessage(&message,"game_id",game->id);
-	numToMessage(&message,"admin_pw",game->admin_pw);
+	int old_status = game->status;
 	game->status = status;
-	numToMessage(&message,"status",game->status);
-	pMessage result = sendMessage(message,NULL,NULL,0,"set_status.php");
-	deleteMessage(&message);
-	deleteMessage(&result);	
+	if (game->local == 0)
+	{
+		pMessage message = NULL;
+		numToMessage(&message,"game_id",game->id);
+		numToMessage(&message,"admin_pw",game->admin_pw);
+		numToMessage(&message,"status",game->status);
+		pMessage result = NULL;
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"set_status.php");
+		deleteMessage(&message);
+		deleteMessage(&result);	
+	}
+	else
+	if (status == 1 && old_status != 1)
+	{
+		int positions[game->player_count];
+		int i;
+		for (i=0;i<game->player_count;i++)
+			positions[i] = i;
+		//Shuffle
+		for (i=0;i<game->player_count*10;i++)
+		{
+			int a = spRand()%game->player_count;
+			int b = spRand()%game->player_count;
+			if (a == b)
+				continue;
+			int temp = positions[a];
+			positions[a] = positions[b];
+			positions[b] = temp;
+		}
+		i = 0;
+		pPlayer p = game->local_player;
+		while (p)
+		{
+			p->position_in_game = positions[i];
+			p = p->next;
+			i++;
+		}
+	}
+}
+
+void set_level(pGame game,char* level_string)
+{
+	sprintf(game->level_string,"%s",level_string);
+	if (game->local == 0)
+	{
+		pMessage message = NULL;
+		numToMessage(&message,"game_id",game->id);
+		numToMessage(&message,"admin_pw",game->admin_pw);
+		addToMessage(&message,"level_string",game->level_string);
+		pMessage result = NULL;
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"set_level.php");
+		deleteMessage(&message);
+		deleteMessage(&result);	
+	}
 }
 
 int push_game(pPlayer player,int second_of_player,void* data)
 {
+	if (player->game->local)
+		return 0;
 	pMessage message = NULL;
 	numToMessage(&message,"game_id",player->game->id);
 	numToMessage(&message,"player_id",player->id);
@@ -478,31 +699,35 @@ int push_message = 0;
 
 int push_thread_function(void* data)
 {
-	while (push_message != -1 || push_thread_first)
+	while (push_message >= 0 || push_thread_first)
 	{
 		if (push_thread_first)
 		{
-			//PULL STACK
-			SDL_mutexP(push_mutex);
 			pThreadData thread_data = push_thread_first;
-			push_thread_first = push_thread_first->next;
-			if (push_thread_first == NULL)
-				push_thread_last = NULL;
-			SDL_mutexV(push_mutex);
-			int i;
-			for (i = 0; i < 3; i++)
-			{
-				if (push_game(thread_data->player,thread_data->second_of_player,thread_data->data) == 0)
-					break;
-			}
+			int i = 0;
+			if (push_message != -2)
+				for (; i < 3; i++)
+				{
+					if (push_game(thread_data->player,thread_data->second_of_player,thread_data->data) == 0)
+						break;
+				}
 			if (i == 3)
-				printf("BIG PANIC!\n");
+				printf("BIG PANIC at second %i!\n",thread_data->second_of_player);
 			else
-			if (i != 0)
-				printf("Little panic... %i\n",i);
-			free(thread_data);
+			{
+				if (i != 0)
+					printf("Little panic... %i\n",i);
+				printf("Sent second %i!\n",thread_data->second_of_player);
+				//PULL STACK
+				SDL_mutexP(push_mutex);
+				push_thread_first = push_thread_first->next;
+				if (push_thread_first == NULL)
+					push_thread_last = NULL;
+				SDL_mutexV(push_mutex);
+				free(thread_data);
+			}
 		}
-		spSleep(100);
+		spSleep(100000);//100ms
 	}
 	return 0;
 }
@@ -533,16 +758,23 @@ void start_push_thread()
 	push_thread = SDL_CreateThread(push_thread_function,NULL);
 }
 
-void end_push_thread()
+void end_push_thread(int kill)
 {
-	push_message = -1;
+	if (kill)
+		push_message = -2;
+	else
+		push_message = -1;
 	int result;
 	SDL_WaitThread(push_thread,&(result));
 	SDL_DestroyMutex(push_mutex);
+	push_mutex = NULL;
+	push_thread = NULL;
 }
 
 int pull_game(pPlayer player,int second_of_player,void* data)
 {
+	if (player->game->local)
+		return 0;
 	pMessage message = NULL;
 	numToMessage(&message,"game_id",player->game->id);
 	numToMessage(&message,"player_id",player->id);
@@ -551,6 +783,8 @@ int pull_game(pPlayer player,int second_of_player,void* data)
 	deleteMessage(&message);
 	if (result)
 	{
+		if (result->name[0] == 'K')
+			printf("player %s kicked\n",player->name);
 		deleteMessage(&result);
 		return 0; //Okay
 	}
@@ -569,6 +803,7 @@ int pull_thread_function(void* data)
 			new_second = player->last_input_data_write->second_of_player+1;
 		if (pull_game(player,new_second,next_data->data) == 0) //data!
 		{
+			printf("PULL THREAD: Get second %i of player %s\n",new_second,player->name);
 			//Adding to the list
 			next_data->player = player;
 			next_data->second_of_player = new_second;
@@ -580,11 +815,13 @@ int pull_thread_function(void* data)
 				player->input_data = next_data;
 			player->last_input_data_write = next_data;
 			SDL_mutexV(player->input_mutex);
-			spSleep(100000); //100ms
+			next_data = (pThreadData)malloc(sizeof(tThreadData));
+			spSleep(50000); //50ms
 		}
 		else
-			spSleep(1000000); //1s
+			spSleep(500000); //500ms
 	}
+	free(next_data);
 	return 0;
 }
 
@@ -595,7 +832,7 @@ int pull_game_thread(pPlayer player,int second_of_player,void* data)
 	pThreadData thread_data = player->last_input_data_read;
 	if (player->last_input_data_read == NULL ||
 		player->last_input_data_read->second_of_player > second_of_player)
-	thread_data = player->input_data;
+		thread_data = player->input_data;
 	while (thread_data)
 	{
 		if (thread_data->second_of_player == second_of_player)
@@ -627,9 +864,9 @@ void end_pull_thread(pPlayer player)
 	SDL_DestroyMutex(player->input_mutex);
 	player->input_mutex = NULL;
 	player->input_thread = NULL;
-	player->input_data = NULL;
-	player->last_input_data_read = NULL;
-	player->last_input_data_write = NULL;
+	//player->input_data = NULL;
+	//player->last_input_data_read = NULL;
+	//player->last_input_data_write = NULL;
 }
 
 int connect_to_server()
@@ -637,10 +874,106 @@ int connect_to_server()
 	ip = spNetResolve("ziz.gp2x.de",80);
 	printf("IP of ziz.gp2x.de: %i.%i.%i.%i\n",ip.address.ipv4_bytes[0],ip.address.ipv4_bytes[1],ip.address.ipv4_bytes[2],ip.address.ipv4_bytes[3]);
 	if (ip.address.ipv4 == SP_INVALID_IP)
-	{
-		spQuitNet();
 		return 1;
+	return 0;
+}
+
+int send_chat(pGame game,char* name,char* chat_message)
+{
+	pMessage message = NULL;
+	numToMessage(&message,"game_id",game->id);
+	addToMessage(&message,"chat_name",name);
+	addToMessage(&message,"chat_message",chat_message);
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"send_chat.php");
+	deleteMessage(&message);
+	int res = 0;
+	if (result == NULL)
+		res = 1;
+	deleteMessage(&result);
+	game->chat_sleep = 0;
+	return res;
+}
+
+void get_chat(pPlayer player)
+{
+	pMessage message = NULL;
+	numToMessage(&message,"game_id",player->game->id);
+	numToMessage(&message,"player_id",player->id);
+	pMessage result = NULL;
+	int i;
+	for (i = 0; i < 3 && result == NULL;i++)
+		result = sendMessage(message,NULL,NULL,0,"get_chat.php");
+	if (result == NULL)
+		return;
+	pChatMessage new_list = NULL;
+	pChatMessage end_list = NULL;
+	pMessage now = result;
+	while (now)
+	{
+		if (strcmp(now->name,"chat_name") == 0)
+		{
+			pChatMessage new_chat = (pChatMessage)malloc(sizeof(tChatMessage));
+			new_chat->birthtime = time(NULL);
+			new_chat->message[0] = 0;
+			new_chat->realtime = 0;
+			new_chat->next = new_list;
+			if (end_list == NULL)
+				end_list = new_chat;
+			new_list = new_chat;
+			sprintf(new_list->name,"%s",now->content);
+		}
+		if (strcmp(now->name,"chat_message") == 0)
+			sprintf(new_list->message,"%s",now->content);
+		if (strcmp(now->name,"chat_time") == 0)
+			new_list->realtime = atoi(now->content);
+		now = now->next;
+	}
+	deleteMessage(&result);
+	if (end_list)
+	{
+		end_list->next = player->game->chat;
+		player->game->chat = new_list;
+	}
+}
+
+int chat_thread_function(void* data)
+{
+	pPlayer player = data;
+	while (player->game->chat_message != -1)
+	{
+		get_chat(player);
+		int count = 0;
+		while (count < 50 && player->game->chat_sleep)
+		{
+			spSleep(100000);
+			count++;
+		}
+		if (player->game->chat_sleep == 0)
+			player->game->chat_sleep = 1;
 	}
 	return 0;
 }
 
+void start_chat_listener(pPlayer player)
+{
+	player->game->chat_message = 0;
+	player->game->chat_thread = SDL_CreateThread(chat_thread_function,(void*)player);	
+}
+
+void stop_chat_listener(pPlayer player)
+{
+	player->game->chat_message = -1;
+	player->game->chat_sleep = 1;
+	int result;
+	SDL_WaitThread(player->game->chat_thread,&(result));
+	player->game->chat_thread = NULL;
+	while (player->game->chat)
+	{
+		pChatMessage next = player->game->chat->next;
+		free(player->game->chat);
+		player->game->chat = next;
+	}
+}

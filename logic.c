@@ -1,22 +1,48 @@
-int do_physics(int steps)
+int do_physics()
 {
-	int i,j;
-	for (i = 0; i < steps; i++)
-		for (j = 0; j < 2; j++)
-		{
-			player[j].dx -= gravitation_x(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			player[j].dy -= gravitation_y(player[j].x >> SP_ACCURACY,player[j].y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			if (circle_is_empty(player[j].x+player[j].dx >> SP_ACCURACY,player[j].y+player[j].dy >> SP_ACCURACY,8,j))
+	int j;
+	for (j = 0; j < player_count; j++)
+	{
+		if (player[j]->firstHare == NULL)
+			continue;
+		pHare hare = player[j]->firstHare;
+		if (hare)
+		do
+		{							
+			hare->dx -= gravitation_x(spFixedToInt(hare->x),spFixedToInt(hare->y)) >> PHYSIC_IMPACT;
+			hare->dy -= gravitation_y(spFixedToInt(hare->x),spFixedToInt(hare->y)) >> PHYSIC_IMPACT;
+			if (circle_is_empty(spFixedToInt(hare->x+hare->dx),spFixedToInt(hare->y+hare->dy),8,hare))
 			{
-				player[j].x += player[j].dx;
-				player[j].y += player[j].dy;
+				hare->x += hare->dx;
+				hare->y += hare->dy;
 			}
 			else
 			{
-				player[j].dx = 0;
-				player[j].dy = 0;
-				player[j].bums = 1;
+				hare->dx = 0;
+				hare->dy = 0;
+				hare->bums = 1;
 			}
+			if (hare->x <  0           || hare->y < 0 ||
+				hare->x >= spIntToFixed(LEVEL_WIDTH) || hare->y >= spIntToFixed(LEVEL_HEIGHT))
+			{
+				if (hare == player[j]->activeHare ||
+					hare == player[j]->setActiveHare)
+				{
+					player[j]->setActiveHare = hare->next;
+					player[j]->activeHare = NULL;
+					if (j == active_player)//Suicid!
+						next_player();
+				}
+				hare = del_hare(hare,&(player[j]->firstHare));
+				if (player[j]->firstHare == NULL)
+					alive_count--;
+				if (alive_count < 2)
+					return 1;
+			}
+			else
+				hare = hare->next;
 		}
-	return updateBullets(steps);
+		while (hare != player[j]->firstHare);
+	}
+	return updateBullets();
 }

@@ -13,7 +13,8 @@ while ($row = mysql_fetch_array( $result ))
 {
 	$game_id = $row['game_id'];
 	$create_date = $row['create_date'];
-	if ($create_date < $now-3600*24) //1 day
+	$status = $row['status'];
+	if ($create_date < $now-3600*24*7) //7 days
 	{
 		$query = "DELETE FROM hase_game_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
@@ -21,14 +22,23 @@ while ($row = mysql_fetch_array( $result ))
 		mysql_query($query) or die;
 		$query = "DELETE FROM hase_data_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
+		$query = "DELETE FROM hase_chat_list WHERE game_id = '$game_id'";
+		mysql_query($query) or die;
 		continue;
 	}
-	$status = $row['status'];
-	if ($status == -1)
+	else
+	if ($create_date < $now-60 && $status >= 0) //1 minute ingame without reaction...
+	{
+		$query = "UPDATE hase_game_list SET status='-2' WHERE game_id = '$game_id'";
+		mysql_query($query) or die;
+		continue;
+	}
+	if ($status == -2)
 		continue;
 	$game_name = $row['game_name'];
 	$max_player = $row['max_player'];
 	$seconds_per_turn = $row['seconds_per_turn'];
+	$hares_per_player = $row['hares_per_player'];
 	//count player
 	$subresult = mysql_query("SELECT COUNT(*) AS total FROM hase_player_list WHERE game_id='$game_id'");
 	$subrow = mysql_fetch_assoc($subresult);
@@ -37,6 +47,7 @@ while ($row = mysql_fetch_array( $result ))
 	echo "create_date: $create_date", PHP_EOL;
 	echo "status: $status", PHP_EOL;
 	echo "seconds_per_turn: $seconds_per_turn", PHP_EOL;
+	echo "hares_per_player: $hares_per_player", PHP_EOL;
 	echo "max_player: $max_player", PHP_EOL;
 	echo "game_name: $game_name", PHP_EOL;
 	echo "game_id: $game_id", PHP_EOL;

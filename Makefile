@@ -10,6 +10,10 @@ SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
 
+SPARROW3D_LIB = libsparrow3d.so
+SPARROWNET_LIB = libsparrowNet.so
+SPARROWSOUND_LIB = libsparrowSound.so
+
 #TARGET = nativ
 
 ifdef TARGET
@@ -26,29 +30,51 @@ SPARROW_LIB = $(SPARROW_FOLDER)
 endif
 LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
-DYNAMIC += -lsparrow3d -lsparrowNet
+DYNAMIC += -lsparrow3d -lsparrowNet -lsparrowSound
 
-all: hase lobby
+CPP += -g
+
+all: hase
 	@echo "=== Built for Target "$(TARGET)" ==="
 
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
-testclient: testclient.c client.o
-	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
-	$(CPP) $(CFLAGS) testclient.c client.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient
+testclient: testclient.c client.o level.o
+	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
+	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
+	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
+	$(CPP) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient$(SUFFIX)
 
-lobby: lobby.c client.o makeBuildDir
-	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	cp $(SPARROW_LIB)/libsparrowNet.so $(BUILD)
-	$(CPP) $(CFLAGS) lobby.c client.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/lobby
+hase: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o makeBuildDir
+	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
+	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
+	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
+	$(CPP) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/hase$(SUFFIX)
 	
 client.o: client.c client.h
 	$(CPP) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
-hase: hase.c gravity.c player.c logic.c help.c bullet.c trace.c makeBuildDir
-	cp $(SPARROW_LIB)/libsparrow3d.so $(BUILD)
-	$(CPP) $(CFLAGS) hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/hase
+lobbyList.o: lobbyList.c lobbyList.h lobbyGame.h
+	$(CPP) $(CFLAGS) -c lobbyList.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+lobbyGame.o: lobbyGame.c lobbyGame.h lobbyList.h
+	$(CPP) $(CFLAGS) -c lobbyGame.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+window.o: window.c window.h lobbyList.h
+	$(CPP) $(CFLAGS) -c window.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+about.o: about.c about.h lobbyList.h
+	$(CPP) $(CFLAGS) -c about.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h
+	$(CPP) $(CFLAGS) -c hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+level.o: level.c level.h
+	$(CPP) $(CFLAGS) -c level.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+
+options.o: options.c options.h
+	$(CPP) $(CFLAGS) -c options.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
 makeBuildDir:
 	 @if [ ! -d $(BUILD:/hase=/) ]; then mkdir $(BUILD:/hase=/);fi
@@ -56,4 +82,6 @@ makeBuildDir:
 
 clean:
 	rm -f *.o
-	rm -f hase
+	rm -f $(BUILD)/lobby
+	rm -f $(BUILD)/hase$(SUFFIX)
+	rm -f $(BUILD)/testclient$(SUFFIX)

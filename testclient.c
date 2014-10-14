@@ -1,21 +1,44 @@
 #include "client.h"
+#include "level.h"
+
+#define TURN_LEN 10
+
+int last_shown_time = 0;
+pGame game = NULL;
+
+void chat_handling()
+{
+	if (game->chat)
+	{
+		pChatMessage chat = game->chat;
+		while (chat && chat->birthtime > last_shown_time)
+		{
+			printf("%i %s: %s\n",last_shown_time,chat->name,chat->message);
+			chat = chat->next;
+		}
+		last_shown_time = game->chat->birthtime;
+	}
+}
 
 int main(int argc, char **argv)
 {
+	spSetRand(time(NULL));
 	if (argc < 3)
 	{
 		printf("testclient game nick [players]\n");
 		return 0;
 	}
+	spInitMath();
 	printf("Init spNet\n");
 	spInitNet();
 	if (connect_to_server())
 		return 1;
 	printf("Server Version: %i\n",server_info());
-	pGame game,gameList = NULL;
+	pGame gameList = NULL;
 	if (argc > 3)
 	{
-		game = create_game(argv[1],atoi(argv[3]),30,"todo");
+		char buffer[512];
+		game = create_game(argv[1],atoi(argv[3]),TURN_LEN,create_level_string(buffer,1536,1536,3,3,3),0,0);
 		printf("Created game %s (%i) with pw %i at time %i\n",game->name,game->id,game->admin_pw,game->create_date);
 	}
 	else
@@ -36,7 +59,7 @@ int main(int argc, char **argv)
 		}
 	}
 	pPlayer player;
-	player = join_game(game,argv[2]);
+	player = join_game(game,argv[2],0);
 	if (player == NULL)
 	{
 		printf("Game full or already started!\n");
@@ -54,48 +77,67 @@ int main(int argc, char **argv)
 	}
 	printf("\n");
 	//Waiting for game_start
+	
+	
 	if (argc > 3)
 	{
 		printf("Press return to start...\n");
 		getchar();
 		set_status(game,1);
+		/*int i;
+		for (i = 0; i < 6; i++)
+		{
+			char buffer[512];
+			set_level(game,create_level_string(buffer,1536,1536,3,3,3));
+			printf("%s\n",buffer);
+			sleep(10);
+		}*/
 	}
 	else
 	while (game->status != 1)
 	{
 		get_game(game,&playerList);
+		if (game->status == -1)
+			goto finish;
 		spSleep(1000000); //1s
 	}
+	
 	//Update game last time
 	get_game(game,&playerList);
+	start_chat_listener(player);
 	momplayer = playerList;
 	while (momplayer)
 	{
 		if (momplayer->id == player->id)
 			player->position_in_game = momplayer->position_in_game;
-		start_pull_thread(momplayer);
 		momplayer = momplayer->next;
 	}
 	printf("I am player %i\n",player->position_in_game);
 	
 	start_push_thread();
 	int i;
-	srand(time(0));
+	spSetRand(time(0));
 	int round;
 	for (round = 0; round < 3;round++)
 	{
 		int p;
 		for (p = 0; p < game->player_count; p++)
 		{
+			while (spRand()%2 == 0)
+			{
+				send_chat(game,player->name,"Kekskuchen!");
+				printf("Send Kekskuchen!\n");
+			}
 			int second;
 			if (player->position_in_game == p)
 			{
-				for (second = round*30;second<(round+1)*30;second++)
+				for (second = round*TURN_LEN;second<(round+1)*TURN_LEN;second++)
 				{
 					char data[1536];
 					push_game_thread(player,second,data);
 					printf("Player %i sent %i\n",p,second);
-					spSleep(rand()%1000000);
+					spSleep(1000000);
+					chat_handling();
 				}
 			}
 			else
@@ -107,24 +149,29 @@ int main(int argc, char **argv)
 						break;
 					momplayer = momplayer->next;
 				}
-				for (second = round*30;second<(round+1)*30;second++)
+				start_pull_thread(momplayer);
+				for (second = round*TURN_LEN;second<(round+1)*TURN_LEN;second++)
 				{
 					char data[1536];
 					while (pull_game_thread(momplayer,second,data))
-						spSleep(100000); //100ms
+						spSleep(500000); //500ms
 					printf("Player %i recv %i\n",p,second);
-				}				
+					chat_handling();
+				}
+				end_pull_thread(momplayer);
 			}
 		}
 	}
 
 	
 	printf("Waiting for push thread\n");
-	end_push_thread();
-	printf("Waiting for pull threads\n");
+	end_push_thread(0);
 	delete_player_list(playerList);
 	
 	printf("Finishing...\n");
+	stop_chat_listener(player);
+	
+	finish:
 	leave_game(player);
 	if (argc > 3)
 		delete_game(game);

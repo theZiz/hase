@@ -12,6 +12,8 @@ $result = mysql_query($query) or die;
 $i = 0;
 while ($row = mysql_fetch_array( $result ))
 {
+	$computer = $row['computer'];
+	echo "computer: $computer", PHP_EOL;
 	$position_in_game = $row['position_in_game'];
 	echo "position_in_game: $position_in_game", PHP_EOL;
 	$player_name = $row['player_name'];
@@ -35,9 +37,10 @@ $max_player = $row['max_player'];
 echo "max_player: $max_player", PHP_EOL;
 $seconds_per_turn = $row['seconds_per_turn'];
 echo "seconds_per_turn: $seconds_per_turn", PHP_EOL;
-$seconds_per_turn = $row['mom_player'];
-echo "mom_player: $mom_player", PHP_EOL;
+$hares_per_player = $row['hares_per_player'];
+echo "hares_per_player: $hares_per_player", PHP_EOL;
 $status = $row['status'];
 echo "status: $status";
+
 mysql_close($connection);
 ?>
