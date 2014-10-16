@@ -1,4 +1,5 @@
 For next version:
+* game server in config
 * Showing how health is removed
 * ingame chat
 * different sprites (kangoroo and co)
@@ -25,5 +26,18 @@ General:
 	* mine (3 wp)
 	* gravitation trap (1 wp)
 	* Fart bomb (1 wp)
+* ingame chat via IRC?
+	* irc server and channel
+	* global user name, preset via c4a
+	* IRC nickname: nick[gamename]
+	* sparrowNet IRC stuff
+		* start IRC thread (server, port, nickname, etc.)
+		* end IRC thread
+		* send command
+		* join channel
+		* send message
+		* get message (if new one, otherwise 0)
+	* old chat approach only for heart beat
+	* button for a random insult
 
 http://pastebin.com/P0q6QE86
