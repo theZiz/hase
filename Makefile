@@ -14,12 +14,8 @@ SPARROW3D_LIB = libsparrow3d.so
 SPARROWNET_LIB = libsparrowNet.so
 SPARROWSOUND_LIB = libsparrowSound.so
 
-#TARGET = nativ
-
 ifdef TARGET
 include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
-
-#TARGET = pandora
 
 BUILD = ./build/$(TARGET)/hase
 SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
@@ -85,3 +81,6 @@ clean:
 	rm -f $(BUILD)/lobby
 	rm -f $(BUILD)/hase$(SUFFIX)
 	rm -f $(BUILD)/testclient$(SUFFIX)
+
+oclean:
+	rm -f *.o
