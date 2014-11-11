@@ -1,11 +1,36 @@
 For next version:
 * game server in config
+	* Multiple servers
+	* server input in servers.ini as url:port
+	* settings ingame
+	* only address + port
+	* configuration of IRC & Co in gameinfo.php
+	* disable/enable
+	* Warning for every server version. If all: one warning + kick
+* global username
+* username saving
+* C4A username guessing
+* ingame chat via IRC
+	* irc server and channel from gameinfo.php
+	* global user name is IRC name
+	* new attribute for every player: IRC name
+	* sparrowNet IRC stuff
+		* start IRC thread (server, port, nickname, etc.)
+		* end IRC thread
+		* send command
+		* join channel
+		* send message
+		* get message (if new one, otherwise 0)
+	* old chat approach only for heart beat
+	* button for a random insult
+	* lobby chat
+	* rename ingame?
 * Showing how health is removed
-* ingame chat
+* ingame chat with IRC
 * different sprites (kangoroo and co)
 * sprite adjustable
 * not closing games "somehow"
-* Items
+* Some items (health, extra WP, mines)
 * Weapons
 	* small circle building tool (1 wp)
 	* low grav missile (3 wp)
@@ -26,18 +51,5 @@ General:
 	* mine (3 wp)
 	* gravitation trap (1 wp)
 	* Fart bomb (1 wp)
-* ingame chat via IRC?
-	* irc server and channel
-	* global user name, preset via c4a
-	* IRC nickname: nick[gamename]
-	* sparrowNet IRC stuff
-		* start IRC thread (server, port, nickname, etc.)
-		* end IRC thread
-		* send command
-		* join channel
-		* send message
-		* get message (if new one, otherwise 0)
-	* old chat approach only for heart beat
-	* button for a random insult
 
 http://pastebin.com/P0q6QE86
