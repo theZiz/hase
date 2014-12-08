@@ -9,13 +9,13 @@ $player_pw = (int)$_POST['player_pw'];
 $second_of_player = (int)$_POST['second_of_player'];
 $data = mysql_real_escape_string($_POST['data']);
 
-$query = "SELECT * FROM hase_player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
+$query = "SELECT * FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
 $result = mysql_query($query) or die;
 
 $row = mysql_fetch_assoc( $result );
 if ($row['player_pw'] == $player_pw)
 {
-	$query = "INSERT INTO hase_data_list (game_id, player_id, second_of_player, data) ".
+	$query = "INSERT INTO " . $mysql_prefix . "data_list (game_id, player_id, second_of_player, data) ".
 	"VALUES ( '$game_id', '$player_id', '$second_of_player', '$data' )";
 	mysql_query($query) or die;
 }

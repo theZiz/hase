@@ -9,13 +9,13 @@ $player_id = (int)$_POST['player_id'];
 $now = time();
 
 //Getting last get time from player
-$query = "SELECT * FROM hase_player_list WHERE game_id = '$game_id' AND player_id = '$player_id'";
+$query = "SELECT * FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id' AND player_id = '$player_id'";
 $result = mysql_query($query) or die;
 
 $row = mysql_fetch_assoc( $result );
 $chat_get_time = $row['chat_get_time'];
 
-$query = "SELECT * FROM hase_chat_list WHERE game_id = '$game_id' AND chat_time > '$chat_get_time'";
+$query = "SELECT * FROM " . $mysql_prefix . "chat_list WHERE game_id = '$game_id' AND chat_time > '$chat_get_time'";
 $result = mysql_query($query) or die;
 while ($row = mysql_fetch_array( $result ))
 {
@@ -29,11 +29,11 @@ while ($row = mysql_fetch_array( $result ))
 		$chat_get_time = $row['chat_time'];
 }
 
-$query = "UPDATE hase_player_list SET chat_get_time='$chat_get_time', heartbeat_time='$now' WHERE game_id = '$game_id' AND player_id = '$player_id'";
+$query = "UPDATE " . $mysql_prefix . "player_list SET chat_get_time='$chat_get_time', heartbeat_time='$now' WHERE game_id = '$game_id' AND player_id = '$player_id'";
 mysql_query($query) or die;
 
 $now = time();
-$query = "UPDATE hase_game_list SET create_date='$now' WHERE game_id = '$game_id'";
+$query = "UPDATE " . $mysql_prefix . "game_list SET create_date='$now' WHERE game_id = '$game_id'";
 mysql_query($query) or die;
 
 mysql_close($connection); 

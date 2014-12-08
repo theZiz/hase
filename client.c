@@ -2,6 +2,8 @@
 
 spNetIP ip;
 
+#define HASE_SERVER "haseserver"
+
 void addToMessage(pMessage *message, char* name, char* content)
 {
 	pMessage temp = (pMessage)malloc(sizeof(tMessage));
@@ -28,8 +30,9 @@ void deleteMessage(pMessage *message)
 	}
 }
 
-pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,char* dest)
+pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,char* dest,char* server_directory)
 {
+	//int server_directory_length = strlen(server_directory);
 	char boundary[17] = "A9B8C7D6E5F4G3H2"; //This should maybe random...
 	int boundary_len = 16;
 	//Calculating the whole content length
@@ -71,13 +74,13 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	int buffer_size = 65536;
 	char buffer[buffer_size];
 	sprintf(buffer,
-		"POST /haseserver/%s HTTP/1.1\r\n"
+		"POST /%s/%s HTTP/1.1\r\n"
 		"Origin: http://ziz.gp2x.de\r\n"
 		"User-Agent: Hase\r\n"
 		"Content-Type: multipart/form-data; boundary=%s\r\n"
 		"Content-Length: %i\r\n"
 		"Host: ziz.gp2x.de\r\n"
-		"\r\n",dest,boundary,length);
+		"\r\n",server_directory,dest,boundary,length);
 	spNetSendHTTP(server_connection,buffer);
 	int pos = 0;
 	mom = message;
@@ -210,7 +213,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 
 int server_info()
 {
-	pMessage result = sendMessage(NULL,NULL,NULL,0,"server_info.php");
+	pMessage result = sendMessage(NULL,NULL,NULL,0,"server_info.php",HASE_SERVER);
 	if (result == NULL)
 		return 0;
 	int r = atoi(result->content);
@@ -231,7 +234,7 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 		addToMessage(&message,"level_string",level_string);
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
-			result = sendMessage(message,NULL,NULL,0,"create_game.php");
+			result = sendMessage(message,NULL,NULL,0,"create_game.php",HASE_SERVER);
 		deleteMessage(&message);
 		if (result == NULL)
 			return NULL;
@@ -292,7 +295,7 @@ void delete_game(pGame game)
 		pMessage result = NULL;
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
-			result = sendMessage(message,NULL,NULL,0,"delete_game.php");
+			result = sendMessage(message,NULL,NULL,0,"delete_game.php",HASE_SERVER);
 		deleteMessage(&message);
 		deleteMessage(&result);
 	}
@@ -306,7 +309,7 @@ int get_games(pGame *gameList)
 	pMessage result = NULL;
 	int i;
 	for (i = 0; i < 3 && result == NULL;i++)
-		result = sendMessage(NULL,NULL,NULL,0,"get_games.php");
+		result = sendMessage(NULL,NULL,NULL,0,"get_games.php",HASE_SERVER);
 	if (result == NULL)
 		return 0;
 	pMessage now = result;
@@ -395,7 +398,7 @@ pPlayer join_game(pGame game,char* name,int ai)
 		numToMessage(&message,"computer",ai);
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
-			result = sendMessage(message,NULL,NULL,0,"join_game.php");
+			result = sendMessage(message,NULL,NULL,0,"join_game.php",HASE_SERVER);
 		deleteMessage(&message);
 		if (result == NULL)
 			return NULL;
@@ -472,7 +475,7 @@ void leave_game(pPlayer player)
 		pMessage result = NULL;
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
-			result = sendMessage(message,NULL,NULL,0,"leave_game.php");
+			result = sendMessage(message,NULL,NULL,0,"leave_game.php",HASE_SERVER);
 		deleteMessage(&message);
 		deleteMessage(&result);
 	}
@@ -515,7 +518,7 @@ int get_game(pGame game,pPlayer *playerList)
 		pMessage result = NULL;
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
-			result = sendMessage(message,NULL,NULL,0,"get_game.php");
+			result = sendMessage(message,NULL,NULL,0,"get_game.php",HASE_SERVER);
 		deleteMessage(&message);
 		if (result == NULL)
 			return 1;
@@ -622,7 +625,7 @@ void set_status(pGame game,int status)
 		pMessage result = NULL;
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
-			result = sendMessage(message,NULL,NULL,0,"set_status.php");
+			result = sendMessage(message,NULL,NULL,0,"set_status.php",HASE_SERVER);
 		deleteMessage(&message);
 		deleteMessage(&result);	
 	}
@@ -667,7 +670,7 @@ void set_level(pGame game,char* level_string)
 		pMessage result = NULL;
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
-			result = sendMessage(message,NULL,NULL,0,"set_level.php");
+			result = sendMessage(message,NULL,NULL,0,"set_level.php",HASE_SERVER);
 		deleteMessage(&message);
 		deleteMessage(&result);	
 	}
@@ -682,7 +685,7 @@ int push_game(pPlayer player,int second_of_player,void* data)
 	numToMessage(&message,"player_id",player->id);
 	numToMessage(&message,"player_pw",player->pw);
 	numToMessage(&message,"second_of_player",second_of_player);
-	pMessage result = sendMessage(message,"data",data,1536,"push_game.php");
+	pMessage result = sendMessage(message,"data",data,1536,"push_game.php",HASE_SERVER);
 	deleteMessage(&message);
 	if (result)
 	{
@@ -779,7 +782,7 @@ int pull_game(pPlayer player,int second_of_player,void* data)
 	numToMessage(&message,"game_id",player->game->id);
 	numToMessage(&message,"player_id",player->id);
 	numToMessage(&message,"second_of_player",second_of_player);
-	pMessage result = sendMessage(message,"data",data,-1536,"pull_game.php");
+	pMessage result = sendMessage(message,"data",data,-1536,"pull_game.php",HASE_SERVER);
 	deleteMessage(&message);
 	if (result)
 	{
@@ -887,7 +890,7 @@ int send_chat(pGame game,char* name,char* chat_message)
 	pMessage result = NULL;
 	int i;
 	for (i = 0; i < 3 && result == NULL;i++)
-		result = sendMessage(message,NULL,NULL,0,"send_chat.php");
+		result = sendMessage(message,NULL,NULL,0,"send_chat.php",HASE_SERVER);
 	deleteMessage(&message);
 	int res = 0;
 	if (result == NULL)
@@ -905,7 +908,7 @@ void get_chat(pPlayer player)
 	pMessage result = NULL;
 	int i;
 	for (i = 0; i < 3 && result == NULL;i++)
-		result = sendMessage(message,NULL,NULL,0,"get_chat.php");
+		result = sendMessage(message,NULL,NULL,0,"get_chat.php",HASE_SERVER);
 	if (result == NULL)
 		return;
 	pChatMessage new_list = NULL;

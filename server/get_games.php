@@ -6,7 +6,7 @@ mysql_select_db("sparrowman") or die;
 
 $now = time();
 
-$query = "SELECT * FROM hase_game_list";
+$query = "SELECT * FROM " . $mysql_prefix . "game_list";
 $result = mysql_query($query) or die;
 $i = 0;
 while ($row = mysql_fetch_array( $result ))
@@ -16,20 +16,20 @@ while ($row = mysql_fetch_array( $result ))
 	$status = $row['status'];
 	if ($create_date < $now-3600*24*7) //7 days
 	{
-		$query = "DELETE FROM hase_game_list WHERE game_id = '$game_id'";
+		$query = "DELETE FROM " . $mysql_prefix . "game_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
-		$query = "DELETE FROM hase_player_list WHERE game_id = '$game_id'";
+		$query = "DELETE FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
-		$query = "DELETE FROM hase_data_list WHERE game_id = '$game_id'";
+		$query = "DELETE FROM " . $mysql_prefix . "data_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
-		$query = "DELETE FROM hase_chat_list WHERE game_id = '$game_id'";
+		$query = "DELETE FROM " . $mysql_prefix . "chat_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
 		continue;
 	}
 	else
 	if ($create_date < $now-60 && $status >= 0) //1 minute ingame without reaction...
 	{
-		$query = "UPDATE hase_game_list SET status='-2' WHERE game_id = '$game_id'";
+		$query = "UPDATE " . $mysql_prefix . "game_list SET status='-2' WHERE game_id = '$game_id'";
 		mysql_query($query) or die;
 		continue;
 	}
@@ -40,7 +40,7 @@ while ($row = mysql_fetch_array( $result ))
 	$seconds_per_turn = $row['seconds_per_turn'];
 	$hares_per_player = $row['hares_per_player'];
 	//count player
-	$subresult = mysql_query("SELECT COUNT(*) AS total FROM hase_player_list WHERE game_id='$game_id'");
+	$subresult = mysql_query("SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'");
 	$subrow = mysql_fetch_assoc($subresult);
 	$player_count = $subrow['total'];
 	echo "player_count: $player_count", PHP_EOL;

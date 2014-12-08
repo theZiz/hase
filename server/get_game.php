@@ -7,7 +7,7 @@ mysql_select_db("sparrowman") or die;
 $game_id = (int)$_POST['game_id'];
 
 //List of player names and IDs and count player
-$query = "SELECT * FROM hase_player_list WHERE game_id='$game_id'";
+$query = "SELECT * FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'";
 $result = mysql_query($query) or die;
 $i = 0;
 while ($row = mysql_fetch_array( $result ))
@@ -24,7 +24,7 @@ while ($row = mysql_fetch_array( $result ))
 }
 echo "player_count: $i", PHP_EOL;
 
-$query = "SELECT * FROM hase_game_list WHERE game_id='$game_id'";
+$query = "SELECT * FROM " . $mysql_prefix . "game_list WHERE game_id='$game_id'";
 $result = mysql_query($query) or die;
 $row = mysql_fetch_assoc( $result );
 $create_date = $row['create_date'];

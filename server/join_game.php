@@ -10,12 +10,12 @@ $player_pw = rand();
 $computer = (int)$_POST['computer'];
 
 //counting players
-$result = mysql_query("SELECT COUNT(*) AS total FROM hase_player_list WHERE game_id='$game_id'");
+$result = mysql_query("SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'");
 $row = mysql_fetch_assoc($result);
 $player_count = $row['total'];
 
 //getting max_players
-$result = mysql_query("SELECT * FROM hase_game_list WHERE game_id='$game_id'");
+$result = mysql_query("SELECT * FROM " . $mysql_prefix . "game_list WHERE game_id='$game_id'");
 $row = mysql_fetch_assoc($result);
 $max_player = $row['max_player'];
 $status = $row['status'];
@@ -27,7 +27,7 @@ if ($player_count >= $max_player || $status != 0)
 else
 {
 	$now = time();
-	$query = "INSERT INTO hase_player_list (game_id, player_pw, player_name, position_in_game, computer, chat_get_time, status, heartbeat_time) ".
+	$query = "INSERT INTO " . $mysql_prefix . "player_list (game_id, player_pw, player_name, position_in_game, computer, chat_get_time, status, heartbeat_time) ".
 	"VALUES ( '$game_id', '$player_pw', '$player_name', '0', '$computer', '0', '0', '$now')";
 
 	mysql_query($query) or die;

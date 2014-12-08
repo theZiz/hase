@@ -18,7 +18,7 @@ $admin_pw = 0;
 while ($admin_pw == 0)
 	$admin_pw = rand();
 
-$query = "INSERT INTO hase_game_list (game_name, max_player, seconds_per_turn, admin_pw, create_date, status, level_string, hares_per_player) ".
+$query = "INSERT INTO " . $mysql_prefix . "game_list (game_name, max_player, seconds_per_turn, admin_pw, create_date, status, level_string, hares_per_player) ".
 "VALUES ( '$game_name', '$max_player', '$seconds_per_turn', '$admin_pw', '$create_date', '0', '$level_string', '$hares_per_player')";
 
 mysql_query($query) or die;

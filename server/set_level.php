@@ -8,13 +8,13 @@ $game_id = (int)$_POST['game_id'];
 $admin_pw = (int)$_POST['admin_pw'];
 $level_string = mysql_real_escape_string($_POST['level_string']);
 
-$query = "SELECT * FROM hase_game_list WHERE game_id = '$game_id'";
+$query = "SELECT * FROM " . $mysql_prefix . "game_list WHERE game_id = '$game_id'";
 $result = mysql_query($query) or die;
 
 $row = mysql_fetch_array( $result );
 if ($row['admin_pw'] == $admin_pw)
 {
-	$query = "UPDATE hase_game_list SET level_string='$level_string' WHERE game_id = '$game_id'";
+	$query = "UPDATE " . $mysql_prefix . "game_list SET level_string='$level_string' WHERE game_id = '$game_id'";
 	mysql_query($query) or die;	
 }
 
