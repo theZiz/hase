@@ -68,4 +68,5 @@ mysql_query($query) or die;
 mysql_close($connection); 
 
 echo "Success!";
+echo "Delete this file now, you will not need it again!";
 ?>
