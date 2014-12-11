@@ -2,7 +2,7 @@
 include 'config.php';
 
 $connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
-mysql_select_db("sparrowman") or die;
+mysql_select_db($mysql_dbname) or die;
 
 $game_id = (int)$_POST['game_id'];
 $player_name = mysql_real_escape_string($_POST['player_name']);

@@ -2,7 +2,7 @@
 
 spNetIP ip;
 
-#define HASE_SERVER "haseserver"
+#define HASE_SERVER "haseserver9"
 
 void addToMessage(pMessage *message, char* name, char* content)
 {

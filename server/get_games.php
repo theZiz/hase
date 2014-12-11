@@ -2,7 +2,7 @@
 include 'config.php';
 
 $connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
-mysql_select_db("sparrowman") or die;
+mysql_select_db($mysql_dbname) or die;
 
 $now = time();
 
