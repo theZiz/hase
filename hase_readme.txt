@@ -11,6 +11,7 @@ Changelog
 1.4.7
 - Fixed small resolution sprites
 - Improved targeting
+- Improved button mapping for handhelds without keyboard
 
 1.4.6
 - faster showing of own messages in chat
