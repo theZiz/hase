@@ -59,6 +59,8 @@ char button_states[SP_INPUT_BUTTON_COUNT];
 unsigned char send_data[1536];
 spParticleBunchPointer particles = NULL;
 
+spSpriteCollectionPointer targeting;	
+
 void ( *hase_resize )( Uint16 w, Uint16 h );
 
 void loadInformation(char* information)
@@ -143,7 +145,19 @@ void draw(void)
 				}
 				else
 				//Arrow
-				if (hare->w_power)
+				{
+					Sint32 w_zoom = spMax(SP_ONE/2,zoom);
+					spSpritePointer target = spActiveSprite(targeting);
+					spSetSpriteZoom(target,w_zoom,w_zoom);
+					Sint32 ox = spMul(hare->x-posX,zoom)-spMul(20*-spSin(hare->rotation+hare->w_direction-SP_PI/2),w_zoom);
+					Sint32 oy = spMul(hare->y-posY,zoom)-spMul(20* spCos(hare->rotation+hare->w_direction-SP_PI/2),w_zoom);
+					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+					//spSetBlending( SP_ONE*2/3 );
+					spDrawSprite(screen->w/2+x,screen->h/2+y,0,target);
+					//spSetBlending( SP_ONE );
+				}
+				/*if (hare->w_power)
 				{
 					Sint32 w_zoom = spMax(SP_ONE,zoom);
 					Sint32 ox = spMul(hare->x-posX-14*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
@@ -153,7 +167,8 @@ void draw(void)
 					spSetBlending( SP_ONE*2/3 );
 					spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(w_zoom,spGetSizeFactor())/16,spMul(hare->w_power,spMul(w_zoom,spGetSizeFactor()))/4,hare->w_direction+rotation+hare->rotation-SP_PI/2);
 					spSetBlending( SP_ONE );
-				}
+				}*/
+				
 			}
 			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//Health bar
@@ -241,7 +256,14 @@ void draw(void)
 		if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] == 4)
 			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_power*30/SP_ONE+30);
 		else
-			sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
+		{
+			float angle;
+			if (player[active_player]->activeHare->direction == 0)
+				angle = (float)player[active_player]->activeHare->w_direction*180.0f/(float)SP_PI;
+			else
+				angle = -((float)player[active_player]->activeHare->w_direction*180.0f/(float)SP_PI-180.0f);
+			sprintf(buffer,"Power: %i %%\nDirection: %.1f°",player[active_player]->activeHare->w_power*100/SP_ONE,angle);
+		}
 		spFontDraw( 2, 0, 0, buffer, font );
 	}
 	if (weapon_points)
@@ -578,6 +600,7 @@ int calc(Uint32 steps)
 	int result = 0;
 	if (game_pause)
 		spSleep(200000);
+	spUpdateSprite(spActiveSprite(targeting),steps);
 	spParticleUpdate(&particles,steps);
 	for (i = 0; i < steps; i++)
 	{
@@ -938,6 +961,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	Uint32 seed = f[0]+f[1]*256+f[2]*65536+f[3]*16777216;
 	spSetRand(seed);
 	loadInformation("Loading images...");
+	targeting = spLoadSpriteCollection("./data/targeting.ssc",NULL);
 	arrow = spLoadSurface("./data/gravity.png");
 	bullet = spLoadSurface("./data/bullet.png");
 	load_weapons();
@@ -1012,6 +1036,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 		}
 		deleteAllTraces(player[i]);
 	}
+	spDeleteSpriteCollection(targeting,0);
 	spDeleteSurface(arrow);
 	spDeleteSurface(bullet);
 	spDeleteSurface(level);

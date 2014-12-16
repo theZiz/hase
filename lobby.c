@@ -25,7 +25,7 @@ void resize( Uint16 w, Uint16 h )
 		font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
 	else
 		font = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
-	spFontAdd( font, SP_FONT_GROUP_ASCII"™", BUTTON_FG ); //whole ASCII
+	spFontAdd( font, SP_FONT_GROUP_ASCII"™°", BUTTON_FG ); //whole ASCII
 	spFontAddBorder(font , 0);
 	spFontAddButton( font, 'R', MY_BUTTON_START_NAME, BUTTON_FG, BUTTON_BG ); //Return == START
 	spFontAddButton( font, 'B', MY_BUTTON_SELECT_NAME, BUTTON_FG, BUTTON_BG ); //Backspace == SELECT
@@ -108,8 +108,8 @@ int local_game_feedback( pWindowElement elem, int action )
 int main(int argc, char **argv)
 {
 	spSetRand(time(NULL));
-	//spSetDefaultWindowSize( 320, 240 );
-	spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 320, 240 );
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	spInitNet();
 	spSoundInit();

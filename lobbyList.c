@@ -159,7 +159,11 @@ int ll_calc(Uint32 steps)
 {
 	if (spGetInput()->button[MY_BUTTON_SELECT] ||
 		spGetInput()->button[MY_BUTTON_START])
+	{
+		spGetInput()->button[MY_BUTTON_SELECT] = 0;
+		spGetInput()->button[MY_BUTTON_START] = 0;
 		return 1;
+	}
 	if (spGetInput()->button[MY_PRACTICE_3])
 	{
 		spGetInput()->button[MY_PRACTICE_3] = 0;

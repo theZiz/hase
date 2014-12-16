@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.4.7
+- Fixed small resolution sprites
+- Improved targeting
+
 1.4.6
 - faster showing of own messages in chat
 - level color for the bullet traces
