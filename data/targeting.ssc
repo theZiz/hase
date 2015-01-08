@@ -1,0 +1,8 @@
+default = default
+fps = 16
+image = ./data/targeting.png
+framesize = 16, 16
+bordersize = 16, 16
+
+[default]
+frame = 0, 0, 8

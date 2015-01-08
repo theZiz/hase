@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="4" release="7" build="0"/>
+<version major="1" minor="4" release="7" build="2"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -67,7 +67,15 @@ Version 1.4.1.1:
 - better and new default values for creating a game
 
 1.4.7
-- little changes to be able to improve the game (especially the server part) without breaking the application
+- Fixed small resolution sprites
+- Improved targeting
+- Improved button mapping for handhelds without keyboard
+
+1.4.7.1
+- Fixed crash if last player removed in online game (thx @zear)
+
+1.4.7.2
+- Added button arrow images to sparrow3d and use them now in hase in the help
 
 </description>
 </descriptions>
@@ -75,7 +83,7 @@ Version 1.4.1.1:
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="4" release="7" build="0" type="release"/>
+<version major="1" minor="4" release="7" build="2" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

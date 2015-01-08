@@ -8,10 +8,18 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
-1.4.7:
-- little changes to be able to improve the game (especially the server part) without breaking the application
+1.4.7.2
+- Added button arrow images to sparrow3d and use them now in hase in the help
 
-1.4.6:
+1.4.7.1
+- Fixed crash if last player removed in online game (thx @zear)
+
+1.4.7
+- Fixed small resolution sprites
+- Improved targeting
+- Improved button mapping for handhelds without keyboard
+
+1.4.6
 - faster showing of own messages in chat
 - level color for the bullet traces
 - better and new default values for creating a game

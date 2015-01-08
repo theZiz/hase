@@ -126,23 +126,23 @@ void window_draw(void)
 						if (window->only_ok)
 						{
 							if (window->firstElement->next)
-								spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]Back", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Back", window->font );
 							else
-								spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]Okay", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Okay", window->font );
 						}
 						else
 						{
 							if (window->firstElement->next)
-								spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]/[c]Back", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]/[c]Back", window->font );
 							else
-								spFontDrawMiddle( screen->w/2,y, 0, "[3]Enter letter  [o]Okay  [c]Cancel", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Okay  [c]Cancel", window->font );
 						}
 					}
 					else
 					if (window->only_ok)
-						spFontDrawMiddle( screen->w/2,y, 0, "[3]Change  [o]Okay", window->font );
+						spFontDrawMiddle( screen->w/2,y, 0, "[R]Change  [o]Okay", window->font );
 					else
-						spFontDrawMiddle( screen->w/2,y, 0, "[3]Change  [o]Okay  [c]Cancel", window->font );
+						spFontDrawMiddle( screen->w/2,y, 0, "[R]Change  [o]Okay  [c]Cancel", window->font );
 				}
 				else
 				if (window->only_ok)
@@ -227,27 +227,47 @@ int window_calc(Uint32 steps)
 				selElem = window->firstElement;
 		}
 	}
-	if (spGetInput()->button[MY_PRACTICE_OK] ||
+	if ((spGetInput()->button[MY_PRACTICE_OK] && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER || spIsKeyboardPolled() == 0 ))||
 		(spGetInput()->button[MY_BUTTON_SELECT] && window->only_ok && selElem->type != -1))
 	{
 		spGetInput()->button[MY_PRACTICE_OK] = 0;
 		if (window->only_ok && selElem->type != -1)
 			spGetInput()->button[MY_BUTTON_SELECT] = 0;
-		switch (selElem->type)
+		if (selElem->type == 1)
 		{
-			case 1:
-				if (spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
-				{
-					window->feedback(selElem,WN_ACT_END_POLL);
-					if (window->firstElement->next == NULL)
-						return 1;
-				}
-				else
+			if (spIsKeyboardPolled())
+			{
+				window->feedback(selElem,WN_ACT_END_POLL);
+				if (window->firstElement->next == NULL)
 					return 1;
-				break;
-			default:
+				if (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
+					return 1;
+			}
+			else
 				return 1;
 		}
+		else
+			return 1;
+	}
+	if ((spGetInput()->button[MY_BUTTON_START] && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS && spIsKeyboardPolled()))||
+		(spGetInput()->button[MY_BUTTON_SELECT] && window->only_ok && selElem->type != -1))
+	{
+		spGetInput()->button[MY_BUTTON_START] = 0;
+		if (window->only_ok && selElem->type != -1)
+			spGetInput()->button[MY_BUTTON_SELECT] = 0;
+		if (selElem->type == 1)
+		{
+			if (spIsKeyboardPolled())
+			{
+				window->feedback(selElem,WN_ACT_END_POLL);
+				if (window->firstElement->next == NULL)
+					return 1;
+			}
+			else
+				return 1;
+		}
+		else
+			return 1;
 	}
 	if ((spGetInput()->button[MY_PRACTICE_CANCEL] || spGetInput()->button[MY_BUTTON_SELECT]) &&
 		(window->only_ok == 0 || selElem->type == -1))
@@ -277,16 +297,16 @@ int window_calc(Uint32 steps)
 		  window->firstElement->next == NULL ) )
 		window->feedback(selElem,WN_ACT_START_POLL);
 
-	if (spGetInput()->button[MY_PRACTICE_3] &&
+	if (spGetInput()->button[MY_BUTTON_START] &&
 		selElem->type == 1 &&
 		!spIsKeyboardPolled() &&
 		spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
 	{
-		spGetInput()->button[MY_PRACTICE_3] = 0;
+		spGetInput()->button[MY_BUTTON_START] = 0;
 		window->feedback(selElem,WN_ACT_START_POLL);
 	}
-	int i;
 	
+	int i;
 	if (spGetInput()->axis[0] < 0)
 	{
 		if (selElem->type == 0)

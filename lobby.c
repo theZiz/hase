@@ -25,7 +25,7 @@ void resize( Uint16 w, Uint16 h )
 		font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
 	else
 		font = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
-	spFontAdd( font, SP_FONT_GROUP_ASCII"™", BUTTON_FG ); //whole ASCII
+	spFontAdd( font, SP_FONT_GROUP_ASCII"™°", BUTTON_FG ); //whole ASCII
 	spFontAddBorder(font , 0);
 	spFontAddButton( font, 'R', MY_BUTTON_START_NAME, BUTTON_FG, BUTTON_BG ); //Return == START
 	spFontAddButton( font, 'B', MY_BUTTON_SELECT_NAME, BUTTON_FG, BUTTON_BG ); //Backspace == SELECT
@@ -35,6 +35,10 @@ void resize( Uint16 w, Uint16 h )
 	spFontAddButton( font, 'c', MY_PRACTICE_CANCEL_NAME, BUTTON_FG, BUTTON_BG ); // d == right button
 	spFontAddButton( font, '3', MY_PRACTICE_3_NAME, BUTTON_FG, BUTTON_BG ); // w == up button
 	spFontAddButton( font, '4', MY_PRACTICE_4_NAME, BUTTON_FG, BUTTON_BG ); // s == down button
+	spFontAddArrowButton( font, '<', SP_BUTTON_ARROW_LEFT, BUTTON_FG, BUTTON_BG );
+	spFontAddArrowButton( font, '^', SP_BUTTON_ARROW_UP, BUTTON_FG, BUTTON_BG );
+	spFontAddArrowButton( font, '>', SP_BUTTON_ARROW_RIGHT, BUTTON_FG, BUTTON_BG );
+	spFontAddArrowButton( font, 'v', SP_BUTTON_ARROW_DOWN, BUTTON_FG, BUTTON_BG );
 	spFontMulWidth(font,spFloatToFixed(0.9f));
 
 	spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_IF_NEEDED,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
@@ -108,8 +112,8 @@ int local_game_feedback( pWindowElement elem, int action )
 int main(int argc, char **argv)
 {
 	spSetRand(time(NULL));
-	//spSetDefaultWindowSize( 320, 240 );
-	spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 320, 240 );
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	spInitNet();
 	spSoundInit();

@@ -482,7 +482,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		if (res == 2)
 			hase(lg_resize,lg_game,lg_player);
 
-		if (!lg_game->local)
+		if (!lg_game->local && lg_player)
 			stop_chat_listener(lg_player);
 
 		while (lg_player)
