@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="4" release="6" build="0"/>
+<version major="1" minor="4" release="7" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -66,13 +66,16 @@ Version 1.4.1.1:
 - level color for the bullet traces
 - better and new default values for creating a game
 
+1.4.7
+- little changes to be able to improve the game (especially the server part) without breaking the application
+
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="4" release="6" build="0" type="release"/>
+<version major="1" minor="4" release="7" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
