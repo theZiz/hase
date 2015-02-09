@@ -123,6 +123,7 @@ int main(int argc, char **argv)
 	spSoundSetMusic("./sounds/Ouroboros.ogg");
 	spSoundPlayMusic(0,-1);
 	resize( screen->w, screen->h );
+	init_window_sprites();
 	int done = 0;
 	while (!done)
 	{
@@ -175,6 +176,7 @@ int main(int argc, char **argv)
 		else
 			done = 1;
 	}
+	quit_window_sprites();
 	spSoundStopMusic(0);
 	spQuitNet();
 	spQuitCore();

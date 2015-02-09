@@ -387,7 +387,7 @@ void delete_player_list(pPlayer player)
 	}
 }
 
-pPlayer join_game(pGame game,char* name,int ai)
+pPlayer join_game(pGame game,char* name,int ai,int nr)
 {
 	pMessage result = NULL;
 	if (game->local == 0)
@@ -396,6 +396,7 @@ pPlayer join_game(pGame game,char* name,int ai)
 		addToMessage(&message,"player_name",name);
 		numToMessage(&message,"game_id",game->id);
 		numToMessage(&message,"computer",ai);
+		numToMessage(&message,"nr",nr);
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
 			result = sendMessage(message,NULL,NULL,0,"join_game.php",HASE_SERVER);
@@ -416,6 +417,7 @@ pPlayer join_game(pGame game,char* name,int ai)
 	player->input_message = 0;
 	player->input_mutex = NULL;
 	player->input_thread = NULL;
+	player->nr = nr;
 	pMessage now = result;
 	while (now)
 	{
@@ -458,6 +460,7 @@ pPlayer join_game(pGame game,char* name,int ai)
 		new_player->input_message = 0;
 		new_player->input_mutex = NULL;
 		new_player->input_thread = NULL;
+		new_player->nr = nr;
 		new_player->next = game->local_player;
 		game->local_player = new_player;
 	}
@@ -558,6 +561,8 @@ int get_game(pGame game,pPlayer *playerList)
 					player->computer = atoi(now->content);
 				if (strcmp(now->name,"position_in_game") == 0)
 					player->position_in_game = atoi(now->content);
+				if (strcmp(now->name,"nr") == 0)
+					player->nr = atoi(now->content);
 			}
 			if (strcmp(now->name,"game_name") == 0)
 				sprintf(game->name,"%s",now->content);
@@ -595,6 +600,7 @@ int get_game(pGame game,pPlayer *playerList)
 			player->next = *playerList;
 			*playerList = player;
 			player->id = mom_player->id;
+			player->nr = mom_player->nr;
 			sprintf(player->name,"%s",mom_player->name);
 			player->pw = mom_player->pw;
 			player->game = mom_player->game;

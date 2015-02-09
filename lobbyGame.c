@@ -250,7 +250,7 @@ int lg_calc(Uint32 steps)
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
 		char m[256] = "";
-		if (text_box(lg_font,lg_resize,"Enter Message:",m,256) == 1)
+		if (text_box(lg_font,lg_resize,"Enter Message:",m,256,0) == 1)
 		{
 			if (lg_player->next)
 			{
@@ -286,12 +286,12 @@ int lg_calc(Uint32 steps)
 			message_box(lg_font,lg_resize,"Game full!");
 		else
 		{
-			if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32) == 1)
+			if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32,1) == 1)
 			{
 				if (lg_new_name[0] == 0)
 					message_box(lg_font,lg_resize,"No name entered...");
 				else
-				if ((lg_last_player->next = join_game(lg_game,lg_new_name,0)) == NULL)
+				if ((lg_last_player->next = join_game(lg_game,lg_new_name,0,get_last_sprite())) == NULL)
 					message_box(lg_font,lg_resize,"Game full...");
 				else
 				{
@@ -306,7 +306,7 @@ int lg_calc(Uint32 steps)
 		spGetInput()->button[MY_PRACTICE_4] = 0;
 		char leave_name[33];
 		sprintf(leave_name,"%s",lg_last_player->name);
-		if (text_box(lg_font,lg_resize,"Enter player name to leave:",leave_name,32) == 1)
+		if (text_box(lg_font,lg_resize,"Enter player name to leave:",leave_name,32,0) == 1)
 		{
 			if (leave_name[0] == 0)
 				message_box(lg_font,lg_resize,"No name entered...");
@@ -385,7 +385,7 @@ int lg_calc(Uint32 steps)
 	{
 		spGetInput()->button[MY_BUTTON_L] = 0;
 		char buffer[32];
-		pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1);
+		pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1,rand()%SPRITE_COUNT+1);
 		if (ai)
 		{
 			ai->next = lg_ai_list;
@@ -449,14 +449,14 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 	lg_reload_now = 0;
 	lg_ai_list = NULL;
 	lg_resize = resize;
-	if (text_box(font,resize,"Enter player name:",lg_name,32) == 1)
+	if (text_box(font,resize,"Enter player name:",lg_name,32,1) == 1)
 	{
 		if (lg_name[0] == 0)
 		{
 			message_box(font,resize,"No name entered...");
 			return;
 		}
-		if ((lg_player = join_game(game,lg_name,0)) == NULL)
+		if ((lg_player = join_game(game,lg_name,0,get_last_sprite())) == NULL)
 		{
 			message_box(font,resize,"Game full...");
 			return;

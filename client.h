@@ -135,6 +135,7 @@ typedef struct sPlayer
 	pThreadData last_input_data_read;
 	int input_message;
 	int computer;
+	int nr;
 	//ingame
 	pHare firstHare;
 	pHare activeHare;
@@ -159,7 +160,7 @@ void delete_game_list(pGame game);
 void delete_game(pGame game);
 int get_games(pGame *gameList);
 void delete_player_list(pPlayer player);
-pPlayer join_game(pGame game,char* name,int ai);
+pPlayer join_game(pGame game,char* name,int ai,int nr);
 void leave_game(pPlayer player);
 int get_game(pGame game,pPlayer *playerList);
 void set_status(pGame game,int status);

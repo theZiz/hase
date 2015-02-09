@@ -2,6 +2,33 @@
 #include "lobbyList.h"
 
 pWindow mg_window = NULL;
+int window_active = 0;
+spSpriteCollectionPointer window_sprite[SPRITE_COUNT];
+
+void init_window_sprites()
+{
+	int i;
+	for (i = 0; i < SPRITE_COUNT; i++)
+	{
+		char buffer[256];
+		sprintf(buffer,"./sprites/hase%i.ssc",i+1);
+		window_sprite[i] = spLoadSpriteCollection(buffer,NULL);
+		spSelectSprite(window_sprite[i],"high jump right");
+		spSetSpriteZoom(spActiveSprite(window_sprite[i]),spGetSizeFactor()/2,spGetSizeFactor()/2);
+	}
+}
+
+int get_last_sprite()
+{
+	return window_active+1;
+}
+
+void quit_window_sprites()
+{
+	int i;
+	for (i = 0; i < SPRITE_COUNT; i++)
+		spDeleteSpriteCollection(window_sprite[i],0);
+}	
 
 void update_window_width(pWindow window)
 {
@@ -30,6 +57,7 @@ pWindow create_window(int ( *feedback )( pWindowElement elem, int action ),spFon
 	window->oldScreen = NULL;
 	window->only_ok = 0;
 	window->count = 0;
+	window->show_selection = 0;
 	return window;
 }
 
@@ -107,6 +135,22 @@ void window_draw(void)
 		nr++;
 		elem = elem->next;
 	}
+	
+	if (window->show_selection)
+	{
+		y+=(spGetSizeFactor()*8 >> SP_ACCURACY)+window->font->maxheight*3/2;
+		spDrawSprite(screen->w/2, y, 0, spActiveSprite(window_sprite[window_active]));
+		spFontDrawRight( screen->w/2-(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "[l]", window->font );
+		spFontDraw     ( screen->w/2+(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "[r]", window->font );
+		y+=(spGetSizeFactor()*8 >> SP_ACCURACY);
+		sprintf(buffer,"\"%s\"",window_sprite[window_active]->comment);
+		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
+		sprintf(buffer,"made by %s (%s)",window_sprite[window_active]->author,window_sprite[window_active]->license);
+		y += window->font->maxheight;
+		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
+	}
+	
+	
 	y = (screen->h + window->height) / 2 - meow - 3*window->font->maxheight/2;
 	if (selElem)
 	{
@@ -174,6 +218,20 @@ void window_draw(void)
 int window_calc(Uint32 steps)
 {
 	pWindow window = recent_window;
+	if (window->show_selection)
+	{
+		spUpdateSprite(spActiveSprite(window_sprite[window_active]),steps);
+		if (spGetInput()->button[MY_BUTTON_L])
+		{
+			spGetInput()->button[MY_BUTTON_L] = 0;
+			window_active = (window_active + SPRITE_COUNT - 1) % SPRITE_COUNT;
+		}
+		if (spGetInput()->button[MY_BUTTON_R])
+		{
+			spGetInput()->button[MY_BUTTON_R] = 0;
+			window_active = (window_active + 1) % SPRITE_COUNT;
+		}
+	}
 	pWindowElement selElem = window->firstElement;
 	pWindowElement befElem = NULL;
 	int nr = 0;
@@ -416,13 +474,18 @@ int text_box_feedback( pWindowElement elem, int action )
 	return 0;
 }
 
-int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len)
+int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection)
 {
 	char* save_char = text_box_char;
 	int save_len = text_box_len;
 	text_box_char = text;
 	text_box_len = len;
 	pWindow window = create_window(text_box_feedback,font,caption);
+	if (show_selection)
+	{
+		window->show_selection = show_selection;
+		window->height += (spGetSizeFactor()*16 >> SP_ACCURACY) + 2*font->maxheight;
+	}
 	add_window_element(window,1,0);
 	int res = modal_window(window,resize);
 	delete_window(window);

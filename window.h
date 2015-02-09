@@ -3,6 +3,8 @@
 
 #include <sparrow3d.h>
 
+#define SPRITE_COUNT 18
+
 typedef struct sWindowElement *pWindowElement;
 typedef struct sWindowElement
 {
@@ -27,6 +29,7 @@ typedef struct sWindow
 	SDL_Surface* oldScreen;
 	int only_ok;
 	int count;
+	int show_selection;
 } tWindow;
 
 #define WN_ACT_UPDATE 0
@@ -42,9 +45,14 @@ int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ));
 void delete_window(pWindow window);
 
 void message_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption);
-int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len);
+int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection);
 
 int set_message(spFontPointer font, char* caption);
 void draw_message_draw(void);
+
+void init_window_sprites();
+void quit_window_sprites();
+
+int get_last_sprite();
 
 #endif

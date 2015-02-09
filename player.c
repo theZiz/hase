@@ -535,7 +535,6 @@ void init_player(pPlayer player_list,int pc,int hc)
 	for (i = 0; i < player_count; i++)
 	{
 		player[i]->time = 0;
-		int nr = spRand()%18+1;
 		for (j = 0; j < hc; j++)
 		{
 			pHare hare = add_hare(&(player[i]->firstHare));
@@ -563,7 +562,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 			hare->dy = 0;
 			hare->health = MAX_HEALTH;
 			char buffer[256];
-			sprintf(buffer,"./sprites/hase%i.ssc",nr);
+			sprintf(buffer,"./sprites/hase%i.ssc",player[i]->nr);
 			hare->hase = spLoadSpriteCollection(buffer,NULL);
 		}
 		player[i]->activeHare = player[i]->firstHare;
