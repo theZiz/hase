@@ -535,7 +535,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 	for (i = 0; i < player_count; i++)
 	{
 		player[i]->time = 0;
-		int nr = spRand()%10+1;
+		int nr = spRand()%18+1;
 		for (j = 0; j < hc; j++)
 		{
 			pHare hare = add_hare(&(player[i]->firstHare));

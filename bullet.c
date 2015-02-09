@@ -18,8 +18,8 @@ const int weapon_reference[WEAPON_Y][WEAPON_X] =
  {4,5,6}};
  
 char weapon_filename[WEAPON_Y][WEAPON_X][64] =
-{{"./data/weapon.png","./data/weapon2.png","./data/weapon3.png"},
- {"./data/weapon4.png","./data/weapon5.png","./data/weapon6.png"}};
+{{"./data/bazooka_big.png","./data/bazooka_middle.png","./data/bazooka_small.png"},
+ {"./data/build.png","./data/prev.png","./data/next.png"}};
  
 typedef SDL_Surface *PSDL_Surface;
 PSDL_Surface weapon_surface[WEAPON_Y][WEAPON_X] =
@@ -79,6 +79,7 @@ typedef struct sBullet
 	pBulletTrace* trace;
 	pBullet next;
 	int kind;
+	SDL_Surface* surface;
 } tBullet;
 
 #define IMPACT_TIME 30
@@ -103,7 +104,7 @@ void deleteAllBullets()
 void addToTrace(pBulletTrace* firstTrace,Sint32 x,Sint32 y,pBullet bullet);
 pBulletTrace* registerTrace(pPlayer player);
 
-pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer tracePlayer)
+pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer tracePlayer,SDL_Surface* surface)
 {
 	spSoundPlay(snd_shoot,-1,0,0,-1);
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
@@ -118,6 +119,7 @@ pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer traceP
 	bullet->dy = spMul(spSin(direction),power);
 	bullet->age = 0;
 	bullet->kind = 0;
+	bullet->surface = surface;
 	if (tracePlayer)
 	{
 		bullet->trace = registerTrace(tracePlayer);
@@ -140,7 +142,7 @@ void drawBullets()
 			Sint32 oy = spMul(momBullet->y-posY,zoom);
 			Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 			Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,bullet,zoom*BULLET_SIZE/16,zoom*BULLET_SIZE/16,momBullet->rotation);
+			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,momBullet->surface,zoom*BULLET_SIZE/16,zoom*BULLET_SIZE/16,momBullet->rotation);
 		}
 		momBullet = momBullet->next;
 	}

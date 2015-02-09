@@ -22,7 +22,6 @@ SDL_Surface* level;
 SDL_Surface* level_original;
 Uint16* level_pixel;
 SDL_Surface* arrow;
-SDL_Surface* bullet;
 int posX,posY,rotation;
 Sint32 zoom;
 Sint32 zoom_d; 
@@ -122,7 +121,7 @@ void draw(void)
 					spSetBlending( SP_ONE );
 				}
 				//Weapon
-				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[hare->wp_y][hare->wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
+				//spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[hare->wp_y][hare->wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
 				//building
 				if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] == 4)
 				{
@@ -727,7 +726,7 @@ int calc(Uint32 steps)
 									if (weapon_points > 0)
 									{
 										weapon_points-=3;
-										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player])->kind = 1;
+										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x])->kind = 1;
 									}
 									break;
 								}
@@ -828,7 +827,7 @@ int calc(Uint32 steps)
 						weapon_points-=weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 						if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] < 4)
 						{
-							pBullet bullet = shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player]);
+							pBullet bullet = shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x]);
 							bullet->kind = weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 						}
 						else
@@ -963,7 +962,6 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	loadInformation("Loading images...");
 	targeting = spLoadSpriteCollection("./data/targeting.ssc",NULL);
 	arrow = spLoadSurface("./data/gravity.png");
-	bullet = spLoadSurface("./data/bullet.png");
 	load_weapons();
 	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
 	loadInformation("Creating level...");
@@ -1038,7 +1036,6 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	}
 	spDeleteSpriteCollection(targeting,0);
 	spDeleteSurface(arrow);
-	spDeleteSurface(bullet);
 	spDeleteSurface(level);
 	spDeleteSurface(level_original);
 	spDeleteSurface(gravity_surface);
