@@ -1,7 +1,11 @@
 default = stand left
-image = ./data/hase10.png
+image = ./data/hase3.png
 framesize = 34, 34
 bordersize = 34, 34
+
+author = Ziz
+license = CC-BY-SA
+comment = My little hase, gravity is magic
 
 [stand left]
 frame = 0, 0

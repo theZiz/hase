@@ -563,7 +563,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 			hare->dy = 0;
 			hare->health = MAX_HEALTH;
 			char buffer[256];
-			sprintf(buffer,"./data/hase%i.ssc",nr);
+			sprintf(buffer,"./sprites/hase%i.ssc",nr);
 			hare->hase = spLoadSpriteCollection(buffer,NULL);
 		}
 		player[i]->activeHare = player[i]->firstHare;

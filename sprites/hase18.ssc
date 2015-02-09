@@ -1,7 +1,11 @@
 default = stand left
-image = ./data/hase5.png
+image = ./data/hase18.png
 framesize = 34, 34
 bordersize = 34, 34
+
+author = Ziz
+license = CC-BY-SA
+comment = All your hares belong to us!
 
 [stand left]
 frame = 0, 0

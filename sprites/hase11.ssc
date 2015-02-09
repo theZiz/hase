@@ -1,7 +1,11 @@
 default = stand left
-image = ./data/hase4.png
+image = ./data/hase11.png
 framesize = 34, 34
 bordersize = 34, 34
+
+author = Levi
+license = CC-BY-SA
+comment = I am a worm with a hat!
 
 [stand left]
 frame = 0, 0

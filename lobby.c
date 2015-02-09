@@ -112,8 +112,7 @@ int local_game_feedback( pWindowElement elem, int action )
 int main(int argc, char **argv)
 {
 	spSetRand(time(NULL));
-	spSetDefaultWindowSize( 320, 240 );
-	//spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	spInitNet();
 	spSoundInit();

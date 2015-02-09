@@ -1,7 +1,11 @@
 default = stand left
-image = ./data/hase7.png
+image = ./data/hase9.png
 framesize = 34, 34
 bordersize = 34, 34
+
+author = pmprog
+license = CC-BY-SA
+comment = I am a guy.
 
 [stand left]
 frame = 0, 0

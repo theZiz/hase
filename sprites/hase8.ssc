@@ -1,7 +1,11 @@
 default = stand left
-image = ./data/hase2.png
+image = ./data/hase8.png
 framesize = 34, 34
 bordersize = 34, 34
+
+author = mcobit
+license = CC-BY-SA
+comment = Where is my prehistoric hazelnut?
 
 [stand left]
 frame = 0, 0

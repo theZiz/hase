@@ -1,7 +1,11 @@
 default = stand left
-image = ./data/hase1.png
+image = ./data/hase5.png
 framesize = 34, 34
 bordersize = 34, 34
+
+author = Gab1975
+license = CC-BY-SA
+comment = Boing!
 
 [stand left]
 frame = 0, 0
