@@ -8,6 +8,8 @@ int op_sample_volume = SP_VOLUME_MAX << VOLUME_SHIFT;
 int op_particles = 1;
 int op_rotation = 1;
 int op_direction_flip = 0;
+char op_server[512] = "ziz.gp2x.de/hase.php";
+char op_username[32] = SP_DEVICE_STRING" User";
 
 int gop_zoom()
 {
@@ -42,6 +44,16 @@ int gop_rotation()
 int gop_direction_flip()
 {
 	return op_direction_flip;
+}
+
+char* gop_server()
+{
+	return op_server;
+}
+
+char* gop_username()
+{
+	return op_username;
 }
 
 void sop_zoom(int v)
@@ -93,12 +105,30 @@ void sop_direction_flip(int v)
 	op_direction_flip = v & 1;
 }
 
+void sop_server(char* server)
+{
+	sprintf(op_server,"%s",server);
+}
+
+void sop_username(char* username)
+{
+	snprintf(op_username,32,"%s",username);
+}
+
 void load_options()
 {
 	spConfigPointer conf = spConfigRead("config.ini","hase");
 	spConfigEntryPointer entry = conf->firstEntry;
+	int found_username = 0;
 	while (entry)
 	{
+		if (strcmp(entry->key,"username") == 0)
+		{
+			found_username = 1;
+			sop_username(entry->value);
+		}
+		if (strcmp(entry->key,"server") == 0)
+			sop_server(entry->value);
 		if (strcmp(entry->key,"zoom") == 0)
 			sop_zoom(atoi(entry->value));
 		if (strcmp(entry->key,"circle") == 0)
@@ -115,6 +145,12 @@ void load_options()
 			sop_direction_flip(atoi(entry->value));
 		entry = entry->next;
 	}
+	spNetC4AProfilePointer profile;
+	if (found_username == 0 && (profile = spNetC4AGetProfile()))
+	{
+		 sop_username(profile->longname);
+		 spNetC4AFreeProfile(profile);
+	}
 	sop_music_volume(gop_music_volume());
 	sop_sample_volume(gop_sample_volume());
 	spConfigFree(conf);
@@ -130,6 +166,8 @@ void save_options()
 	spConfigSetInt(conf,"particles",op_particles);
 	spConfigSetInt(conf,"rotation",op_rotation);
 	spConfigSetInt(conf,"direction_flip",op_direction_flip);
+	sprintf(spConfigGetString(conf,"server",""),"%s",op_server);
+	sprintf(spConfigGetString(conf,"username",""),"%s",op_username);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }

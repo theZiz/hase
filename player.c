@@ -534,6 +534,8 @@ void init_player(pPlayer player_list,int pc,int hc)
 		player[i]->firstHare = NULL;
 	for (i = 0; i < player_count; i++)
 	{
+		player[i]->d_time = 0;
+		player[i]->d_health = 0;
 		player[i]->time = 0;
 		for (j = 0; j < hc; j++)
 		{

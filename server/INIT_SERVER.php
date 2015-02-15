@@ -40,7 +40,8 @@ $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."player_list` (".
 "  `computer` int(11) NOT NULL,".
 "  `chat_get_time` int(11) NOT NULL,".
 "  `status` int(11) NOT NULL,".
-"  `heartbeat_time` int(11) NOT NULL".
+"  `heartbeat_time` int(11) NOT NULL,".
+"  `nr` int(11) NOT NULL".
 ") ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=0;";
 mysql_query($query) or die;
 $query = "ALTER TABLE `".$mysql_prefix."chat_list`".

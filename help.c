@@ -4,7 +4,7 @@ void draw_help()
 {
 	if (help == 0)
 	{
-		spFontDraw( 2, screen->h-font->maxheight-2, 0, "[R]Help", font );
+		spFontDrawRight( screen->w-1, 0, 0, "[R]Help", font );
 		return;
 	}
 	int h = 11*font->maxheight+4;

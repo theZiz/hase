@@ -4,8 +4,6 @@
 #include <sparrow3d.h>
 #include "lobbyGame.h"
 
-#define LL_VERSION 8
-
 #define LL_FG spGetRGB(128,128,160)
 #define LL_BG spGetRGB(64,64,80)
 

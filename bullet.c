@@ -491,7 +491,11 @@ int updateBullets()
 										spFixedToInt(hare->y-momBullet->y)*spFixedToInt(hare->y-momBullet->y);
 									d = rad*rad-d;
 								if (d > 0)
+								{
 									hare->health -= d*MAX_HEALTH/(2048+momBullet->kind*128);
+									player[j]->d_health -= d*MAX_HEALTH/(2048+momBullet->kind*128);
+									player[j]->d_time = 5000;
+								}
 								if (hare->health <= 0)
 								{
 									if (hare == player[j]->activeHare ||

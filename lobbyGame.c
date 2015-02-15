@@ -3,12 +3,13 @@
 #include <time.h> 
 #include "window.h"
 
+#include "options.h"
+
 #define LG_WAIT 5000
 
 spFontPointer lg_font;
 void ( *lg_resize )( Uint16 w, Uint16 h );
 int lg_counter;
-char lg_name[32] = SP_DEVICE_STRING" User";
 pGame lg_game;
 int lg_reload_now = 0;
 SDL_Surface* lg_level = NULL;
@@ -449,14 +450,14 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 	lg_reload_now = 0;
 	lg_ai_list = NULL;
 	lg_resize = resize;
-	if (text_box(font,resize,"Enter player name:",lg_name,32,1) == 1)
+	if (text_box(font,resize,"Enter player name:",gop_username(),32,1) == 1)
 	{
-		if (lg_name[0] == 0)
+		if (gop_username()[0] == 0)
 		{
 			message_box(font,resize,"No name entered...");
 			return;
 		}
-		if ((lg_player = join_game(game,lg_name,0,get_last_sprite())) == NULL)
+		if ((lg_player = join_game(game,gop_username(),0,get_last_sprite())) == NULL)
 		{
 			message_box(font,resize,"Game full...");
 			return;

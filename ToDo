@@ -1,17 +1,6 @@
 For next version:
-* game server in config
-	* Multiple servers
-	* server input in servers.ini as url:port
-	* settings ingame
-	* only address + port
-	* configuration of IRC & Co in gameinfo.php
-	* disable/enable
-	* Warning for every server version. If all: one warning + kick
-* global username
-* username saving
-* C4A username guessing
+* global username (for lobby)
 * ingame chat via IRC
-	* irc server and channel from gameinfo.php
 	* global user name is IRC name
 	* new attribute for every player: IRC name
 	* sparrowNet IRC stuff
@@ -25,10 +14,7 @@ For next version:
 	* button for a random insult
 	* lobby chat
 	* rename ingame?
-* Showing how health is removed
 * ingame chat with IRC
-* different sprites (kangoroo and co)
-* sprite adjustable
 * not closing games "somehow"
 * Some items (health, extra WP, mines)
 * Weapons

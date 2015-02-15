@@ -8,6 +8,14 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.0
+- More sprites
+- Sprites chooseable
+- Username saving
+- Username guessing with C4A profile information
+- server improvements
+- better weapon illustration
+
 1.4.7.2
 - Added button arrow images to sparrow3d and use them now in hase in the help
 

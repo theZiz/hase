@@ -5,6 +5,8 @@
 #include <sparrowNet.h>
 #include <sparrow3d.h>
 
+#define CLIENT_VERSION 10
+
 #define TRACE_COUNT 16
 /*
 #define MY_BUTTON_START SP_BUTTON_START
@@ -144,6 +146,8 @@ typedef struct sPlayer
 	int time;
 	pBulletTrace trace[TRACE_COUNT];
 	int tracePos;
+	int d_health;
+	int d_time;
 } tPlayer;
 
 typedef struct sThreadData

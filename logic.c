@@ -5,6 +5,10 @@ int do_physics()
 	{
 		if (player[j]->firstHare == NULL)
 			continue;
+		if (player[j]->d_time > 0)
+			player[j]->d_time--;
+		if (player[j]->d_time == 0)
+			player[j]->d_health = 0;
 		pHare hare = player[j]->firstHare;
 		if (hare)
 		do

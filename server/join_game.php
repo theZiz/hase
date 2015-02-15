@@ -8,6 +8,7 @@ $game_id = (int)$_POST['game_id'];
 $player_name = mysql_real_escape_string($_POST['player_name']);
 $player_pw = rand();
 $computer = (int)$_POST['computer'];
+$nr = (int)$_POST['nr'];
 
 //counting players
 $result = mysql_query("SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'");
@@ -27,8 +28,8 @@ if ($player_count >= $max_player || $status != 0)
 else
 {
 	$now = time();
-	$query = "INSERT INTO " . $mysql_prefix . "player_list (game_id, player_pw, player_name, position_in_game, computer, chat_get_time, status, heartbeat_time) ".
-	"VALUES ( '$game_id', '$player_pw', '$player_name', '0', '$computer', '0', '0', '$now')";
+	$query = "INSERT INTO " . $mysql_prefix . "player_list (game_id, player_pw, player_name, position_in_game, computer, chat_get_time, status, heartbeat_time, nr) ".
+	"VALUES ( '$game_id', '$player_pw', '$player_name', '0', '$computer', '0', '0', '$now', '$nr')";
 
 	mysql_query($query) or die;
 	$player_id = mysql_insert_id();

@@ -210,16 +210,11 @@ void draw(void)
 		draw_message();
 	
 	//HID
-	int y = screen->h - (alive_count+1) * font->maxheight*(spGetSizeFactor() > SP_ONE?4:3)/4 - 1;
+	int y = screen->h - alive_count * (font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY));
 	for (j = 0; j < player_count; j++)
 	{
 		if (player[j]->firstHare == NULL)
 			continue;
-		int x = screen->w/3;
-		if  (j == active_player)
-			y += font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4;
-		sprintf(buffer,"%s ",player[j]->name);
-		spFontDrawRight(x, y, 0, buffer, font );
 		int health = 0;
 		int count = 0;
 		pHare hare = player[j]->firstHare;
@@ -230,20 +225,33 @@ void draw(void)
 			hare = hare->next;
 		}
 		while (hare != player[j]->firstHare);
+		
 		int w = health*screen->w/(hase_game->hares_per_player*MAX_HEALTH*5);
-		if  (j == active_player)
-			spRectangle(x+w/2, y+font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4,0,w,font->maxheight*5/4*(spGetSizeFactor() > SP_ONE?4:3)/4,spSpriteAverageColor(hare->hase->active));
-		else
-		{
+		if  (j != active_player)
 			spSetPattern8(153,60,102,195,153,60,102,195);
-			spRectangle(x+w/2, y+font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4,0,w,font->maxheight*3/4*(spGetSizeFactor() > SP_ONE?4:3)/4,spSpriteAverageColor(hare->hase->active));
-			spDeactivatePattern();			
+		spRectangle(w/2, y+font->maxheight*3/8,0,w,font->maxheight*3/4,spSpriteAverageColor(hare->hase->active));
+		spDeactivatePattern();
+
+		sprintf(buffer,"%i/%i",health,hase_game->hares_per_player*MAX_HEALTH);
+		int width = spFontWidth(buffer,font);
+		int pos_x = w/2-width/2;
+		if (pos_x < 0)
+			pos_x = 0;
+		spFontDraw(pos_x,y-font->maxheight/8,0,buffer,font);
+		w = spMax(w,width);
+		sprintf(buffer,"%s (%i)",player[j]->name,count);
+		w += spFontDraw(w+2, y-font->maxheight/8, 0, buffer, font );
+
+		if (player[j]->d_health)
+		{
+			if (player[j]->d_health < 0)
+				sprintf(buffer," %i",player[j]->d_health);
+			else
+				sprintf(buffer," -%i",player[j]->d_health);
+			spFontDraw(w+2,y+font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4-font->maxheight/2,0,buffer,font);
 		}
-		sprintf(buffer,"%i/%i",count,hase_game->hares_per_player);
-		spFontDraw(x+w+2, y, 0, buffer, font );
-		y += font->maxheight*(spGetSizeFactor() > SP_ONE?4:3)/4;
-		if  (j == active_player)
-			y += font->maxheight/2*(spGetSizeFactor() > SP_ONE?4:3)/4;
+
+		y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 	}
 	
 	
