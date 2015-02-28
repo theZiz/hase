@@ -58,6 +58,7 @@ pWindow create_window(int ( *feedback )( pWindowElement elem, int action ),spFon
 	window->only_ok = 0;
 	window->count = 0;
 	window->show_selection = 0;
+	window->sprite_count = NULL;
 	return window;
 }
 
@@ -139,9 +140,21 @@ void window_draw(void)
 	if (window->show_selection)
 	{
 		y+=(spGetSizeFactor()*8 >> SP_ACCURACY)+window->font->maxheight*3/2;
-		spDrawSprite(screen->w/2, y, 0, spActiveSprite(window_sprite[window_active]));
-		spFontDrawRight( screen->w/2-(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "[l]", window->font );
-		spFontDraw     ( screen->w/2+(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "[r]", window->font );
+		int to_left = -spFontWidth("[r]",window->font);
+		if (window->sprite_count && window->sprite_count[window_active])
+		{
+			if (window->sprite_count[window_active] == 1)
+				sprintf(buffer,"[r] (already used one time)");
+			else
+				sprintf(buffer,"[r] (already used %i times)",window->sprite_count[window_active]);
+		}
+		else
+			sprintf(buffer,"[r]");
+		to_left += spFontWidth(buffer,window->font);
+		to_left /= 2;
+		spDrawSprite(screen->w/2-to_left, y, 0, spActiveSprite(window_sprite[window_active]));
+		spFontDrawRight( screen->w/2-to_left-(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "[l]", window->font );
+		spFontDraw     ( screen->w/2-to_left+(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
 		y+=(spGetSizeFactor()*8 >> SP_ACCURACY);
 		sprintf(buffer,"\"%s\"",window_sprite[window_active]->comment);
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
@@ -474,7 +487,7 @@ int text_box_feedback( pWindowElement elem, int action )
 	return 0;
 }
 
-int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection)
+int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection,int* sprite_count)
 {
 	char* save_char = text_box_char;
 	int save_len = text_box_len;
@@ -484,6 +497,7 @@ int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* c
 	if (show_selection)
 	{
 		window->show_selection = show_selection;
+		window->sprite_count = sprite_count;
 		window->height += (spGetSizeFactor()*16 >> SP_ACCURACY) + 2*font->maxheight;
 	}
 	add_window_element(window,1,0);

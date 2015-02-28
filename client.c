@@ -294,6 +294,7 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 	game->local_player = NULL;
 	game->local_counter = 0;
 	game->next = NULL;
+	memset(game->sprite_count,0,sizeof(int)*SPRITE_COUNT);
 	pMessage now = result;
 	while (now)
 	{
@@ -379,7 +380,8 @@ int get_games(pGame *gameList)
 			game->status = 0;
 			game->admin_pw = 0;
 			game->next = NULL;
-			game->local = 0;	
+			game->local = 0;
+			memset(game->sprite_count,0,sizeof(int)*SPRITE_COUNT);
 		}
 		if (strcmp(now->name,"game_name") == 0)
 			sprintf(game->name,"%s",now->content);
@@ -423,6 +425,10 @@ void delete_player_list(pPlayer player)
 
 pPlayer join_game(pGame game,char* name,int ai,int nr)
 {
+	if (nr < 1)
+		nr = 1;
+	if (nr > SPRITE_COUNT)
+		nr = SPRITE_COUNT;
 	pMessage result = NULL;
 	if (game->local == 0)
 	{
@@ -498,11 +504,13 @@ pPlayer join_game(pGame game,char* name,int ai,int nr)
 		new_player->next = game->local_player;
 		game->local_player = new_player;
 	}
+	game->sprite_count[nr-1]++;
 	return player;
 }
 
 void leave_game(pPlayer player)
 {
+	player->game->sprite_count[player->nr-1]--;
 	if (player->game->local == 0)
 	{
 		pMessage message = NULL;
@@ -548,6 +556,7 @@ void leave_game(pPlayer player)
 
 int get_game(pGame game,pPlayer *playerList)
 {
+	memset(game->sprite_count,0,sizeof(int)*SPRITE_COUNT);
 	if (game->local == 0)
 	{
 		pMessage message = NULL;
@@ -596,7 +605,10 @@ int get_game(pGame game,pPlayer *playerList)
 				if (strcmp(now->name,"position_in_game") == 0)
 					player->position_in_game = atoi(now->content);
 				if (strcmp(now->name,"nr") == 0)
+				{
 					player->nr = atoi(now->content);
+					game->sprite_count[player->nr-1]++;
+				}
 			}
 			if (strcmp(now->name,"game_name") == 0)
 				sprintf(game->name,"%s",now->content);
@@ -635,6 +647,7 @@ int get_game(pGame game,pPlayer *playerList)
 			*playerList = player;
 			player->id = mom_player->id;
 			player->nr = mom_player->nr;
+			game->sprite_count[player->nr-1]++;
 			sprintf(player->name,"%s",mom_player->name);
 			player->pw = mom_player->pw;
 			player->game = mom_player->game;

@@ -49,6 +49,8 @@
 
 #define KEY_POLL_MASK SP_PRACTICE_OK_NOWASD_MASK
 
+#define SPRITE_COUNT 18
+
 typedef struct sMessage *pMessage;
 typedef struct sMessage
 {
@@ -91,6 +93,7 @@ typedef struct sGame
 	SDL_Thread* chat_thread;
 	int chat_message;
 	int chat_sleep;
+	int sprite_count[SPRITE_COUNT];
 } tGame;
 
 typedef struct sThreadData *pThreadData;

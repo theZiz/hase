@@ -1,4 +1,5 @@
 For next version:
+* better bullet camera following
 * global username (for lobby)
 * ingame chat via IRC
 	* global user name is IRC name
