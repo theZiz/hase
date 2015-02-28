@@ -230,6 +230,9 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	return result;
 }
 
+char irc_server[256] = "";
+char irc_channel[256] = "";
+
 int server_info()
 {
 	pMessage result = sendMessage(NULL,NULL,NULL,0,"",gop_server());
@@ -238,6 +241,12 @@ int server_info()
 	pMessage mom = result;
 	while (mom)
 	{
+		if (strcmp(mom->name,"irc_server") == 0)
+			sprintf(irc_server,"%s",mom->content);
+		else
+		if (strcmp(mom->name,"irc_channel") == 0)
+			sprintf(irc_channel,"%s",mom->content);
+		else
 		if (strcmp(mom->name,"version") == 0)
 		{
 			int version = atoi(mom->content);
@@ -274,9 +283,8 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 			return NULL;
 	}
 	pGame game = (pGame)malloc(sizeof(tGame));
-	game->chat_message = 0;
-	game->chat_thread = NULL;
-	game->chat = NULL;
+	game->heartbeat_message = 0;
+	game->heartbeat_thread = NULL;
 	game->id = -1;
 	sprintf(game->name,"%s",game_name);
 	sprintf(game->level_string,"%s",level_string);
@@ -367,9 +375,8 @@ int get_games(pGame *gameList)
 				*gameList = (pGame)malloc(sizeof(tGame));
 				game = *gameList;
 			}
-			game->chat_message = 0;
-			game->chat_thread = NULL;
-			game->chat = NULL;
+			game->heartbeat_message = 0;
+			game->heartbeat_thread = NULL;
 			game->id = atoi(now->content);
 			game->name[0] = 0;
 			game->level_string[0] = 0;
@@ -934,26 +941,48 @@ int connect_to_server()
 	return 0;
 }
 
-int send_chat(pGame game,char* name,char* chat_message)
+spNetIRCServerPointer server = NULL;
+spNetIRCChannelPointer channel = NULL;
+
+void start_irc_client(char* name)
 {
-	pMessage message = NULL;
-	numToMessage(&message,"game_id",game->id);
-	addToMessage(&message,"chat_name",name);
-	addToMessage(&message,"chat_message",chat_message);
-	pMessage result = NULL;
-	int i;
-	for (i = 0; i < 3 && result == NULL;i++)
-		result = sendMessage(message,NULL,NULL,0,"send_chat.php",hase_url);
-	deleteMessage(&message);
-	int res = 0;
-	if (result == NULL)
-		res = 1;
-	deleteMessage(&result);
-	game->chat_sleep = 0;
-	return res;
+	if (server)
+		return;
+	server = spNetIRCConnectServer(irc_server,6667,name,name,name,"*");
 }
 
-void get_chat(pPlayer player)
+void try_to_join()
+{
+	if (channel == NULL && server && spNetIRCServerReady(server))
+		channel = spNetIRCJoinChannel(server,irc_channel);
+}
+
+void stop_irc_client()
+{
+	if (server)
+		spNetIRCCloseServer(server);
+	server = NULL;
+	channel = NULL;
+}
+
+spNetIRCChannelPointer get_channel()
+{
+	if (channel && spNetIRCChannelReady(channel) != 1)
+		return NULL;
+	return channel;
+}
+
+void send_chat(pGame game,char* chat_message)
+{
+	char buffer[512];
+	if (game)
+		sprintf(buffer,"<%s> %s",game->name,chat_message);
+	else
+		sprintf(buffer,"%s",chat_message);
+	spNetIRCSendMessage(server,channel,buffer);
+}
+
+void heartbeat(pPlayer player)
 {
 	pMessage message = NULL;
 	numToMessage(&message,"game_id",player->game->id);
@@ -961,75 +990,52 @@ void get_chat(pPlayer player)
 	pMessage result = NULL;
 	int i;
 	for (i = 0; i < 3 && result == NULL;i++)
-		result = sendMessage(message,NULL,NULL,0,"get_chat.php",hase_url);
+		result = sendMessage(message,NULL,NULL,0,"heartbeat.php",hase_url);
 	if (result == NULL)
 		return;
-	pChatMessage new_list = NULL;
-	pChatMessage end_list = NULL;
-	pMessage now = result;
-	while (now)
-	{
-		if (strcmp(now->name,"chat_name") == 0)
-		{
-			pChatMessage new_chat = (pChatMessage)malloc(sizeof(tChatMessage));
-			new_chat->birthtime = time(NULL);
-			new_chat->message[0] = 0;
-			new_chat->realtime = 0;
-			new_chat->next = new_list;
-			if (end_list == NULL)
-				end_list = new_chat;
-			new_list = new_chat;
-			sprintf(new_list->name,"%s",now->content);
-		}
-		if (strcmp(now->name,"chat_message") == 0)
-			sprintf(new_list->message,"%s",now->content);
-		if (strcmp(now->name,"chat_time") == 0)
-			new_list->realtime = atoi(now->content);
-		now = now->next;
-	}
 	deleteMessage(&result);
-	if (end_list)
-	{
-		end_list->next = player->game->chat;
-		player->game->chat = new_list;
-	}
 }
 
-int chat_thread_function(void* data)
+int heartbeat_thread_function(void* data)
 {
 	pPlayer player = data;
-	while (player->game->chat_message != -1)
+	while (player->game->heartbeat_message != -1)
 	{
-		get_chat(player);
+		heartbeat(player);
 		int count = 0;
-		while (count < 50 && player->game->chat_sleep)
+		while (count < 50 && player->game->heartbeat_message == 0)
 		{
 			spSleep(100000);
 			count++;
 		}
-		if (player->game->chat_sleep == 0)
-			player->game->chat_sleep = 1;
 	}
 	return 0;
 }
 
-void start_chat_listener(pPlayer player)
+void start_hearbeat(pPlayer player)
 {
-	player->game->chat_message = 0;
-	player->game->chat_thread = SDL_CreateThread(chat_thread_function,(void*)player);	
+	player->game->heartbeat_message = 0;
+	player->game->heartbeat_thread = SDL_CreateThread(heartbeat_thread_function,(void*)player);	
 }
 
-void stop_chat_listener(pPlayer player)
+void stop_heartbeat(pPlayer player)
 {
-	player->game->chat_message = -1;
-	player->game->chat_sleep = 1;
+	player->game->heartbeat_message = -1;
 	int result;
-	SDL_WaitThread(player->game->chat_thread,&(result));
-	player->game->chat_thread = NULL;
-	while (player->game->chat)
+	SDL_WaitThread(player->game->heartbeat_thread,&(result));
+	player->game->heartbeat_thread = NULL;
+}
+
+char* ingame_message(char* message,char* game_name)
+{
+	char search[512];
+	sprintf(search,"<%s> ",game_name);
+	if (strstr(message,search) == message)
 	{
-		pChatMessage next = player->game->chat->next;
-		free(player->game->chat);
-		player->game->chat = next;
+		int l;
+		for (l = strlen(search);l > 0;l--)
+			message++;
+		return message;
 	}
+	return NULL;
 }

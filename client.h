@@ -60,16 +60,6 @@ typedef struct sMessage
 	pMessage next;
 } tMessage;
 
-typedef struct sChatMessage *pChatMessage;
-typedef struct sChatMessage
-{
-	char name[256];
-	char message[256];
-	int birthtime;
-	int realtime;
-	pChatMessage next;
-} tChatMessage;
-
 typedef struct sPlayer *pPlayer;
 
 typedef struct sGame *pGame;
@@ -89,10 +79,8 @@ typedef struct sGame
 	int local;
 	pPlayer local_player;
 	int local_counter;
-	pChatMessage chat;
-	SDL_Thread* chat_thread;
-	int chat_message;
-	int chat_sleep;
+	int heartbeat_message;
+	SDL_Thread* heartbeat_thread;
 	int sprite_count[SPRITE_COUNT];
 } tGame;
 
@@ -185,9 +173,16 @@ void end_pull_thread(pPlayer player);
 
 int connect_to_server();
 
-int send_chat(pGame game,char* name,char* chat_message);
-void get_chat(pPlayer player);
-void start_chat_listener(pPlayer player);
-void stop_chat_listener(pPlayer player);
+
+void start_irc_client(char* name);
+void stop_irc_client();
+void try_to_join();
+spNetIRCChannelPointer get_channel();
+
+void send_chat(pGame game,char* chat_message);
+void start_heartbeat(pPlayer player);
+void stop_heartbeat(pPlayer player);
+
+char* ingame_message(char* message,char* game_name);
 
 #endif

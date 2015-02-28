@@ -646,10 +646,10 @@ int calc(Uint32 steps)
 				int c = 1;
 				while (momBullet)
 				{
-					destX += momBullet->x;
-					destY += momBullet->y;
+					destX += momBullet->x*4;
+					destY += momBullet->y*4;
 					momBullet = momBullet->next;
-					c++;
+					c+=4;
 				}
 				destX /= c;
 				destY /= c;

@@ -1,22 +1,6 @@
 For next version:
-* better bullet camera following
-* global username (for lobby)
-* ingame chat via IRC
-	* global user name is IRC name
-	* new attribute for every player: IRC name
-	* sparrowNet IRC stuff
-		* start IRC thread (server, port, nickname, etc.)
-		* end IRC thread
-		* send command
-		* join channel
-		* send message
-		* get message (if new one, otherwise 0)
-	* old chat approach only for heart beat
-	* button for a random insult
-	* lobby chat
-	* rename ingame?
+* button for a random insult
 * ingame chat with IRC
-* not closing games "somehow"
 * Some items (health, extra WP, mines)
 * Weapons
 	* small circle building tool (1 wp)

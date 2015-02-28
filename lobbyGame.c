@@ -4,6 +4,7 @@
 #include "window.h"
 
 #include "options.h"
+#include "client.h"
 
 #define LG_WAIT 5000
 
@@ -18,9 +19,9 @@ pPlayer lg_player;
 pPlayer lg_last_player;
 spTextBlockPointer lg_block = NULL;
 spTextBlockPointer lg_chat_block = NULL;
-char lg_level_string[512];
-pChatMessage lg_last_chat = NULL;
+spNetIRCMessagePointer lg_last_read_message = NULL;
 Sint32 lg_scroll;
+char lg_level_string[512];
 
 #define CHAT_LINES 4
 
@@ -82,12 +83,17 @@ void lg_draw(void)
 		}
 	}
 	//Chat
-	spRectangle(screen->w/2, l_w+(4+CHAT_LINES)*lg_font->maxheight/2+4, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);
 	if (lg_game->local)
 		spFontDrawMiddle(screen->w/2, l_w+(3+CHAT_LINES)*lg_font->maxheight/2+4, 0,"No chat in local game",lg_font);
 	else
-	if (lg_chat_block)
-		spFontDrawTextBlock(left,4, l_w+2*lg_font->maxheight+4, 0,lg_chat_block,CHAT_LINES*lg_font->maxheight,lg_scroll,lg_font);
+	if (get_channel() == NULL)
+		spFontDrawMiddle(screen->w/2, l_w+(3+CHAT_LINES)*lg_font->maxheight/2+4, 0,"Connecting to IRC...",lg_font);
+	else
+	{
+		spRectangle(screen->w/2, l_w+(4+CHAT_LINES)*lg_font->maxheight/2+4, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);
+		if (lg_chat_block)
+			spFontDrawTextBlock(left,4, l_w+2*lg_font->maxheight+4, 0,lg_chat_block,CHAT_LINES*lg_font->maxheight,lg_scroll,lg_font);
+	}
 	//Footline
 	if (lg_reload_now)
 	{
@@ -96,11 +102,14 @@ void lg_draw(void)
 	}
 	else
 	{
-		if (lg_game->local)
+		if (lg_game->local || (lg_game->admin_pw && get_channel() == NULL))
 			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave and close game", lg_font );
 		else
-		if (lg_game->admin_pw == 0)
+		if (lg_game->admin_pw == 0 && get_channel())
 			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave game", lg_font );
+		else
+		if (lg_game->admin_pw == 0 && get_channel() == NULL)
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave game", lg_font );
 		else
 			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave and close game", lg_font );
 		if (!lg_game->local)
@@ -191,6 +200,7 @@ char lg_chat_text[65536];
 
 int lg_calc(Uint32 steps)
 {
+	try_to_join();
 	if (lg_chat_block)
 	{
 		if (lg_chat_block->line_count <= CHAT_LINES)
@@ -213,67 +223,52 @@ int lg_calc(Uint32 steps)
 			}
 		}
 	}
-	if (lg_last_chat != lg_game->chat)
+	if (get_channel() && get_channel()->first_message)
 	{
-		pChatMessage now = lg_game->chat;
-		char temp1[65536] = "";
-		char temp2[65536] = "";
-		char* t1 = temp1;
-		char* t2 = temp2;
-		while (now != lg_last_chat)
+		char buffer[2048];
+		char* message;
+		if (lg_last_read_message == NULL)
 		{
-			char t[32];
-			time_t birthtime = now->realtime;
-			strftime(t,32,"%T",localtime(&birthtime));
-			printf("%s: %s\n",now->name,now->message);
-			if (now->next == lg_last_chat)
-				sprintf(t1,"%s(%s)%s: %s",t2,t,now->name,now->message);
-			else
-				sprintf(t1,"%s(%s)%s: %s\n",t2,t,now->name,now->message);
-			char* tt = t1;
-			t1 = t2;
-			t2 = tt;
-			now = now->next;
+			if (message = ingame_message(get_channel()->first_message->message,lg_game->name))
+			{
+				sprintf(buffer,"%s: %s",get_channel()->first_message->user,message);
+				lg_chat_block = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,lg_font);
+			}
+			lg_last_read_message = get_channel()->first_message;
 		}
-		if (lg_chat_text[0] == 0)
-			t1 = t2;
-		else
-			sprintf(t1,"%s\n%s",lg_chat_text,t2);
-		sprintf(lg_chat_text,"%s",t1);
-		if (lg_chat_block)
-			spDeleteTextBlock(lg_chat_block);
-		lg_chat_block = spCreateTextBlock( lg_chat_text, spGetWindowSurface()->w-4, lg_font);
-		lg_last_chat = lg_game->chat;
-		if (lg_chat_block->line_count > CHAT_LINES)
-			lg_scroll = SP_ONE;
+		if (lg_last_read_message)
+			while (lg_last_read_message->next)
+			{
+				spNetIRCMessagePointer next = lg_last_read_message->next;
+				if (message = ingame_message(next->message,lg_game->name))
+				{
+					sprintf(buffer,"%s: %s",next->user,message);
+					spTextBlockPointer temp = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,lg_font);
+					if (lg_chat_block)
+					{
+						int lc = lg_chat_block->line_count + temp->line_count;
+						spTextLinePointer copyLine = (spTextLinePointer)malloc(lc*sizeof(spTextLine));
+						memcpy(copyLine,lg_chat_block->line,lg_chat_block->line_count*sizeof(spTextLine));
+						memcpy(&copyLine[lg_chat_block->line_count],temp->line,temp->line_count*sizeof(spTextLine));
+						free(lg_chat_block->line);
+						lg_chat_block->line = copyLine;
+						lg_chat_block->line_count = lc;
+						free(temp);
+					}
+					else
+						lg_chat_block = temp;
+					if (lg_chat_block->line_count > CHAT_LINES)
+						lg_scroll = SP_ONE;
+				}
+				lg_last_read_message = next;
+			}
 	}
-	if (!lg_game->local && spGetInput()->button[MY_BUTTON_START])
+	if (!lg_game->local && get_channel() && spGetInput()->button[MY_BUTTON_START])
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
 		char m[256] = "";
 		if (text_box(lg_font,lg_resize,"Enter Message:",m,256,0,NULL) == 1)
-		{
-			if (lg_player->next)
-			{
-				char temp1[256] = "";
-				char temp2[256] = "";
-				char* t1 = temp1;
-				char* t2 = temp2;
-				sprintf(t2,"%s",lg_player->name);
-				pPlayer p = lg_player->next;
-				while (p)
-				{
-					sprintf(t1,"%s, %s",t2,p->name);
-					char* tt = t1;
-					t1 = t2;
-					t2 = tt;
-					p = p->next;	
-				}
-				send_chat(lg_game,t2,m);
-			}
-			else
-				send_chat(lg_game,lg_player->name,m);
-		}
+			send_chat(lg_game,m);
 	}
 	if (spGetInput()->button[MY_BUTTON_SELECT])
 	{
@@ -449,14 +444,17 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 	lg_counter = LG_WAIT; //instead reload
 	lg_reload_now = 0;
 	lg_ai_list = NULL;
+	lg_last_read_message = get_channel()?get_channel()->last_read_message:NULL;
 	lg_resize = resize;
-	if (text_box(font,resize,"Enter player name:",gop_username(),32,1,game->local?NULL:(game->admin_pw?NULL:game->sprite_count)) == 1)
+	if (game->local == 1 && text_box(font,resize,"Enter player name:",gop_username(),32,1,NULL) == 1 ||
+		game->local == 0 && sprite_box(font,resize,"Choose sprite!",1,game->admin_pw?NULL:game->sprite_count) == 1)
 	{
 		if (gop_username()[0] == 0)
 		{
 			message_box(font,resize,"No name entered...");
 			return;
 		}
+		save_options();
 		if ((lg_player = join_game(game,gop_username(),0,get_last_sprite())) == NULL)
 		{
 			message_box(font,resize,"Game full...");
@@ -467,10 +465,9 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		lg_level_string[0] = 0;
 		lg_block = NULL;
 		lg_chat_block = NULL;
-		lg_last_chat = NULL;
 		lg_chat_text[0] = 0;
 		if (!lg_game->local)
-			start_chat_listener(lg_player);
+			start_hearbeat(lg_player);
 		
 		int res = spLoop(lg_draw,lg_calc,10,resize,NULL);
 		
@@ -484,7 +481,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 			hase(lg_resize,lg_game,lg_player);
 
 		if (!lg_game->local && lg_player)
-			stop_chat_listener(lg_player);
+			stop_heartbeat(lg_player);
 
 		while (lg_player)
 		{

@@ -12,6 +12,7 @@ void start_about(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 	"Fonts:\nPixel Mania by HiBan (CC-BY-SA)\nDejaVu Sans (Public Domain)\n\n"
 	"Music:\nOuroboros by Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com");
 	window->height += font->maxheight*13;
+	window->only_ok = 1;
 	modal_window(window,resize);
 	delete_window(window);	
 }
@@ -28,6 +29,7 @@ void start_help(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 	"about the controls press [R] ingame for help.\n\n"
 	"All your hares belong to us!");
 	window->height += font->maxheight*10;
+	window->only_ok = 1;
 	modal_window(window,resize);
 	delete_window(window);	
 }

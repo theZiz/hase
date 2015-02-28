@@ -223,7 +223,12 @@ void window_draw(void)
 	}
 	else
 	if (window->do_flip)
-		spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay", window->font );
+	{
+		if (window->only_ok)
+			spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay", window->font );
+		else
+			spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay  [c]Cancel", window->font );
+	}
 	if (window->do_flip)
 		spFlip();
 }
@@ -258,11 +263,17 @@ int window_calc(Uint32 steps)
 	}
 	if (selElem	== NULL)
 	{
-		if (spGetInput()->button[MY_PRACTICE_OK] || spGetInput()->button[MY_BUTTON_SELECT])
+		if (spGetInput()->button[MY_PRACTICE_OK] || spGetInput()->button[MY_BUTTON_START] || spGetInput()->button[MY_BUTTON_SELECT])
 		{
 			spGetInput()->button[MY_PRACTICE_OK] = 0;
 			spGetInput()->button[MY_BUTTON_SELECT] = 0;
+			spGetInput()->button[MY_BUTTON_START] = 0;
 			return 1;
+		}
+		if (window->only_ok == 0 && spGetInput()->button[MY_PRACTICE_CANCEL])
+		{
+			spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
+			return 2;
 		}
 		return 0;
 	}
@@ -320,7 +331,7 @@ int window_calc(Uint32 steps)
 		else
 			return 1;
 	}
-	if ((spGetInput()->button[MY_BUTTON_START] && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS && spIsKeyboardPolled()))||
+	if (spGetInput()->button[MY_BUTTON_START] ||
 		(spGetInput()->button[MY_BUTTON_SELECT] && window->only_ok && selElem->type != -1))
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
@@ -331,7 +342,7 @@ int window_calc(Uint32 steps)
 			if (spIsKeyboardPolled())
 			{
 				window->feedback(selElem,WN_ACT_END_POLL);
-				if (window->firstElement->next == NULL)
+				if (window->firstElement->next == NULL || spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
 					return 1;
 			}
 			else
@@ -465,6 +476,7 @@ int set_message(spFontPointer font, char* caption)
 void message_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption)
 {
 	pWindow window = create_window(NULL,font,caption);
+	window->only_ok = 1;
 	modal_window(window,resize);
 	delete_window(window);
 }
@@ -505,5 +517,19 @@ int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* c
 	delete_window(window);
 	text_box_char = save_char;
 	text_box_len = save_len;
+	return res;
+}
+
+int sprite_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption,int show_selection,int* sprite_count)
+{
+	pWindow window = create_window(text_box_feedback,font,caption);
+	if (show_selection)
+	{
+		window->show_selection = show_selection;
+		window->sprite_count = sprite_count;
+		window->height += (spGetSizeFactor()*16 >> SP_ACCURACY) + 2*font->maxheight;
+	}
+	int res = modal_window(window,resize);
+	delete_window(window);
 	return res;
 }

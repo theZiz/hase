@@ -45,6 +45,7 @@ void delete_window(pWindow window);
 
 void message_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption);
 int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection,int* sprite_count);
+int sprite_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption,int show_selection,int* sprite_count);
 
 int set_message(spFontPointer font, char* caption);
 void draw_message_draw(void);

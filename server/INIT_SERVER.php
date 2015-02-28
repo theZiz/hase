@@ -4,14 +4,6 @@ include 'config.php';
 $connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
 mysql_select_db($mysql_dbname) or die;
 
-$query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."chat_list` (".
-"`chat_id` int(11) NOT NULL,".
-"  `game_id` int(11) NOT NULL,".
-"  `chat_time` int(11) NOT NULL,".
-"  `chat_name` varchar(256) NOT NULL,".
-"  `chat_message` varchar(256) NOT NULL".
-") ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=0;";
-mysql_query($query) or die;
 $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."data_list` (".
 "  `game_id` int(11) NOT NULL,".
 "  `player_id` int(11) NOT NULL,".
@@ -44,9 +36,7 @@ $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."player_list` (".
 "  `nr` int(11) NOT NULL".
 ") ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=0;";
 mysql_query($query) or die;
-$query = "ALTER TABLE `".$mysql_prefix."chat_list`".
-" ADD PRIMARY KEY (`chat_id`);";
-mysql_query($query) or die;
+
 $query = "ALTER TABLE `".$mysql_prefix."data_list`".
 " ADD PRIMARY KEY (`game_id`,`player_id`,`second_of_player`);";
 mysql_query($query) or die;
@@ -55,9 +45,6 @@ $query = "ALTER TABLE `".$mysql_prefix."game_list`".
 mysql_query($query) or die;
 $query = "ALTER TABLE `".$mysql_prefix."player_list`".
 " ADD PRIMARY KEY (`player_id`,`game_id`);";
-mysql_query($query) or die;
-$query = "ALTER TABLE `".$mysql_prefix."chat_list`".
-" MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=0;";
 mysql_query($query) or die;
 $query = "ALTER TABLE `".$mysql_prefix."game_list`".
 " MODIFY `game_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=0;";

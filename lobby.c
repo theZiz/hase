@@ -115,6 +115,7 @@ int main(int argc, char **argv)
 	//spSetDefaultWindowSize( 320, 240 );
 	spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
+	spSetReturnBehavior(1,0);
 	spInitNet();
 	spSoundInit();
 	screen = spCreateDefaultWindow();
@@ -160,7 +161,8 @@ int main(int argc, char **argv)
 					}
 					break;
 				case 1:
-					start_lobby(font,resize);
+					if (text_box(font,resize,"Enter player name:",gop_username(),32,0,NULL) == 1)
+						start_lobby(font,resize);
 					break;
 				case 2:
 					options_window(font,resize,0);
