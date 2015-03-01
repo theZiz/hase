@@ -608,7 +608,7 @@ int calc(Uint32 steps)
 		{
 			spGetInput()->button[MY_PRACTICE_OK] = 0;
 			char m[256] = "";
-			if (text_box(font,hase_resize,"Enter Message:",m,256,0,NULL) == 1)
+			if (text_box(font,hase_resize,"Enter Message:",m,256,0,NULL,1) == 1)
 				send_chat(hase_game,m);
 		}
 		if (spGetInput()->button[MY_PRACTICE_3])

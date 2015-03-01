@@ -24,6 +24,7 @@ Changelog
 - Automatic query answer
 - Sending IRC messages from within the game
 - Receiving IRC message ingame
+- Added button for random insult
 
 1.4.7.2
 - Added button arrow images to sparrow3d and use them now in hase in the help

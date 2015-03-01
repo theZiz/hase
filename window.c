@@ -59,6 +59,7 @@ pWindow create_window(int ( *feedback )( pWindowElement elem, int action ),spFon
 	window->count = 0;
 	window->show_selection = 0;
 	window->sprite_count = NULL;
+	window->insult_button = 0;
 	return window;
 }
 
@@ -192,6 +193,9 @@ void window_draw(void)
 							if (window->firstElement->next)
 								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]/[c]Back", window->font );
 							else
+							if (window->insult_button)
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Okay  [c]Cancel [3]Insult", window->font );
+							else
 								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Okay  [c]Cancel", window->font );
 						}
 					}
@@ -204,6 +208,9 @@ void window_draw(void)
 				else
 				if (window->only_ok)
 					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay", window->font );
+				else
+				if (window->insult_button)
+					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel [3]Insult", window->font );
 				else
 					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel", window->font );
 				break;
@@ -233,9 +240,30 @@ void window_draw(void)
 		spFlip();
 }
 
+void fill_with_insult(char* buffer)
+{
+	switch (rand()%2)
+	{
+		case 0: sprintf(buffer,"Son of a witch!"); break;
+		case 1: sprintf(buffer,"Your mama's gravity made me miss!"); break;
+	}
+}
+
 int window_calc(Uint32 steps)
 {
 	pWindow window = recent_window;
+	if (window->insult_button && spGetInput()->button[MY_PRACTICE_3] && spIsKeyboardPolled())
+	{
+		spGetInput()->button[MY_PRACTICE_3] = 0;
+		char buffer[128];
+		fill_with_insult(buffer);
+		snprintf(&(spGetInput()->keyboard.buffer[spGetInput()->keyboard.pos]),spGetInput()->keyboard.len-spGetInput()->keyboard.pos,"%s",buffer);
+		spGetInput()->keyboard.pos += strlen(buffer);
+		if (spGetInput()->keyboard.pos > spGetInput()->keyboard.len)
+			spGetInput()->keyboard.pos = spGetInput()->keyboard.len;
+		spGetInput()->keyboard.lastSize = 1;
+	}
+	
 	if (window->show_selection)
 	{
 		spUpdateSprite(spActiveSprite(window_sprite[window_active]),steps);
@@ -331,7 +359,7 @@ int window_calc(Uint32 steps)
 		else
 			return 1;
 	}
-	if (spGetInput()->button[MY_BUTTON_START] ||
+	if ((spGetInput()->button[MY_BUTTON_START] && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER || spIsKeyboardPolled())) ||
 		(spGetInput()->button[MY_BUTTON_SELECT] && window->only_ok && selElem->type != -1))
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
@@ -499,13 +527,14 @@ int text_box_feedback( pWindowElement elem, int action )
 	return 0;
 }
 
-int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection,int* sprite_count)
+int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection,int* sprite_count,int insult_button)
 {
 	char* save_char = text_box_char;
 	int save_len = text_box_len;
 	text_box_char = text;
 	text_box_len = len;
 	pWindow window = create_window(text_box_feedback,font,caption);
+	window->insult_button = insult_button;
 	if (show_selection)
 	{
 		window->show_selection = show_selection;
@@ -513,6 +542,8 @@ int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* c
 		window->height += (spGetSizeFactor()*16 >> SP_ACCURACY) + 2*font->maxheight;
 	}
 	add_window_element(window,1,0);
+	if (insult_button)
+		window->width += spGetWindowSurface()->w/6;
 	int res = modal_window(window,resize);
 	delete_window(window);
 	text_box_char = save_char;

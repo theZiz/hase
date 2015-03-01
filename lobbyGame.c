@@ -267,7 +267,7 @@ int lg_calc(Uint32 steps)
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
 		char m[256] = "";
-		if (text_box(lg_font,lg_resize,"Enter Message:",m,256,0,NULL) == 1)
+		if (text_box(lg_font,lg_resize,"Enter Message:",m,256,0,NULL,1) == 1)
 			send_chat(lg_game,m);
 	}
 	if (spGetInput()->button[MY_BUTTON_SELECT])
@@ -282,7 +282,7 @@ int lg_calc(Uint32 steps)
 			message_box(lg_font,lg_resize,"Game full!");
 		else
 		{
-			if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32,1,lg_game->sprite_count) == 1)
+			if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32,1,lg_game->sprite_count,0) == 1)
 			{
 				if (lg_new_name[0] == 0)
 					message_box(lg_font,lg_resize,"No name entered...");
@@ -302,7 +302,7 @@ int lg_calc(Uint32 steps)
 		spGetInput()->button[MY_PRACTICE_4] = 0;
 		char leave_name[33];
 		sprintf(leave_name,"%s",lg_last_player->name);
-		if (text_box(lg_font,lg_resize,"Enter player name to leave:",leave_name,32,0,NULL) == 1)
+		if (text_box(lg_font,lg_resize,"Enter player name to leave:",leave_name,32,0,NULL,0) == 1)
 		{
 			if (leave_name[0] == 0)
 				message_box(lg_font,lg_resize,"No name entered...");
@@ -446,7 +446,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 	lg_ai_list = NULL;
 	lg_last_read_message = get_channel()?get_channel()->last_read_message:NULL;
 	lg_resize = resize;
-	if (game->local == 1 && text_box(font,resize,"Enter player name:",gop_username(),32,1,NULL) == 1 ||
+	if (game->local == 1 && text_box(font,resize,"Enter player name:",gop_username(),32,1,NULL,0) == 1 ||
 		game->local == 0 && sprite_box(font,resize,"Choose sprite!",1,game->admin_pw?NULL:game->sprite_count) == 1)
 	{
 		if (gop_username()[0] == 0)

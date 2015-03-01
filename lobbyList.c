@@ -238,7 +238,7 @@ int ll_calc(Uint32 steps)
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
 		char m[256] = "";
-		if (text_box(ll_font,ll_resize,"Enter Message:",m,256,0,NULL) == 1)
+		if (text_box(ll_font,ll_resize,"Enter Message:",m,256,0,NULL,1) == 1)
 			send_chat(NULL,m);
 	}
 	if (spGetInput()->button[MY_PRACTICE_3])
@@ -458,6 +458,8 @@ void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 {
 	ll_selected = 0;
 	ll_font = font;
+	ll_level = NULL;
+	ll_block = NULL;
 	ll_counter = 10000;//Instead reload
 	ll_surface = spCreateSurface(2*spGetWindowSurface()->w/3-4,spGetWindowSurface()->w/3-6);
 	ll_resize = resize;

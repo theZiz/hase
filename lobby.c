@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 					}
 					break;
 				case 1:
-					if (text_box(font,resize,"Enter player name:",gop_username(),32,0,NULL) == 1)
+					if (text_box(font,resize,"Enter player name:",gop_username(),32,0,NULL,0) == 1)
 						start_lobby(font,resize);
 					break;
 				case 2:
