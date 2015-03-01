@@ -58,7 +58,9 @@ char button_states[SP_INPUT_BUTTON_COUNT];
 unsigned char send_data[1536];
 spParticleBunchPointer particles = NULL;
 
-spSpriteCollectionPointer targeting;	
+spSpriteCollectionPointer targeting;
+
+spNetIRCMessagePointer before_showing;
 
 void ( *hase_resize )( Uint16 w, Uint16 h );
 
@@ -210,7 +212,29 @@ void draw(void)
 		draw_message();
 	
 	//HID
-	int y = screen->h - alive_count * (font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY));
+	
+	int y = 0;
+	if (get_channel())
+	{
+		spNetIRCMessagePointer showing = NULL;
+		if (before_showing == NULL && get_channel()->first_message)
+			showing = get_channel()->first_message;
+		else
+		if (before_showing)
+			showing = before_showing->next;
+		while (showing)
+		{
+			if (ingame_message(showing->message,hase_game->name))
+			{
+				sprintf(buffer,"%s: %s",showing->user,showing->message);
+				spFontDraw(2, y-font->maxheight/8, 0, buffer, font );
+				y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
+			}
+			showing = showing->next;
+		}
+	}
+	
+	y = screen->h - alive_count * (font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY));
 	for (j = 0; j < player_count; j++)
 	{
 		if (player[j]->firstHare == NULL)
@@ -269,18 +293,18 @@ void draw(void)
 				angle = (float)player[active_player]->activeHare->w_direction*180.0f/(float)SP_PI;
 			else
 				angle = -((float)player[active_player]->activeHare->w_direction*180.0f/(float)SP_PI-180.0f);
-			sprintf(buffer,"Power: %i %%\nDirection: %.1f°",player[active_player]->activeHare->w_power*100/SP_ONE,angle);
+			sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
 		}
-		spFontDraw( 2, 0, 0, buffer, font );
+		spFontDrawRight( screen->w-1, screen->h-1-3*font->maxheight, 0, buffer, font );
 	}
 	if (weapon_points)
-		sprintf(buffer,"%i seconds left",countdown / 1000);
+		sprintf(buffer,"%is",countdown / 1000);
 	else
 	if (extra_time)
-		sprintf(buffer,"%i seconds left to escape",extra_time / 1000);
+		sprintf(buffer,"%is",extra_time / 1000);
 	else
-		sprintf(buffer,"Free time until bullet strikes!");
-	spFontDrawMiddle( screen->w >> 1, 0, 0, buffer, font );
+		sprintf(buffer,"∞");
+	spFontDrawMiddle( screen->w >> 1, screen->h-1-font->maxheight, 0, buffer, font );
 	
 	if (wp_choose)
 		draw_weapons();
@@ -542,6 +566,24 @@ int quit_feedback( pWindowElement elem, int action )
 
 int calc(Uint32 steps)
 {
+	try_to_join();
+	if (get_channel())
+	{
+		spNetIRCMessagePointer showing = NULL;
+		if (before_showing == NULL && get_channel()->first_message)
+			showing = get_channel()->first_message;
+		else
+		if (before_showing)
+			showing = before_showing->next;
+		time_t now = time(NULL) - 20;
+		while (showing)
+		{
+			if (showing->time_stamp > now)
+				break;
+			before_showing = showing;
+			showing = showing->next;
+		}
+	}
 	if (spGetInput()->button[MY_BUTTON_SELECT])
 	{
 		spGetInput()->button[MY_BUTTON_SELECT] = 0;
@@ -562,19 +604,16 @@ int calc(Uint32 steps)
 	}
 	if (spGetInput()->button[MY_PRACTICE_4])
 	{
-		if (spGetInput()->button[MY_PRACTICE_OK])
+		if (spGetInput()->button[MY_PRACTICE_OK] && get_channel())
 		{
 			spGetInput()->button[MY_PRACTICE_OK] = 0;
-			show_names = 1-show_names;
+			char m[256] = "";
+			if (text_box(font,hase_resize,"Enter Message:",m,256,0,NULL) == 1)
+				send_chat(hase_game,m);
 		}
 		if (spGetInput()->button[MY_PRACTICE_3])
 		{
 			spGetInput()->button[MY_PRACTICE_3] = 0;
-			show_names = 1-show_names;
-		}
-		if (spGetInput()->button[MY_PRACTICE_CANCEL])
-		{
-			spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
 			show_names = 1-show_names;
 		}
 		if (spGetInput()->button[MY_BUTTON_L])
@@ -940,6 +979,7 @@ int calc(Uint32 steps)
 
 int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 {
+	before_showing = NULL;
 	hase_resize = resize;
 	hase_game = game;
 	get_game(game,&hase_player_list);

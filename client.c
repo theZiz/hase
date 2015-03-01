@@ -955,6 +955,24 @@ void try_to_join()
 {
 	if (channel == NULL && server && spNetIRCServerReady(server))
 		channel = spNetIRCJoinChannel(server,irc_channel);
+	if (server)
+	{
+		if (server->first_channel)
+		{
+			spNetIRCChannelPointer c = server->first_channel;
+			while (c)
+			{
+				if (c != channel && c->close_query == 0)
+				{
+					printf("%s\n",c->name);
+					spNetIRCSendMessage(server,c,"[Automatic reply] This User is within the game \"Hase\" online, which doesn't support queries. The user will not see your message!");
+					spNetIRCPartChannel(server,c);
+					break;
+				}
+				c = c->next;
+			}
+		}
+	}
 }
 
 void stop_irc_client()
@@ -1012,7 +1030,7 @@ int heartbeat_thread_function(void* data)
 	return 0;
 }
 
-void start_hearbeat(pPlayer player)
+void start_heartbeat(pPlayer player)
 {
 	player->game->heartbeat_message = 0;
 	player->game->heartbeat_thread = SDL_CreateThread(heartbeat_thread_function,(void*)player);	

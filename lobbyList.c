@@ -22,7 +22,6 @@ int ll_game_hares = 3;
 spTextBlockPointer ll_chat_block = NULL;
 Sint32 ll_chat_scroll;
 
-
 pGame mom_game;
 
 void update_ll_surface()
@@ -95,9 +94,14 @@ void ll_draw(void)
 			spFontDrawTextBlock(left,2, screen->h-1*ll_font->maxheight-h-1, 0,ll_chat_block,h+2,ll_chat_scroll,ll_font);
 	}
 
-	spFontDrawMiddle(5*screen->w/6+4, 2*ll_font->maxheight+screen->w/3-6, 0, "Players", ll_font );
-	spRectangle(5*screen->w/6, screen->h-1*ll_font->maxheight-h/2, 0,screen->w/3-6,h,LL_FG);
-	spFontDrawTextBlock(middle,4*screen->w/6+5, screen->h-1*ll_font->maxheight-h-1, 0,ll_block,h+2,0,ll_font);
+	if (ll_game_count > 0 && mom_game)
+	{
+		sprintf(buffer,"Players of %s",mom_game->name);
+		spFontDrawMiddle(5*screen->w/6+4, 2*ll_font->maxheight+screen->w/3-6, 0, buffer, ll_font );
+		spRectangle(5*screen->w/6, screen->h-1*ll_font->maxheight-h/2, 0,screen->w/3-6,h,LL_FG);
+		spFontDrawTextBlock(middle,4*screen->w/6+5, screen->h-1*ll_font->maxheight-h-1, 0,ll_block,h+2,0,ll_font);
+	}
+	
 	if (ll_reload_now)
 	{
 		spFontDrawMiddle( screen->w/2, screen->h-ll_font->maxheight, 0, "Reloading list...", ll_font );

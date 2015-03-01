@@ -21,6 +21,9 @@ Changelog
 - Using this username for global IRC chat
 - Chat in game lobby now via IRC
 - Furthermore chat in global lobby, too
+- Automatic query answer
+- Sending IRC messages from within the game
+- Receiving IRC message ingame
 
 1.4.7.2
 - Added button arrow images to sparrow3d and use them now in hase in the help

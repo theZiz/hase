@@ -467,7 +467,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		lg_chat_block = NULL;
 		lg_chat_text[0] = 0;
 		if (!lg_game->local)
-			start_hearbeat(lg_player);
+			start_heartbeat(lg_player);
 		
 		int res = spLoop(lg_draw,lg_calc,10,resize,NULL);
 		
