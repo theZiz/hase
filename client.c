@@ -232,6 +232,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 
 char irc_server[256] = "";
 char irc_channel[256] = "";
+int irc_port = 6667;
 
 int server_info()
 {
@@ -246,6 +247,9 @@ int server_info()
 		else
 		if (strcmp(mom->name,"irc_channel") == 0)
 			sprintf(irc_channel,"%s",mom->content);
+		else
+		if (strcmp(mom->name,"irc_port") == 0)
+			irc_port = atoi(mom->content);
 		else
 		if (strcmp(mom->name,"version") == 0)
 		{
@@ -948,7 +952,7 @@ void start_irc_client(char* name)
 {
 	if (server)
 		return;
-	server = spNetIRCConnectServer(irc_server,6667,name,name,name,"*");
+	server = spNetIRCConnectServer(irc_server,irc_port,name,name,name,"*");
 }
 
 void try_to_join()

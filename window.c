@@ -242,10 +242,65 @@ void window_draw(void)
 
 void fill_with_insult(char* buffer)
 {
-	switch (rand()%2)
+	switch (rand()%57)
 	{
-		case 0: sprintf(buffer,"Son of a witch!"); break;
-		case 1: sprintf(buffer,"Your mama's gravity made me miss!"); break;
+		case  0: sprintf(buffer,"Son of a witch!"); break;
+		case  1: sprintf(buffer,"Your mama's gravity made me miss!"); break;
+		case  2: sprintf(buffer,"\"Worm with a hat\"-head!"); break;
+		case  3: sprintf(buffer,"No you're a Craigix!"); break;
+		case  4: sprintf(buffer,"Mostly harmless"); break;
+		case  5: sprintf(buffer,"You and who's army?"); break;
+		case  6: sprintf(buffer,"I've seen bigger"); break;
+		case  7: sprintf(buffer,"Ha Ha!"); break;
+		case  8: sprintf(buffer,"You're history"); break;
+		case  9: sprintf(buffer,"Tree Hugger"); break;
+		case 10: sprintf(buffer,"Talk to the hand"); break;
+		case 11: sprintf(buffer,"I'm laughing on the inside"); break;
+		case 12: sprintf(buffer,"You'z dead meat!"); break;
+		case 13: sprintf(buffer,"Over here"); break;
+		case 14: sprintf(buffer,"Want some candy?"); break;
+		case 15: sprintf(buffer,"One dead dude coming up"); break;
+		case 16: sprintf(buffer,"Is that the way to Amarillo?"); break;
+		case 17: sprintf(buffer,"Back off cupcake"); break;
+		case 18: sprintf(buffer,"Is that all you've got?"); break;
+		case 19: sprintf(buffer,"You fight like a cow!"); break;
+		case 20: sprintf(buffer,"I'm out of touch, you're out of time!"); break;
+		case 21: sprintf(buffer,"It really is time for you to go to the occulist."); break;
+		case 22: sprintf(buffer,"You call that shooting? Watch how it's done."); break;
+		case 23: sprintf(buffer,"Mwahahaha... *ahem*."); break;
+		case 24: sprintf(buffer,"parabolic math too hard for ya?"); break;
+		case 25: sprintf(buffer,"Revenge is a dish best served... right NOW!"); break;
+		case 26: sprintf(buffer,"You shoot like a jellyfish!"); break;
+		case 27: sprintf(buffer,"y00 sux0r n00b!"); break;
+		case 28: sprintf(buffer,"It seems you do not understand gravity."); break;
+		case 29: sprintf(buffer,"I got 99 problems, but you ain’t one."); break;
+		case 30: sprintf(buffer,"Dognabbit!"); break;
+		case 31: sprintf(buffer,"Son of a beach!"); break;
+		case 32: sprintf(buffer,"I'll get you next time!"); break;
+		case 33: sprintf(buffer,"nya nya, didn't hurt at all!"); break;
+		case 34: sprintf(buffer,"My granny can shoot better than that"); break;
+		case 35: sprintf(buffer,"Don't point that thing at me"); break;
+		case 36: sprintf(buffer,"Sure, blame it on your ISP"); break;
+		case 37: sprintf(buffer,"I will see you in two months!"); break;
+		case 38: sprintf(buffer,"You suck as much as the Pandora's Wifi chip!"); break;
+		case 39: sprintf(buffer,"Cheater!"); break;
+		case 40: sprintf(buffer,"What's your order number?"); break;
+		case 41: sprintf(buffer,"You're weaker than a Pandora case!"); break;
+		case 42: sprintf(buffer,"Go get yourself an Alu case?"); break;
+		case 43: sprintf(buffer,"But then 2 monthsTM you have to wait!"); break;
+		case 44: sprintf(buffer,"Hase hole."); break;
+		case 45: sprintf(buffer,"I'm all outa gum..."); break;
+		case 46: sprintf(buffer,"Your face your ass what's the difference?"); break;
+		case 47: sprintf(buffer,"Come get some!"); break;
+		case 48: sprintf(buffer,"Do you want to wash Wang or do you want to see Wang wash wang?"); break;
+		case 49: sprintf(buffer,"Hail to the king Baby."); break;
+		case 50: sprintf(buffer,"You wanna dance?"); break;
+		case 51: sprintf(buffer,"You couldn't hit a planet if you were standing on it."); break;
+		case 52: sprintf(buffer,"systemd lover!"); break;
+		case 53: sprintf(buffer,"Gnome lover!"); break;
+		case 54: sprintf(buffer,"KDE lover!"); break;
+		case 55: sprintf(buffer,"Unity lover!"); break;
+		case 56: sprintf(buffer,"A chicken could hit me, if it would press [c] enough!"); break;
 	}
 }
 
