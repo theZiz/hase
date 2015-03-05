@@ -6,9 +6,13 @@ For next version:
 	* mines
 * Weapons
 	* small circle building tool (1 wp)
-	* low grav missile (3 wp)
-	* neg grav missile (3 wp)
-	* no grav missile (3 wp)
+	* wand
+		* 1 wp
+		* 2 wp
+		* 3 wp
+		* 4 wp
+	* Kaio-Ken
+	
 
 General:
 * smarter AI
@@ -24,5 +28,8 @@ General:
 	* mine (3 wp)
 	* gravitation trap (1 wp)
 	* Fart bomb (1 wp)
+	* low grav missile (3 wp)
+	* neg grav missile (3 wp)
+	* no grav missile (3 wp)
 
 http://pastebin.com/P0q6QE86

@@ -1,68 +1,97 @@
 #define WEAPON_X 3
 #define WEAPON_Y 2
 
-const char weapon_name[WEAPON_Y][WEAPON_X][64] =
-{{"Big carrot bazooka","Middle carrot bazooka","Small carrot bazooka"},
- {"Build circle","Previous hare","Next hare"}};
+#define WEAPON_MAX 7
 
-const char weapon_description[WEAPON_Y][WEAPON_X][64] =
-{{"Makes big holes","Makes middle holes","Makes small holes"},
- {"Protect yourself with dirt","Choose the previous hare","Choose the next hare"}};
+#define WP_BIG_BAZOOKA 0
+#define WP_MID_BAZOOKA 1
+#define WP_SML_BAZOOKA 2
+#define WP_BUILD_MID 3
+#define WP_BUILD_SML 4
+#define WP_PREV_HARE 5
+#define WP_NEXT_HARE 6
+
+const char weapon_name[WEAPON_MAX][64] = {
+	"Big carrot bazooka",
+	"Middle carrot bazooka",
+	"Small carrot bazooka",
+	"Build circle",
+	"Small Build circle",
+	"Previous hare",
+	"Next hare"
+};
+
+const char weapon_description[WEAPON_MAX][64] = {
+	"Makes big holes",
+	"Makes middle holes",
+	"Makes small holes",
+	"Protect yourself with dirt",
+	"Protect yourself with less dirt",
+	"Choose the previous hare",
+	"Choose the next hare"
+};
  
-const int weapon_cost[WEAPON_Y][WEAPON_X] =
-{{3,2,1},
- {2,1,1}};
- 
-const int weapon_reference[WEAPON_Y][WEAPON_X] =
-{{1,2,3},
- {4,5,6}};
- 
-char weapon_filename[WEAPON_Y][WEAPON_X][64] =
-{{"./data/bazooka_big.png","./data/bazooka_middle.png","./data/bazooka_small.png"},
- {"./data/build.png","./data/prev.png","./data/next.png"}};
+const int weapon_cost[WEAPON_MAX] = {3,2,1,2,1,1,1};
+
+const int weapon_shoot[WEAPON_MAX] = {1,1,1,0,0,0,0};
+
+const int weapon_explosion[WEAPON_MAX] = {32,26,20,0,0,0,0};
+
+const int weapon_health_divisor[WEAPON_MAX] = {2176,2304,2432,0,0,0,0};
+
+const char weapon_filename[WEAPON_MAX][64] = {
+	"./data/bazooka_big.png",
+	"./data/bazooka_middle.png",
+	"./data/bazooka_small.png",
+	"./data/build.png",
+	"./data/build.png",
+	"./data/prev.png",
+	"./data/next.png"
+};
+
+const int weapon_pos[WEAPON_Y][WEAPON_X] = {
+	{WP_BIG_BAZOOKA,WP_MID_BAZOOKA,WP_SML_BAZOOKA},
+	{WP_BUILD_MID  ,WP_PREV_HARE  ,WP_NEXT_HARE}
+};
  
 typedef SDL_Surface *PSDL_Surface;
-PSDL_Surface weapon_surface[WEAPON_Y][WEAPON_X] =
-{{NULL,NULL,NULL},
- {NULL,NULL,NULL}};
+PSDL_Surface weapon_surface[WEAPON_MAX] = {NULL,NULL,NULL,NULL,NULL,NULL};
  
 void load_weapons()
 {
-	int x,y;
-	for (x = 0;x<WEAPON_X;x++)
-		for (y = 0;y<WEAPON_Y;y++)
-			weapon_surface[y][x] = spLoadSurface(weapon_filename[y][x]);
+	int i;
+	for (i = 0;i<WEAPON_MAX;i++)
+		weapon_surface[i] = spLoadSurface(weapon_filename[i]);
 }
 
 void delete_weapons()
 {
-	int x,y;
-	for (x = 0;x<WEAPON_X;x++)
-		for (y = 0;y<WEAPON_Y;y++)
-			spDeleteSurface(weapon_surface[y][x]);
+	int i;
+	for (i = 0;i<WEAPON_MAX;i++)
+		spDeleteSurface(weapon_surface[i]);
 }
 
 void draw_weapons()
 {
-	int x,y,w = 0;
-	for (x = 0;x<WEAPON_X;x++)
-		for (y = 0;y<WEAPON_Y;y++)
-			w = spMax(spFontWidth(weapon_description[y][x],font),w);
+	int x,y,w,i = 0;
+	for (i = 0;i<WEAPON_MAX;i++)
+		w = spMax(spFontWidth(weapon_description[i],font),w);
 	int h = WEAPON_Y*48 + 3*font->maxheight;
 	spSetPattern8(153,60,102,195,153,60,102,195);
 	spRectangle(screen->w/2,screen->h/2,0,w,h,LL_BG);
 	spDeactivatePattern();
 	for (x = 0;x<WEAPON_X;x++)
 		for (y = 0;y<WEAPON_Y;y++)
-			spBlitSurface((screen->w-(WEAPON_X-x-2)*96)/2,(screen->h-h+y*96)/2+24+font->maxheight,0,weapon_surface[y][x]);
+			spBlitSurface((screen->w-(WEAPON_X-x-2)*96)/2,(screen->h-h+y*96)/2+24+font->maxheight,0,weapon_surface[weapon_pos[y][x]]);
 	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"[o]/[3]Choose",font);
 	if (player[active_player]->activeHare)
 	{
-		spFontDrawMiddle(screen->w/2,(screen->h-h)/2,0,weapon_name[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x],font);
+		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+		spFontDrawMiddle(screen->w/2,(screen->h-h)/2,0,weapon_name[w_nr],font);
 		spRectangleBorder((screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-2)*96)/2-1,(screen->h-h+player[active_player]->activeHare->wp_y*96)/2+24+font->maxheight-1,0,44,44,2,2,get_border_color());
-		spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x],font);
+		spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[w_nr],font);
 		char buffer[32];
-		sprintf(buffer,"Cost: %i",weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x]);
+		sprintf(buffer,"Cost: %i",weapon_cost[w_nr]);
 		spFontDrawRight((screen->w+w)/2,(screen->h+h)/2-font->maxheight*1,0,buffer,font);
 	}
 }
@@ -477,8 +506,7 @@ int updateBullets()
 						momBullet->impact_counter = OUTPACT_TIME;
 						spClearTarget(EXPLOSION_COLOR);
 						spFlip();
-						int rad = 38-(momBullet->kind*6);
-						bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,rad);
+						bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,weapon_explosion[momBullet->kind]);
 						for (j = 0; j < player_count; j++)
 						{
 							if (player[j]->firstHare == NULL)
@@ -489,11 +517,11 @@ int updateBullets()
 							{							
 								int d = spFixedToInt(hare->x-momBullet->x)*spFixedToInt(hare->x-momBullet->x)+
 										spFixedToInt(hare->y-momBullet->y)*spFixedToInt(hare->y-momBullet->y);
-									d = rad*rad-d;
+									d = weapon_explosion[momBullet->kind]*weapon_explosion[momBullet->kind]-d;
 								if (d > 0)
 								{
-									hare->health -= d*MAX_HEALTH/(2048+momBullet->kind*128);
-									player[j]->d_health -= d*MAX_HEALTH/(2048+momBullet->kind*128);
+									hare->health -= d*MAX_HEALTH/weapon_health_divisor[momBullet->kind];
+									player[j]->d_health -= d*MAX_HEALTH/weapon_health_divisor[momBullet->kind];
 									player[j]->d_time = 5000;
 								}
 								if (hare->health <= 0)

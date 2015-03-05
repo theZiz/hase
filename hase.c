@@ -125,7 +125,8 @@ void draw(void)
 				//Weapon
 				//spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[hare->wp_y][hare->wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
 				//building
-				if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] == 4)
+				int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+				if (w_nr == WP_BUILD_MID)
 				{
 					int r = (zoom*48 >> SP_ACCURACY+1);
 					int d = 60+(hare->w_power*60 >> SP_ACCURACY);
@@ -283,8 +284,9 @@ void draw(void)
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	if (player[active_player]->activeHare)
 	{
-		spFontDrawRight( screen->w-1, screen->h-1-font->maxheight*2, 0, weapon_name[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x], font );
-		if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] == 4)
+		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+		spFontDrawRight( screen->w-1, screen->h-1-font->maxheight*2, 0, weapon_name[w_nr], font );
+		if (w_nr == WP_BUILD_MID)
 			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_power*30/SP_ONE+30);
 		else
 		{
@@ -730,6 +732,7 @@ int calc(Uint32 steps)
 			next_player();
 		if (wp_choose == 0)
 		{
+			int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 			if (player[active_player]->computer && player[active_player]->activeHare)
 			{		
 				//AI
@@ -772,8 +775,8 @@ int calc(Uint32 steps)
 									//Shoot!
 									if (weapon_points > 0)
 									{
-										weapon_points-=3;
-										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x])->kind = 1;
+										weapon_points-=weapon_cost[WP_BIG_BAZOOKA];
+										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr])->kind = WP_BIG_BAZOOKA;
 									}
 									break;
 								}
@@ -868,19 +871,19 @@ int calc(Uint32 steps)
 				if (input_states[INPUT_BUTTON_CANCEL] && player[active_player]->activeHare)
 				{
 					//Shoot!
-					if (weapon_points - weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] >= 0)
+					if (weapon_points - weapon_cost[w_nr] >= 0)
 					{
 						input_states[INPUT_BUTTON_CANCEL] = 0;
-						weapon_points-=weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
-						if (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x] < 4)
+						weapon_points-=weapon_cost[w_nr];
+						if (weapon_shoot[w_nr])
 						{
-							pBullet bullet = shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x]);
-							bullet->kind = weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+							pBullet bullet = shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr]);
+							bullet->kind = w_nr;
 						}
 						else
-						switch (weapon_reference[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x])
+						switch (w_nr)
 						{
-							case 4:
+							case WP_BUILD_MID:
 								{
 									int d = 60+(player[active_player]->activeHare->w_power*60 >> SP_ACCURACY);
 									int r = 48;
@@ -889,13 +892,13 @@ int calc(Uint32 steps)
 									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,24,NULL))
 										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
 									else
-										weapon_points+=weapon_cost[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+										weapon_points+=weapon_cost[w_nr];
 								}
 								break;
-							case 5:
+							case WP_PREV_HARE:
 								player[active_player]->activeHare = player[active_player]->activeHare->before;
 								break;
-							case 6:
+							case WP_NEXT_HARE:
 								player[active_player]->activeHare = player[active_player]->activeHare->next;
 								break;
 						}
