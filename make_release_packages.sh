@@ -18,6 +18,7 @@ do
 		echo "--> Copy temporary folders"
 		cp -r data "$f/$PROGRAM"
 		cp -r textures "$f/$PROGRAM"
+		cp -r sprites "$f/$PROGRAM"
 		cp -r sounds "$f/$PROGRAM"
 		cp hase_readme.txt "$f/$PROGRAM"
 		cd $f
@@ -40,7 +41,7 @@ do
 					cp ../../small_resolution_data/* "$PROGRAM/data"
 				fi
 				if [ $NAME = "gcw" ]; then
-					cp ../../censorship/* "$PROGRAM/data"
+					cp ../../small_resolution_censorship/* "$PROGRAM/data"
 					mksquashfs * "$PROGRAM.opk" -all-root -noappend -no-exports -no-xattrs
 					mv "$PROGRAM.opk" ../..
 					echo "<a href=$PROGRAM.opk type=\"application/x-opk+squashfs\">$NAME</a></br>" >> ../../index.htm
@@ -56,6 +57,7 @@ do
 		echo "--> Remove temporary folders"
 		rm -r $PROGRAM/data
 		rm -r $PROGRAM/textures
+		rm -r $PROGRAM/sprites
 		rm -r $PROGRAM/sounds
 		rm $PROGRAM/hase_readme.txt
 		cd ..
