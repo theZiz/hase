@@ -1,6 +1,6 @@
 #!/bin/sh
 PROGRAM="hase"
-VERSION="1.4.7.2"
+VERSION="1.5.0.0"
 DEST=./build/*
 echo "<html>" > index.htm
 echo "<head>" >> index.htm
@@ -40,6 +40,7 @@ do
 					cp ../../small_resolution_data/* "$PROGRAM/data"
 				fi
 				if [ $NAME = "gcw" ]; then
+					cp ../../censorship/* "$PROGRAM/data"
 					mksquashfs * "$PROGRAM.opk" -all-root -noappend -no-exports -no-xattrs
 					mv "$PROGRAM.opk" ../..
 					echo "<a href=$PROGRAM.opk type=\"application/x-opk+squashfs\">$NAME</a></br>" >> ../../index.htm
