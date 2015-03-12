@@ -50,7 +50,7 @@ const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,3,1,1,1};
 
 const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0};
 
-const int weapon_explosion[WEAPON_MAX] = {32,26,20,0,64,48,32,0,0,0,0,0};
+const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,0,0,0,0,0};
 
 const int weapon_health_divisor[WEAPON_MAX] = {2176,2304,2432,0,0,0,0,0,0,0,0,0};
 
@@ -106,15 +106,7 @@ void draw_weapons()
 		for (y = 0;y<WEAPON_Y;y++)
 		{
 			if (weapon_points < weapon_cost[weapon_pos[y][x]])
-				spSetPattern8(
-					0b11101110,
-					0b00101000,
-					0b10111011,
-					0b10000010,
-					0b11101110,
-					0b00101000,
-					0b10111011,
-					0b10000010);
+				spSetPattern8(136,85,34,85,136,85,34,85);
 			spRotozoomSurface((screen->w-(WEAPON_X-x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-h+y*factor*2)/2+factor/2+font->maxheight,0,weapon_surface[weapon_pos[y][x]],spGetSizeFactor()/2,spGetSizeFactor()/2,0);
 			spDeactivatePattern();
 		}
@@ -542,6 +534,29 @@ int updateBullets()
 						spClearTarget(EXPLOSION_COLOR);
 						spFlip();
 						bullet_impact(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY,weapon_explosion[momBullet->kind]);
+						if (momBullet->kind == WP_CLUSTER)
+						{
+							//Calculating the direction
+							int rotation = 0;
+							Sint32 force = gravitation_force(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY);
+							if (force)
+							{
+								Sint32 ac = spDiv(-gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY),force);
+								if (ac < -SP_ONE)
+									ac = -SP_ONE;
+								if (ac > SP_ONE)
+									ac = SP_ONE;
+								rotation = -spAcos(ac);
+								if (-gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) <= 0)
+									rotation = 2*SP_PI-rotation;
+								while (rotation < 0)
+									rotation += 2*SP_PI;
+								while (rotation >= 2*SP_PI)
+									rotation -= 2*SP_PI;
+							}
+							for (j = 0; j < 5;j++)
+								shootBullet(momBullet->x,momBullet->y,rotation-SP_PI/2+SP_PI*(j-2)/16,SP_ONE/8,rand()%2*2-1,NULL,weapon_surface[WP_CLUSTER])->kind = WP_SML_BAZOOKA;
+						}
 						for (j = 0; j < player_count; j++)
 						{
 							if (player[j]->firstHare == NULL)
