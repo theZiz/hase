@@ -244,7 +244,7 @@ void window_draw(void)
 
 void fill_with_insult(char* buffer)
 {
-	switch (rand()%57)
+	switch (rand()%58)
 	{
 		case  0: sprintf(buffer,"Son of a witch!"); break;
 		case  1: sprintf(buffer,"Your mama's gravity made me miss!"); break;
@@ -303,6 +303,7 @@ void fill_with_insult(char* buffer)
 		case 54: sprintf(buffer,"KDE lover!"); break;
 		case 55: sprintf(buffer,"Unity lover!"); break;
 		case 56: sprintf(buffer,"A chicken could hit me, if it would press [c] enough!"); break;
+		case 57: sprintf(buffer,"Where is your god now?"); break;
 	}
 }
 

@@ -129,10 +129,11 @@ void draw(void)
 				//spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[hare->wp_y][hare->wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
 				//building
 				int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
-				if (w_nr == WP_BUILD_MID)
+				if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
 				{
-					int r = (zoom*48 >> SP_ACCURACY+1);
-					int d = 60+(hare->w_power*60 >> SP_ACCURACY);
+					
+					int r = (zoom*weapon_explosion[w_nr] >> SP_ACCURACY+1);
+					int d = 12+weapon_explosion[w_nr]+(hare->w_power*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
 					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
 					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
@@ -142,7 +143,7 @@ void draw(void)
 					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
-					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,24,NULL))
+					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2,NULL))
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,0));
 					else
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
@@ -289,7 +290,7 @@ void draw(void)
 	{
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 		spFontDrawRight( screen->w-1, screen->h-1-font->maxheight*2, 0, weapon_name[w_nr], font );
-		if (w_nr == WP_BUILD_MID)
+		if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
 			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_power*30/SP_ONE+30);
 		else
 		{
@@ -904,13 +905,13 @@ int calc(Uint32 steps)
 						else
 						switch (w_nr)
 						{
-							case WP_BUILD_MID:
+							case WP_BUILD_SML:case WP_BUILD_MID:case WP_BUILD_BIG:
 								{
-									int d = 60+(player[active_player]->activeHare->w_power*60 >> SP_ACCURACY);
-									int r = 48;
+									int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_power*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
+									int r = weapon_explosion[w_nr];
 									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
 									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
-									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,24,NULL))
+									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2,NULL))
 										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
 									else
 										weapon_points+=weapon_cost[w_nr];

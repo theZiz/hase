@@ -50,7 +50,7 @@ const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,3,1,1,1};
 
 const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0};
 
-const int weapon_explosion[WEAPON_MAX] = {32,26,20,0,0,0,0,0,0,0,0,0};
+const int weapon_explosion[WEAPON_MAX] = {32,26,20,0,64,48,32,0,0,0,0,0};
 
 const int weapon_health_divisor[WEAPON_MAX] = {2176,2304,2432,0,0,0,0,0,0,0,0,0};
 
