@@ -123,7 +123,7 @@ int ll_wait;
 #define MAX_WAIT 300
 #define MIN_WAIT 50
 
-int create_game_feedback( pWindowElement elem, int action )
+int create_game_feedback( pWindow window, pWindowElement elem, int action )
 {
 	switch (action)
 	{

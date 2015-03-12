@@ -172,7 +172,7 @@ void save_options()
 	spConfigFree(conf);
 }
 
-int options_feedback( pWindowElement elem, int action )
+int options_feedback( pWindow window, pWindowElement elem, int action )
 {
 	switch (action)
 	{
@@ -196,7 +196,7 @@ int options_feedback( pWindowElement elem, int action )
 					break;
 				case 6:
 					sop_rotation(1-gop_rotation());
-					options_feedback(elem->next,WN_ACT_UPDATE);
+					options_feedback(window,elem->next,WN_ACT_UPDATE);
 					break;
 				case 7:
 					sop_direction_flip(1-gop_direction_flip());
@@ -223,7 +223,7 @@ int options_feedback( pWindowElement elem, int action )
 					break;
 				case 6:
 					sop_rotation(1-gop_rotation());
-					options_feedback(elem->next,WN_ACT_UPDATE);
+					options_feedback(window,elem->next,WN_ACT_UPDATE);
 					break;
 				case 7:
 					sop_direction_flip(1-gop_direction_flip());

@@ -81,6 +81,9 @@ void loadInformation(char* information)
 
 #include "level.h"
 
+char chatMessage[256];
+pWindow chatWindow;
+
 void draw(void)
 {
 	char buffer[256];
@@ -317,6 +320,9 @@ void draw(void)
 	int b_alpha = bullet_alpha();
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
+	
+	if (chatWindow)
+		window_draw();
 	
 	spFlip();
 }
@@ -560,7 +566,7 @@ void set_input()
 
 
 
-int quit_feedback( pWindowElement elem, int action )
+int quit_feedback( pWindow window, pWindowElement elem, int action )
 {
 	sprintf(elem->text,"Do you really want to quit?");
 	return 0;
@@ -599,6 +605,22 @@ int calc(Uint32 steps)
 				return 1;
 		}
 	}
+	if (chatWindow)
+	{
+		int result = window_calc(steps);
+		if (result == 1)
+		{
+			send_chat(hase_game,chatMessage);
+			chatMessage[0] = 0;
+		}
+		if (result)
+		{
+			delete_window(chatWindow);
+			chatWindow = NULL;
+		}
+		spResetButtonsState();
+	}
+	
 	if (spGetInput()->button[MY_BUTTON_START])
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
@@ -609,9 +631,8 @@ int calc(Uint32 steps)
 		if (spGetInput()->button[MY_PRACTICE_OK] && get_channel())
 		{
 			spGetInput()->button[MY_PRACTICE_OK] = 0;
-			char m[256] = "";
-			if (text_box(font,hase_resize,"Enter Message:",m,256,0,NULL,1) == 1)
-				send_chat(hase_game,m);
+			chatWindow = create_text_box(font,hase_resize,"Enter Message:",chatMessage,256,0,NULL,1);
+			set_recent_window(chatWindow);
 		}
 		if (spGetInput()->button[MY_PRACTICE_3])
 		{
@@ -982,6 +1003,8 @@ int calc(Uint32 steps)
 
 int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 {
+	chatWindow = NULL;
+	chatMessage[0] = 0;
 	before_showing = NULL;
 	hase_resize = resize;
 	hase_game = game;
@@ -1093,5 +1116,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	delete_weapons();
 	spParticleDelete(&particles);
 	spResetButtonsState();
+	if (chatWindow)
+		delete_window(chatWindow);
 	return result;
 }

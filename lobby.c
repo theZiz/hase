@@ -46,7 +46,7 @@ void resize( Uint16 w, Uint16 h )
 	//	font->maxheight = font->maxheight*4/5;
 }
 
-int main_menu_feedback( pWindowElement elem, int action )
+int main_menu_feedback( pWindow window, pWindowElement elem, int action )
 {
 	switch (elem->reference)
 	{
@@ -64,7 +64,7 @@ int lo_game_players = 4;
 int lo_game_seconds = 45;
 int lo_game_hares = 3;
 
-int local_game_feedback( pWindowElement elem, int action )
+int local_game_feedback( pWindow window, pWindowElement elem, int action )
 {
 	switch (action)
 	{
