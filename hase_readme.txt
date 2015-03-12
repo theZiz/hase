@@ -25,6 +25,10 @@ Changelog
 - Sending IRC messages from within the game
 - Receiving IRC message ingame
 - Added button for random insult
+- Too expensive weapons are greyed out
+- New weapons:
+	- Added a big and a small build tool
+	
 
 1.4.7.2
 - Added button arrow images to sparrow3d and use them now in hase in the help

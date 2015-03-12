@@ -104,7 +104,20 @@ void draw_weapons()
 	spDeactivatePattern();
 	for (x = 0;x<WEAPON_X;x++)
 		for (y = 0;y<WEAPON_Y;y++)
+		{
+			if (weapon_points < weapon_cost[weapon_pos[y][x]])
+				spSetPattern8(
+					0b11101110,
+					0b00101000,
+					0b10111011,
+					0b10000010,
+					0b11101110,
+					0b00101000,
+					0b10111011,
+					0b10000010);
 			spRotozoomSurface((screen->w-(WEAPON_X-x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-h+y*factor*2)/2+factor/2+font->maxheight,0,weapon_surface[weapon_pos[y][x]],spGetSizeFactor()/2,spGetSizeFactor()/2,0);
+			spDeactivatePattern();
+		}
 	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"[o]/[3]Choose",font);
 	if (player[active_player]->activeHare)
 	{
