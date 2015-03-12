@@ -52,7 +52,7 @@ const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0};
 
 const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,0,0,0,0,0};
 
-const int weapon_health_divisor[WEAPON_MAX] = {2176,2304,2432,0,0,0,0,0,0,0,0,0};
+const int weapon_health_divisor[WEAPON_MAX] = {2176,2304,2432,2432,0,0,0,0,0,0,0,0};
 
 const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/bazooka_big.png",

@@ -5,7 +5,6 @@ For next version:
 	* extra WP
 	* mines
 * Weapons
-	* Cluster weapons
 	* wand
 		* 1 wp
 		* 2 wp
@@ -14,7 +13,8 @@ For next version:
 	* mine (3 wp)
 	* Kaio-Ken
 	* super jump (1 wp)
-	
+* Level border
+* tweak the physics a bit? (smaller circle)	
 
 General:
 * smarter AI

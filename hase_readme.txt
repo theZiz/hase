@@ -28,6 +28,7 @@ Changelog
 - Too expensive weapons are greyed out
 - New weapons:
 	- Added a big and a small build tool
+	- Cluster bomb
 	
 
 1.4.7.2
