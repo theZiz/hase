@@ -15,20 +15,23 @@ Changelog
 - Username guessing with C4A profile information
 - server improvements
 - better weapon illustration
-- Notice of sprite is used by another player
+- Noticement if sprite is used by another player
 - Better camera movement
 - Username has to be choosen in lobby
-- Using this username for global IRC chat
-- Chat in game lobby now via IRC
-- Furthermore chat in global lobby, too
-- Automatic query answer
-- Sending IRC messages from within the game
-- Receiving IRC message ingame
-- Added button for random insult
+- IRC chat
+- Chat in lobby
+- Sending and receiving chat messages from within the game
+- Random button for insult in chat
 - Too expensive weapons are greyed out
+- Showing level border
 - New weapons:
-	- Added a big and a small build tool
+	- A bigger and a smaller building tool
 	- Cluster bomb
+	- Mine shooter
+- Added items:
+	- health
+	- more weapon points
+	- mine
 	
 
 1.4.7.2

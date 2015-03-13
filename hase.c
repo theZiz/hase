@@ -36,7 +36,6 @@ int alive_count;
 
 int game_pause = 0;
 int extra_time = 0;
-int weapon_points = 0;
 int wp_choose = 0;
 
 int show_names = 1;
@@ -72,13 +71,27 @@ void loadInformation(char* information)
 }
 
 #define PHYSIC_IMPACT 13
+
+#define ITEMS_COUNT 3
+typedef struct sItem *pItem;
+typedef struct sItem
+{
+	int kind;
+	Sint32 x,y;
+	Sint32 dx,dy;
+	Sint32 rotation;
+	int seen;
+	int beep;
+	pItem next;
+} tItem;
+pItem items_drop(int kind,Sint32 x,Sint32 y);
 #include "gravity.c"
 #include "player.c"
 #include "help.c"
 #include "bullet.c"
 #include "logic.c"
 #include "trace.c"
-
+#include "items.c"
 #include "level.h"
 
 char chatMessage[256];
@@ -98,6 +111,9 @@ void draw(void)
 	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
 	spSetVerticalOrigin(SP_CENTER);
 	spSetHorizontalOrigin(SP_CENTER);
+	
+	//Items
+	items_draw();
 
 	//Players:
 	int j;
@@ -143,7 +159,7 @@ void draw(void)
 					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
-					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2,NULL))
+					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2,NULL,1))
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,0));
 					else
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
@@ -284,7 +300,7 @@ void draw(void)
 	}
 	
 	
-	sprintf(buffer,"Weapon points: %i/3",weapon_points);
+	sprintf(buffer,"Weapon points: %i/3",player[active_player]->weapon_points);
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	if (player[active_player]->activeHare)
 	{
@@ -303,7 +319,7 @@ void draw(void)
 		}
 		spFontDrawRight( screen->w-1, screen->h-1-3*font->maxheight, 0, buffer, font );
 	}
-	if (weapon_points)
+	if (player[active_player]->weapon_points)
 		sprintf(buffer,"%is",countdown / 1000);
 	else
 	if (extra_time)
@@ -701,21 +717,29 @@ int calc(Uint32 steps)
 		if (player[active_player]->activeHare)
 		{
 			int destX,destY;
-			destX = player[active_player]->activeHare->x;
-			destY = player[active_player]->activeHare->y;
-			if (firstBullet)
+			if (dropItem && dropItem->seen)
 			{
-				pBullet momBullet = firstBullet;
-				int c = 1;
-				while (momBullet)
+				destX = dropItem->x;
+				destY = dropItem->y;
+			}
+			else
+			{
+				destX = player[active_player]->activeHare->x;
+				destY = player[active_player]->activeHare->y;
+				if (firstBullet)
 				{
-					destX += momBullet->x*4;
-					destY += momBullet->y*4;
-					momBullet = momBullet->next;
-					c+=4;
+					pBullet momBullet = firstBullet;
+					int c = 1;
+					while (momBullet)
+					{
+						destX += momBullet->x*2;
+						destY += momBullet->y*2;
+						momBullet = momBullet->next;
+						c+=2;
+					}
+					destX /= c;
+					destY /= c;
 				}
-				destX /= c;
-				destY /= c;
 			}
 			posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
 			posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
@@ -736,6 +760,7 @@ int calc(Uint32 steps)
 		set_input();
 		if (game_pause)
 			continue;
+		items_calc();
 		update_player();
 		int res = do_physics();
 		if (res == 1)
@@ -748,7 +773,7 @@ int calc(Uint32 steps)
 		if (bullet_alpha() > 0)
 			continue;
 		check_next_player();
-		if (weapon_points)
+		if (player[active_player]->weapon_points)
 			countdown --;
 		if (countdown < 0)
 			next_player();
@@ -758,7 +783,7 @@ int calc(Uint32 steps)
 			if (player[active_player]->computer && player[active_player]->activeHare)
 			{		
 				//AI
-				if (weapon_points)
+				if (player[active_player]->weapon_points)
 				{
 					if (player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
 					{
@@ -795,10 +820,10 @@ int calc(Uint32 steps)
 								else
 								{
 									//Shoot!
-									if (weapon_points > 0)
+									if (player[active_player]->weapon_points > 0)
 									{
-										weapon_points-=weapon_cost[WP_BIG_BAZOOKA];
-										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr])->kind = WP_BIG_BAZOOKA;
+										player[active_player]->weapon_points-=weapon_cost[WP_BIG_BAZOOKA];
+										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],WP_BIG_BAZOOKA);
 									}
 									break;
 								}
@@ -893,15 +918,12 @@ int calc(Uint32 steps)
 				if (input_states[INPUT_BUTTON_CANCEL] && player[active_player]->activeHare)
 				{
 					//Shoot!
-					if (weapon_points - weapon_cost[w_nr] >= 0)
+					if (player[active_player]->weapon_points - weapon_cost[w_nr] >= 0)
 					{
 						input_states[INPUT_BUTTON_CANCEL] = 0;
-						weapon_points-=weapon_cost[w_nr];
+						player[active_player]->weapon_points-=weapon_cost[w_nr];
 						if (weapon_shoot[w_nr])
-						{
-							pBullet bullet = shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr]);
-							bullet->kind = w_nr;
-						}
+							shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr);
 						else
 						switch (w_nr)
 						{
@@ -911,10 +933,10 @@ int calc(Uint32 steps)
 									int r = weapon_explosion[w_nr];
 									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
 									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
-									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2,NULL))
+									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2,NULL,1))
 										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
 									else
-										weapon_points+=weapon_cost[w_nr];
+										player[active_player]->weapon_points+=weapon_cost[w_nr];
 								}
 								break;
 							case WP_PREV_HARE:
@@ -928,7 +950,7 @@ int calc(Uint32 steps)
 				}
 			}
 		}
-		if (firstBullet == NULL && weapon_points == 0)
+		if (firstBullet == NULL && player[active_player]->weapon_points == 0)
 		{
 			if (extra_time == 0)
 				extra_time = 5000;
@@ -1050,6 +1072,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	realloc_gravity();
 	init_gravity();
 	init_player(hase_player_list,game->player_count,game->hares_per_player);
+	items_init(game);
 	zoomAdjust = spSqrt(spGetSizeFactor());
 	minZoom = spSqrt(spGetSizeFactor()/4)/16384*16384;
 	maxZoom = spSqrt(spGetSizeFactor()*4)/16384*16384;
@@ -1117,6 +1140,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	delete_weapons();
 	spParticleDelete(&particles);
 	spResetButtonsState();
+	items_quit();
 	if (chatWindow)
 		delete_window(chatWindow);
 	return result;

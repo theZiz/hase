@@ -139,6 +139,7 @@ typedef struct sPlayer
 	int tracePos;
 	int d_health;
 	int d_time;
+	int weapon_points;
 } tPlayer;
 
 typedef struct sThreadData

@@ -219,6 +219,7 @@ void init_gravity()
 			                  gravity_surface,angle<<GRAVITY_RESOLUTION+1,f<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1);
 		}
 	}
+	spRectangleBorder(LEVEL_WIDTH/2,LEVEL_HEIGHT/2,0,LEVEL_WIDTH,LEVEL_HEIGHT,4,4,BORDER_COLOR);
 	spBlitSurface(LEVEL_WIDTH/2,LEVEL_HEIGHT/2,0,level_original);
 	spSelectRenderTarget(screen);
 }

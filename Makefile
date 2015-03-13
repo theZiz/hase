@@ -63,7 +63,7 @@ window.o: window.c window.h lobbyList.h
 about.o: about.c about.h lobbyList.h
 	$(CC) $(CFLAGS) -c about.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
-hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h
+hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h items.c
 	$(CC) $(CFLAGS) -c hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
 
 level.o: level.c level.h

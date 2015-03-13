@@ -1,20 +1,12 @@
 For next version:
-* Some items
-	* items at all
-	* health
-	* extra WP
-	* mines
 * Weapons
+	* Kaio-Ken (3 wp)
+	* super jump (1 wp)
 	* wand
 		* 1 wp
 		* 2 wp
 		* 3 wp
 		* 4 wp
-	* mine (3 wp)
-	* Kaio-Ken
-	* super jump (1 wp)
-* Level border
-* tweak the physics a bit? (smaller circle)	
 
 General:
 * smarter AI

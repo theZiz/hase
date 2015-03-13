@@ -15,7 +15,7 @@ int active_player = 0;
 int player_count;
 pPlayer *player;
 
-int circle_is_empty(int x, int y, int r,pHare except)
+static int circle_is_empty(int x, int y, int r,pHare except,int with_players)
 {
 	int a,b;
 	int start_a = x-r;
@@ -41,26 +41,27 @@ int circle_is_empty(int x, int y, int r,pHare except)
 	}
 	
 	int i;
-	for (i = 0; i < player_count; i++)
-	{
-		pHare hare = player[i]->firstHare;
-		if (hare)
-		do
+	if (with_players)
+		for (i = 0; i < player_count; i++)
 		{
-			if (hare == except)
+			pHare hare = player[i]->firstHare;
+			if (hare)
+			do
 			{
+				if (hare == except)
+				{
+					hare = hare->next;
+					continue;
+				}
+				int px = hare->x >> SP_ACCURACY;
+				int py = hare->y >> SP_ACCURACY;
+				int d = (x-px)*(x-px)+(y-py)*(y-py);
+				if (d <= (r+PLAYER_PLAYER_RADIUS)*(r+PLAYER_PLAYER_RADIUS))
+					return 0;
 				hare = hare->next;
-				continue;
 			}
-			int px = hare->x >> SP_ACCURACY;
-			int py = hare->y >> SP_ACCURACY;
-			int d = (x-px)*(x-px)+(y-py)*(y-py);
-			if (d <= (r+8)*(r+8))
-				return 0;
-			hare = hare->next;
+			while (hare != player[i]->firstHare);
 		}
-		while (hare != player[i]->firstHare);
-	}
 	return 1;
 }
 
@@ -143,7 +144,7 @@ void update_player()
 					int k;
 					for (k = 1; k <= 16; k++)
 					{
-						if (circle_is_empty(spFixedToInt(hare->x+k*dx),spFixedToInt(hare->y-k*dy),8,hare))
+						if (circle_is_empty(spFixedToInt(hare->x+k*dx),spFixedToInt(hare->y-k*dy),PLAYER_RADIUS,hare,1))
 						{
 							hare->x += k*dx;
 							hare->y -= k*dy;
@@ -296,8 +297,11 @@ void start_thread()
 	}
 }
 
+pItem dropItem = NULL;
+
 void real_next_player()
 {
+	player[active_player]->weapon_points = 0;
 	stop_thread(0);
 	int j;
 	for (j = 0; j < hase_game->player_count; j++)
@@ -327,10 +331,12 @@ void real_next_player()
 		hare = hare->next;
 	}
 	while (hare != player[active_player]->firstHare);
-	weapon_points = 3;
+	player[active_player]->weapon_points += 3;
 	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
 	wp_choose = 0;
+	if (spRand()/1337%player_count == 0)
+		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
 	start_thread();
 }
 
@@ -520,6 +526,7 @@ pHare del_hare(pHare hare,pHare* firstHare)
 
 void init_player(pPlayer player_list,int pc,int hc)
 {
+	dropItem = NULL;
 	next_player_go = 0;
 	player_count = pc;
 	player = (pPlayer*)malloc(sizeof(pPlayer)*pc);
@@ -534,6 +541,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 		player[i]->firstHare = NULL;
 	for (i = 0; i < player_count; i++)
 	{
+		player[i]->weapon_points = 0;
 		player[i]->d_time = 0;
 		player[i]->d_health = 0;
 		player[i]->time = 0;
@@ -553,7 +561,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 				x = spRand()%LEVEL_WIDTH;
 				y = spRand()%LEVEL_HEIGHT;
 				printf("Tried %i %i... ",x,y);
-				if (circle_is_empty(x,y,16,hare) && gravitation_force(x,y)/32768)
+				if (circle_is_empty(x,y,16,hare,1) && gravitation_force(x,y)/32768)
 					break;
 				printf("NOT!\n");
 			}
@@ -580,7 +588,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 	rotation = -player[active_player]->firstHare->rotation;
 	ai_shoot_tries = 0;
 	last_ai_try = 0;
-	weapon_points = 3;
+	player[active_player]->weapon_points = 3;
 	extra_time = 0;
 	start_thread();
 }
