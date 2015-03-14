@@ -153,7 +153,14 @@ void update_player()
 							if (hare->high_hops)
 							{
 								angle = SP_PI/10;
-								divisor = 6;
+								if (hare->high_hops >= 2) //super jump!
+								{
+									divisor = 4;
+									if (hare->high_hops == 3) //Wingdaium
+										angle = 0;
+								}
+								else
+									divisor = 6;
 							}
 							if (hare->direction)
 							{
@@ -201,197 +208,6 @@ void update_player()
 		}
 		while (hare != player[j]->firstHare);
 	}
-}
-
-void update_player_sprite(int steps)
-{
-	pHare hare = player[active_player]->firstHare;
-	if (hare)
-	do
-	{
-		if (hare->hops > 0)
-		{
-			if (hare->high_hops)
-			{
-				if (hare->direction == 0)
-					spSelectSprite(hare->hase,"high jump left");
-				else
-					spSelectSprite(hare->hase,"high jump right");
-			}
-			else
-			{
-				if (hare->direction == 0)
-					spSelectSprite(hare->hase,"jump left");
-				else
-					spSelectSprite(hare->hase,"jump right");
-			}
-		}
-		else
-		{
-			if (hare->direction == 0)
-				spSelectSprite(hare->hase,"stand left");
-			else
-				spSelectSprite(hare->hase,"stand right");
-		}
-		spUpdateSprite(spActiveSprite(hare->hase),steps);
-		hare = hare->next;
-	}
-	while (hare != player[active_player]->firstHare);
-}	
-
-int next_player_go = 0;
-
-void next_player()
-{
-	next_player_go = 1;
-}
-
-void stop_thread(int kill)
-{
-	if (!hase_game->local && active_player >= 0)
-	{
-		if (!player[active_player]->computer)
-		{
-			if (player[active_player]->local)
-			{
-				printf("Ending Push Thread for player %s (s: %i)\n",player[active_player]->name,player[active_player]->time/1000);
-				char buffer[320];
-				sprintf(buffer,"Finishing sending turn data\nfor player %s...",player[active_player]->name);
-				set_message(font,buffer);
-				draw_message();
-				spFlip();
-				push_game_thread(player[active_player],player[active_player]->time/1000,send_data);
-				memset(send_data,0,sizeof(char)*1536);
-				end_push_thread(kill);
-				spResetLoop();
-			}
-			else
-			{
-				printf("Ending Pull Thread for player %s\n",player[active_player]->name);
-				end_pull_thread(player[active_player]);
-			}
-		}
-		printf("Setting player time from %i to %i\n",player[active_player]->time,((player[active_player]->time+999)/1000)*1000);
-		player[active_player]->time = ((player[active_player]->time+999)/1000)*1000;
-	}	
-}
-
-void start_thread()
-{
-	if (!hase_game->local)
-	{
-		if (!player[active_player]->computer)
-		{
-			memset(send_data,0,1536*sizeof(char));
-			if (player[active_player]->local)
-			{
-				printf("Starting Push Thread for player %s\n",player[active_player]->name);
-				start_push_thread();
-			}
-			else
-			{
-				printf("Starting Pull Thread for player %s\n",player[active_player]->name);
-				start_pull_thread(player[active_player]);
-			}
-		}
-	}
-}
-
-pItem dropItem = NULL;
-
-void real_next_player()
-{
-	player[active_player]->weapon_points = 0;
-	stop_thread(0);
-	int j;
-	for (j = 0; j < hase_game->player_count; j++)
-		if (player[j]->activeHare == NULL)
-		{
-			player[j]->activeHare = player[j]->setActiveHare;
-			player[j]->setActiveHare = NULL;
-		}
-	ai_shoot_tries = 0;
-	last_ai_try = 0;
-	lastAIDistance = 100000000;
-	do
-	{
-		active_player = (active_player+1)%player_count;
-	}
-	while (player[active_player]->firstHare == NULL);
-	player[active_player]->activeHare = player[active_player]->activeHare->next;
-	if (player[active_player]->computer)
-		player[active_player]->activeHare->direction = spRand()&1;
-	countdown = hase_game->seconds_per_turn*1000;
-	pHare hare = player[active_player]->firstHare;
-	if (hare)
-	do
-	{
-		hare->hops = 0;
-		hare->high_hops = 0;
-		hare = hare->next;
-	}
-	while (hare != player[active_player]->firstHare);
-	player[active_player]->weapon_points += 3;
-	extra_time = 0;
-	memset(input_states,0,sizeof(int)*12);
-	wp_choose = 0;
-	if (spRand()/1337%player_count == 0)
-		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
-	start_thread();
-}
-
-void check_next_player()
-{
-	if (next_player_go && bullet_alpha() == 0)
-	{
-		next_player_go = 0;
-		real_next_player();
-	}
-}
-
-pHare add_hare(pHare* firstHare)
-{
-	pHare hare = (pHare)malloc(sizeof(tHare));
-	if (*firstHare)
-	{
-		pHare last = (*firstHare)->before;
-		last->next = hare;
-		hare->before = last;
-		hare->next = *firstHare;
-		(*firstHare)->before = hare;
-	}
-	else
-	{
-		*firstHare = hare;
-		hare->next = hare;
-		hare->before = hare;
-	}
-	return hare;
-}
-
-#define SQRT_2 92672
-
-Sint32 vector_length_approx(Sint32 x,Sint32 y)
-{
-	x = abs(x);
-	y = abs(y);
-	if (x > y)
-	{
-		Sint32 factor = spDiv(y,x);
-		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),x);
-	}
-	else
-	{
-		Sint32 factor = spDiv(x,y);
-		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),y);
-	}
-}
-
-Sint32 vector_length_guess(Sint32 x,Sint32 y)
-{
-	x = abs(x);
-	y = abs(y);
-	return spMax(x,y);
 }
 
 int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32 extra_data)
@@ -484,6 +300,229 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 	return 0;
 }
 
+void update_player_sprite(int steps)
+{
+	int j;
+	for (j = 0; j < player_count; j++)
+	{
+		pHare hare = player[j]->firstHare;
+		if (hare)
+		{
+			int count = 0;
+			do
+			{
+				if (hare->hops > 0)
+				{
+					if (hare->high_hops)
+					{
+						if (hare->direction == 0)
+							spSelectSprite(hare->hase,"high jump left");
+						else
+							spSelectSprite(hare->hase,"high jump right");
+					}
+					else
+					{
+						if (hare->direction == 0)
+							spSelectSprite(hare->hase,"jump left");
+						else
+							spSelectSprite(hare->hase,"jump right");
+					}
+				}
+				else
+				{
+					if (hare->direction == 0)
+						spSelectSprite(hare->hase,"stand left");
+					else
+						spSelectSprite(hare->hase,"stand right");
+				}
+				spUpdateSprite(spActiveSprite(hare->hase),steps);
+				count++;
+				hare = hare->next;
+			}
+			while (hare != player[j]->firstHare);
+			
+			if (player[j]->next_round_extra && gop_particles() != 4)
+			{
+				int c = ((4-gop_particles()) * count * steps / 10);
+				spParticleBunchPointer p = spParticleCreate(c,hare_explosion_feedback,&particles);
+				p->age = 9000;
+				int i;
+				for (i = 0; i < c; i++)
+				{
+					int a = rand()%(2*SP_PI);
+					p->particle[i].dx = spSin(a)/8;
+					p->particle[i].dy = spCos(a)/8;
+					p->particle[i].dz = 0;
+					p->particle[i].x = hare->x+p->particle[i].dx*8*8;
+					p->particle[i].y = hare->y+p->particle[i].dy*8*8;
+					p->particle[i].z = 0;
+					p->particle[i].data.color = spGetFastRGB(255,0,0);
+					p->particle[i].status = 0;
+					hare = hare->next;
+				}
+			}
+		}
+	}
+}	
+
+int next_player_go = 0;
+
+void next_player()
+{
+	next_player_go = 1;
+}
+
+void stop_thread(int kill)
+{
+	if (!hase_game->local && active_player >= 0)
+	{
+		if (!player[active_player]->computer)
+		{
+			if (player[active_player]->local)
+			{
+				printf("Ending Push Thread for player %s (s: %i)\n",player[active_player]->name,player[active_player]->time/1000);
+				char buffer[320];
+				sprintf(buffer,"Finishing sending turn data\nfor player %s...",player[active_player]->name);
+				set_message(font,buffer);
+				draw_message();
+				spFlip();
+				push_game_thread(player[active_player],player[active_player]->time/1000,send_data);
+				memset(send_data,0,sizeof(char)*1536);
+				end_push_thread(kill);
+				spResetLoop();
+			}
+			else
+			{
+				printf("Ending Pull Thread for player %s\n",player[active_player]->name);
+				end_pull_thread(player[active_player]);
+			}
+		}
+		printf("Setting player time from %i to %i\n",player[active_player]->time,((player[active_player]->time+999)/1000)*1000);
+		player[active_player]->time = ((player[active_player]->time+999)/1000)*1000;
+	}	
+}
+
+void start_thread()
+{
+	if (!hase_game->local)
+	{
+		if (!player[active_player]->computer)
+		{
+			memset(send_data,0,1536*sizeof(char));
+			if (player[active_player]->local)
+			{
+				printf("Starting Push Thread for player %s\n",player[active_player]->name);
+				start_push_thread();
+			}
+			else
+			{
+				printf("Starting Pull Thread for player %s\n",player[active_player]->name);
+				start_pull_thread(player[active_player]);
+			}
+		}
+	}
+}
+
+pItem dropItem = NULL;
+
+void real_next_player()
+{
+	stop_thread(0);
+	int j;
+	for (j = 0; j < hase_game->player_count; j++)
+		if (player[j]->activeHare == NULL)
+		{
+			player[j]->activeHare = player[j]->setActiveHare;
+			player[j]->setActiveHare = NULL;
+		}
+	ai_shoot_tries = 0;
+	last_ai_try = 0;
+	lastAIDistance = 100000000;
+	do
+	{
+		active_player = (active_player+1)%player_count;
+	}
+	while (player[active_player]->firstHare == NULL);
+	player[active_player]->activeHare = player[active_player]->activeHare->next;
+	if (player[active_player]->computer)
+		player[active_player]->activeHare->direction = spRand()&1;
+	countdown = hase_game->seconds_per_turn*1000;
+	pHare hare = player[active_player]->firstHare;
+	if (hare)
+	do
+	{
+		hare->hops = 0;
+		hare->high_hops = 0;
+		hare = hare->next;
+	}
+	while (hare != player[active_player]->firstHare);
+	player[active_player]->weapon_points = 3 + player[active_player]->next_round_extra;
+	player[active_player]->next_round_extra = 0;
+
+	extra_time = 0;
+	memset(input_states,0,sizeof(int)*12);
+	wp_choose = 0;
+	if (spRand()/1337%player_count == 0)
+		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
+	start_thread();
+}
+
+void check_next_player()
+{
+	if (next_player_go && bullet_alpha() == 0)
+	{
+		next_player_go = 0;
+		real_next_player();
+	}
+}
+
+pHare add_hare(pHare* firstHare)
+{
+	pHare hare = (pHare)malloc(sizeof(tHare));
+	if (*firstHare)
+	{
+		pHare last = (*firstHare)->before;
+		last->next = hare;
+		hare->before = last;
+		hare->next = *firstHare;
+		(*firstHare)->before = hare;
+	}
+	else
+	{
+		*firstHare = hare;
+		hare->next = hare;
+		hare->before = hare;
+	}
+	return hare;
+}
+
+#define SQRT_2 92672
+
+Sint32 vector_length_approx(Sint32 x,Sint32 y)
+{
+	x = abs(x);
+	y = abs(y);
+	if (x > y)
+	{
+		Sint32 factor = spDiv(y,x);
+		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),x);
+	}
+	else
+	{
+		Sint32 factor = spDiv(x,y);
+		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),y);
+	}
+}
+
+Sint32 vector_length_guess(Sint32 x,Sint32 y)
+{
+	x = abs(x);
+	y = abs(y);
+	return spMax(x,y);
+}
+
+
+
 pHare del_hare(pHare hare,pHare* firstHare)
 {
 	pHare next = NULL;
@@ -538,7 +577,10 @@ void init_player(pPlayer player_list,int pc,int hc)
 	}
 	int i,j;
 	for (i = 0; i < player_count; i++)
+	{
+		player[i]->next_round_extra = 0;
 		player[i]->firstHare = NULL;
+	}
 	for (i = 0; i < player_count; i++)
 	{
 		player[i]->weapon_points = 0;

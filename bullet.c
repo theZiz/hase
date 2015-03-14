@@ -1,7 +1,7 @@
 #define WEAPON_X 4
-#define WEAPON_Y 3
+#define WEAPON_Y 4
 
-#define WEAPON_MAX 13
+#define WEAPON_MAX 17
 
 #define WP_BIG_BAZOOKA 0
 #define WP_MID_BAZOOKA 1
@@ -16,6 +16,10 @@
 #define WP_PREV_HARE 10
 #define WP_NEXT_HARE 11
 #define WP_MINE_BOMB 12
+#define WP_SPELL_EXP 13
+#define WP_SPELL_WIN 14
+#define WP_SPELL_STU 15
+#define WP_SPELL_AVA 16
 
 const char weapon_name[WEAPON_MAX][64] = {
 	"Big carrot bazooka",
@@ -30,7 +34,11 @@ const char weapon_name[WEAPON_MAX][64] = {
 	"Super jump",
 	"Previous hare",
 	"Next hare",
-	""
+	"",
+	"Expelliarmus",
+	"Wingardium Leviosa",
+	"Stupor",
+	"Avada Kedavra"
 };
 
 const char weapon_description[WEAPON_MAX][64] = {
@@ -46,20 +54,24 @@ const char weapon_description[WEAPON_MAX][64] = {
 	"Make a very high jump",
 	"Choose the previous hare",
 	"Choose the next hare",
-	""
+	"",
+	"A spell. Deals a little damage",
+	"A spell. Forces a direct up jump",
+	"A spell. Deals a lot damage",
+	"A spell. If hit, the hare dies"
 };
  
-const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,3,1,1,1,0};
+const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,2,1,1,1,0,2,3,4,5};
 
-const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0,0};
+const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0,0,spGetFastRGB(200,200,255),spGetFastRGB(255,255,0),spGetFastRGB(255,0,0),spGetFastRGB(0,255,0)};
 
-const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16};
+const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16,2,2,2,2};
 
-const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8};
+const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,2,2,2,2};
 
-const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32};
+const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,12,12,12,12};
 
-const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,2048,0,0,0,2048,0,0,0,0,1792};
+const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,2048,0,0,0,2048,0,0,0,0,2560,0,0,0,0};
 
 const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/bazooka_big.png",
@@ -74,17 +86,22 @@ const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/super_jump.png",
 	"./data/prev.png",
 	"./data/next.png",
-	"./data/mine.png"
+	"./data/mine.png",
+	"./data/expelliarmus.png",
+	"./data/wingardium.png",
+	"./data/stupor.png",
+	"./data/avada.png"
 };
 
 const int weapon_pos[WEAPON_Y][WEAPON_X] = {
 	{WP_BIG_BAZOOKA, WP_MID_BAZOOKA, WP_SML_BAZOOKA,   WP_CLUSTER},
 	{  WP_BUILD_BIG,   WP_BUILD_MID,   WP_BUILD_SML,      WP_MINE},
+	{  WP_SPELL_EXP,   WP_SPELL_WIN,   WP_SPELL_STU, WP_SPELL_AVA},
 	{ WP_SUPER_JUMP,    WP_KAIO_KEN,   WP_PREV_HARE, WP_NEXT_HARE}
 };
 
 typedef SDL_Surface *PSDL_Surface;
-PSDL_Surface weapon_surface[WEAPON_MAX] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+PSDL_Surface weapon_surface[WEAPON_MAX] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
  
 void load_weapons()
 {
@@ -169,6 +186,8 @@ pBulletTrace* registerTrace(pPlayer player);
 
 pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer tracePlayer,SDL_Surface* surface,int kind)
 {
+	if (weapon_shoot[kind] != 1)
+		power = SP_ONE/2;
 	spSoundPlay(snd_shoot,-1,0,0,-1);
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 	bullet->next = firstBullet;
@@ -205,7 +224,10 @@ void drawBullets()
 			Sint32 oy = spMul(momBullet->y-posY,zoom);
 			Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 			Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,momBullet->surface,zoom*weapon_size[momBullet->kind]/16,zoom*weapon_size[momBullet->kind]/16,momBullet->rotation);
+			if (weapon_shoot[momBullet->kind] == 1)
+				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,momBullet->surface,zoom*weapon_size[momBullet->kind]/16,zoom*weapon_size[momBullet->kind]/16,momBullet->rotation);
+			else
+				spEllipse(screen->w/2+x,screen->h/2+y,0,spFixedToInt(zoom*weapon_size[momBullet->kind]),spFixedToInt(zoom*weapon_size[momBullet->kind]),weapon_shoot[momBullet->kind]);
 		}
 		momBullet = momBullet->next;
 	}
@@ -262,8 +284,8 @@ void bullet_impact(int X,int Y,int radius)
 					p->particle[c].x = X+x << SP_ACCURACY;
 					p->particle[c].y = Y+y << SP_ACCURACY;
 					p->particle[c].z = 0;
-					p->particle[c].dx = ((spRand() & 131071) - SP_ONE)/4;
-					p->particle[c].dy = ((spRand() & 131071) - SP_ONE)/4;
+					p->particle[c].dx = ((rand() & 131071) - SP_ONE)/4;
+					p->particle[c].dy = ((rand() & 131071) - SP_ONE)/4;
 					p->particle[c].dz = 0;
 					p->particle[c].data.color = BORDER_COLOR;
 					p->particle[c].status = 0;
@@ -511,9 +533,30 @@ int updateBullets()
 				(*(momBullet->trace))->x = momBullet->x;
 				(*(momBullet->trace))->y = momBullet->y;
 			}
+			if (weapon_shoot[momBullet->kind] != 1 && gop_particles() != 4 && (momBullet->age & 15) == 0 )
+			{
+				int c = 15 >> gop_particles();
+				spParticleBunchPointer p = spParticleCreate(c,hare_explosion_feedback,&particles);
+				p->age = 7000;
+				int i;
+				for (i = 0; i < c; i++)
+				{
+					p->particle[i].x = momBullet->x;
+					p->particle[i].y = momBullet->y;
+					p->particle[i].z = 0;
+					p->particle[i].dx = ((rand() & 131071) - SP_ONE)/16;
+					p->particle[i].dy = ((rand() & 131071) - SP_ONE)/16;
+					p->particle[i].dz = 0;
+					p->particle[i].data.color = weapon_shoot[momBullet->kind];
+					p->particle[i].status = 0;
+				}
+			}
 		}
-		momBullet->dx -= gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-		momBullet->dy -= gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+		if (weapon_shoot[momBullet->kind] == 1)
+		{
+			momBullet->dx -= gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			momBullet->dy -= gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+		}
 		int speed = abs(momBullet->dx)+abs(momBullet->dy);
 		momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;
 		int dead = 0;
@@ -566,22 +609,53 @@ int updateBullets()
 						}
 						if (momBullet->kind == WP_MINE)
 							items_drop(2,momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY);
+						int total_break = 0;
 						for (j = 0; j < player_count; j++)
 						{
 							if (player[j]->firstHare == NULL)
 								continue;
+							if (total_break)
+								break;
 							pHare hare = player[j]->firstHare;
 							if (hare)
 							do
-							{							
+							{	
+								if (total_break)
+									break;
 								int d = spFixedToInt(hare->x-momBullet->x)*spFixedToInt(hare->x-momBullet->x)+
 										spFixedToInt(hare->y-momBullet->y)*spFixedToInt(hare->y-momBullet->y);
 									d = weapon_explosion[momBullet->kind]*weapon_explosion[momBullet->kind]-d;
 								if (d > 0)
 								{
-									hare->health -= d*MAX_HEALTH/weapon_health_divisor[momBullet->kind];
-									player[j]->d_health -= d*MAX_HEALTH/weapon_health_divisor[momBullet->kind];
-									player[j]->d_time = 5000;
+									int damage = 0;
+									switch (momBullet->kind)
+									{
+										case WP_SPELL_EXP:
+											damage = MAX_HEALTH*3/10;
+											total_break = 1;
+											break;
+										case WP_SPELL_WIN:
+											hare->hops = HIGH_HOPS_TIME;
+											hare->high_hops = 3;
+											total_break = 1;
+											break;
+										case WP_SPELL_STU:
+											damage = MAX_HEALTH*7/10;
+											total_break = 1;
+											break;
+										case WP_SPELL_AVA:
+											damage = hare->health;
+											total_break = 1;
+											break;
+										default:
+											damage = d*MAX_HEALTH/weapon_health_divisor[momBullet->kind];
+									}
+									if (damage)
+									{
+										hare->health -= damage;
+										player[j]->d_health -= damage;
+										player[j]->d_time = 5000;
+									}
 								}
 								if (hare->health <= 0)
 								{

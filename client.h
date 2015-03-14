@@ -140,6 +140,7 @@ typedef struct sPlayer
 	int d_health;
 	int d_time;
 	int weapon_points;
+	int next_round_extra;
 } tPlayer;
 
 typedef struct sThreadData

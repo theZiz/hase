@@ -1,12 +1,16 @@
 For next version:
-* Weapons
-	* Kaio-Ken (3 wp)
-	* super jump (1 wp)
-	* wand
-		* 1 wp
-		* 2 wp
-		* 3 wp
-		* 4 wp
+- lobby
+- nick name 
+- chat
+- adding
+- sprites
+- adding another player (sprites!)
+- adding AI
+- change level
+- play
+- show all weapons
+- show items
+- win!
 
 General:
 * smarter AI

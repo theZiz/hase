@@ -939,6 +939,15 @@ int calc(Uint32 steps)
 										player[active_player]->weapon_points+=weapon_cost[w_nr];
 								}
 								break;
+							case WP_SUPER_JUMP:
+								if (player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
+									jump(2); //jump is possible
+								else
+									player[active_player]->weapon_points+=weapon_cost[w_nr]; //payback						
+								break;
+							case WP_KAIO_KEN:
+								player[active_player]->next_round_extra++;
+								break;
 							case WP_PREV_HARE:
 								player[active_player]->activeHare = player[active_player]->activeHare->before;
 								break;

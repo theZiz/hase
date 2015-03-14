@@ -113,7 +113,8 @@ void items_calc()
 						case 1: //power
 							if (d <= PLAYER_RADIUS*PLAYER_RADIUS*4)
 							{
-								player[j]->weapon_points++;
+								if (player[j]->computer == 0)
+									player[j]->weapon_points++;
 								dead = 1;
 							}
 							break;
@@ -141,6 +142,8 @@ void items_calc()
 				dropItem = NULL;
 			free(item);
 		}
+		else
+			before = item;
 		item = next;
 	}
 	

@@ -28,12 +28,17 @@ Changelog
 	- A bigger and a smaller building tool
 	- Cluster bomb
 	- Mine shooter
+	- Super jump
+	- Weapon point harvesting
+	- Little damage shoot without gravity
+	- High damage shoot without gravity
+	- Instant kill
+	- Forced super jump
 - Added items:
 	- health
 	- more weapon points
 	- mine
 	
-
 1.4.7.2
 - Added button arrow images to sparrow3d and use them now in hase in the help
 
