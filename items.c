@@ -19,8 +19,8 @@ pItem items_drop(int kind,Sint32 x,Sint32 y)
 	else
 	while (1)
 	{
-		item->x = spRand()%LEVEL_WIDTH,spRand()%LEVEL_WIDTH;
-		item->y = spRand()%LEVEL_WIDTH,spRand()%LEVEL_HEIGHT;
+		item->x = spRand()%LEVEL_WIDTH;
+		item->y = spRand()%LEVEL_HEIGHT;
 		if (circle_is_empty(item->x,item->y,16,NULL,1) && gravitation_force(item->x,item->y)/32768)
 			break;
 	}

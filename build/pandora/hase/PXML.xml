@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="4" release="7" build="2"/>
+<version major="1" minor="5" release="0" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -42,48 +42,78 @@ Version 1.4.1:
 Version 1.4.1.1:
 - Added clock preference (900 Mhz) to PXML
 
-1.4.2
+Version 1.4.2:
 - An option to hide the player names on demand for better aiming when you have a lot of the screen area covered with the names
 - Improved colours
 
-1.4.3
+Version 1.4.3:
 - Arrow stays at minimal size while zooming to see where you are aiming at large zoom-outs
 - Circle around active hare to tell which of your characters you are currently controlling
 - Options menu for setting like volume, zooming behaviour and hare markation
 - Changeable particle size
 - Added Sound
 
-1.4.4
+Version 1.4.4:
 - Fixed the broken network play
 
-1.4.5
+Version 1.4.5:
 - Added option to not rotate the level, but the bunny
 - Added option to invert the controls of the bunny is upside down
 - Improved the particle effect (should be faster)
 
-1.4.6
+Version 1.4.6:
 - faster showing of own messages in chat
 - level color for the bullet traces
 - better and new default values for creating a game
 
-1.4.7
+Version 1.4.7:
 - Fixed small resolution sprites
 - Improved targeting
 - Improved button mapping for handhelds without keyboard
 
-1.4.7.1
+Version 1.4.7.1:
 - Fixed crash if last player removed in online game (thx @zear)
 
-1.4.7.2
+Version 1.4.7.2:
 - Added button arrow images to sparrow3d and use them now in hase in the help
 
+Version 1.5:
+- More sprites
+- Sprites chooseable
+- Username saving
+- Username guessing with C4A profile information
+- server improvements
+- better weapon illustration
+- Noticement if sprite is used by another player
+- Better camera movement
+- Username has to be choosen in lobby
+- IRC chat
+- Chat in lobby
+- Sending and receiving chat messages from within the game
+- Random button for insult in chat
+- Too expensive weapons are greyed out
+- Showing level border
+- New weapons:
+	- A bigger and a smaller building tool
+	- Cluster bomb
+	- Mine shooter
+	- Super jump
+	- Weapon point harvesting
+	- Little damage shoot without gravity
+	- High damage shoot without gravity
+	- Instant kill
+	- Forced super jump
+- Added items:
+	- health
+	- more weapon points
+	- mine
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="4" release="7" build="2" type="release"/>
+<version major="1" minor="5" release="0" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

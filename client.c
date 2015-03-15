@@ -958,7 +958,10 @@ void start_irc_client(char* name)
 void try_to_join()
 {
 	if (channel == NULL && server && spNetIRCServerReady(server))
+	{
 		channel = spNetIRCJoinChannel(server,irc_channel);
+		channel->show_users = 1;
+	}
 	if (server)
 	{
 		if (server->first_channel)

@@ -113,8 +113,8 @@ int main(int argc, char **argv)
 {
 	srand(time(NULL));
 	spSetRand(time(NULL));
-	//spSetDefaultWindowSize( 320, 240 );
-	spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 320, 240 );
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	spSetReturnBehavior(1,0);
 	spInitNet();
