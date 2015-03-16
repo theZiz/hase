@@ -14,7 +14,7 @@ void init_window_sprites()
 		sprintf(buffer,"./sprites/hase%i.ssc",i+1);
 		window_sprite[i] = spLoadSpriteCollection(buffer,NULL);
 		spSelectSprite(window_sprite[i],"high jump right");
-		spSetSpriteZoom(spActiveSprite(window_sprite[i]),spGetSizeFactor()/2,spGetSizeFactor()/2);
+		spSetSpriteZoom(spActiveSprite(window_sprite[i]),SP_ONE/2+spGetSizeFactor()/4,SP_ONE/2+spGetSizeFactor()/4);
 	}
 }
 
@@ -186,19 +186,19 @@ void window_draw(void)
 						if (window->only_ok)
 						{
 							if (window->firstElement->next)
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Back", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]Back", window->font );
 							else
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Okay", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]Okay", window->font );
 						}
 						else
 						{
 							if (window->firstElement->next)
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]/[c]Back", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]/[c]Back", window->font );
 							else
 							if (window->insult_button)
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Okay  [c]Cancel [3]Insult", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]Okay [c]Cancel [3]Insult", window->font );
 							else
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter  [R]Okay  [c]Cancel", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]Okay [c]Cancel", window->font );
 						}
 					}
 					else
@@ -212,7 +212,7 @@ void window_draw(void)
 					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay", window->font );
 				else
 				if (window->insult_button)
-					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel [3]Insult", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel  [3]Insult", window->font );
 				else
 					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel", window->font );
 				break;

@@ -119,10 +119,10 @@ void delete_weapons()
 
 void draw_weapons()
 {
-	int x,y,w,i = 0;
+	int x,y,w = 0,i = 0;
 	for (i = 0;i<WEAPON_MAX;i++)
 		w = spMax(spFontWidth(weapon_description[i],font),w);
-	int factor = 24 * spGetSizeFactor() >> SP_ACCURACY;
+	int factor = 24 * (SP_ONE+spGetSizeFactor()/2) >> SP_ACCURACY;
 	int h = WEAPON_Y*factor + 3*font->maxheight;
 	spSetPattern8(153,60,102,195,153,60,102,195);
 	spRectangle(screen->w/2,screen->h/2,0,w,h,LL_BG);
@@ -132,7 +132,7 @@ void draw_weapons()
 		{
 			if (player[active_player]->weapon_points < weapon_cost[weapon_pos[y][x]])
 				spSetPattern8(136,85,34,85,136,85,34,85);
-			spRotozoomSurface((screen->w-(WEAPON_X-x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-h+y*factor*2)/2+factor/2+font->maxheight,0,weapon_surface[weapon_pos[y][x]],spGetSizeFactor()/2,spGetSizeFactor()/2,0);
+			spRotozoomSurface((screen->w-(WEAPON_X-x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-h+y*factor*2)/2+factor/2+font->maxheight,0,weapon_surface[weapon_pos[y][x]],SP_ONE/2+spGetSizeFactor()/4,SP_ONE/2+spGetSizeFactor()/4,0);
 			spDeactivatePattern();
 		}
 	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"[o]/[3]Choose",font);

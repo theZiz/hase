@@ -42,8 +42,9 @@ void resize( Uint16 w, Uint16 h )
 	spFontMulWidth(font,spFloatToFixed(0.9f));
 
 	spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_IF_NEEDED,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
-	//if (spGetSizeFactor() <= SP_ONE)
-	//	font->maxheight = font->maxheight*4/5;
+	spSetVirtualKeyboardBackspaceButton(MY_PRACTICE_4);
+	if (spGetSizeFactor() <= SP_ONE)
+		font->maxheight = font->maxheight-1;
 }
 
 int main_menu_feedback( pWindow window, pWindowElement elem, int action )
@@ -113,8 +114,8 @@ int main(int argc, char **argv)
 {
 	srand(time(NULL));
 	spSetRand(time(NULL));
-	spSetDefaultWindowSize( 320, 240 );
-	//spSetDefaultWindowSize( 800, 480 );
+	//spSetDefaultWindowSize( 320, 240 );
+	spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	spSetReturnBehavior(1,0);
 	spInitNet();

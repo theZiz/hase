@@ -8,6 +8,11 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.0.1
+- bigger sprites for small screens
+- Fixed keyboard-gui-collision
+- Backspace button for onscreen keyboard devices (like the GCW)
+
 1.5.0
 - More sprites
 - Sprites chooseable
