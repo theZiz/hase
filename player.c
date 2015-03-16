@@ -565,6 +565,7 @@ pHare del_hare(pHare hare,pHare* firstHare)
 
 void init_player(pPlayer player_list,int pc,int hc)
 {
+	lastAIDistance = 100000000;
 	dropItem = NULL;
 	next_player_go = 0;
 	player_count = pc;
@@ -602,12 +603,12 @@ void init_player(pPlayer player_list,int pc,int hc)
 			{
 				x = spRand()%LEVEL_WIDTH;
 				y = spRand()%LEVEL_HEIGHT;
-				printf("Tried %i %i... ",x,y);
+				//printf("Tried %i %i... ",x,y);
 				if (circle_is_empty(x,y,16,hare,1) && gravitation_force(x,y)/32768)
 					break;
-				printf("NOT!\n");
+				//printf("NOT!\n");
 			}
-			printf("Fine.\n");
+			//printf("Fine.\n");
 			hare->x = x << SP_ACCURACY;
 			hare->y = y << SP_ACCURACY;
 			hare->dx = 0;

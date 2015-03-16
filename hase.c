@@ -809,6 +809,7 @@ int calc(Uint32 steps)
 									int w_d = spRand()%(2*SP_PI);
 									int w_p = spRand()%SP_ONE;
 									lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/2);
+									printf("power %i rotation %i: %i-%i\n",w_p/2,player[active_player]->activeHare->rotation+w_d+SP_PI,x,y);
 									int d = min_d_not_me(x,y,active_player);
 									if (d < lastAIDistance)
 									{
