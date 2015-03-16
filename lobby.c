@@ -17,14 +17,22 @@ spFontPointer font = NULL;
 void resize( Uint16 w, Uint16 h )
 {
 	spSelectRenderTarget(screen);
+	spFontSetShadeColor(0);
 	//Font Loading
 	if ( font )
-		spFontDelete( font );
-	spFontSetShadeColor(0);
-	if (spGetSizeFactor() > SP_ONE)
-		font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+	{
+		if (spGetSizeFactor() > SP_ONE)
+			spFontReload( font, "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+		else
+			spFontReload( font, "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+	}
 	else
-		font = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+	{
+		if (spGetSizeFactor() > SP_ONE)
+			font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+		else
+			font = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+	}
 	spFontAdd( font, SP_FONT_GROUP_ASCII"™°∞", BUTTON_FG ); //whole ASCII
 	spFontAddBorder(font , 0);
 	spFontAddButton( font, 'R', MY_BUTTON_START_NAME, BUTTON_FG, BUTTON_BG ); //Return == START
