@@ -307,7 +307,9 @@ int ll_calc(Uint32 steps)
 			return 1;
 		int b = SDL_GetTicks();
 		ll_reload_now = 0;
-		ll_counter = a-b;
+		ll_counter = (a-b)/2; //<-black magic
+		spResetLoop();
+		steps = 0;
 	}
 	int step;
 	for (step = 0; step < steps; step++)

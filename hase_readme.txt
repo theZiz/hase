@@ -8,8 +8,12 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.0.3
+- Improved user name checking of IRC nick
+
 1.5.0.2
 - Fixed a bug, which fucked the deterministic, which is baaaad
+- Replacing spaces with underscore in nicknames
 
 1.5.0.1
 - bigger sprites for small screens

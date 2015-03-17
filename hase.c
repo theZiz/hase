@@ -245,9 +245,10 @@ void draw(void)
 			showing = before_showing->next;
 		while (showing)
 		{
-			if (ingame_message(showing->message,hase_game->name))
+			char* message;
+			if (message = ingame_message(showing->message,hase_game->name))
 			{
-				sprintf(buffer,"%s: %s",showing->user,showing->message);
+				sprintf(buffer,"%s: %s",showing->user,message);
 				spFontDraw(2, y-font->maxheight/8, 0, buffer, font );
 				y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 			}
@@ -809,7 +810,6 @@ int calc(Uint32 steps)
 									int w_d = spRand()%(2*SP_PI);
 									int w_p = spRand()%SP_ONE;
 									lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/2);
-									printf("power %i rotation %i: %i-%i\n",w_p/2,player[active_player]->activeHare->rotation+w_d+SP_PI,x,y);
 									int d = min_d_not_me(x,y,active_player);
 									if (d < lastAIDistance)
 									{

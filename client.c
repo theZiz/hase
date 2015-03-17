@@ -952,7 +952,20 @@ void start_irc_client(char* name)
 {
 	if (server)
 		return;
-	server = spNetIRCConnectServer(irc_server,irc_port,name,name,name,"*");
+	char buffer[17]; //max nick len on freenode is 16... Let's keep some space for numbers
+	int i;
+	for (i = 0; i < 15 && name[i];i++)
+		if ((((name[i] < '0') || 
+			  (name[i] > '9' && name[i] < 'A') ||
+			   name[i] > '}') &&
+			(name[i] !='-' || i == 0)) ||
+			(name[i] >= '0' && name[i] <= '9' && i == 0))
+			buffer[i] = '_';
+		else
+			buffer[i] = name[i];
+	buffer[i] = 0;
+	printf("%s %i %s\n",buffer,irc_port,irc_server);
+	server = spNetIRCConnectServer(irc_server,irc_port,buffer,"Hase_user",name,"*");
 }
 
 void try_to_join()
