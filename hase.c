@@ -16,7 +16,6 @@ spSound* snd_high;
 spSound* snd_low;
 spSound* snd_shoot;
 
-SDL_Surface* screen;
 spFontPointer font;
 SDL_Surface* level;
 SDL_Surface* level_original;
@@ -39,6 +38,9 @@ int extra_time = 0;
 int wp_choose = 0;
 
 int show_names = 1;
+int show_map = 1;
+
+int map_w,map_h,map_size;
 
 #define INPUT_AXIS_0_LEFT 0
 #define INPUT_AXIS_0_RIGHT 1
@@ -60,6 +62,8 @@ spParticleBunchPointer particles = NULL;
 spSpriteCollectionPointer targeting;
 
 spNetIRCMessagePointer before_showing;
+
+SDL_Surface* screen;
 
 void ( *hase_resize )( Uint16 w, Uint16 h );
 
@@ -85,6 +89,7 @@ typedef struct sItem
 	pItem next;
 } tItem;
 pItem items_drop(int kind,Sint32 x,Sint32 y);
+void update_map();
 #include "gravity.c"
 #include "player.c"
 #include "help.c"
@@ -96,6 +101,71 @@ pItem items_drop(int kind,Sint32 x,Sint32 y);
 
 char chatMessage[256];
 pWindow chatWindow;
+
+SDL_Surface* map_surface;
+
+void draw_map(int px,int py)
+{
+	spRotozoomSurface(px,py,0,map_surface,SP_ONE,SP_ONE,rotation);	
+	//player
+	int j;
+	for (j = 0; j < player_count; j++)
+	{
+		if (player[j]->firstHare == NULL)
+			continue;
+		pHare hare = player[j]->firstHare;
+		if (hare)
+		do
+		{	
+			int X = hare->x-(LEVEL_WIDTH << SP_ACCURACY-1);
+			int Y = hare->y-(LEVEL_HEIGHT << SP_ACCURACY-1);
+			int x = px+(spMul(spCos(rotation),X) - spMul(spSin(rotation),Y) >> SP_ACCURACY)*map_w/LEVEL_WIDTH;
+			int y = py+(spMul(spSin(rotation),X) + spMul(spCos(rotation),Y) >> SP_ACCURACY)*map_h/LEVEL_HEIGHT;
+			if (j == active_player)
+			{
+				if (hare == player[j]->activeHare)
+					spEllipse(x,y,0,map_size,map_size,spGetFastRGB(0,255,255));
+				else
+					spEllipse(x,y,0,map_size,map_size,spGetFastRGB(0,255,0));
+			}
+			else
+				spEllipse(x,y,0,map_size,map_size,spGetFastRGB(255,0,0));
+			hare = hare->next;
+		}
+		while (hare != player[j]->firstHare);	
+	}
+	pItem item = firstItem;
+	while (item)
+	{
+		int X = item->x-(LEVEL_WIDTH << SP_ACCURACY-1);
+		int Y = item->y-(LEVEL_HEIGHT << SP_ACCURACY-1);
+		int x = px+(spMul(spCos(rotation),X) - spMul(spSin(rotation),Y) >> SP_ACCURACY)*map_w/LEVEL_WIDTH;
+		int y = py+(spMul(spSin(rotation),X) + spMul(spCos(rotation),Y) >> SP_ACCURACY)*map_h/LEVEL_HEIGHT;
+		switch (item->kind)
+		{
+			case 0:
+				spRectangle(x,y,0,map_size,map_size,spGetFastRGB(255,255,255));
+				break;
+			case 1:
+				spRectangle(x,y,0,map_size,map_size,spGetFastRGB(255,255,0));
+				break;
+			case 2:
+				spRectangle(x,y,0,map_size,map_size,spGetFastRGB(100,50,0));
+				break;
+		}
+		item = item->next;
+	}
+	pBullet bullet = firstBullet;
+	while (bullet)
+	{
+		int X = bullet->x-(LEVEL_WIDTH << SP_ACCURACY-1);
+		int Y = bullet->y-(LEVEL_HEIGHT << SP_ACCURACY-1);
+		int x = px+(spMul(spCos(rotation),X) - spMul(spSin(rotation),Y) >> SP_ACCURACY)*map_w/LEVEL_WIDTH;
+		int y = py+(spMul(spSin(rotation),X) + spMul(spCos(rotation),Y) >> SP_ACCURACY)*map_h/LEVEL_HEIGHT;
+		spEllipse(x,y,0,map_size,map_size,spGetFastRGB(127,127,255));
+		bullet = bullet->next;
+	}
+}
 
 void draw(void)
 {
@@ -227,13 +297,12 @@ void draw(void)
 		
 	//Trace
 	drawTrace(player[active_player]);
-	
-	//Error message
-	if (game_pause)
-		draw_message();
+		
+	//Map
+	if (show_map)
+		draw_map(screen->w-map_w/2,font->maxheight+map_h/2);
 	
 	//HID
-	
 	int y = 0;
 	if (get_channel())
 	{
@@ -299,8 +368,7 @@ void draw(void)
 
 		y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 	}
-	
-	
+		
 	sprintf(buffer,"Weapon points: %i/3",player[active_player]->weapon_points);
 	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
 	if (player[active_player]->activeHare)
@@ -341,6 +409,10 @@ void draw(void)
 	
 	if (chatWindow)
 		window_draw();
+
+	//Error message
+	if (game_pause)
+		draw_message();
 	
 	spFlip();
 }
@@ -656,6 +728,11 @@ int calc(Uint32 steps)
 		{
 			spGetInput()->button[MY_PRACTICE_3] = 0;
 			show_names = 1-show_names;
+		}
+		if (spGetInput()->button[MY_PRACTICE_CANCEL])
+		{
+			spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
+			show_map = 1-show_map;
 		}
 		if (spGetInput()->button[MY_BUTTON_L])
 			zoom_d = -1;
@@ -1034,8 +1111,48 @@ int calc(Uint32 steps)
 	return result;
 }
 
+void update_map()
+{
+	Uint16 c = get_level_color();
+	Uint16 b = get_border_color();
+	SDL_LockSurface( map_surface );
+	SDL_LockSurface( level_original );
+	Uint16* map = ( Uint16* )( map_surface->pixels );
+	Uint16* lvl = ( Uint16* )( level_original->pixels );
+	int x,y;
+	for ( x = 0; x < map_w; x++)
+		for ( y = 0; y < map_h; y++)
+		{
+			int lx = x*LEVEL_WIDTH/map_w;
+			int ly = y*LEVEL_HEIGHT/map_h;
+			if (x == 0 ||
+				x == map_w-1 ||
+				y == 0 ||
+				y == map_h-1)
+			map[x+y*map_h] = b;
+			else
+			if (lvl[lx+ly*LEVEL_HEIGHT] != SP_ALPHA_COLOR)
+				map[x+y*map_h] = c;
+			else
+				map[x+y*map_h] = SP_ALPHA_COLOR;
+		}
+	for ( x = 1; x < map_w-1; x++)
+		for ( y = 1; y < map_h-1; y++)
+		{
+			if (map[x+y*map_h] != SP_ALPHA_COLOR &&
+				(map[x+1+y*map_h] == SP_ALPHA_COLOR ||
+				 map[x-1+y*map_h] == SP_ALPHA_COLOR ||
+				 map[x+map_h+y*map_h] == SP_ALPHA_COLOR ||
+				 map[x-map_h+y*map_h] == SP_ALPHA_COLOR))
+				map[x+y*map_h] = b;
+		}
+	SDL_UnlockSurface( map_surface );
+	SDL_UnlockSurface( level_original );
+}
+
 int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 {
+	screen = spGetWindowSurface();
 	chatWindow = NULL;
 	chatMessage[0] = 0;
 	before_showing = NULL;
@@ -1083,6 +1200,11 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	init_gravity();
 	init_player(hase_player_list,game->player_count,game->hares_per_player);
 	items_init(game);
+	map_w = 64 * spGetSizeFactor() >> SP_ACCURACY;
+	map_h = 64 * spGetSizeFactor() >> SP_ACCURACY;
+	map_size = spGetSizeFactor() >> SP_ACCURACY;
+	map_surface = spCreateSurface( map_w, map_h );
+	update_map();
 	zoomAdjust = spSqrt(spGetSizeFactor());
 	minZoom = spSqrt(spGetSizeFactor()/4)/16384*16384;
 	maxZoom = spSqrt(spGetSizeFactor()*4)/16384*16384;
@@ -1142,6 +1264,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 		}
 		deleteAllTraces(player[i]);
 	}
+	spDeleteSurface(map_surface);
 	spDeleteSpriteCollection(targeting,0);
 	spDeleteSurface(arrow);
 	spDeleteSurface(level);

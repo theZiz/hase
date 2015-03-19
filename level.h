@@ -2,6 +2,7 @@
 #define LEVEL_H
 
 #include <sparrow3d.h>
+#include <string.h>
 
 #define TEXTURE_SIZE 256
 #define TEXTURE_MASK 255

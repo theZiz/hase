@@ -50,7 +50,7 @@ const char weapon_description[WEAPON_MAX][64] = {
 	"Protect yourself with dirt",
 	"Protect yourself with few dirt",
 	"Explodes if a character is near",
-	"Start the next round with 4 WP",
+	"Start the next round with 1 WP more",
 	"Make a very high jump",
 	"Choose the previous hare",
 	"Choose the next hare",
@@ -387,6 +387,7 @@ void bullet_impact(int X,int Y,int radius)
 	begin=end;
 	//spSetBlending(SP_ONE);
 	spSelectRenderTarget(screen);
+	update_map();
 	spSoundPlay(snd_explosion,-1,0,0,-1);
 }
 
@@ -515,6 +516,7 @@ void negative_impact(int X,int Y,int radius)
 	begin=end;
 	//spSetBlending(SP_ONE);
 	spSelectRenderTarget(screen);
+	update_map();
 }
 
 int updateBullets()

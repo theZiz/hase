@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <sparrowNet.h>
 #include <sparrow3d.h>
+#include <string.h>
 
 #define CLIENT_VERSION 10
 

@@ -8,6 +8,9 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.1:
+- Added mini map
+
 1.5.0.3
 - Improved user name checking of IRC nick
 

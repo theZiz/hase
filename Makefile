@@ -1,15 +1,11 @@
-#==stuff linked to
 DYNAMIC = -lSDL_ttf -lSDL_mixer -lSDL_image -lSDL -lm
-#==global Flags. Even on the gp2x with 16 kb Cache, -O3 is much better then -Os
-CFLAGS = -O3 -fsingle-precision-constant -fPIC
-# Testtweaks: -fgcse-lm -fgcse-sm -fsched-spec-load -fmodulo-sched -funsafe-loop-optimizations -Wunsafe-loop-optimizations -fgcse-las -fgcse-after-reload -fvariable-expansion-in-unroller -ftracer -fbranch-target-load-optimize
+CFLAGS = -O3 -fsingle-precision-constant
 GENERAL_TWEAKS = -ffast-math
-#==PC==
+#==PC defaults==
 FLAGS = -g -DDESKTOP $(GENERAL_TWEAKS)
 SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
-
 SPARROW3D_LIB = libsparrow3d.so
 SPARROWNET_LIB = libsparrowNet.so
 SPARROWSOUND_LIB = libsparrowSound.so
@@ -36,41 +32,20 @@ all: hase
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
-testclient: testclient.c client.o level.o
+testclient: $@.c client.o level.o
 	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
 	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
 	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
-	$(CC) $(CFLAGS) testclient.c client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/testclient$(SUFFIX)
+	$(CC) $(CFLAGS) $(LINK_FLAGS) $< client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
 
 hase: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o makeBuildDir
 	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
 	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
 	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
-	$(CC) $(CFLAGS) lobby.c client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/hase$(SUFFIX)
-	
-client.o: client.c client.h
-	$(CC) $(CFLAGS) -c client.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+	$(CC) $(CFLAGS) $(LINK_FLAGS) $< client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
 
-lobbyList.o: lobbyList.c lobbyList.h lobbyGame.h
-	$(CC) $(CFLAGS) -c lobbyList.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
-
-lobbyGame.o: lobbyGame.c lobbyGame.h lobbyList.h
-	$(CC) $(CFLAGS) -c lobbyGame.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
-
-window.o: window.c window.h lobbyList.h
-	$(CC) $(CFLAGS) -c window.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
-
-about.o: about.c about.h lobbyList.h
-	$(CC) $(CFLAGS) -c about.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
-
-hase.o: hase.c hase.h gravity.c player.c logic.c help.c bullet.c trace.c level.h items.c
-	$(CC) $(CFLAGS) -c hase.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
-
-level.o: level.c level.h
-	$(CC) $(CFLAGS) -c level.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
-
-options.o: options.c options.h
-	$(CC) $(CFLAGS) -c options.c $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC)
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -c $< $(SDL) $(INCLUDE)
 
 makeBuildDir:
 	 @if [ ! -d $(BUILD:/hase=/) ]; then mkdir $(BUILD:/hase=/);fi
