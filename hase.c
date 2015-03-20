@@ -1117,6 +1117,8 @@ void update_map()
 	Uint16 b = get_border_color();
 	SDL_LockSurface( map_surface );
 	SDL_LockSurface( level_original );
+	int map_s = map_surface->pitch/map_surface->format->BytesPerPixel;
+	int lvl_s = level_original->pitch/level_original->format->BytesPerPixel;
 	Uint16* map = ( Uint16* )( map_surface->pixels );
 	Uint16* lvl = ( Uint16* )( level_original->pixels );
 	int x,y;
@@ -1129,22 +1131,22 @@ void update_map()
 				x == map_w-1 ||
 				y == 0 ||
 				y == map_h-1)
-			map[x+y*map_h] = b;
+			map[x+y*map_s] = b;
 			else
-			if (lvl[lx+ly*LEVEL_HEIGHT] != SP_ALPHA_COLOR)
-				map[x+y*map_h] = c;
+			if (lvl[lx+ly*lvl_s] != SP_ALPHA_COLOR)
+				map[x+y*map_s] = c;
 			else
-				map[x+y*map_h] = SP_ALPHA_COLOR;
+				map[x+y*map_s] = SP_ALPHA_COLOR;
 		}
 	for ( x = 1; x < map_w-1; x++)
 		for ( y = 1; y < map_h-1; y++)
 		{
-			if (map[x+y*map_h] != SP_ALPHA_COLOR &&
-				(map[x+1+y*map_h] == SP_ALPHA_COLOR ||
-				 map[x-1+y*map_h] == SP_ALPHA_COLOR ||
-				 map[x+map_h+y*map_h] == SP_ALPHA_COLOR ||
-				 map[x-map_h+y*map_h] == SP_ALPHA_COLOR))
-				map[x+y*map_h] = b;
+			if (map[x+y*map_s] != SP_ALPHA_COLOR &&
+				(map[x+1+y*map_s] == SP_ALPHA_COLOR ||
+				 map[x-1+y*map_s] == SP_ALPHA_COLOR ||
+				 map[x+map_s+y*map_s] == SP_ALPHA_COLOR ||
+				 map[x-map_s+y*map_s] == SP_ALPHA_COLOR))
+				map[x+y*map_s] = b;
 		}
 	SDL_UnlockSurface( map_surface );
 	SDL_UnlockSurface( level_original );
