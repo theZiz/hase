@@ -1,4 +1,23 @@
+For next minor release:
+* chat text right alighted of necessary
+* Still moving when hit left while typing?
+
 For next version:
+* Better movement (no stucking)
+* No hare capturing with standing on top
+* Two hares in the air fall down!
+* Tutorial
+	* Jumping and basic shooting
+	* High jumping
+	* weapon choice
+	* camera movement
+* When start from bigger window, not too small
+* at least 4 new weapons
+* more intelligent AI
+	* if stuck, change direction
+	* Getting more wp
+	* Using different weapons, especially if some hare is on them
+* Moving and exploding items (when hit)
 
 General:
 * smarter AI

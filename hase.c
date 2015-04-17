@@ -396,6 +396,9 @@ void draw(void)
 	else
 		sprintf(buffer,"∞");
 	spFontDrawMiddle( screen->w >> 1, screen->h-1-font->maxheight, 0, buffer, font );
+
+	//sprintf(buffer,"FPS: %i",spGetFPS());
+	//spFontDrawMiddle( screen->w >> 1, 1, 0, buffer, font );
 	
 	if (wp_choose)
 		draw_weapons();

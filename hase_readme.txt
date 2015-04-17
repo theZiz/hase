@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.2:
+- Using NEON for little speed up
+- Fixed a bug in the particle system
+
 1.5.1:
 - Added mini map
 

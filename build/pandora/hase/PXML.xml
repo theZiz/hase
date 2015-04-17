@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="1" build="0"/>
+<version major="1" minor="5" release="2" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -10,7 +10,11 @@ Hase
 </titles>
 <descriptions>
 <description lang="en_US">
-Hase is a worms like game with gravitation. And hares instead of worms.
+The provocative and risqué game that has jaded a generation of upstanding citizens. It has been said to make lewd references to _drug-use_ and _antisocial_ behaviours. 	  				 	 	 	    		  	   		  		
+Players are reported to believe they are hares. Reporting a new sense of gravity previously unheard of.  	  				 	 	 	    		  	   		  		
+Jump around, jump up, jump up, and jump down.
+Wage war against productivity and the established society. Energetic beats!
+Squinting is highly recommended to fully experience the graphics.
 
 Changelog:
 Version 1.3:
@@ -117,13 +121,18 @@ Version 1.5.0.3:
 
 Version 1.5.1:
 - Added mini map
+
+Version 1.5.2:
+- Using NEON for little speed up
+- Fixed a bug in the particle system
+- Lowered clock preference (800 Mhz) in PXML
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="1" build="0" type="release"/>
+<version major="1" minor="5" release="2" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
@@ -162,6 +171,6 @@ Hase is a worms like game with gravitation. And hares instead of worms.
 <subcategory name="ActionGame"/>
 </category>
 </categories>
-<clockspeed frequency="900"/>
+<clockspeed frequency="800"/>
 </application>
 </PXML>

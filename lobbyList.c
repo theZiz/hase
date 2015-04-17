@@ -443,7 +443,7 @@ int ll_reload()
 		message_box(ll_font,ll_resize,"The server is under repair. Please try again later!");
 		return 1;
 	}
-	if (info > CLIENT_VERSION)
+	if (info != CLIENT_VERSION)
 	{
 		message_box(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!");
 		return 1;
