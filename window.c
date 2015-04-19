@@ -38,7 +38,7 @@ void update_window_width(pWindow window)
 		window->width = spMax(window->width,elem->width+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
 		elem = elem->next;
 	}
-	window->width = spMin(window->width,spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
+	window->width = spMin(spGetWindowSurface()->w,spMin(window->width,spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)));
 }
 
 pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, int action ),spFontPointer font,char* title)
@@ -123,6 +123,10 @@ void window_draw(void)
 	while (elem)
 	{
 		y+=window->font->maxheight*3/2;
+		int t_w = spFontWidth(elem->text,window->font);
+		int t_r = (screen->w+t_w)/2;
+		if (t_r > screen->w - meow)
+			t_r = screen->w - meow;
 		if (nr == window->selection)
 		{
 			if (window->firstElement->next) //more than one element
@@ -130,12 +134,11 @@ void window_draw(void)
 			selElem = elem;
 			if (elem->type == 1 && spIsKeyboardPolled())
 			{
-				int x = (screen->w+spFontWidth(elem->text,window->font))/2;
 				if ((SDL_GetTicks() >> 9) & 1)
-					spLine(x, y, 0, x, y+window->font->maxheight, 0,65535);
+					spLine(t_r, y, 0, t_r, y+window->font->maxheight, 0,65535);
 			}
 		}
-		spFontDrawMiddle( screen->w/2, y, 0, elem->text, window->font );
+		spFontDrawRight( t_r, y, 0, elem->text, window->font );
 		nr++;
 		elem = elem->next;
 	}

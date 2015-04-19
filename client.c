@@ -850,10 +850,14 @@ int pull_game(pPlayer player,int second_of_player,void* data)
 	deleteMessage(&message);
 	if (result)
 	{
+		int kicked = 0;
 		if (result->name[0] == 'K')
-			printf("player %s kicked\n",player->name);
+		{
+			kicked = 2;
+			printf("player %s kicked or not available\n",player->name);
+		}
 		deleteMessage(&result);
-		return 0; //Okay
+		return kicked; //0 Okay, 2 Kicked
 	}
 	return 1;//Error
 }
@@ -862,13 +866,19 @@ int pull_thread_function(void* data)
 {
 	pPlayer player = data;
 	pThreadData next_data = (pThreadData)malloc(sizeof(tThreadData));
+	int kicked = 0;
 	while (player->input_message != -1)
 	{
+		if (kicked == 2)
+		{
+			spSleep(500000); //500ms
+			continue;
+		}
 		//Try to get second after recent second
 		int new_second = 0;
 		if (player->last_input_data_write)
 			new_second = player->last_input_data_write->second_of_player+1;
-		if (pull_game(player,new_second,next_data->data) == 0) //data!
+		if ((kicked = pull_game(player,new_second,next_data->data)) == 0) //data!
 		{
 			printf("PULL THREAD: Get second %i of player %s\n",new_second,player->name);
 			//Adding to the list

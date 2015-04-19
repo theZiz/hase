@@ -188,7 +188,7 @@ void update_player()
 			}
 			hare->rotation = 0;
 			hare->bums = 0;
-			Sint32 force = gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y));
+			int force = gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y));
 			if (force)
 			{
 				Sint32 ac = spDiv(-gravitation_y(spFixedToInt(hare->x),spFixedToInt(hare->y)),force);
@@ -203,6 +203,8 @@ void update_player()
 					hare->rotation += 2*SP_PI;
 				while (hare->rotation >= 2*SP_PI)
 					hare->rotation -= 2*SP_PI;
+				if (force > 1024)
+					hare->cam_rotation = hare->rotation;
 			}
 			hare = hare->next;
 		}
@@ -614,6 +616,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 			hare->dx = 0;
 			hare->dy = 0;
 			hare->health = MAX_HEALTH;
+			hare->cam_rotation = hare->rotation;
 			char buffer[256];
 			sprintf(buffer,"./sprites/hase%i.ssc",player[i]->nr);
 			hare->hase = spLoadSpriteCollection(buffer,NULL);

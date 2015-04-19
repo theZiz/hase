@@ -197,7 +197,7 @@ void draw(void)
 		{							
 			spSpritePointer sprite = spActiveSprite(hare->hase);
 			spSetSpriteZoom(sprite,zoom/2,zoom/2);
-			spSetSpriteRotation(sprite,+rotation+hare->rotation);
+			spSetSpriteRotation(sprite,+rotation+hare->cam_rotation);
 			Sint32 ox = spMul(hare->x-posX,zoom);
 			Sint32 oy = spMul(hare->y-posY,zoom);
 			Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
@@ -279,7 +279,7 @@ void draw(void)
 			spSetBlending( SP_ONE*2/3 );
 			if (show_names)
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
-			if (j == active_player && player[j]->computer && ai_shoot_tries>1  && hare == player[j]->activeHare)
+			if (j == active_player && player[j]->computer && ai_shoot_tries>1 && player[j]->weapon_points && hare == player[j]->activeHare)
 			{
 				sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+show_names)*font->maxheight,0,buffer, font );
@@ -712,6 +712,7 @@ int calc(Uint32 steps)
 			chatWindow = NULL;
 		}
 		spResetButtonsState();
+		spResetAxisState();
 	}
 	
 	if (spGetInput()->button[MY_BUTTON_START])
@@ -766,7 +767,7 @@ int calc(Uint32 steps)
 	update_player_sprite(steps);
 	int result = 0;
 	if (game_pause)
-		spSleep(200000);
+		spSleep(100000);
 	spUpdateSprite(spActiveSprite(targeting),steps);
 	spParticleUpdate(&particles,steps);
 	for (i = 0; i < steps; i++)
@@ -827,7 +828,7 @@ int calc(Uint32 steps)
 		}
 		if (player[active_player]->activeHare)
 		{
-			Sint32 goal = -player[active_player]->activeHare->rotation;
+			Sint32 goal = -player[active_player]->activeHare->cam_rotation;
 			if (goal < -SP_PI*3/2 && rotation > -SP_PI/2)
 				rotation -= 2*SP_PI;
 			if (goal > -SP_PI/2 && rotation < -SP_PI*3/2)
@@ -1236,7 +1237,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	spSoundDelete(snd_low);
 	spSoundDelete(snd_shoot);
 
-	stop_thread(result == 1);
+	stop_thread(result < 2);
 	if (result == 2)
 	{
 		int i;

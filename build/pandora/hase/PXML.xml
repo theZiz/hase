@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="2" build="0"/>
+<version major="1" minor="5" release="2" build="1"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -126,13 +126,21 @@ Version 1.5.2:
 - Using NEON for little speed up
 - Fixed a bug in the particle system
 - Lowered clock preference (800 Mhz) in PXML
+
+Version 1.5.2.1:
+- Right aligned text input if more text than fits in the window
+- No movement while typing
+- If admin leaves game, the game is not shown in the game list anymore
+- rotation stays fix when no gravitation
+- Less network spam
+- Removed "Aiming 100%" label above AI after it shoot
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="2" build="0" type="release"/>
+<version major="1" minor="5" release="2" build="1" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

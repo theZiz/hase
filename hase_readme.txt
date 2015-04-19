@@ -8,6 +8,14 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.2.1:
+- Right aligned text input if more text than fits in the window
+- No movement while typing
+- If admin leaves game, the game is not shown in the game list anymore
+- rotation stays fix when no gravitation
+- Less network spam
+- Removed "Aiming 100%" label above AI after it shoot
+
 1.5.2:
 - Using NEON for little speed up
 - Fixed a bug in the particle system

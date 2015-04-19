@@ -112,6 +112,7 @@ typedef struct sHare
 	spSpriteCollectionPointer hase;	
 	pHare before,next;
 	int wp_x,wp_y;
+	Sint32 cam_rotation;
 } tHare;
 
 typedef struct sPlayer

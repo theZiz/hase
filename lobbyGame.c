@@ -351,7 +351,7 @@ int lg_calc(Uint32 steps)
 				return -1; //stopped
 			if (res == -3)
 				return -3; //connection error
-			if (hase(lg_resize,lg_game,lg_player) == 1)
+			if (hase(lg_resize,lg_game,lg_player) < 2)
 				set_status(lg_game,-2);
 			return 3;
 		}
