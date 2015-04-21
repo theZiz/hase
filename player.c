@@ -586,6 +586,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 	}
 	for (i = 0; i < player_count; i++)
 	{
+		player[i]->kicked = 0;
 		player[i]->weapon_points = 0;
 		player[i]->d_time = 0;
 		player[i]->d_health = 0;

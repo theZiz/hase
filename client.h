@@ -6,7 +6,7 @@
 #include <sparrow3d.h>
 #include <string.h>
 
-#define CLIENT_VERSION 11
+#define CLIENT_VERSION 12
 
 #define TRACE_COUNT 16
 /*
@@ -143,6 +143,7 @@ typedef struct sPlayer
 	int d_time;
 	int weapon_points;
 	int next_round_extra;
+	int kicked;
 } tPlayer;
 
 typedef struct sThreadData

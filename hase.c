@@ -229,7 +229,7 @@ void draw(void)
 					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
-					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2,NULL,1))
+					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2+1,NULL,1))
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,0));
 					else
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
@@ -284,6 +284,11 @@ void draw(void)
 				sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+show_names)*font->maxheight,0,buffer, font );
 			}
+			if (j == active_player && player[j]->kicked == 2 && hare == player[j]->activeHare)
+			{
+				sprintf(buffer,"Zombie (Disconnected)");
+				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+show_names)*font->maxheight,0,buffer, font );
+			}
 			spSetBlending( SP_ONE );
 			hare = hare->next;
 		}
@@ -314,8 +319,9 @@ void draw(void)
 			showing = before_showing->next;
 		while (showing)
 		{
-			char* message;
-			if (message = ingame_message(showing->message,hase_game->name))
+			char* message = showing->message;
+			if (hase_game->status == -1 || //replay
+				(message = ingame_message(showing->message,hase_game->name)))
 			{
 				sprintf(buffer,"%s: %s",showing->user,message);
 				spFontDraw(2, y-font->maxheight/8, 0, buffer, font );
@@ -612,16 +618,12 @@ void set_input()
 				input_states[INPUT_BUTTON_4] = spGetInput()->button[MY_PRACTICE_4];
 		}
 		else
-		{
-			input_states[INPUT_AXIS_0_LEFT] = 0;
-			input_states[INPUT_AXIS_0_RIGHT] = 0;
-			input_states[INPUT_AXIS_1_LEFT] = 0;
-			input_states[INPUT_AXIS_1_RIGHT] = 0;
-		}
+			memset(input_states,0,sizeof(int)*12);
 		if (spGetInput()->button[MY_BUTTON_START] != button_states[MY_BUTTON_START])
 			input_states[INPUT_BUTTON_START] = spGetInput()->button[MY_BUTTON_START];
 		if (spGetInput()->button[MY_BUTTON_SELECT] != button_states[MY_BUTTON_SELECT])
 			input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[MY_BUTTON_SELECT];
+		//I need to save the button states to compare, to be able to set input_states[…] to 0!
 		memcpy(button_states,spGetInput()->button,sizeof(char)*SP_INPUT_BUTTON_COUNT);
 		if (!hase_game->local)
 		{
@@ -645,7 +647,7 @@ void set_input()
 			if (game_pause)
 			{
 				char buffer[256];
-				sprintf(buffer,"Waiting for turn data\nfrom player %s...",player[active_player]->name);
+				sprintf(buffer,"Waiting for turn data\nfrom player %s...\n(Timeout after 1 minute)",player[active_player]->name);
 				set_message(font,buffer);
 			}	
 		}
@@ -1015,7 +1017,7 @@ int calc(Uint32 steps)
 									int r = weapon_explosion[w_nr];
 									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
 									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
-									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2,NULL,1))
+									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2+1,NULL,1))
 										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
 									else
 										player[active_player]->weapon_points+=weapon_cost[w_nr];

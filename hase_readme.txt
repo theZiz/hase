@@ -8,6 +8,14 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.3:
+- Fixed a bug, that the very close use of the build tool could freeze the game
+
+1.5.2.2:
+- Improved handling of disconnects (now called "Zombies" ingame)
+- Fixed jump while typing
+- No message filter for irc messages in replays
+
 1.5.2.1:
 - Right aligned text input if more text than fits in the window
 - No movement while typing

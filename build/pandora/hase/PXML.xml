@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="2" build="1"/>
+<version major="1" minor="5" release="3" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -134,13 +134,21 @@ Version 1.5.2.1:
 - rotation stays fix when no gravitation
 - Less network spam
 - Removed "Aiming 100%" label above AI after it shoot
+
+Version 1.5.2.2:
+- Improved handling of disconnects (now called "Zombies" ingame)
+- Fixed jump while typing
+- No message filter for irc messages in replays
+
+Version 1.5.3:
+- Fixed a bug, that the very close use of the build tool could freeze the game
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="2" build="1" type="release"/>
+<version major="1" minor="5" release="3" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

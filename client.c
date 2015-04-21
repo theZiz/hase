@@ -842,6 +842,8 @@ int pull_game(pPlayer player,int second_of_player,void* data)
 {
 	if (player->game->local)
 		return 0;
+	if (player->kicked)
+		return 2; //kicked;
 	pMessage message = NULL;
 	numToMessage(&message,"game_id",player->game->id);
 	numToMessage(&message,"player_id",player->id);
@@ -855,6 +857,7 @@ int pull_game(pPlayer player,int second_of_player,void* data)
 		{
 			kicked = 2;
 			printf("player %s kicked or not available\n",player->name);
+			player->kicked = 1;
 		}
 		deleteMessage(&result);
 		return kicked; //0 Okay, 2 Kicked
@@ -865,20 +868,18 @@ int pull_game(pPlayer player,int second_of_player,void* data)
 int pull_thread_function(void* data)
 {
 	pPlayer player = data;
+	if (player->kicked)
+		return 0;
 	pThreadData next_data = (pThreadData)malloc(sizeof(tThreadData));
-	int kicked = 0;
 	while (player->input_message != -1)
 	{
-		if (kicked == 2)
-		{
-			spSleep(500000); //500ms
-			continue;
-		}
+		if (player->kicked)
+			break;
 		//Try to get second after recent second
 		int new_second = 0;
 		if (player->last_input_data_write)
 			new_second = player->last_input_data_write->second_of_player+1;
-		if ((kicked = pull_game(player,new_second,next_data->data)) == 0) //data!
+		if (pull_game(player,new_second,next_data->data) == 0) //data!
 		{
 			printf("PULL THREAD: Get second %i of player %s\n",new_second,player->name);
 			//Adding to the list
@@ -897,6 +898,7 @@ int pull_thread_function(void* data)
 		}
 		else
 			spSleep(500000); //500ms
+
 	}
 	free(next_data);
 	return 0;
@@ -923,6 +925,12 @@ int pull_game_thread(pPlayer player,int second_of_player,void* data)
 		memcpy(data,thread_data->data,1536);
 	}
 	SDL_mutexV(player->input_mutex);
+	if (thread_data == 0 && player->kicked)
+	{
+		player->kicked = 2;
+		result = 0;
+		memset(data,1+2+16+32,1536);
+	}
 	return result;
 }
 
@@ -1023,7 +1031,7 @@ spNetIRCChannelPointer get_channel()
 void send_chat(pGame game,char* chat_message)
 {
 	char buffer[512];
-	if (game)
+	if (game && game->status != -1) //not for replays
 		sprintf(buffer,"<%s> %s",game->name,chat_message);
 	else
 		sprintf(buffer,"%s",chat_message);
