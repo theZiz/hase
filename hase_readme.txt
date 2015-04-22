@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.3.1:
+- Some sparrow3d improvements to draw faster
+- Showing the needed server version in the lobby
+
 1.5.3:
 - Fixed a bug, that the very close use of the build tool could freeze the game
 

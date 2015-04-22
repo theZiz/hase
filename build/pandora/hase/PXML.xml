@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="3" build="0"/>
+<version major="1" minor="5" release="3" build="1"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -142,13 +142,17 @@ Version 1.5.2.2:
 
 Version 1.5.3:
 - Fixed a bug, that the very close use of the build tool could freeze the game
+
+Version 1.5.3.1:
+- Some sparrow3d improvements to draw faster
+- Showing the needed server version in the lobby
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="3" build="0" type="release"/>
+<version major="1" minor="5" release="3" build="1" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
@@ -178,7 +182,13 @@ Hase is a worms like game with gravitation. And hares instead of worms.
 <!--Optional url and sourcecodeurl, mandatory name-->
 </licenses>
 <previewpics>
-<pic src="previews/screenshot1.png"/>
+<pic src="previews/hase1.png"/>
+<pic src="previews/hase2.png"/>
+<pic src="previews/hase3.png"/>
+<pic src="previews/hase4.png"/>
+<pic src="previews/hase5.png"/>
+<pic src="previews/hase6.png"/>
+<pic src="previews/hase7.png"/>
 </previewpics>
 <info name="Hase Readme" type="text" src="hase_readme.txt"/>
 <!--the categories has to conform to the FDO categories, those will be enforced by the schema and libpnd!-->
