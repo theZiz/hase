@@ -71,7 +71,8 @@ void ll_draw(void)
 	SDL_Surface* screen = spGetWindowSurface();
 	spClearTarget(LL_BG);
 	char buffer[256];
-	spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, "Hase Lobby", ll_font );
+	sprintf(buffer,"Hase Lobby (Version %i)",CLIENT_VERSION);
+	spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, buffer, ll_font );
 	
 	sprintf(buffer,"%i Games on Server:\n",ll_game_count);
 	spFontDrawMiddle( screen->w/3+2, 1*ll_font->maxheight, 0, buffer, ll_font );
