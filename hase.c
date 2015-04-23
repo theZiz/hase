@@ -5,6 +5,11 @@
 #include "lobbyList.h"
 #include "hase.h"
 
+#ifdef PROFILE
+	int calc_time = 0;
+	int draw_time = 0;
+#endif
+
 pGame hase_game;
 pPlayer hase_player_list;
 
@@ -169,6 +174,9 @@ void draw_map(int px,int py)
 
 void draw(void)
 {
+	#ifdef PROFILE
+		int start_time = SDL_GetTicks();
+	#endif
 	char buffer[256];
 	spClearTarget(0);
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
@@ -403,8 +411,6 @@ void draw(void)
 		sprintf(buffer,"∞");
 	spFontDrawMiddle( screen->w >> 1, screen->h-1-font->maxheight, 0, buffer, font );
 
-	//sprintf(buffer,"FPS: %i",spGetFPS());
-	//spFontDrawMiddle( screen->w >> 1, 1, 0, buffer, font );
 	
 	if (wp_choose)
 		draw_weapons();
@@ -422,6 +428,12 @@ void draw(void)
 	//Error message
 	if (game_pause)
 		draw_message();
+		
+	#ifdef PROFILE
+		draw_time = SDL_GetTicks() - start_time;
+		sprintf(buffer,"FPS: %i\nDraw: %ims\nCalc: %ims",spGetFPS(),draw_time,calc_time);
+		spFontDrawMiddle( screen->w >> 1, 1, 0, buffer, font );
+	#endif
 	
 	spFlip();
 }
@@ -669,6 +681,9 @@ int quit_feedback( pWindow window, pWindowElement elem, int action )
 
 int calc(Uint32 steps)
 {
+	#ifdef PROFILE
+		int start_time = SDL_GetTicks();
+	#endif
 	try_to_join();
 	if (get_channel())
 	{
@@ -1114,6 +1129,9 @@ int calc(Uint32 steps)
 			continue;
 		}
 	}
+	#ifdef PROFILE
+		calc_time = SDL_GetTicks() - start_time;
+	#endif
 	return result;
 }
 

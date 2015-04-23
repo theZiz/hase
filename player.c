@@ -24,14 +24,14 @@ static int circle_is_empty(int x, int y, int r,pHare except,int with_players)
 	int end_a = x+r+1;
 	if (end_a > LEVEL_WIDTH)
 		end_a = LEVEL_WIDTH;
+	int start_b = y-r;
+	if (start_b < 0)
+		start_b = 0;
+	int end_b = y+r+1;
+	if (end_b > LEVEL_HEIGHT)
+		end_b = LEVEL_HEIGHT;
 	for (a = start_a; a < end_a; a++)
 	{
-		int start_b = y-r;
-		if (start_b < 0)
-			start_b = 0;
-		int end_b = y+r+1;
-		if (end_b > LEVEL_HEIGHT)
-			end_b = LEVEL_HEIGHT;
 		for (b = start_b; b < end_b; b++)
 		if (a!=x && b!=y && (a-x)*(a-x)+(b-y)*(b-y) <= r*r)
 		{
@@ -65,7 +65,7 @@ static int circle_is_empty(int x, int y, int r,pHare except,int with_players)
 	return 1;
 }
 
-int pixel_is_empty(int x, int y)
+static int pixel_is_empty(int x, int y)
 {
 	if (x < 0)
 		return 1;
@@ -80,7 +80,7 @@ int pixel_is_empty(int x, int y)
 	return 1;
 }
 
-Sint32 gravitation_x(int x,int y)
+static Sint32 gravitation_x(int x,int y)
 {
 	int gx1 = x - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
 	int gy1 = y - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
@@ -97,7 +97,7 @@ Sint32 gravitation_x(int x,int y)
 	return g2 * ry + g1 * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION;
 }
 
-Sint32 gravitation_y(int x,int y)
+static Sint32 gravitation_y(int x,int y)
 {
 	int gx1 = x - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
 	int gy1 = y - (1 << GRAVITY_RESOLUTION - 1) >> GRAVITY_RESOLUTION;
@@ -114,7 +114,7 @@ Sint32 gravitation_y(int x,int y)
 	return g2 * ry + g1 * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION;
 }
 
-Sint32 gravitation_force(int x,int y)
+static Sint32 gravitation_force(int x,int y)
 {
 	int grav_x = gravitation_x(x,y);
 	int grav_y = gravitation_y(x,y);

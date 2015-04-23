@@ -60,8 +60,14 @@ void lg_draw(void)
 		spFontDrawTextBlock(middle,screen->w-w-4, 6*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
 	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[3]Add player  [4]Remove player", lg_font );
-	spFontDraw(screen->w-2-w  , h+6*lg_font->maxheight, 0, "[3]Add player", lg_font );
-	spFontDraw(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[4]Remove player", lg_font );
+	if (lg_player)
+	{
+		spFontDraw(screen->w-2-w  , h+6*lg_font->maxheight, 0, "[3]Add player", lg_font );
+		spFontDraw(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[4]Remove player", lg_font );
+	}
+	else
+		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "Spectate mode!", lg_font );
+	
 	if (lg_game->admin_pw == 0)
 	{
 		spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "The game master will", lg_font );
@@ -275,6 +281,27 @@ int lg_calc(Uint32 steps)
 		spGetInput()->button[MY_BUTTON_SELECT] = 0;
 		return 1;
 	}
+	if (lg_reload_now == 2)
+	{
+		int a = SDL_GetTicks();
+		int res = lg_reload();
+		int b = SDL_GetTicks();
+		lg_reload_now = 0;
+		lg_counter = a-b;
+		if (res == -1)
+			return -1; //stopped
+		if (res == -3)
+			return -3; //connection error
+		if (res == 1)
+			return 2; //started
+	}
+	if (!lg_game->local)
+		lg_counter+=steps;
+	if (lg_counter >= LG_WAIT)
+		lg_reload_now = 1;
+	//Spectators are leaving here ;)
+	if (lg_player == NULL)
+		return 0;
 	if (spGetInput()->button[MY_PRACTICE_3])
 	{
 		spGetInput()->button[MY_PRACTICE_3] = 0;
@@ -389,25 +416,6 @@ int lg_calc(Uint32 steps)
 			lg_counter = LG_WAIT;
 		}
 	}
-	if (lg_reload_now == 2)
-	{
-		int a = SDL_GetTicks();
-		int res = lg_reload();
-		int b = SDL_GetTicks();
-		lg_reload_now = 0;
-		lg_counter = a-b;
-		if (res == -1)
-			return -1; //stopped
-		if (res == -3)
-			return -3; //connection error
-		if (res == 1)
-			return 2; //started
-		
-	}
-	if (!lg_game->local)
-		lg_counter+=steps;
-	if (lg_counter >= LG_WAIT)
-		lg_reload_now = 1;
 	return 0;
 }
 
@@ -437,7 +445,7 @@ int lg_reload()
 	return lg_game->status;
 }
 
-void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), pGame game)
+void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), pGame game,int spectate)
 {
 	lg_game = game;
 	lg_font = font;
@@ -446,27 +454,33 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 	lg_ai_list = NULL;
 	lg_last_read_message = get_channel()?get_channel()->last_read_message:NULL;
 	lg_resize = resize;
-	if (game->local == 1 && text_box(font,resize,"Enter player name:",gop_username(),32,1,NULL,0) == 1 ||
+	if (spectate ||
+		game->local == 1 && text_box(font,resize,"Enter player name:",gop_username(),32,1,NULL,0) == 1 ||
 		game->local == 0 && sprite_box(font,resize,"Choose sprite!",1,game->admin_pw?NULL:game->sprite_count) == 1)
 	{
-		if (gop_username()[0] == 0)
+		if (!spectate)
 		{
-			message_box(font,resize,"No name entered...");
-			return;
+			if (gop_username()[0] == 0)
+			{
+				message_box(font,resize,"No name entered...");
+				return;
+			}
+			save_options();
+			if ((lg_player = join_game(game,gop_username(),0,get_last_sprite())) == NULL)
+			{
+				message_box(font,resize,"Game full...");
+				return;
+			}
+			lg_last_player = lg_player;
 		}
-		save_options();
-		if ((lg_player = join_game(game,gop_username(),0,get_last_sprite())) == NULL)
-		{
-			message_box(font,resize,"Game full...");
-			return;
-		}
-		lg_last_player = lg_player;
+		else
+			lg_player = NULL;
 		lg_level = NULL;
 		lg_level_string[0] = 0;
 		lg_block = NULL;
 		lg_chat_block = NULL;
 		lg_chat_text[0] = 0;
-		if (!lg_game->local)
+		if (!spectate && !lg_game->local)
 			start_heartbeat(lg_player);
 		
 		int res = spLoop(lg_draw,lg_calc,10,resize,NULL);
@@ -480,7 +494,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		if (res == 2)
 			hase(lg_resize,lg_game,lg_player);
 
-		if (!lg_game->local && lg_player)
+		if (!spectate && !lg_game->local && lg_player)
 			stop_heartbeat(lg_player);
 
 		while (lg_player)

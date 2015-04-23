@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="3" build="1"/>
+<version major="1" minor="5" release="3" build="3"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -146,13 +146,21 @@ Version 1.5.3:
 Version 1.5.3.1:
 - Some sparrow3d improvements to draw faster
 - Showing the needed server version in the lobby
+
+Version 1.5.3.2:
+- Recompile with NEON support (forgot it in 1.5.3.1)
+- Some little speed optimizations
+
+Version 1.5.3.3:
+- Added spectate modus
+- You can even spectate already started, but not yet finished games!
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="3" build="1" type="release"/>
+<version major="1" minor="5" release="3" build="3" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

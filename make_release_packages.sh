@@ -1,6 +1,6 @@
 #!/bin/sh
 PROGRAM="hase"
-VERSION="1.5.3.1"
+VERSION="1.5.3.3"
 DEST=./build/*
 echo "<html>" > index.htm
 echo "<head>" >> index.htm

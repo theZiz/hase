@@ -111,9 +111,9 @@ void ll_draw(void)
 	else
 	{
 		if (mom_game && mom_game->status == -1)
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Replay   [3]Create   [B]Back", ll_font );
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]/[4]Replay   [3]Create   [B]Back", ll_font );
 		else
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Join   [3]Create   [B]Back", ll_font );
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Join   [3]Create   [4]Spectate   [B]Back", ll_font );
 		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
 	}
@@ -264,7 +264,7 @@ int ll_calc(Uint32 steps)
 		{
 			char buffer[512];
 			pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0,ll_game_hares);
-			start_lobby_game(ll_font,ll_resize,game);
+			start_lobby_game(ll_font,ll_resize,game,0);
 			delete_game(game);
 			ll_counter = 10000;			
 		}
@@ -296,7 +296,35 @@ int ll_calc(Uint32 steps)
 				message_box(ll_font,ll_resize,"Game full!");
 			else
 			{
-				start_lobby_game(ll_font,ll_resize,game);
+				start_lobby_game(ll_font,ll_resize,game,0);
+				ll_counter = 10000;
+			}
+		}
+	}
+	if (spGetInput()->button[MY_PRACTICE_4])
+	{
+		spGetInput()->button[MY_PRACTICE_4] = 0;
+		if (ll_game_count <= 0)
+			message_box(ll_font,ll_resize,"No game to spectate!");
+		else
+		{
+			pGame game = ll_game_list;
+			int pos = 0;
+			while (game)
+			{
+				if (pos == ll_selected)
+					break;
+				game = game->next;
+				pos++;
+			}
+			if (game->status == 1)
+				hase(ll_resize,game,NULL); //Already started
+			else
+			if (game->status == -1) //Replay!
+				hase(ll_resize,game,NULL);
+			else
+			{
+				start_lobby_game(ll_font,ll_resize,game,1);
 				ll_counter = 10000;
 			}
 		}

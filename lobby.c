@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 					{
 						char buffer[512];
 						pGame game = create_game("New game",lo_game_players,lo_game_seconds,create_level_string(buffer,1536,1536,3,3,3),1,lo_game_hares);
-						start_lobby_game(font,resize,game);
+						start_lobby_game(font,resize,game,0);
 						delete_game(game);
 					}
 					break;

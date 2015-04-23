@@ -8,6 +8,14 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.3.3:
+- Added spectate modus
+- You can even spectate already started, but not yet finished games!
+
+1.5.3.2:
+- Recompile with NEON support (forgot it in 1.5.3.1)
+- Some little speed optimizations
+
 1.5.3.1:
 - Some sparrow3d improvements to draw faster
 - Showing the needed server version in the lobby
