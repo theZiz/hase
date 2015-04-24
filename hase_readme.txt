@@ -8,6 +8,12 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.3.7:
+- Telling when a game happened for replays
+
+1.5.3.6:
+- If the game master leaves the game, the game is not deleted from the game list, except (s)he want it.
+
 1.5.3.5:
 - Using Menu as fourth button in Linux/Windows
 

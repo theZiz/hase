@@ -204,6 +204,12 @@ char* lg_get_combi_name(char* buffer)
 char lg_new_name[33] = "";
 char lg_chat_text[65536];
 
+int delete_feedback( pWindow window, pWindowElement elem, int action )
+{
+	sprintf(elem->text,"Do you want to delete the game from the game list?");
+	return 0;
+}
+
 int lg_calc(Uint32 steps)
 {
 	try_to_join();
@@ -379,7 +385,14 @@ int lg_calc(Uint32 steps)
 			if (res == -3)
 				return -3; //connection error
 			if (hase(lg_resize,lg_game,lg_player) < 2)
-				set_status(lg_game,-2);
+			{
+				pWindow window = create_window(delete_feedback,lg_font,"Question");
+				add_window_element(window,-1,0);
+				int res = modal_window(window,lg_resize);
+				delete_window(window);
+				if (res == 1)
+					set_status(lg_game,-2);
+			}
 			return 3;
 		}
 	}

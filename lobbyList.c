@@ -35,6 +35,7 @@ void update_ll_surface()
 	spFontDraw( 2+13*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Status", ll_font );
 	pos++;
 	spLine(2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, ll_surface->w-2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, 65535);
+	  
 	pGame game = ll_game_list;
 	mom_game = NULL;
 	while (game)
@@ -53,7 +54,22 @@ void update_ll_surface()
 		switch (game->status)
 		{
 			case  1: sprintf(buffer,"Running"); break;
-			case -1: sprintf(buffer,"Done"); break;
+			case -1:
+			{
+				time_t rawtime;
+				struct tm * ptm;
+				time ( &rawtime );
+				rawtime -= game->create_date;
+				ptm = gmtime ( &rawtime );
+				if (ptm->tm_yday)
+					sprintf(buffer,"%id ago",ptm->tm_yday);
+				else
+				if (ptm->tm_hour)
+					sprintf(buffer,"%ih ago",ptm->tm_hour);
+				else
+					sprintf(buffer,"%im ago",ptm->tm_min);
+				break;
+			}
 			default: sprintf(buffer,"Open");
 		}
 		spFontDraw( 2+13*ll_surface->w/16, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );

@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="3" build="5"/>
+<version major="1" minor="5" release="3" build="7"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -162,13 +162,18 @@ Version 1.5.3.4:
 Version 1.5.3.5:
 - Using Menu as fourth button in Linux/Windows
 
+Version 1.5.3.6:
+- If the game master leaves the game, the game is not deleted from the game list, except (s)he want it.
+
+Version 1.5.3.7:
+- Telling when a game happened for replays
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="3" build="5" type="release"/>
+<version major="1" minor="5" release="3" build="7" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

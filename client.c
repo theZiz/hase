@@ -984,7 +984,7 @@ void start_irc_client(char* name)
 	buffer[i] = 0;
 	printf("%s %i %s\n",buffer,irc_port,irc_server);
 	char buffer2[128];
-	sprintf(buffer2,"Hase_user_"SP_DEVICE_STRING);
+	sprintf(buffer2,SP_DEVICE_STRING);
 	for (i = 0; buffer2[i]; i++)
 		if (buffer2[i] == ' ')
 			buffer2[i] = '_';
