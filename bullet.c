@@ -284,8 +284,8 @@ void bullet_impact(int X,int Y,int radius)
 					p->particle[c].x = X+x << SP_ACCURACY;
 					p->particle[c].y = Y+y << SP_ACCURACY;
 					p->particle[c].z = 0;
-					p->particle[c].dx = ((rand() & 131071) - SP_ONE)/4;
-					p->particle[c].dy = ((rand() & 131071) - SP_ONE)/4;
+					p->particle[c].dx = (rand() & 32767) - SP_ONE/4;
+					p->particle[c].dy = (rand() & 32767) - SP_ONE/4;
 					p->particle[c].dz = 0;
 					p->particle[c].data.color = BORDER_COLOR;
 					p->particle[c].status = 0;
@@ -546,8 +546,8 @@ int updateBullets()
 					p->particle[i].x = momBullet->x;
 					p->particle[i].y = momBullet->y;
 					p->particle[i].z = 0;
-					p->particle[i].dx = ((rand() & 131071) - SP_ONE)/16;
-					p->particle[i].dy = ((rand() & 131071) - SP_ONE)/16;
+					p->particle[i].dx = (((rand() & 32767) * 4) - SP_ONE)/16;
+					p->particle[i].dy = (((rand() & 32767) * 4) - SP_ONE)/16;
 					p->particle[i].dz = 0;
 					p->particle[i].data.color = weapon_shoot[momBullet->kind];
 					p->particle[i].status = 0;

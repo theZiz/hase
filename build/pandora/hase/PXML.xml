@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="3" build="3"/>
+<version major="1" minor="5" release="3" build="5"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -154,13 +154,21 @@ Version 1.5.3.2:
 Version 1.5.3.3:
 - Added spectate modus
 - You can even spectate already started, but not yet finished games!
+
+Version 1.5.3.4:
+- Line break for ingame chat (Really, you guys talk to much! ;)
+- No flickering when entering text while a loading screen is active
+
+Version 1.5.3.5:
+- Using Menu as fourth button in Linux/Windows
+
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="3" build="3" type="release"/>
+<version major="1" minor="5" release="3" build="5" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

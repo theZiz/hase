@@ -8,6 +8,13 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.3.5:
+- Using Menu as fourth button in Linux/Windows
+
+1.5.3.4:
+- Line break for ingame chat (Really, you guys talk to much! ;)
+- No flickering when entering text while a loading screen is active
+
 1.5.3.3:
 - Added spectate modus
 - You can even spectate already started, but not yet finished games!

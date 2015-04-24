@@ -351,7 +351,7 @@ void update_player_sprite(int steps)
 				int i;
 				for (i = 0; i < c; i++)
 				{
-					int a = rand()%(2*SP_PI);
+					int a = (int)((rand() & 32767) * 16) % (2*SP_PI);
 					p->particle[i].dx = spSin(a)/8;
 					p->particle[i].dy = spCos(a)/8;
 					p->particle[i].dz = 0;
@@ -399,7 +399,7 @@ void stop_thread(int kill)
 				end_pull_thread(player[active_player]);
 			}
 		}
-		printf("Setting player time from %i to %i\n",player[active_player]->time,((player[active_player]->time+999)/1000)*1000);
+		printf("Setting time of %s from %i to %i\n",player[active_player]->name,player[active_player]->time,((player[active_player]->time+999)/1000)*1000);
 		player[active_player]->time = ((player[active_player]->time+999)/1000)*1000;
 	}	
 }

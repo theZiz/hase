@@ -325,6 +325,7 @@ void draw(void)
 		else
 		if (before_showing)
 			showing = before_showing->next;
+		int help_length = spFontWidth("[R]Help",font);
 		while (showing)
 		{
 			char* message = showing->message;
@@ -332,7 +333,42 @@ void draw(void)
 				(message = ingame_message(showing->message,hase_game->name)))
 			{
 				sprintf(buffer,"%s: %s",showing->user,message);
-				spFontDraw(2, y-font->maxheight/8, 0, buffer, font );
+				char* found = buffer;
+				while (spFontWidth(found,font) > screen->w - help_length)
+				{
+					char* end_space = found;
+					char* last_space = NULL;
+					end_space++;
+					int was_null = 0;
+					while (end_space[0])
+					{
+						while (end_space[0] && end_space[0] != ' ')
+							end_space++;
+						if (end_space[0] == 0)
+							was_null = 1;
+						end_space[0] = 0;
+						if (spFontWidth(found,font) > screen->w - help_length)
+						{
+							if (!was_null)
+								end_space[0] = ' ';
+							break;
+						}
+						if (!was_null)
+							end_space[0] = ' ';
+						last_space = end_space;
+						if (!was_null)
+							end_space++;
+					}
+					if (last_space != NULL)
+						end_space = last_space;
+					end_space[0] = 0;
+					spFontDraw(2, y-font->maxheight/8, 0, found, font );
+					y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
+					found = end_space;
+					if (last_space)
+						found++;
+				}
+				spFontDraw(2, y-font->maxheight/8, 0, found, font );
 				y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 			}
 			showing = showing->next;
@@ -398,7 +434,7 @@ void draw(void)
 				angle = (float)player[active_player]->activeHare->w_direction*180.0f/(float)SP_PI;
 			else
 				angle = -((float)player[active_player]->activeHare->w_direction*180.0f/(float)SP_PI-180.0f);
-			sprintf(buffer,"Power: %i %%",player[active_player]->activeHare->w_power*100/SP_ONE);
+			sprintf(buffer,"Power: %i.%i %%",player[active_player]->activeHare->w_power*100/SP_ONE,player[active_player]->activeHare->w_power*1000/SP_ONE%10);
 		}
 		spFontDrawRight( screen->w-1, screen->h-1-3*font->maxheight, 0, buffer, font );
 	}
@@ -422,12 +458,12 @@ void draw(void)
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
 	
-	if (chatWindow)
-		window_draw();
-
 	//Error message
 	if (game_pause)
 		draw_message();
+
+	if (chatWindow)
+		window_draw();
 		
 	#ifdef PROFILE
 		draw_time = SDL_GetTicks() - start_time;

@@ -983,7 +983,12 @@ void start_irc_client(char* name)
 			buffer[i] = name[i];
 	buffer[i] = 0;
 	printf("%s %i %s\n",buffer,irc_port,irc_server);
-	server = spNetIRCConnectServer(irc_server,irc_port,buffer,"Hase_user",name,"*");
+	char buffer2[128];
+	sprintf(buffer2,"Hase_user_"SP_DEVICE_STRING);
+	for (i = 0; buffer2[i]; i++)
+		if (buffer2[i] == ' ')
+			buffer2[i] = '_';
+	server = spNetIRCConnectServer(irc_server,irc_port,buffer,buffer2,name,"*");
 }
 
 void try_to_join()
