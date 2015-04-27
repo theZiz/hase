@@ -6,7 +6,7 @@
 #include <sparrow3d.h>
 #include <string.h>
 
-#define CLIENT_VERSION 12
+#define CLIENT_VERSION 13
 
 #define TRACE_COUNT 16
 /*
@@ -178,6 +178,7 @@ void end_pull_thread(pPlayer player);
 
 int connect_to_server();
 
+void log_message(char* name,char* message);
 
 void start_irc_client(char* name);
 void stop_irc_client();

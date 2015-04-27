@@ -11,7 +11,7 @@
 #endif
 
 pGame hase_game;
-pPlayer hase_player_list;
+pPlayer hase_player_list = NULL;
 
 #define LEVEL_WIDTH 1536
 #define LEVEL_HEIGHT 1536
@@ -69,6 +69,7 @@ spSpriteCollectionPointer targeting;
 spNetIRCMessagePointer before_showing;
 
 SDL_Surface* screen;
+SDL_Surface* tomato;
 
 void ( *hase_resize )( Uint16 w, Uint16 h );
 
@@ -221,8 +222,8 @@ void draw(void)
 				}
 				//Weapon
 				//spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[hare->wp_y][hare->wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
-				//building
 				int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+				//building
 				if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
 				{
 					
@@ -237,7 +238,7 @@ void draw(void)
 					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
-					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2+1,NULL,1))
+					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2+4,NULL,-1))
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,0));
 					else
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
@@ -251,10 +252,11 @@ void draw(void)
 					spSetSpriteZoom(target,w_zoom,w_zoom);
 					Sint32 ox = spMul(hare->x-posX,zoom)-spMul(20*-spSin(hare->rotation+hare->w_direction-SP_PI/2),w_zoom);
 					Sint32 oy = spMul(hare->y-posY,zoom)-spMul(20* spCos(hare->rotation+hare->w_direction-SP_PI/2),w_zoom);
-					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
-					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+					Sint32 nx = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+					Sint32 ny = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 					//spSetBlending( SP_ONE*2/3 );
-					spDrawSprite(screen->w/2+x,screen->h/2+y,0,target);
+					spLine(screen->w/2+x,screen->h/2+y,0,screen->w/2+nx,screen->h/2+ny,0,get_border_color());
+					spDrawSprite(screen->w/2+nx,screen->h/2+ny,0,target);
 					//spSetBlending( SP_ONE );
 				}
 				/*if (hare->w_power)
@@ -325,7 +327,7 @@ void draw(void)
 		else
 		if (before_showing)
 			showing = before_showing->next;
-		int help_length = spFontWidth("[R]Help",font);
+		int help_length = spFontWidth("[4]+[o]Help",font);
 		while (showing)
 		{
 			char* message = showing->message;
@@ -419,8 +421,11 @@ void draw(void)
 		y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 	}
 		
-	sprintf(buffer,"Weapon points: %i/3",player[active_player]->weapon_points);
-	spFontDrawRight( screen->w-1, screen->h-1-font->maxheight, 0, buffer, font );
+	spFontDrawRight( screen->w-1 - player[active_player]->weapon_points * tomato->w, screen->h-1-font->maxheight, 0, 
+		player[active_player]->weapon_points > 0 ? "Action points:" : "Action points: None", font );
+	int i;
+	for (i = 0; i < player[active_player]->weapon_points; i++)
+		spBlitSurface( screen->w-1 - tomato->w*(2*i+1)/2, screen->h-1-font->maxheight/2,0,tomato);
 	if (player[active_player]->activeHare)
 	{
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
@@ -664,13 +669,14 @@ void set_input()
 				input_states[INPUT_BUTTON_CANCEL] = spGetInput()->button[MY_PRACTICE_CANCEL];
 			if (spGetInput()->button[MY_PRACTICE_4] != button_states[MY_PRACTICE_4])
 				input_states[INPUT_BUTTON_4] = spGetInput()->button[MY_PRACTICE_4];
+
+			if (spGetInput()->button[MY_BUTTON_START] != button_states[MY_BUTTON_START])
+				input_states[INPUT_BUTTON_START] = spGetInput()->button[MY_BUTTON_START];
+			if (spGetInput()->button[MY_BUTTON_SELECT] != button_states[MY_BUTTON_SELECT])
+				input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[MY_BUTTON_SELECT];
 		}
 		else
 			memset(input_states,0,sizeof(int)*12);
-		if (spGetInput()->button[MY_BUTTON_START] != button_states[MY_BUTTON_START])
-			input_states[INPUT_BUTTON_START] = spGetInput()->button[MY_BUTTON_START];
-		if (spGetInput()->button[MY_BUTTON_SELECT] != button_states[MY_BUTTON_SELECT])
-			input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[MY_BUTTON_SELECT];
 		//I need to save the button states to compare, to be able to set input_states[…] to 0!
 		memcpy(button_states,spGetInput()->button,sizeof(char)*SP_INPUT_BUTTON_COUNT);
 		if (!hase_game->local)
@@ -695,7 +701,7 @@ void set_input()
 			if (game_pause)
 			{
 				char buffer[256];
-				sprintf(buffer,"Waiting for turn data\nfrom player %s...\n(Timeout after 1 minute)",player[active_player]->name);
+				sprintf(buffer,"Waiting for turn data\nfrom player %s...",player[active_player]->name);
 				set_message(font,buffer);
 			}	
 		}
@@ -756,7 +762,8 @@ int calc(Uint32 steps)
 		int result = window_calc(steps);
 		if (result == 1)
 		{
-			send_chat(hase_game,chatMessage);
+			if (chatMessage[0])
+				send_chat(hase_game,chatMessage);
 			chatMessage[0] = 0;
 		}
 		if (result)
@@ -768,18 +775,18 @@ int calc(Uint32 steps)
 		spResetAxisState();
 	}
 	
-	if (spGetInput()->button[MY_BUTTON_START])
+	if (spGetInput()->button[MY_BUTTON_START] && get_channel())
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
-		help = 1-help;
+		chatWindow = create_text_box(font,hase_resize,"Enter Message:",chatMessage,256,0,NULL,1);
+		set_recent_window(chatWindow);
 	}
 	if (spGetInput()->button[MY_PRACTICE_4])
 	{
-		if (spGetInput()->button[MY_PRACTICE_OK] && get_channel())
+		if (spGetInput()->button[MY_PRACTICE_OK])
 		{
 			spGetInput()->button[MY_PRACTICE_OK] = 0;
-			chatWindow = create_text_box(font,hase_resize,"Enter Message:",chatMessage,256,0,NULL,1);
-			set_recent_window(chatWindow);
+			help = 1-help;
 		}
 		if (spGetInput()->button[MY_PRACTICE_3])
 		{
@@ -1068,7 +1075,7 @@ int calc(Uint32 steps)
 									int r = weapon_explosion[w_nr];
 									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
 									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
-									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2+1,NULL,1))
+									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2+4,NULL,-1))
 										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
 									else
 										player[active_player]->weapon_points+=weapon_cost[w_nr];
@@ -1248,6 +1255,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	loadInformation("Loading images...");
 	targeting = spLoadSpriteCollection("./data/targeting.ssc",NULL);
 	arrow = spLoadSurface("./data/gravity.png");
+	tomato = spLoadSurfaceZoom("./data/power.png",spGetSizeFactor()/4);
 	load_weapons();
 	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
 	loadInformation("Creating level...");
@@ -1260,6 +1268,12 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	level_pixel = (Uint16*)level_original->pixels;
 	realloc_gravity();
 	init_gravity();
+	pPlayer player_list = hase_player_list;
+	while (player_list)
+	{
+		printf("player has position %i\n",player_list->position_in_game);
+		player_list = player_list->next;
+	}
 	init_player(hase_player_list,game->player_count,game->hares_per_player);
 	items_init(game);
 	map_w = 64 * spGetSizeFactor() >> SP_ACCURACY;
@@ -1332,6 +1346,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	spDeleteSurface(level);
 	spDeleteSurface(level_original);
 	spDeleteSurface(gravity_surface);
+	spDeleteSurface(tomato);
 	delete_weapons();
 	spParticleDelete(&particles);
 	spResetButtonsState();

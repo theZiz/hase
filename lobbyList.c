@@ -231,6 +231,9 @@ int ll_calc(Uint32 steps)
 			while (get_channel()->last_read_message->next)
 			{
 				spNetIRCMessagePointer next = get_channel()->last_read_message->next;
+
+				log_message(next->user,next->message);
+				
 				sprintf(buffer,"%s: %s",next->user,next->message);
 				spTextBlockPointer temp = spCreateTextBlock(buffer,ll_surface->w-2,ll_font);
 				int lc = ll_chat_block->line_count + temp->line_count;
@@ -503,6 +506,13 @@ int ll_reload()
 
 void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 {
+	char buffer[2048],time_buffer[128];
+    time_t t = time(NULL);
+    struct tm *ti = gmtime(&t);
+    strftime(time_buffer,2048,"%c",ti);
+
+	log_message("Enter lobby",time_buffer);
+	
 	ll_selected = 0;
 	ll_font = font;
 	ll_level = NULL;

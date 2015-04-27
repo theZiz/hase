@@ -238,7 +238,7 @@ int server_info()
 {
 	pMessage result = sendMessage(NULL,NULL,NULL,0,"",gop_server());
 	if (result == NULL)
-		return 0;
+		return -1;
 	pMessage mom = result;
 	while (mom)
 	{
@@ -794,7 +794,8 @@ int push_thread_function(void* data)
 				free(thread_data);
 			}
 		}
-		spSleep(100000);//100ms
+		else
+			spSleep(100000);//100ms
 	}
 	return 0;
 }
@@ -894,7 +895,7 @@ int pull_thread_function(void* data)
 			player->last_input_data_write = next_data;
 			SDL_mutexV(player->input_mutex);
 			next_data = (pThreadData)malloc(sizeof(tThreadData));
-			spSleep(50000); //50ms
+			//spSleep(50000); //50ms
 		}
 		else
 			spSleep(500000); //500ms
@@ -1031,6 +1032,14 @@ spNetIRCChannelPointer get_channel()
 	if (channel && spNetIRCChannelReady(channel) != 1)
 		return NULL;
 	return channel;
+}
+
+void log_message(char* name,char* message)
+{
+	char buffer[512];
+	FILE * log = fopen(spConfigGetPath(buffer,"hase","chat_log.txt"), "a");
+	fprintf(log, "%s: %s\n",name,message);
+	fclose(log);
 }
 
 void send_chat(pGame game,char* chat_message)

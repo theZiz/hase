@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="3" build="7"/>
+<version major="1" minor="5" release="4" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -10,78 +10,90 @@ Hase
 </titles>
 <descriptions>
 <description lang="en_US">
-The provocative and risqué game that has jaded a generation of upstanding citizens. It has been said to make lewd references to _drug-use_ and _antisocial_ behaviours. 	  				 	 	 	    		  	   		  		
-Players are reported to believe they are hares. Reporting a new sense of gravity previously unheard of.  	  				 	 	 	    		  	   		  		
-Jump around, jump up, jump up, and jump down.
-Wage war against productivity and the established society. Energetic beats!
-Squinting is highly recommended to fully experience the graphics.
+Hase is a game about hares in space. It is a bit like Worms or Artillery, but with gravitation.
+The game itself is licsensed under GPLv2+.
+The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domain)
 
-Changelog:
-Version 1.3:
-- Network support
+Changelog
+=========
 
-Version 1.4:
-- 5s extra time after last bullet
-- 3 weapon points per turn
-- Locking zoom
-- Improved Aiming
-- New health bar
-- Fixed a bug in the bullet calculation
-- improved button mapping, using SP_PRACTICE
-- Writing down tractory while flying
-- New window approach
-- Menu
-- Multiple hares per player
-- New controls
-- Global health bar
-- Particle Effect
-- 6 Weapons
+1.5.4:
+- Fixed bug on gcw, which made the game unplayable
+- (Hopefully) fixed a bug, which made a client crash right after the start if a game with a chance of ~10%
+- Automaticly reconnect of IRC loose connection
+- Added logging for irc
+- Less time between two downloads of a turn to avoid wifi energy saving, which slows down the whole game
+- Fixed a crash, when exiting a game via removing the last player
+- Creating backups from the OPKs for the GCW, too
+- Tomato sprites instead of "Weapon points"
+- Line between player and cross haire for easier aiming
+- Removed confusing "1 minute timeout" message
+- Building tool can build in the ground, but more savety distance to hares
+- No sending of empty messages in Chats
+- Chat is now [Start] ingame
+- Fixed error message if server is not avaible
 
-Version 1.4.1:
-- Fixed little bug after finished turn in online game
-- AI is smarter (no friendly fire)
-- Faster canceling online game
-- Canceled online game will have no replay
+1.5.3.7:
+- Telling when a game happened for replays
 
-Version 1.4.1.1:
-- Added clock preference (900 Mhz) to PXML
+1.5.3.6:
+- If the game master leaves the game, the game is not deleted from the game list, except (s)he want it.
 
-Version 1.4.2:
-- An option to hide the player names on demand for better aiming when you have a lot of the screen area covered with the names
-- Improved colours
+1.5.3.5:
+- Using Menu as fourth button in Linux/Windows
 
-Version 1.4.3:
-- Arrow stays at minimal size while zooming to see where you are aiming at large zoom-outs
-- Circle around active hare to tell which of your characters you are currently controlling
-- Options menu for setting like volume, zooming behaviour and hare markation
-- Changeable particle size
-- Added Sound
+1.5.3.4:
+- Line break for ingame chat (Really, you guys talk to much! ;)
+- No flickering when entering text while a loading screen is active
 
-Version 1.4.4:
-- Fixed the broken network play
+1.5.3.3:
+- Added spectate modus
+- You can even spectate already started, but not yet finished games!
 
-Version 1.4.5:
-- Added option to not rotate the level, but the bunny
-- Added option to invert the controls of the bunny is upside down
-- Improved the particle effect (should be faster)
+1.5.3.2:
+- Recompile with NEON support (forgot it in 1.5.3.1)
+- Some little speed optimizations
 
-Version 1.4.6:
-- faster showing of own messages in chat
-- level color for the bullet traces
-- better and new default values for creating a game
+1.5.3.1:
+- Some sparrow3d improvements to draw faster
+- Showing the needed server version in the lobby
 
-Version 1.4.7:
-- Fixed small resolution sprites
-- Improved targeting
-- Improved button mapping for handhelds without keyboard
+1.5.3:
+- Fixed a bug, that the very close use of the build tool could freeze the game
 
-Version 1.4.7.1:
-- Fixed crash if last player removed in online game (thx @zear)
+1.5.2.2:
+- Improved handling of disconnects (now called "Zombies" ingame)
+- Fixed jump while typing
+- No message filter for irc messages in replays
 
-Version 1.4.7.2:
-- Added button arrow images to sparrow3d and use them now in hase in the help
+1.5.2.1:
+- Right aligned text input if more text than fits in the window
+- No movement while typing
+- If admin leaves game, the game is not shown in the game list anymore
+- rotation stays fix when no gravitation
+- Less network spam
+- Removed "Aiming 100%" label above AI after it shoot
 
-Version 1.5:
+1.5.2:
+- Using NEON for little speed up
+- Fixed a bug in the particle system
+
+1.5.1:
+- Added mini map
+
+1.5.0.3
+- Improved user name checking of IRC nick
+
+1.5.0.2
+- Fixed a bug, which fucked the deterministic, which is baaaad
+- Replacing spaces with underscore in nicknames
+
+1.5.0.1
+- bigger sprites for small screens
+- Fixed keyboard-gui-collision
+- Backspace button for onscreen keyboard devices (like the GCW)
+
+1.5.0
 - More sprites
 - Sprites chooseable
 - Username saving
@@ -112,68 +124,76 @@ Version 1.5:
 	- more weapon points
 	- mine
 	
-Version 1.5.0.2:
-- Fixed a bug, which fucked the deterministic, which is baaaad
-- Replacing spaces with underscore in nicknames
+1.4.7.2
+- Added button arrow images to sparrow3d and use them now in hase in the help
 
-Version 1.5.0.3:
-- Improved user name checking of IRC nick
+1.4.7.1
+- Fixed crash if last player removed in online game (thx @zear)
 
-Version 1.5.1:
-- Added mini map
+1.4.7
+- Fixed small resolution sprites
+- Improved targeting
+- Improved button mapping for handhelds without keyboard
 
-Version 1.5.2:
-- Using NEON for little speed up
-- Fixed a bug in the particle system
-- Lowered clock preference (800 Mhz) in PXML
+1.4.6
+- faster showing of own messages in chat
+- level color for the bullet traces
+- better and new default values for creating a game
 
-Version 1.5.2.1:
-- Right aligned text input if more text than fits in the window
-- No movement while typing
-- If admin leaves game, the game is not shown in the game list anymore
-- rotation stays fix when no gravitation
-- Less network spam
-- Removed "Aiming 100%" label above AI after it shoot
+1.4.5:
+- Added option to not rotate the level, but the bunny
+- Added option to invert the controls of the bunny is upside down
+- Improved the particle effect (should be faster)
 
-Version 1.5.2.2:
-- Improved handling of disconnects (now called "Zombies" ingame)
-- Fixed jump while typing
-- No message filter for irc messages in replays
+1.4.4:
+- Fixed broken network play
 
-Version 1.5.3:
-- Fixed a bug, that the very close use of the build tool could freeze the game
+1.4.3:
+- Arrow stays at minimal size while zooming to see where you are aiming at large zoom-outs
+- Circle around active hare to tell which of your characters you are currently controlling
+- Options menu for setting like volume, zooming behaviour and hare markation
+- Changeable particle size
+- Added Sound
 
-Version 1.5.3.1:
-- Some sparrow3d improvements to draw faster
-- Showing the needed server version in the lobby
+1.4.2:
+- An option to hide the player names on demand for better aiming when you have a lot of the screen area covered with the names
+- Improved colours
 
-Version 1.5.3.2:
-- Recompile with NEON support (forgot it in 1.5.3.1)
-- Some little speed optimizations
+1.4.1:
+- Fixed little bug after finished turn in online game
+- AI is smarter (no friendly fire)
+- Faster canceling online game
+- Canceled online game will have no replay
 
-Version 1.5.3.3:
-- Added spectate modus
-- You can even spectate already started, but not yet finished games!
+1.4:
+- 5s extra time after last bullet
+- 3 weapon points per turn
+- Locking zoom
+- Improved Aiming
+- New health bar
+- Fixed a bug in the bullet calculation
+- improved button mapping, using SP_PRACTICE
+- Writing down tractory while flying
+- New window approach
+- Menu
+- Multiple hares per player
+- New controls
+- Global health bar
+- Particle Effect
+- 6 Weapons
 
-Version 1.5.3.4:
-- Line break for ingame chat (Really, you guys talk to much! ;)
-- No flickering when entering text while a loading screen is active
 
-Version 1.5.3.5:
-- Using Menu as fourth button in Linux/Windows
+1.3:
+- network support
+- Start of change logging
 
-Version 1.5.3.6:
-- If the game master leaves the game, the game is not deleted from the game list, except (s)he want it.
-
-Version 1.5.3.7:
-- Telling when a game happened for replays
 </description>
 </descriptions>
 <icon src="./hase_prototype.png"/>
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="3" build="7" type="release"/>
+<version major="1" minor="5" release="4" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

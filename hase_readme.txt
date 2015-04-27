@@ -1,12 +1,28 @@
 Hase 
 ====
 
-Hase is a game about hares in space. It is like Worms, but with gravitation.
+Hase is a game about hares in space. It is a bit like Worms or Artillery, but with gravitation.
 The game itself is licsensed under GPLv2+.
 The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domain)
 
 Changelog
 =========
+
+1.5.4:
+- Fixed bug on gcw, which made the game unplayable
+- (Hopefully) fixed a bug, which made a client crash right after the start if a game with a chance of ~10%
+- Automaticly reconnect of IRC loose connection
+- Added logging for irc
+- Less time between two downloads of a turn to avoid wifi energy saving, which slows down the whole game
+- Fixed a crash, when exiting a game via removing the last player
+- Creating backups from the OPKs for the GCW, too
+- Tomato sprites instead of "Weapon points"
+- Line between player and cross haire for easier aiming
+- Removed confusing "1 minute timeout" message
+- Building tool can build in the ground, but more savety distance to hares
+- No sending of empty messages in Chats
+- Chat is now [Start] ingame
+- Fixed error message if server is not avaible
 
 1.5.3.7:
 - Telling when a game happened for replays

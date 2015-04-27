@@ -88,7 +88,8 @@ pWindowElement add_window_element(pWindow window,int type,int reference)
 	elem->type = type;
 	elem->reference = reference;
 	elem->text[0] = 0;
-	window->feedback(window,elem,WN_ACT_UPDATE);
+	if (window->feedback)
+		window->feedback(window,elem,WN_ACT_UPDATE);
 	update_elem_width(elem,window);
 	update_window_width(window);
 	window->height+=3*window->font->maxheight/2;
@@ -382,7 +383,8 @@ int window_calc(Uint32 steps)
 		{
 			spGetInput()->axis[1] = 0;
 			if (selElem->type == 1 &&
-				spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
+				spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER &&
+				window->feedback)
 				window->feedback(window,selElem,WN_ACT_END_POLL);
 			window->selection = (window->selection + window->count - 1) % window->count;
 			selElem = befElem;
@@ -391,7 +393,8 @@ int window_calc(Uint32 steps)
 		{
 			spGetInput()->axis[1] = 0;
 			if (selElem->type == 1 &&
-				spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
+				spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER &&
+				window->feedback)
 				window->feedback(window,selElem,WN_ACT_END_POLL);
 			window->selection = (window->selection + 1) % window->count;
 			if (selElem->next)
@@ -410,7 +413,8 @@ int window_calc(Uint32 steps)
 		{
 			if (spIsKeyboardPolled())
 			{
-				window->feedback(window,selElem,WN_ACT_END_POLL);
+				if (window->feedback)
+					window->feedback(window,selElem,WN_ACT_END_POLL);
 				if (window->firstElement->next == NULL)
 					return 1;
 				if (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
@@ -432,7 +436,8 @@ int window_calc(Uint32 steps)
 		{
 			if (spIsKeyboardPolled())
 			{
-				window->feedback(window,selElem,WN_ACT_END_POLL);
+				if (window->feedback)
+					window->feedback(window,selElem,WN_ACT_END_POLL);
 				if (window->firstElement->next == NULL || spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
 					return 1;
 			}
@@ -452,7 +457,8 @@ int window_calc(Uint32 steps)
 			case 1:
 				if (spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
 				{
-					window->feedback(window,selElem,WN_ACT_END_POLL);
+					if (window->feedback)
+						window->feedback(window,selElem,WN_ACT_END_POLL);
 					if (window->firstElement->next == NULL)
 						return 2;
 				}
@@ -467,7 +473,8 @@ int window_calc(Uint32 steps)
 	if (selElem->type == 1 &&
 		!spIsKeyboardPolled() &&
 		( spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER ||
-		  window->firstElement->next == NULL ) )
+		  window->firstElement->next == NULL ) &&
+		  window->feedback)
 		window->feedback(window,selElem,WN_ACT_START_POLL);
 
 	if (spGetInput()->button[MY_BUTTON_START] &&
@@ -476,7 +483,8 @@ int window_calc(Uint32 steps)
 		spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
 	{
 		spGetInput()->button[MY_BUTTON_START] = 0;
-		window->feedback(window,selElem,WN_ACT_START_POLL);
+		if (window->feedback)
+			window->feedback(window,selElem,WN_ACT_START_POLL);
 	}
 	
 	int i;
@@ -485,26 +493,31 @@ int window_calc(Uint32 steps)
 		if (selElem->type == 0)
 		{
 			spGetInput()->axis[0] = 0;
-			window->feedback(window,selElem,WN_ACT_LEFT);
+			if (window->feedback)
+				window->feedback(window,selElem,WN_ACT_LEFT);
 		}
 		else
 		if (selElem->type == 2)
 			for (i = 0; i < steps;i++)
-				window->feedback(window,selElem,WN_ACT_LEFT);
+				if (window->feedback)
+					window->feedback(window,selElem,WN_ACT_LEFT);
 	}
 	if (spGetInput()->axis[0] > 0)
 	{
 		if (selElem->type == 0)
 		{
 			spGetInput()->axis[0] = 0;
-			window->feedback(window,selElem,WN_ACT_RIGHT);
+			if (window->feedback)
+				window->feedback(window,selElem,WN_ACT_RIGHT);
 		}
 		else
 		if (selElem->type == 2)
 			for (i = 0; i < steps;i++)
-				window->feedback(window,selElem,WN_ACT_RIGHT);
+				if (window->feedback)
+					window->feedback(window,selElem,WN_ACT_RIGHT);
 	}
-	window->feedback(window,selElem,WN_ACT_UPDATE);
+	if (window->feedback)
+		window->feedback(window,selElem,WN_ACT_UPDATE);
 	update_elem_width(selElem,window);
 	update_window_width(window);
 	return 0;
@@ -534,7 +547,8 @@ int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 			nr++;
 			selElem = selElem->next;
 		}
-		window->feedback(window,selElem,WN_ACT_END_POLL);
+		if (window->feedback)
+			window->feedback(window,selElem,WN_ACT_END_POLL);
 	}
 	recent_window = save_window;
 	spDeleteSurface( window->oldScreen );

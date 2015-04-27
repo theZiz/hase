@@ -142,9 +142,9 @@ void draw_weapons()
 		spFontDrawMiddle(screen->w/2,(screen->h-h)/2,0,weapon_name[w_nr],font);
 		spRectangleBorder((screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-h+player[active_player]->activeHare->wp_y*factor*2)/2+factor/2+font->maxheight-1,0,factor-4,factor-4,2,2,get_border_color());
 		spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[w_nr],font);
-		char buffer[32];
-		sprintf(buffer,"Cost: %i",weapon_cost[w_nr]);
-		spFontDrawRight((screen->w+w)/2,(screen->h+h)/2-font->maxheight*1,0,buffer,font);
+		spFontDrawRight((screen->w+w)/2 - weapon_cost[w_nr] * tomato->w,(screen->h+h)/2-font->maxheight*1,0,"Cost:",font);
+		for (i = 0; i < weapon_cost[w_nr]; i++)
+			spBlitSurface( (screen->w+w)/2 - tomato->w*(2*i+1)/2, (screen->h+h)/2-font->maxheight/2,0,tomato);
 	}
 }
 
@@ -416,7 +416,7 @@ void negative_impact(int X,int Y,int radius)
 					pixel[X+x+(Y+y)*LEVEL_WIDTH] = BORDER_COLOR;
 			}
 			else
-			if (pixel[X+x+(Y+y)*LEVEL_WIDTH] == SP_ALPHA_COLOR)
+			//if (pixel[X+x+(Y+y)*LEVEL_WIDTH] == SP_ALPHA_COLOR)
 			{
 				if ((X+x+Y+y >> 3) & 1)
 					pixel[X+x+(Y+y)*LEVEL_WIDTH] = 0;

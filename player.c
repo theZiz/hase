@@ -17,27 +17,28 @@ pPlayer *player;
 
 static int circle_is_empty(int x, int y, int r,pHare except,int with_players)
 {
-	int a,b;
-	int start_a = x-r;
-	if (start_a < 0)
-		start_a = 0;
-	int end_a = x+r+1;
-	if (end_a > LEVEL_WIDTH)
-		end_a = LEVEL_WIDTH;
-	int start_b = y-r;
-	if (start_b < 0)
-		start_b = 0;
-	int end_b = y+r+1;
-	if (end_b > LEVEL_HEIGHT)
-		end_b = LEVEL_HEIGHT;
-	for (a = start_a; a < end_a; a++)
+	if (with_players != -1)
 	{
-		for (b = start_b; b < end_b; b++)
-		if (a!=x && b!=y && (a-x)*(a-x)+(b-y)*(b-y) <= r*r)
-		{
-			if (level_pixel[a+b*LEVEL_WIDTH] != SP_ALPHA_COLOR)
-				return 0;
-		}
+		int a,b;
+		int start_a = x-r;
+		if (start_a < 0)
+			start_a = 0;
+		int end_a = x+r+1;
+		if (end_a > LEVEL_WIDTH)
+			end_a = LEVEL_WIDTH;
+		int start_b = y-r;
+		if (start_b < 0)
+			start_b = 0;
+		int end_b = y+r+1;
+		if (end_b > LEVEL_HEIGHT)
+			end_b = LEVEL_HEIGHT;
+		for (a = start_a; a < end_a; a++)
+			for (b = start_b; b < end_b; b++)
+			if ((a-x)*(a-x)+(b-y)*(b-y) <= r*r)
+			{
+				if (level_pixel[a+b*LEVEL_WIDTH] != SP_ALPHA_COLOR)
+					return 0;
+			}
 	}
 	
 	int i;

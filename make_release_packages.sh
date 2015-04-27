@@ -1,6 +1,6 @@
 #!/bin/sh
 PROGRAM="hase"
-VERSION="1.5.3.7"
+VERSION="1.5.4"
 DEST=./build/*
 echo "<html>" > index.htm
 echo "<head>" >> index.htm
@@ -42,9 +42,11 @@ do
 				fi
 				if [ $NAME = "gcw" ]; then
 					cp ../../small_resolution_censorship/* "$PROGRAM/data"
-					mksquashfs * "$PROGRAM.opk" -all-root -noappend -no-exports -no-xattrs
-					mv "$PROGRAM.opk" ../..
+					mksquashfs * "$PROGRAM-$VERSION.opk" -all-root -noappend -no-exports -no-xattrs
+					mv "$PROGRAM-$VERSION.opk" ../..
 					echo "<a href=$PROGRAM.opk type=\"application/x-opk+squashfs\">$NAME</a></br>" >> ../../index.htm
+					echo "unlink('$PROGRAM.opk');" >> ../../symlink.php
+					echo "symlink('$PROGRAM-$VERSION.opk', '$PROGRAM.opk');" >> ../../symlink.php
 				else
 					zip -r "$PROGRAM-$NAME-$VERSION.zip" * > /dev/null
 					mv "$PROGRAM-$NAME-$VERSION.zip" ../..

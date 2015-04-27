@@ -356,6 +356,8 @@ int lg_calc(Uint32 steps)
 				else
 				{
 					pPlayer n = p->next;
+					if (l == NULL && n == NULL) //no prev, no next
+						return 1;
 					leave_game(p);
 					lg_counter = LG_WAIT;
 					if (l)
@@ -365,8 +367,6 @@ int lg_calc(Uint32 steps)
 					if (n == NULL)
 						lg_last_player = l;
 				}
-				if (lg_player == NULL)
-					return 1;
 			}
 		}
 	}
@@ -384,7 +384,7 @@ int lg_calc(Uint32 steps)
 				return -1; //stopped
 			if (res == -3)
 				return -3; //connection error
-			if (hase(lg_resize,lg_game,lg_player) < 2)
+			if (hase(lg_resize,lg_game,lg_player) < 2 && lg_game->local == 0)
 			{
 				pWindow window = create_window(delete_feedback,lg_font,"Question");
 				add_window_element(window,-1,0);
@@ -507,7 +507,7 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		if (res == 2)
 			hase(lg_resize,lg_game,lg_player);
 
-		if (!spectate && !lg_game->local && lg_player)
+		if (!spectate && !lg_game->local)
 			stop_heartbeat(lg_player);
 
 		while (lg_player)

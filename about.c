@@ -8,7 +8,7 @@ void start_about(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 {
 	pWindow window = create_window(NULL,font,"About Hase\n"
 	"Version: "VERSION"\n\n"
-	"Developer:\nZiz (zizsdl@googlemail.com)\nGame licensed under GPLv2+\n\n"
+	"Developer:\nZiz (ziz@mailbox.org)\nGame licensed under GPLv2+\n\n"
 	"Fonts:\nPixel Mania by HiBan (CC-BY-SA)\nDejaVu Sans (Public Domain)\n\n"
 	"Music:\nOuroboros by Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com");
 	window->height += font->maxheight*13;
