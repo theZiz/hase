@@ -50,7 +50,7 @@ const char weapon_description[WEAPON_MAX][64] = {
 	"Protect yourself with dirt",
 	"Protect yourself with few dirt",
 	"Explodes if a character is near",
-	"Start the next round with 1 WP more",
+	"Start the next round with 1 AP more",
 	"Make a very high jump",
 	"Choose the previous hare",
 	"Choose the next hare",

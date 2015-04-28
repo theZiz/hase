@@ -35,7 +35,6 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 {
 	char boundary[17] = "A9B8C7D6E5F4G3H2"; //This should maybe random...
 	int boundary_len = 16;
-	//Calculating the whole content length
 	int direction = 1;
 	if (count < 0)
 	{
@@ -55,52 +54,20 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	}
 	if (binary && direction == 1)
 	{
-/*		length +=
-			2+boundary_len+2 + //boundary start + return
-			62 + //Content-Disposition: form-data; name=\"userfile\"; filename=\"\"\r\n
-			strlen(binary_name) +
-			19 + //Content-Type: fun\r\n
-			count + 4; // content + 2 returns*/
 		length +=
 			2+boundary_len+2 + //boundary start + return
 			39+strlen(binary_name)+2 + //Content-Disposition: form-data; name="<name>" + return
 			count + 4; // content + 2 returns
 	}
-	length += 2+boundary_len+2+4; //4 + boundary_end + 2 returns;
+	length += 2+boundary_len+2+4; //--boundary-- + 2 returns;
 	spNetTCPConnection server_connection = spNetOpenClientTCP(ip);
 	if (server_connection == NULL)
 		return NULL;
 	//int buffer_size = 2048+count;//spMax(length+1,512);
 	int buffer_size = 65536;
 	char buffer[buffer_size];
+	char header[4096]; //magic number ftw!
 	char host[512];
-	sprintf(host,"%s",server);
-	char* server_directory = strchr(host,'/');
-	if (server_directory)
-	{
-		server_directory[0] = 0;
-		server_directory++;
-		sprintf(buffer,
-			"POST /%s/%s HTTP/1.1\r\n"
-			"Origin: http://%s\r\n"
-			"User-Agent: Hase\r\n"
-			"Content-Type: multipart/form-data; boundary=%s\r\n"
-			"Content-Length: %i\r\n"
-			"Host: %s\r\n"
-			"\r\n",server_directory,dest,host,boundary,length,host);
-	}
-	else
-	{
-		sprintf(buffer,
-			"POST /%s HTTP/1.1\r\n"
-			"Origin: http://%s\r\n"
-			"User-Agent: Hase\r\n"
-			"Content-Type: multipart/form-data; boundary=%s\r\n"
-			"Content-Length: %i\r\n"
-			"Host: %s\r\n"
-			"\r\n",dest,host,boundary,length,host);
-	}
-	spNetSendHTTP(server_connection,buffer);
 	int pos = 0;
 	mom = message;
 	char temp[512];
@@ -117,19 +84,10 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	}
 	if (binary && direction == 1)
 	{
-/*		int l =
-			2+boundary_len+2 + //boundary start + return
-			62 + //Content-Disposition: form-data; name=\"userfile\"; filename=\"\"\r\n
-			strlen(binary_name) +
-			19+4; //Content-Type: fun\r\n\r\n		*/
 		int l =
 			2+boundary_len+2 + //boundary start + return
 			39+strlen(binary_name)+2 + //Content-Disposition: form-data; name="<name>" + return
 			4; // content + 2 returns
-/*		sprintf(temp,
-			"\r\n--%s\r\n"
-			"Content-Disposition: form-data; name=\"userfile\"; filename=\"%s\"\r\n"
-			"Content-Type: fun\r\n\r\n",boundary,binary_name);*/
 		sprintf(temp,
 			"\r\n--%s\r\n"
 			"Content-Disposition: form-data; name=\"%s\"\r\n"
@@ -143,9 +101,42 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 		"\r\n--%s--\r\n"
 		"\r\n",boundary);
 	memcpy(&(buffer[pos]),temp,6+4+boundary_len+1);
+
+	sprintf(host,"%s",server);
+	char* server_directory = strchr(host,'/');
+	if (server_directory)
+	{
+		server_directory[0] = 0;
+		server_directory++;
+		sprintf(header,
+			"POST /%s/%s HTTP/1.1\r\n"
+			"Origin: http://%s\r\n"
+			"User-Agent: Hase\r\n"
+			"Connection: Close\r\n"
+			"Content-Type: multipart/form-data; boundary=%s\r\n"
+			"Content-Length: %i\r\n"
+			"Host: %s\r\n"
+			"\r\n",server_directory,dest,host,boundary,length,host);
+	}
+	else
+	{
+		sprintf(header,
+			"POST /%s HTTP/1.1\r\n"
+			"Origin: http://%s\r\n"
+			"User-Agent: Hase\r\n"
+			"Connection: Close\r\n"
+			"Content-Type: multipart/form-data; boundary=%s\r\n"
+			"Content-Length: %i\r\n"
+			"Host: %s\r\n"
+			"\r\n",dest,host,boundary,length,host);
+	}
+	//printf("Header:\n%s",header);
+	spNetSendHTTP(server_connection,header);
+	//printf("\nMessage\n%sEND\n",buffer);
 	spNetSendTCP(server_connection,buffer,length);
 	
 	int res = spNetReceiveHTTP(server_connection,buffer,buffer_size-1);
+	//printf("Out\n");
 	buffer[res] = 0;
 	spNetCloseTCP(server_connection);
 	//HTTP error check + jumping to begin
@@ -887,7 +878,7 @@ int pull_thread_function(void* data)
 			next_data->player = player;
 			next_data->second_of_player = new_second;
 			next_data->next = NULL;
-			SDL_mutexP(player->input_mutex);
+			SDL_mutexP(player->input_mutex);	
 			if (player->last_input_data_write)
 				player->last_input_data_write->next = next_data;
 			else
@@ -895,7 +886,7 @@ int pull_thread_function(void* data)
 			player->last_input_data_write = next_data;
 			SDL_mutexV(player->input_mutex);
 			next_data = (pThreadData)malloc(sizeof(tThreadData));
-			//spSleep(50000); //50ms
+			spSleep(50000); //50ms
 		}
 		else
 			spSleep(500000); //500ms

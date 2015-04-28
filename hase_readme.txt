@@ -8,6 +8,9 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.1:
+- Fixed a bug in the HTTP handling code, which made online game unplayable slow
+
 1.5.4:
 - Fixed bug on gcw, which made the game unplayable
 - (Hopefully) fixed a bug, which made a client crash right after the start if a game with a chance of ~10%
