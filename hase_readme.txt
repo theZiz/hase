@@ -8,6 +8,12 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.2:
+- Rsotation speed of the cross haire depends on the weapon power
+- Targeting line is above cross haire
+- Fixed a _very_ rare and uncommon crash because of division by zero
+- Set the ingame chat to appear for 1 minute instead of only 20 seconds (testwise)
+
 1.5.4.1:
 - Fixed a bug in the HTTP handling code, which made online game unplayable slow
 

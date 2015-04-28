@@ -15,6 +15,33 @@ int active_player = 0;
 int player_count;
 pPlayer *player;
 
+void update_targeting()
+{
+	spSpritePointer sprite = spActiveSprite(targeting);
+	int nr = 0;
+	spSubSpritePointer mom = sprite->firstSub;
+	while (mom != sprite->momSub)
+	{
+		nr++;
+		mom = mom->next;
+	}
+	Sint32 subPosition = sprite->momSub->age * SP_ONE / sprite->momSub->duration;
+	Sint32 divisor = spMax(SP_ONE/128,player[active_player]->activeHare->w_power);
+	int new_duration = spDiv(SP_ONE,divisor) >> SP_ACCURACY-5;
+	sprite->momSub->age = spDiv(subPosition,divisor) >> SP_ACCURACY-5;
+	sprite->wholeAge = nr * new_duration + sprite->momSub->age;
+	nr = 0;
+	mom = sprite->firstSub;
+	do
+	{
+		mom->duration = new_duration;
+		nr++;
+		mom = mom->next;
+	}
+	while (mom != sprite->firstSub);
+	sprite->wholeDuration = nr * new_duration;	
+}
+
 static int circle_is_empty(int x, int y, int r,pHare except,int with_players)
 {
 	if (with_players != -1)
@@ -467,6 +494,7 @@ void real_next_player()
 	wp_choose = 0;
 	if (spRand()/1337%player_count == 0)
 		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
+	update_targeting();
 	start_thread();
 }
 
@@ -507,12 +535,12 @@ Sint32 vector_length_approx(Sint32 x,Sint32 y)
 	y = abs(y);
 	if (x > y)
 	{
-		Sint32 factor = spDiv(y,x);
+		Sint32 factor = spDiv(y,spMax(1,x));
 		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),x);
 	}
 	else
 	{
-		Sint32 factor = spDiv(x,y);
+		Sint32 factor = spDiv(x,spMax(1,y));
 		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),y);
 	}
 }

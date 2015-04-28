@@ -255,8 +255,8 @@ void draw(void)
 					Sint32 nx = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32 ny = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 					//spSetBlending( SP_ONE*2/3 );
-					spLine(screen->w/2+x,screen->h/2+y,0,screen->w/2+nx,screen->h/2+ny,0,get_border_color());
 					spDrawSprite(screen->w/2+nx,screen->h/2+ny,0,target);
+					spLine(screen->w/2+x,screen->h/2+y,0,screen->w/2+nx,screen->h/2+ny,0,get_border_color());
 					//spSetBlending( SP_ONE );
 				}
 				/*if (hare->w_power)
@@ -735,7 +735,7 @@ int calc(Uint32 steps)
 		else
 		if (before_showing)
 			showing = before_showing->next;
-		time_t now = time(NULL) - 20;
+		time_t now = time(NULL) - 60;
 		while (showing)
 		{
 			if (showing->time_stamp > now)
@@ -919,6 +919,7 @@ int calc(Uint32 steps)
 			countdown --;
 		if (countdown < 0)
 			next_player();
+		Sint32 old_power = player[active_player]->activeHare->w_power;
 		if (wp_choose == 0)
 		{
 			int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
@@ -1100,6 +1101,8 @@ int calc(Uint32 steps)
 					}
 				}
 			}
+			if (player[active_player]->activeHare->w_power != old_power)
+				update_targeting();
 		}
 		if (firstBullet == NULL && player[active_player]->weapon_points == 0)
 		{
