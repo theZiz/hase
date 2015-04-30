@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="2"/>
+<version major="1" minor="5" release="4" build="3"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,14 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.5.4.3:
+- Asking the server to give gzip compressed data. Saved up to 98% of data bandwith.
+- Sound warning at end of turn
+- Mine make noises now
+- Chat is fading out ingame
+- Pandora only: Toggling between fullscreen and windowed mode with the Pandora button
+- Inverted button images to be more clear
 
 1.5.4.2:
 - Rsotation speed of the cross haire depends on the weapon power
@@ -202,7 +210,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="2" type="release"/>
+<version major="1" minor="5" release="4" build="3" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

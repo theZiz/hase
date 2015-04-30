@@ -11,8 +11,10 @@
 SDL_Surface* screen;
 spFontPointer font = NULL;
 
-#define BUTTON_BG spGetRGB(64,64,64)
-#define BUTTON_FG spGetRGB(220,220,220)
+#define BUTTON_FG spGetRGB(32,32,32)
+#define BUTTON_BG spGetRGB(220,220,220)
+#define FONT_BG spGetRGB(64,64,64)
+#define FONT_FG spGetRGB(220,220,220)
 
 void resize( Uint16 w, Uint16 h )
 {
@@ -33,7 +35,7 @@ void resize( Uint16 w, Uint16 h )
 		else
 			font = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
 	}
-	spFontAdd( font, SP_FONT_GROUP_ASCII"™°∞", BUTTON_FG ); //whole ASCII
+	spFontAdd( font, SP_FONT_GROUP_ASCII"™°∞", FONT_FG ); //whole ASCII
 	spFontAddBorder(font , 0);
 	spFontAddButton( font, 'R', MY_BUTTON_START_NAME, BUTTON_FG, BUTTON_BG ); //Return == START
 	spFontAddButton( font, 'B', MY_BUTTON_SELECT_NAME, BUTTON_FG, BUTTON_BG ); //Backspace == SELECT

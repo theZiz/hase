@@ -120,7 +120,10 @@ void items_calc()
 							break;
 						case 2: //mine
 							if (item->beep == 0 && d <= (PLAYER_RADIUS+32)*(PLAYER_RADIUS+32))
+							{
 								item->beep = 5000;
+								spSoundPlay(snd_beep,-1,0,0,-1);
+							}
 							break;
 					}
 					if (dead)
@@ -158,9 +161,7 @@ void items_draw()
 		Sint32 oy = spMul(item->y-posY,zoom);
 		Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 		Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-		if (item->kind == 2 &&
-			((item->beep > 2000 && item->beep/400%2) ||
-			(item->beep <= 2000 && item->beep/200%2)))
+		if (item->kind == 2 && item->beep/500%2)
 			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,item_surface[ITEMS_COUNT],zoom/2,zoom/2,rotation+item->rotation);
 		else
 			spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,item_surface[item->kind],zoom/2,zoom/2,rotation+item->rotation);

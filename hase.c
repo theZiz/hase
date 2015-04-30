@@ -17,6 +17,9 @@ pPlayer hase_player_list = NULL;
 #define LEVEL_HEIGHT 1536
 
 spSound* snd_explosion;
+spSound* snd_end;
+int channel_end;
+spSound* snd_beep;
 spSound* snd_high;
 spSound* snd_low;
 spSound* snd_shoot;
@@ -328,6 +331,7 @@ void draw(void)
 		if (before_showing)
 			showing = before_showing->next;
 		int help_length = spFontWidth("[4]+[o]Help",font);
+		time_t now = time(NULL) - 60;
 		while (showing)
 		{
 			char* message = showing->message;
@@ -335,6 +339,9 @@ void draw(void)
 				(message = ingame_message(showing->message,hase_game->name)))
 			{
 				sprintf(buffer,"%s: %s",showing->user,message);
+				int diff = showing->time_stamp - now;
+				if (diff < 16)
+				spSetBlending(diff * SP_ONE/16);
 				char* found = buffer;
 				while (spFontWidth(found,font) > screen->w - help_length)
 				{
@@ -372,6 +379,7 @@ void draw(void)
 				}
 				spFontDraw(2, y-font->maxheight/8, 0, found, font );
 				y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
+				spSetBlending(SP_ONE);
 			}
 			showing = showing->next;
 		}
@@ -916,7 +924,9 @@ int calc(Uint32 steps)
 			continue;
 		check_next_player();
 		if (player[active_player]->weapon_points)
-			countdown --;
+			countdown--;
+		if (countdown == 5000)
+			channel_end = spSoundPlay(snd_end,-1,0,0,-1);
 		if (countdown < 0)
 			next_player();
 		Sint32 old_power = player[active_player]->activeHare->w_power;
@@ -1114,6 +1124,14 @@ int calc(Uint32 steps)
 			else
 				extra_time--;
 		}
+		if (firstBullet || player[active_player]->weapon_points == 0)
+			if (channel_end >= 0)
+			{
+				spSoundStop(channel_end,0);
+				channel_end = -1;
+			}
+
+		
 		if (wp_choose)
 		{
 			if (input_states[INPUT_AXIS_0_LEFT] && player[active_player]->activeHare)
@@ -1298,6 +1316,9 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	game_pause = 0;
 	wp_choose = 0;
 	snd_explosion = spSoundLoad("./sounds/explosion.wav");
+	snd_beep = spSoundLoad("./sounds/beep.wav");
+	snd_end = spSoundLoad("./sounds/end_beep.wav");
+	channel_end = -1;
 	snd_high = spSoundLoad("./sounds/high_jump.wav");
 	snd_low = spSoundLoad("./sounds/short_jump.wav");
 	snd_shoot = spSoundLoad("./sounds/plop.wav");
@@ -1306,6 +1327,8 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	
 	spSoundStop(-1,0);
 	spSoundDelete(snd_explosion);
+	spSoundDelete(snd_beep);
+	spSoundDelete(snd_end);
 	spSoundDelete(snd_high);
 	spSoundDelete(snd_low);
 	spSoundDelete(snd_shoot);

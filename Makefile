@@ -24,6 +24,10 @@ LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
 DYNAMIC += -lsparrow3d -lsparrowNet -lsparrowSound
 
+ifneq ($(TARGET),win32)
+DYNAMIC += -lz
+endif
+
 CFLAGS += $(PARAMETER) $(FLAGS)
 
 all: hase

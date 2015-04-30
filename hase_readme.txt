@@ -8,6 +8,14 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.3:
+- Asking the server to give gzip compressed data. Saved up to 98% of data bandwith.
+- Sound warning at end of turn
+- Mine make noises now
+- Chat is fading out ingame
+- Pandora only: Toggling between fullscreen and windowed mode with the Pandora button
+- Inverted button images to be more clear
+
 1.5.4.2:
 - Rsotation speed of the cross haire depends on the weapon power
 - Targeting line is above cross haire
