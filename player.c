@@ -457,7 +457,7 @@ pItem dropItem = NULL;
 
 void real_next_player()
 {
-	spSoundPause(-1,1);
+	spSoundPause(1,-1);
 	stop_thread(0);
 	int j;
 	for (j = 0; j < hase_game->player_count; j++)
@@ -497,7 +497,7 @@ void real_next_player()
 		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
 	update_targeting();
 	start_thread();
-	spSoundPause(-1,0);
+	spSoundPause(0,-1);
 }
 
 void check_next_player()

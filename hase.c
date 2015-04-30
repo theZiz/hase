@@ -755,6 +755,7 @@ int calc(Uint32 steps)
 	if (spGetInput()->button[MY_BUTTON_SELECT])
 	{
 		spGetInput()->button[MY_BUTTON_SELECT] = 0;
+		spSoundPause(1,-1);
 		if (options_window(font,hase_resize,1))
 		{
 			pWindow window = create_window(quit_feedback,font,"Sure?");
@@ -764,7 +765,9 @@ int calc(Uint32 steps)
 			if (res == 1)
 				return 1;
 		}
+		spSoundPause(0,-1);
 	}
+	
 	if (chatWindow)
 	{
 		int result = window_calc(steps);
@@ -836,11 +839,11 @@ int calc(Uint32 steps)
 	int result = 0;
 	if (game_pause)
 	{
-		spSoundPause(-1,1);
+		spSoundPause(1,-1);
 		spSleep(100000);
 	}
 	else
-		spSoundPause(-1,0);
+		spSoundPause(0,-1);
 	spUpdateSprite(spActiveSprite(targeting),steps);
 	spParticleUpdate(&particles,steps);
 	for (i = 0; i < steps; i++)
