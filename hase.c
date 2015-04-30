@@ -835,7 +835,12 @@ int calc(Uint32 steps)
 	update_player_sprite(steps);
 	int result = 0;
 	if (game_pause)
+	{
+		spSoundPause(-1,1);
 		spSleep(100000);
+	}
+	else
+		spSoundPause(-1,0);
 	spUpdateSprite(spActiveSprite(targeting),steps);
 	spParticleUpdate(&particles,steps);
 	for (i = 0; i < steps; i++)
