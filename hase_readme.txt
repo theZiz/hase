@@ -8,8 +8,12 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.4:
+- Compression of outgoing turn data (again up to 98% data bandwidth saving)
+- Button mapping is adjustable
+
 1.5.4.3:
-- Asking the server to give gzip compressed data. Saved up to 98% of data bandwith.
+- Asking the server to give gzip compressed data. Saved up to 98% of data bandwidth.
 - Sound warning at end of turn
 - Mine make noises now
 - Chat is fading out ingame

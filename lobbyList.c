@@ -105,7 +105,7 @@ void ll_draw(void)
 		spFontDrawMiddle(screen->w/3, screen->h-2*ll_font->maxheight-h/2, 0, "Connecting to IRC Server...", ll_font );
 	else
 	{
-		spFontDrawMiddle(screen->w/3+2, 2*ll_font->maxheight+screen->w/3-6, 0, "[R]Chat [l]/[r]scroll", ll_font );
+		spFontDrawMiddle(screen->w/3+2, 2*ll_font->maxheight+screen->w/3-6, 0, "{chat}Chat {power_down}/{power_up}scroll", ll_font );
 		spRectangle(screen->w/3, screen->h-1*ll_font->maxheight-h/2, 0,ll_surface->w,h,LL_FG);
 		if (ll_chat_block)
 			spFontDrawTextBlock(left,2, screen->h-1*ll_font->maxheight-h-1, 0,ll_chat_block,h+2,ll_chat_scroll,ll_font);
@@ -127,9 +127,9 @@ void ll_draw(void)
 	else
 	{
 		if (mom_game && mom_game->status == -1)
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]/[4]Replay   [3]Create   [B]Back", ll_font );
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}/{view}Replay   {weapon}Create   {menu}Back", ll_font );
 		else
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "[o]Join   [3]Create   [4]Spectate   [B]Back", ll_font );
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}Join   {weapon}Create   {view}Spectate   {menu}Back", ll_font );
 		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
 		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
 	}
@@ -202,16 +202,16 @@ int ll_calc(Uint32 steps)
 			ll_chat_scroll = 0;
 		else
 		{
-			if (spGetInput()->button[MY_BUTTON_R])
+			if (spMapGetByID(MAP_POWER_UP))
 			{
-				spGetInput()->button[MY_BUTTON_R] = 0;
+				spMapSetByID(MAP_POWER_UP,0);
 				ll_chat_scroll+=SP_ONE/(ll_chat_block->line_count-CHAT_LINES)+1;
 				if (ll_chat_scroll > SP_ONE)
 					ll_chat_scroll = SP_ONE;
 			}
-			if (spGetInput()->button[MY_BUTTON_L])
+			if (spMapGetByID(MAP_POWER_DN))
 			{
-				spGetInput()->button[MY_BUTTON_L] = 0;
+				spMapSetByID(MAP_POWER_DN,0);
 				ll_chat_scroll-=SP_ONE/(ll_chat_block->line_count-CHAT_LINES)+1;
 				if (ll_chat_scroll < 0)
 					ll_chat_scroll = 0;
@@ -249,21 +249,21 @@ int ll_calc(Uint32 steps)
 					ll_chat_scroll = SP_ONE;
 			}
 	}
-	if (spGetInput()->button[MY_BUTTON_SELECT])
+	if (spMapGetByID(MAP_MENU))
 	{
-		spGetInput()->button[MY_BUTTON_SELECT] = 0;
+		spMapSetByID(MAP_MENU,0);
 		return 1;
 	}
-	if (get_channel() && spGetInput()->button[MY_BUTTON_START])
+	if (get_channel() && spMapGetByID(MAP_CHAT))
 	{
-		spGetInput()->button[MY_BUTTON_START] = 0;
+		spMapSetByID(MAP_CHAT,0);
 		char m[256] = "";
 		if (text_box(ll_font,ll_resize,"Enter Message:",m,256,0,NULL,1) == 1)
 			send_chat(NULL,m);
 	}
-	if (spGetInput()->button[MY_PRACTICE_3])
+	if (spMapGetByID(MAP_WEAPON))
 	{
-		spGetInput()->button[MY_PRACTICE_3] = 0;
+		spMapSetByID(MAP_WEAPON,0);
 		int res = 1;
 		while (res == 1)
 		{
@@ -289,9 +289,9 @@ int ll_calc(Uint32 steps)
 		}
 		ll_counter = 10000;
 	}		
-	if (spGetInput()->button[MY_PRACTICE_OK])
+	if (spMapGetByID(MAP_JUMP))
 	{
-		spGetInput()->button[MY_PRACTICE_OK] = 0;
+		spMapSetByID(MAP_JUMP,0);
 		if (ll_game_count <= 0)
 			message_box(ll_font,ll_resize,"No game to join!");
 		else
@@ -320,9 +320,9 @@ int ll_calc(Uint32 steps)
 			}
 		}
 	}
-	if (spGetInput()->button[MY_PRACTICE_4])
+	if (spMapGetByID(MAP_VIEW))
 	{
-		spGetInput()->button[MY_PRACTICE_4] = 0;
+		spMapSetByID(MAP_VIEW,0);
 		if (ll_game_count <= 0)
 			message_box(ll_font,ll_resize,"No game to spectate!");
 		else

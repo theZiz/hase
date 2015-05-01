@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="3"/>
+<version major="1" minor="5" release="4" build="4"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -17,8 +17,12 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.4:
+- Compression of outgoing turn data (again up to 98% data bandwidth saving)
+- Button mapping is adjustable
+
 1.5.4.3:
-- Asking the server to give gzip compressed data. Saved up to 98% of data bandwith.
+- Asking the server to give gzip compressed data. Saved up to 98% of data bandwidth.
 - Sound warning at end of turn
 - Mine make noises now
 - Chat is fading out ingame
@@ -210,7 +214,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="3" type="release"/>
+<version major="1" minor="5" release="4" build="4" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

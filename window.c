@@ -147,20 +147,20 @@ void window_draw(void)
 	if (window->show_selection)
 	{
 		y+=(spGetSizeFactor()*8 >> SP_ACCURACY)+window->font->maxheight*3/2;
-		int to_left = -spFontWidth("[r]",window->font);
+		int to_left = -spFontWidth("{power_up}",window->font);
 		if (window->sprite_count && window->sprite_count[window_active])
 		{
 			if (window->sprite_count[window_active] == 1)
-				sprintf(buffer,"[r] (already used one time)");
+				sprintf(buffer,"{power_up} (already used one time)");
 			else
-				sprintf(buffer,"[r] (already used %i times)",window->sprite_count[window_active]);
+				sprintf(buffer,"{power_up} (already used %i times)",window->sprite_count[window_active]);
 		}
 		else
-			sprintf(buffer,"[r]");
+			sprintf(buffer,"{power_up}");
 		to_left += spFontWidth(buffer,window->font);
 		to_left /= 2;
 		spDrawSprite(screen->w/2-to_left, y, 0, spActiveSprite(window_sprite[window_active]));
-		spFontDrawRight( screen->w/2-to_left-(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "[l]", window->font );
+		spFontDrawRight( screen->w/2-to_left-(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "{power_down}", window->font );
 		spFontDraw     ( screen->w/2-to_left+(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
 		y+=(spGetSizeFactor()*8 >> SP_ACCURACY);
 		sprintf(buffer,"\"%s\"",window_sprite[window_active]->comment);
@@ -178,9 +178,9 @@ void window_draw(void)
 		{
 			case 0: case 2:
 				if (window->only_ok)
-					spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  [o]Okay", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  {jump}Okay", window->font );
 				else
-					spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  [o]Okay  [c]Cancel", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  {jump}Okay  {shoot}Cancel", window->font );
 				break;
 			case 1:
 				if (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
@@ -190,47 +190,47 @@ void window_draw(void)
 						if (window->only_ok)
 						{
 							if (window->firstElement->next)
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]Back", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Back", window->font );
 							else
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]Okay", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Okay", window->font );
 						}
 						else
 						{
 							if (window->firstElement->next)
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]/[c]Back", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}/{shoot}Back", window->font );
 							else
 							if (window->insult_button)
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]Okay [c]Cancel [3]Insult", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Okay {shoot}Cancel {weapon}Insult", window->font );
 							else
-								spFontDrawMiddle( screen->w/2,y, 0, "[o]Enter letter [4]<- [R]Okay [c]Cancel", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Okay {shoot}Cancel", window->font );
 						}
 					}
 					else
 					if (window->only_ok)
-						spFontDrawMiddle( screen->w/2,y, 0, "[R]Change  [o]Okay", window->font );
+						spFontDrawMiddle( screen->w/2,y, 0, "{chat}Change  {jump}Okay", window->font );
 					else
-						spFontDrawMiddle( screen->w/2,y, 0, "[R]Change  [o]Okay  [c]Cancel", window->font );
+						spFontDrawMiddle( screen->w/2,y, 0, "{chat}Change  {jump}Okay  {shoot}Cancel", window->font );
 				}
 				else
 				if (window->only_ok)
-					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  {jump}Okay", window->font );
 				else
 				if (window->insult_button)
-					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel  [3]Insult", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  {jump}Okay  {shoot}Cancel  {weapon}Insult", window->font );
 				else
-					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  [o]Okay  [c]Cancel", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  {jump}Okay  {shoot}Cancel", window->font );
 				break;
 			case -1:
 				if (window->main_menu)
-					spFontDrawMiddle( screen->w/2,y, 0, "[o]Select  [c]Exit", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Select  {shoot}Exit", window->font );
 				else
 				if (window->only_ok)
-					spFontDrawMiddle( screen->w/2,y, 0, "[o]Select  [c]Back", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Select  {shoot}Back", window->font );
 				else
-					spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay  [c]Cancel", window->font );
+					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay  {shoot}Cancel", window->font );
 				break;
 			case -2:
-				spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay", window->font );
+				spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay", window->font );
 				break;
 		}
 	}
@@ -238,9 +238,9 @@ void window_draw(void)
 	if (window->do_flip)
 	{
 		if (window->only_ok)
-			spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay", window->font );
+			spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay", window->font );
 		else
-			spFontDrawMiddle( screen->w/2,y, 0, "[o]Okay  [c]Cancel", window->font );
+			spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay  {shoot}Cancel", window->font );
 	}
 	if (window->do_flip)
 		spFlip();
@@ -306,7 +306,7 @@ void fill_with_insult(char* buffer)
 		case 53: sprintf(buffer,"Gnome lover!"); break;
 		case 54: sprintf(buffer,"KDE lover!"); break;
 		case 55: sprintf(buffer,"Unity lover!"); break;
-		case 56: sprintf(buffer,"A chicken could hit me, if it would press [c] enough!"); break;
+		case 56: sprintf(buffer,"A chicken could hit me, if it would press {shoot} enough!"); break;
 		case 57: sprintf(buffer,"Where is your god now?"); break;
 		case 58: sprintf(buffer,"No, go away!"); break;
 		case 59: sprintf(buffer,"Jet fuel doesn't melt steel beams!"); break;
@@ -316,9 +316,9 @@ void fill_with_insult(char* buffer)
 int window_calc(Uint32 steps)
 {
 	pWindow window = recent_window;
-	if (window->insult_button && spGetInput()->button[MY_PRACTICE_3] && spIsKeyboardPolled())
+	if (window->insult_button && spMapGetByID(MAP_WEAPON) && spIsKeyboardPolled())
 	{
-		spGetInput()->button[MY_PRACTICE_3] = 0;
+		spMapSetByID(MAP_WEAPON,0);
 		char buffer[128];
 		fill_with_insult(buffer);
 		snprintf(&(spGetInput()->keyboard.buffer[spGetInput()->keyboard.pos]),spGetInput()->keyboard.len-spGetInput()->keyboard.pos,"%s",buffer);
@@ -331,14 +331,14 @@ int window_calc(Uint32 steps)
 	if (window->show_selection)
 	{
 		spUpdateSprite(spActiveSprite(window_sprite[window_active]),steps);
-		if (spGetInput()->button[MY_BUTTON_L])
+		if (spMapGetByID(MAP_POWER_DN))
 		{
-			spGetInput()->button[MY_BUTTON_L] = 0;
+			spMapSetByID(MAP_POWER_DN,0);
 			window_active = (window_active + SPRITE_COUNT - 1) % SPRITE_COUNT;
 		}
-		if (spGetInput()->button[MY_BUTTON_R])
+		if (spMapGetByID(MAP_POWER_UP))
 		{
-			spGetInput()->button[MY_BUTTON_R] = 0;
+			spMapSetByID(MAP_POWER_UP,0);
 			window_active = (window_active + 1) % SPRITE_COUNT;
 		}
 	}
@@ -355,16 +355,16 @@ int window_calc(Uint32 steps)
 	}
 	if (selElem	== NULL)
 	{
-		if (spGetInput()->button[MY_PRACTICE_OK] || spGetInput()->button[MY_BUTTON_START] || spGetInput()->button[MY_BUTTON_SELECT])
+		if (spMapGetByID(MAP_JUMP) || spMapGetByID(MAP_CHAT) || spMapGetByID(MAP_MENU))
 		{
-			spGetInput()->button[MY_PRACTICE_OK] = 0;
-			spGetInput()->button[MY_BUTTON_SELECT] = 0;
-			spGetInput()->button[MY_BUTTON_START] = 0;
+			spMapSetByID(MAP_JUMP,0);
+			spMapSetByID(MAP_CHAT,0);
+			spMapSetByID(MAP_MENU,0);
 			return 1;
 		}
-		if (window->only_ok == 0 && spGetInput()->button[MY_PRACTICE_CANCEL])
+		if (window->only_ok == 0 && spMapGetByID(MAP_SHOOT))
 		{
-			spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
+			spMapSetByID(MAP_SHOOT,0);
 			return 2;
 		}
 		return 0;
@@ -403,12 +403,12 @@ int window_calc(Uint32 steps)
 				selElem = window->firstElement;
 		}
 	}
-	if ((spGetInput()->button[MY_PRACTICE_OK] && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER || spIsKeyboardPolled() == 0 ))||
-		(spGetInput()->button[MY_BUTTON_SELECT] && window->only_ok && selElem->type != -1))
+	if ((spMapGetByID(MAP_JUMP) && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER || spIsKeyboardPolled() == 0 ))||
+		(spMapGetByID(MAP_MENU) && window->only_ok && selElem->type != -1))
 	{
-		spGetInput()->button[MY_PRACTICE_OK] = 0;
+		spMapSetByID(MAP_JUMP,0);
 		if (window->only_ok && selElem->type != -1)
-			spGetInput()->button[MY_BUTTON_SELECT] = 0;
+			spMapSetByID(MAP_MENU,0);
 		if (selElem->type == 1)
 		{
 			if (spIsKeyboardPolled())
@@ -426,12 +426,12 @@ int window_calc(Uint32 steps)
 		else
 			return 1;
 	}
-	if ((spGetInput()->button[MY_BUTTON_START] && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER || spIsKeyboardPolled())) ||
-		(spGetInput()->button[MY_BUTTON_SELECT] && window->only_ok && selElem->type != -1))
+	if ((spMapGetByID(MAP_CHAT) && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER || spIsKeyboardPolled())) ||
+		(spMapGetByID(MAP_MENU) && window->only_ok && selElem->type != -1))
 	{
-		spGetInput()->button[MY_BUTTON_START] = 0;
+		spMapSetByID(MAP_CHAT,0);
 		if (window->only_ok && selElem->type != -1)
-			spGetInput()->button[MY_BUTTON_SELECT] = 0;
+			spMapSetByID(MAP_MENU,0);
 		if (selElem->type == 1)
 		{
 			if (spIsKeyboardPolled())
@@ -447,11 +447,11 @@ int window_calc(Uint32 steps)
 		else
 			return 1;
 	}
-	if ((spGetInput()->button[MY_PRACTICE_CANCEL] || spGetInput()->button[MY_BUTTON_SELECT]) &&
+	if ((spMapGetByID(MAP_SHOOT) || spMapGetByID(MAP_MENU)) &&
 		(window->only_ok == 0 || selElem->type == -1))
 	{
-		spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
-		spGetInput()->button[MY_BUTTON_SELECT] = 0;
+		spMapSetByID(MAP_SHOOT,0);
+		spMapSetByID(MAP_MENU,0);
 		switch (selElem->type)
 		{
 			case 1:
@@ -477,12 +477,12 @@ int window_calc(Uint32 steps)
 		  window->feedback)
 		window->feedback(window,selElem,WN_ACT_START_POLL);
 
-	if (spGetInput()->button[MY_BUTTON_START] &&
+	if (spMapGetByID(MAP_CHAT) &&
 		selElem->type == 1 &&
 		!spIsKeyboardPolled() &&
 		spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
 	{
-		spGetInput()->button[MY_BUTTON_START] = 0;
+		spMapSetByID(MAP_CHAT,0);
 		if (window->feedback)
 			window->feedback(window,selElem,WN_ACT_START_POLL);
 	}

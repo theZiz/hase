@@ -33,7 +33,9 @@ void deleteMessage(pMessage *message)
 	}
 }
 
-//#define INPUT_COMPRESSION
+#ifndef WIN32
+#define INPUT_COMPRESSION
+#endif
 
 pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,char* dest,char* server)
 {
@@ -55,13 +57,6 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			strlen(mom->content)+4; // content + 2 returns
 		length += mom->l;
 		mom = mom->next;
-	}
-	if (binary && direction == 1)
-	{
-		length +=
-			2+boundary_len+2 + //boundary start + return
-			39+strlen(binary_name)+2 + //Content-Disposition: form-data; name="<name>" + return
-			count + 4; // content + 2 returns
 	}
 	length += boundary_len+2+4; //--boundary-- + 2 returns;
 	spNetTCPConnection server_connection = spNetOpenClientTCP(ip);
@@ -90,6 +85,47 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	}
 	if (binary && direction == 1)
 	{
+		#ifdef INPUT_COMPRESSION
+			//compress data
+			z_stream strm;
+			strm.zalloc = Z_NULL;
+			strm.zfree = Z_NULL;
+			strm.opaque = Z_NULL;
+			strm.avail_in = count;
+			strm.next_in = binary;
+			if (deflateInit2 (&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 31,8,Z_DEFAULT_STRATEGY) != Z_OK)
+			{
+				printf("Error: ZStream Init error\n");
+				return NULL;
+			}
+			strm.avail_out = buffer_size;
+			strm.next_out = out_buffer;
+			switch (deflate(&strm, Z_FINISH))
+			{
+				case Z_STREAM_ERROR:
+					printf("Error: ZStream error\n");
+					deflateEnd(&strm);
+					return NULL;
+				case Z_DATA_ERROR:
+					printf("Error: ZStream data error\n");
+					return NULL;
+				case Z_MEM_ERROR:
+					deflateEnd(&strm);
+					printf("Error: ZStream mem error\n");
+					return NULL;
+				case Z_NEED_DICT:
+					printf("Error: ZStream need dict error\n");
+					return NULL;
+			}
+			//printf("Compression saved %i%% (%i vs. %i)\n",100-(int)strm.total_out*100/count,(int)strm.total_out,count);
+			count = (int)strm.total_out;
+			deflateEnd(&strm);
+			binary = out_buffer;
+		#endif
+		length +=
+			2+boundary_len+2 + //boundary start + return
+			39+strlen(binary_name)+2 + //Content-Disposition: form-data; name="<name>" + return
+			count + 4; // content + 2 returns
 		int l =
 			2+boundary_len+2 + //boundary start + return
 			39+strlen(binary_name)+2 + //Content-Disposition: form-data; name="<name>" + return
@@ -106,42 +142,6 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	sprintf(temp,
 		"\r\n--%s--",boundary);
 	memcpy(&(buffer[pos]),temp,2+4+boundary_len+1);
-	
-	#ifdef INPUT_COMPRESSION
-		//compress data
-		z_stream strm;
-		strm.zalloc = Z_NULL;
-		strm.zfree = Z_NULL;
-		strm.opaque = Z_NULL;
-		strm.avail_in = length;
-		strm.next_in = in_buffer;
-		if (deflateInit2 (&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 31,8,Z_DEFAULT_STRATEGY) != Z_OK)
-		{
-			printf("Error: ZStream Init error\n");
-			return NULL;
-		}
-		strm.avail_out = buffer_size;
-		strm.next_out = out_buffer;
-		switch (deflate(&strm, Z_FINISH))
-		{
-			case Z_STREAM_ERROR:
-				printf("Error: ZStream error\n");
-				deflateEnd(&strm);
-				return NULL;
-			case Z_DATA_ERROR:
-				printf("Error: ZStream data error\n");
-				return NULL;
-			case Z_MEM_ERROR:
-				deflateEnd(&strm);
-				printf("Error: ZStream mem error\n");
-				return NULL;
-			case Z_NEED_DICT:
-				printf("Error: ZStream need dict error\n");
-				return NULL;
-		}
-		//printf("Compression saved %i%% (%i vs. %i)\n",(int)strm.total_out*100/length,(int)strm.total_out,length);
-		deflateEnd(&strm);
-	#endif
 		
 	sprintf(host,"%s",server);
 	char* server_directory = strchr(host,'/');
@@ -158,12 +158,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			"Content-Length: %i\r\n"
 			"Accept-Encoding: gzip\r\n"
 			"Host: %s\r\n"
-		#ifdef INPUT_COMPRESSION
-			"Content-Encoding: gzip\r\n"
-			"\r\n",server_directory,dest,host,boundary,(int)strm.total_out,host);
-		#else
 			"\r\n",server_directory,dest,host,boundary,length,host);
-		#endif
 	}
 	else
 	{
@@ -176,21 +171,12 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			"Content-Length: %i\r\n"
 			"Accept-Encoding: gzip\r\n"
 			"Host: %s\r\n"
-		#ifdef INPUT_COMPRESSION
-			"Content-Encoding: gzip\r\n"
-			"\r\n",dest,host,boundary,(int)strm.total_out,host);
-		#else
 			"\r\n",dest,host,boundary,length,host);
-		#endif
 	}
 	//printf("Header:\n%s",header);
 	spNetSendHTTP(server_connection,header);
 	//printf("\nMessage\n%sEND\n",buffer);
-	#ifdef INPUT_COMPRESSION
-		spNetSendTCP(server_connection,out_buffer,(int)strm.total_out);
-	#else
-		spNetSendTCP(server_connection,buffer,length);
-	#endif
+	spNetSendTCP(server_connection,buffer,length);
 	
 	int res = spNetReceiveHTTP(server_connection,buffer,buffer_size-1);
 	buffer[res] = 0;
@@ -884,6 +870,9 @@ int push_game(pPlayer player,int second_of_player,void* data)
 	numToMessage(&message,"player_id",player->id);
 	numToMessage(&message,"player_pw",player->pw);
 	numToMessage(&message,"second_of_player",second_of_player);
+	#ifdef INPUT_COMPRESSION
+		numToMessage(&message,"gzip",1);
+	#endif
 	pMessage result = sendMessage(message,"data",data,1536,"push_game.php",hase_url);
 	deleteMessage(&message);
 	if (result)

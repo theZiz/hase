@@ -135,7 +135,7 @@ void draw_weapons()
 			spRotozoomSurface((screen->w-(WEAPON_X-x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-h+y*factor*2)/2+factor/2+font->maxheight,0,weapon_surface[weapon_pos[y][x]],SP_ONE/2+spGetSizeFactor()/4,SP_ONE/2+spGetSizeFactor()/4,0);
 			spDeactivatePattern();
 		}
-	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"[o]/[3]Choose",font);
+	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"{jump}/{weapon}Choose",font);
 	if (player[active_player]->activeHare)
 	{
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];

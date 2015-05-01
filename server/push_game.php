@@ -7,7 +7,11 @@ $game_id = (int)$_POST['game_id'];
 $player_id = (int)$_POST['player_id'];
 $player_pw = (int)$_POST['player_pw'];
 $second_of_player = (int)$_POST['second_of_player'];
-$data = mysql_real_escape_string($_POST['data']);
+if (array_key_exists('gzip',$_POST))
+	$data = mysql_real_escape_string(gzdecode($_POST['data']));
+else
+	$data = mysql_real_escape_string($_POST['data']);
+
 
 $query = "SELECT * FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
 $result = mysql_query($query) or die;

@@ -59,11 +59,11 @@ void lg_draw(void)
 	if (lg_block)
 		spFontDrawTextBlock(middle,screen->w-w-4, 6*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
-	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[3]Add player  [4]Remove player", lg_font );
+	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "{weapon}Add player  {view}Remove player", lg_font );
 	if (lg_player)
 	{
-		spFontDraw(screen->w-2-w  , h+6*lg_font->maxheight, 0, "[3]Add player", lg_font );
-		spFontDraw(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "[4]Remove player", lg_font );
+		spFontDraw(screen->w-2-w  , h+6*lg_font->maxheight, 0, "{weapon}Add player", lg_font );
+		spFontDraw(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "{view}Remove player", lg_font );
 	}
 	else
 		spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "Spectate mode!", lg_font );
@@ -77,15 +77,15 @@ void lg_draw(void)
 	{
 		if (spGetSizeFactor() <= SP_ONE)
 		{
-			spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[l]Add AI  [r]Remove all AIs", lg_font );
-			spFontDrawMiddle(screen->w-2-w/2, h+8*lg_font->maxheight, 0, "[o]Start game  [c]New level", lg_font );
+			spFontDrawMiddle(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "{power_down}Add AI  {power_up}Remove all AIs", lg_font );
+			spFontDrawMiddle(screen->w-2-w/2, h+8*lg_font->maxheight, 0, "{jump}Start game  {shoot}New level", lg_font );
 		}
 		else
 		{
-			spFontDraw(screen->w-2-w  , h+7*lg_font->maxheight, 0, "[l]Add AI", lg_font );
-			spFontDraw(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "[r]Remove all AIs", lg_font );
-			spFontDraw(screen->w-2-w  , h+8*lg_font->maxheight, 0, "[o]Start game", lg_font );
-			spFontDraw(screen->w-2-w/2, h+8*lg_font->maxheight, 0, "[c]New level", lg_font );
+			spFontDraw(screen->w-2-w  , h+7*lg_font->maxheight, 0, "{power_down}Add AI", lg_font );
+			spFontDraw(screen->w-2-w/2, h+7*lg_font->maxheight, 0, "{power_up}Remove all AIs", lg_font );
+			spFontDraw(screen->w-2-w  , h+8*lg_font->maxheight, 0, "{jump}Start game", lg_font );
+			spFontDraw(screen->w-2-w/2, h+8*lg_font->maxheight, 0, "{shoot}New level", lg_font );
 		}
 	}
 	//Chat
@@ -109,15 +109,15 @@ void lg_draw(void)
 	else
 	{
 		if (lg_game->local || (lg_game->admin_pw && get_channel() == NULL))
-			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave and close game", lg_font );
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{menu}Leave and close game", lg_font );
 		else
 		if (lg_game->admin_pw == 0 && get_channel())
-			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave game", lg_font );
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{chat}Chat {menu}Leave game", lg_font );
 		else
 		if (lg_game->admin_pw == 0 && get_channel() == NULL)
-			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[B]Leave game", lg_font );
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{menu}Leave game", lg_font );
 		else
-			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "[R]Chat [B]Leave and close game", lg_font );
+			spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{chat}Chat {menu}Leave and close game", lg_font );
 		if (!lg_game->local)
 		{
 			sprintf(buffer,"Next update: %is",(LG_WAIT-lg_counter)/1000);
@@ -275,16 +275,16 @@ int lg_calc(Uint32 steps)
 				lg_last_read_message = next;
 			}
 	}
-	if (!lg_game->local && get_channel() && spGetInput()->button[MY_BUTTON_START])
+	if (!lg_game->local && get_channel() && spMapGetByID(MAP_CHAT))
 	{
-		spGetInput()->button[MY_BUTTON_START] = 0;
+		spMapSetByID(MAP_CHAT,0);
 		char m[256] = "";
 		if (text_box(lg_font,lg_resize,"Enter Message:",m,256,0,NULL,1) == 1)
 			send_chat(lg_game,m);
 	}
-	if (spGetInput()->button[MY_BUTTON_SELECT])
+	if (spMapGetByID(MAP_MENU))
 	{
-		spGetInput()->button[MY_BUTTON_SELECT] = 0;
+		spMapSetByID(MAP_MENU,0);
 		return 1;
 	}
 	if (lg_reload_now == 2)
@@ -308,9 +308,9 @@ int lg_calc(Uint32 steps)
 	//Spectators are leaving here ;)
 	if (lg_player == NULL)
 		return 0;
-	if (spGetInput()->button[MY_PRACTICE_3])
+	if (spMapGetByID(MAP_WEAPON))
 	{
-		spGetInput()->button[MY_PRACTICE_3] = 0;
+		spMapSetByID(MAP_WEAPON,0);
 		if (lg_game->player_count >= lg_game->max_player)
 			message_box(lg_font,lg_resize,"Game full!");
 		else
@@ -330,9 +330,9 @@ int lg_calc(Uint32 steps)
 			}
 		}
 	}
-	if (spGetInput()->button[MY_PRACTICE_4])
+	if (spMapGetByID(MAP_VIEW))
 	{
-		spGetInput()->button[MY_PRACTICE_4] = 0;
+		spMapSetByID(MAP_VIEW,0);
 		char leave_name[33];
 		sprintf(leave_name,"%s",lg_last_player->name);
 		if (text_box(lg_font,lg_resize,"Enter player name to leave:",leave_name,32,0,NULL,0) == 1)
@@ -370,9 +370,9 @@ int lg_calc(Uint32 steps)
 			}
 		}
 	}
-	if (spGetInput()->button[MY_PRACTICE_OK] && lg_game->admin_pw)
+	if (spMapGetByID(MAP_JUMP) && lg_game->admin_pw)
 	{
-		spGetInput()->button[MY_PRACTICE_OK] = 0;
+		spMapSetByID(MAP_JUMP,0);
 		if (lg_game->player_count < 2)
 			message_box(lg_font,lg_resize,"At least two players are needed!");
 		else
@@ -396,9 +396,9 @@ int lg_calc(Uint32 steps)
 			return 3;
 		}
 	}
-	if (spGetInput()->button[MY_PRACTICE_CANCEL] && lg_game->admin_pw)
+	if (spMapGetByID(MAP_SHOOT) && lg_game->admin_pw)
 	{
-		spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
+		spMapSetByID(MAP_SHOOT,0);
 		create_level_string(lg_game->level_string,1536,1536,3,3,3);
 		spDeleteSurface(lg_level);
 		int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
@@ -406,9 +406,9 @@ int lg_calc(Uint32 steps)
 		sprintf(lg_level_string,"%s",lg_game->level_string);
 		set_level(lg_game,lg_level_string);
 	}
-	if (spGetInput()->button[MY_BUTTON_R] && lg_game->admin_pw)
+	if (spMapGetByID(MAP_POWER_UP) && lg_game->admin_pw)
 	{
-		spGetInput()->button[MY_BUTTON_R] = 0;
+		spMapSetByID(MAP_POWER_UP,0);
 		while (lg_ai_list)
 		{
 			pPlayer next = lg_ai_list->next;
@@ -417,9 +417,9 @@ int lg_calc(Uint32 steps)
 		}
 		lg_counter = LG_WAIT;
 	}
-	if (spGetInput()->button[MY_BUTTON_L] && lg_game->admin_pw)
+	if (spMapGetByID(MAP_POWER_DN) && lg_game->admin_pw)
 	{
-		spGetInput()->button[MY_BUTTON_L] = 0;
+		spMapSetByID(MAP_POWER_DN,0);
 		char buffer[32];
 		pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1,rand()%SPRITE_COUNT+1);
 		if (ai)

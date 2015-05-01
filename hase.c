@@ -63,7 +63,7 @@ int map_w,map_h,map_size;
 #define INPUT_BUTTON_START 10
 #define INPUT_BUTTON_SELECT 11
 int input_states[12];
-char button_states[SP_INPUT_BUTTON_COUNT];
+char button_states[8];
 unsigned char send_data[1536];
 spParticleBunchPointer particles = NULL;
 
@@ -330,7 +330,7 @@ void draw(void)
 		else
 		if (before_showing)
 			showing = before_showing->next;
-		int help_length = spFontWidth("[4]+[o]Help",font);
+		int help_length = spFontWidth("{view}+{jump}Help",font);
 		time_t now = time(NULL) - 60;
 		while (showing)
 		{
@@ -625,7 +625,7 @@ void set_input()
 	else
 	if (player[active_player]->local)
 	{
-		if (spGetInput()->button[MY_PRACTICE_4] == 0)
+		if (spMapGetByID(MAP_VIEW) == 0)
 		{
 			if (spGetInput()->axis[0] < 0)
 			{
@@ -665,28 +665,30 @@ void set_input()
 				input_states[INPUT_AXIS_1_LEFT] = 0;
 				input_states[INPUT_AXIS_1_RIGHT] = 0;
 			}
-			if (spGetInput()->button[MY_BUTTON_L] != button_states[MY_BUTTON_L])
-				input_states[INPUT_BUTTON_L] = spGetInput()->button[MY_BUTTON_L];
-			if (spGetInput()->button[MY_BUTTON_R] != button_states[MY_BUTTON_R])
-				input_states[INPUT_BUTTON_R] = spGetInput()->button[MY_BUTTON_R];
-			if (spGetInput()->button[MY_PRACTICE_OK] != button_states[MY_PRACTICE_OK])
-				input_states[INPUT_BUTTON_OK] = spGetInput()->button[MY_PRACTICE_OK];
-			if (spGetInput()->button[MY_PRACTICE_3] != button_states[MY_PRACTICE_3])
-				input_states[INPUT_BUTTON_3] = spGetInput()->button[MY_PRACTICE_3];
-			if (spGetInput()->button[MY_PRACTICE_CANCEL] != button_states[MY_PRACTICE_CANCEL])
-				input_states[INPUT_BUTTON_CANCEL] = spGetInput()->button[MY_PRACTICE_CANCEL];
-			if (spGetInput()->button[MY_PRACTICE_4] != button_states[MY_PRACTICE_4])
-				input_states[INPUT_BUTTON_4] = spGetInput()->button[MY_PRACTICE_4];
+			if (spMapGetByID(MAP_POWER_DN) != button_states[MAP_POWER_DN])
+				input_states[INPUT_BUTTON_L] = spMapGetByID(MAP_POWER_DN);
+			if (spMapGetByID(MAP_POWER_UP) != button_states[MAP_POWER_UP])
+				input_states[INPUT_BUTTON_R] = spMapGetByID(MAP_POWER_UP);
+			if (spMapGetByID(MAP_JUMP) != button_states[MAP_JUMP])
+				input_states[INPUT_BUTTON_OK] = spMapGetByID(MAP_JUMP);
+			if (spMapGetByID(MAP_WEAPON) != button_states[MAP_WEAPON])
+				input_states[INPUT_BUTTON_3] = spMapGetByID(MAP_WEAPON);
+			if (spMapGetByID(MAP_SHOOT) != button_states[MAP_SHOOT])
+				input_states[INPUT_BUTTON_CANCEL] = spMapGetByID(MAP_SHOOT);
+			if (spMapGetByID(MAP_VIEW) != button_states[MAP_VIEW])
+				input_states[INPUT_BUTTON_4] = spMapGetByID(MAP_VIEW);
 
-			if (spGetInput()->button[MY_BUTTON_START] != button_states[MY_BUTTON_START])
-				input_states[INPUT_BUTTON_START] = spGetInput()->button[MY_BUTTON_START];
-			if (spGetInput()->button[MY_BUTTON_SELECT] != button_states[MY_BUTTON_SELECT])
-				input_states[INPUT_BUTTON_SELECT] = spGetInput()->button[MY_BUTTON_SELECT];
+			if (spMapGetByID(MAP_CHAT) != button_states[MAP_CHAT])
+				input_states[INPUT_BUTTON_START] = spMapGetByID(MAP_CHAT);
+			if (spMapGetByID(MAP_MENU) != button_states[MAP_MENU])
+				input_states[INPUT_BUTTON_SELECT] = spMapGetByID(MAP_MENU);
 		}
 		else
 			memset(input_states,0,sizeof(int)*12);
 		//I need to save the button states to compare, to be able to set input_states[…] to 0!
-		memcpy(button_states,spGetInput()->button,sizeof(char)*SP_INPUT_BUTTON_COUNT);
+		int i;
+		for (i = 0; i < 8; i++)
+			button_states[i] = spMapGetByID(i);
 		if (!hase_game->local)
 		{
 			add_ms_to_data(player[active_player]->time % 1000);
@@ -752,9 +754,9 @@ int calc(Uint32 steps)
 			showing = showing->next;
 		}
 	}
-	if (spGetInput()->button[MY_BUTTON_SELECT])
+	if (spMapGetByID(MAP_MENU))
 	{
-		spGetInput()->button[MY_BUTTON_SELECT] = 0;
+		spMapSetByID(MAP_MENU,0);
 		spSoundPause(1,-1);
 		if (options_window(font,hase_resize,1))
 		{
@@ -786,32 +788,32 @@ int calc(Uint32 steps)
 		spResetAxisState();
 	}
 	
-	if (spGetInput()->button[MY_BUTTON_START] && get_channel())
+	if (spMapGetByID(MAP_CHAT) && get_channel())
 	{
-		spGetInput()->button[MY_BUTTON_START] = 0;
+		spMapSetByID(MAP_CHAT,0);
 		chatWindow = create_text_box(font,hase_resize,"Enter Message:",chatMessage,256,0,NULL,1);
 		set_recent_window(chatWindow);
 	}
-	if (spGetInput()->button[MY_PRACTICE_4])
+	if (spMapGetByID(MAP_VIEW))
 	{
-		if (spGetInput()->button[MY_PRACTICE_OK])
+		if (spMapGetByID(MAP_JUMP))
 		{
-			spGetInput()->button[MY_PRACTICE_OK] = 0;
+			spMapSetByID(MAP_JUMP,0);
 			help = 1-help;
 		}
-		if (spGetInput()->button[MY_PRACTICE_3])
+		if (spMapGetByID(MAP_WEAPON))
 		{
-			spGetInput()->button[MY_PRACTICE_3] = 0;
+			spMapSetByID(MAP_WEAPON,0);
 			show_names = 1-show_names;
 		}
-		if (spGetInput()->button[MY_PRACTICE_CANCEL])
+		if (spMapGetByID(MAP_SHOOT))
 		{
-			spGetInput()->button[MY_PRACTICE_CANCEL] = 0;
+			spMapSetByID(MAP_SHOOT,0);
 			show_map = 1-show_map;
 		}
-		if (spGetInput()->button[MY_BUTTON_L])
+		if (spMapGetByID(MAP_POWER_DN))
 			zoom_d = -1;
-		if (spGetInput()->button[MY_BUTTON_R])
+		if (spMapGetByID(MAP_POWER_UP))
 			zoom_d =  1;
 		if (spGetInput()->axis[0] < 0)
 		{
@@ -856,7 +858,7 @@ int calc(Uint32 steps)
 			zoom = spMul(zoomAdjust,zoomAdjust);
 			if ((zoomAdjust & 16383) == 0 && gop_zoom())
 				zoom_d = 0;
-			if (gop_zoom() == 0 && spGetInput()->button[MY_BUTTON_L] == 0)
+			if (gop_zoom() == 0 && spMapGetByID(MAP_POWER_DN) == 0)
 				zoom_d = 0;
 		}
 		else
@@ -868,7 +870,7 @@ int calc(Uint32 steps)
 			zoom = spMul(zoomAdjust,zoomAdjust);
 			if ((zoomAdjust & 16383) == 0 && gop_zoom())
 				zoom_d = 0;
-			if (gop_zoom() == 0 && spGetInput()->button[MY_BUTTON_R] == 0)
+			if (gop_zoom() == 0 && spMapGetByID(MAP_POWER_UP) == 0)
 				zoom_d = 0;
 		}
 		//Camera
@@ -1319,7 +1321,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	countdown = hase_game->seconds_per_turn*1000;
 	alive_count = player_count;
 	memset(input_states,0,sizeof(int)*12);
-	memset(button_states,0,sizeof(char)*SP_INPUT_BUTTON_COUNT);
+	memset(button_states,0,sizeof(char)*8);
 	memset(send_data,0,1536*sizeof(char));
 	game_pause = 0;
 	wp_choose = 0;
