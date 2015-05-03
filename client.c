@@ -293,7 +293,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 				return NULL;
 				
 		}
-		printf("Compression saved %i%% (%i vs. %i)\n",100-content_length*100/(int)strm.total_out,content_length,(int)strm.total_out);
+		//printf("Compression saved %i%% (%i vs. %i)\n",100-content_length*100/(int)strm.total_out,content_length,(int)strm.total_out);
 		inflateEnd(&strm);
 		out_buffer[pos+(int)strm.total_out] = 0;
 		buffer = out_buffer;
