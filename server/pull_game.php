@@ -1,7 +1,7 @@
 <?php 
 //header("Content-type: fun");
 include 'config.php';
-$connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
+$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
 mysql_select_db($mysql_dbname) or die;
 
 $game_id = (int)$_POST['game_id'];

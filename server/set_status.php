@@ -1,7 +1,7 @@
 <?php 
 include 'config.php';
 
-$connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
+$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
 mysql_select_db($mysql_dbname) or die;
 
 $game_id = (int)$_POST['game_id'];
@@ -22,7 +22,7 @@ if ($row['admin_pw'] == $admin_pw && $row['status'] != $status)
 		$result = mysql_query("SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'");
 		$row = mysql_fetch_assoc($result);
 		$player_count = $row['total'];
-		$positions = new SplFixedArray($player_count);
+		$positions = array_fill(0,$player_count,0);
 		for ($i=0;$i<$player_count;$i++)
 			$positions[$i] = $i;
 		//Shuffle
@@ -50,5 +50,6 @@ if ($row['admin_pw'] == $admin_pw && $row['status'] != $status)
 		}
 	}
 }
-mysql_close($connection); 
+mysql_close($connection);
+echo "Everything: ok";
 ?>

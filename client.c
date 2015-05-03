@@ -6,6 +6,7 @@
 spNetIP ip;
 
 char hase_url[512] = "";
+char hase_gzip = 0;
 
 void addToMessage(pMessage *message, char* name, char* content)
 {
@@ -86,6 +87,8 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	if (binary && direction == 1)
 	{
 		#ifdef INPUT_COMPRESSION
+		if (hase_gzip)
+		{
 			//compress data
 			z_stream strm;
 			strm.zalloc = Z_NULL;
@@ -121,6 +124,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			count = (int)strm.total_out;
 			deflateEnd(&strm);
 			binary = out_buffer;
+		}
 		#endif
 		length +=
 			2+boundary_len+2 + //boundary start + return
@@ -289,7 +293,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 				return NULL;
 				
 		}
-		//printf("Compression saved %i%% (%i vs. %i)\n",100-content_length*100/(int)strm.total_out,content_length,(int)strm.total_out);
+		printf("Compression saved %i%% (%i vs. %i)\n",100-content_length*100/(int)strm.total_out,content_length,(int)strm.total_out);
 		inflateEnd(&strm);
 		out_buffer[pos+(int)strm.total_out] = 0;
 		buffer = out_buffer;
@@ -337,12 +341,13 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 		found[0] = 0;
 		char* line = rest;
 		char* middle = strchr(line,':');
-		if (middle)
+		if (middle && line[0] != '<') //some free hosting website add statistic bullshit
 		{
 			middle[0] = 0;
 			middle++;
 			middle++;
 			addToMessage(&result,line,middle);
+			//printf("Add %s -> %s\n",line,middle);
 		}
 		if (exit_afterwards)
 			break;		
@@ -363,6 +368,9 @@ int server_info()
 	pMessage mom = result;
 	while (mom)
 	{
+		if (strcmp(mom->name,"gzip") == 0 && strcmp(mom->content,"yes") == 0)
+			hase_gzip = 1;
+		else
 		if (strcmp(mom->name,"irc_server") == 0)
 			sprintf(irc_server,"%s",mom->content);
 		else
@@ -871,6 +879,7 @@ int push_game(pPlayer player,int second_of_player,void* data)
 	numToMessage(&message,"player_pw",player->pw);
 	numToMessage(&message,"second_of_player",second_of_player);
 	#ifdef INPUT_COMPRESSION
+	if (hase_gzip)
 		numToMessage(&message,"gzip",1);
 	#endif
 	pMessage result = sendMessage(message,"data",data,1536,"push_game.php",hase_url);
@@ -1081,8 +1090,13 @@ void end_pull_thread(pPlayer player)
 
 int connect_to_server()
 {
-	ip = spNetResolve("ziz.gp2x.de",80);
-	printf("IP of ziz.gp2x.de: %i.%i.%i.%i\n",ip.address.ipv4_bytes[0],ip.address.ipv4_bytes[1],ip.address.ipv4_bytes[2],ip.address.ipv4_bytes[3]);
+	char server[512];
+	sprintf(server,"%s",gop_server());
+	char* slash;
+	if (slash = strchr(server,'/'))
+		slash[0] = 0;
+	ip = spNetResolve(server,80);
+	printf("IP of %s: %i.%i.%i.%i\n",server,ip.address.ipv4_bytes[0],ip.address.ipv4_bytes[1],ip.address.ipv4_bytes[2],ip.address.ipv4_bytes[3]);
 	if (ip.address.ipv4 == SP_INVALID_IP)
 		return 1;
 	return 0;

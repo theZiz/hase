@@ -1,7 +1,7 @@
 <?php 
 include 'config.php';
 
-$connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
+$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
 mysql_select_db($mysql_dbname) or die;
 
 $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."data_list` (".

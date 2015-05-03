@@ -1,11 +1,12 @@
 <?php 
 include 'config.php';
+include 'utils.php';
 
-$connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
+$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
 mysql_select_db($mysql_dbname) or die;
 
 $game_id = (int)$_POST['game_id'];
-$player_name = mysql_real_escape_string($_POST['player_name']);
+$player_name = escape_input($_POST['player_name']);
 $player_pw = rand();
 $computer = (int)$_POST['computer'];
 $nr = (int)$_POST['nr'];

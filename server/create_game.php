@@ -1,11 +1,12 @@
 <?php 
 include 'config.php';
+include 'utils.php';
 
-$connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
+$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
 mysql_select_db($mysql_dbname) or die;
 
-$game_name = mysql_real_escape_string($_POST['game_name']);
-$level_string = mysql_real_escape_string($_POST['level_string']);
+$game_name = escape_input($_POST['game_name']);
+$level_string = escape_input($_POST['level_string']);
 $max_player = (int)$_POST['max_player'];
 $seconds_per_turn = (int)$_POST['seconds_per_turn'];
 try {

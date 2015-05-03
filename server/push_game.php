@@ -1,6 +1,8 @@
 <?php 
 include 'config.php';
-$connection = mysql_connect ("localhost", $mysql_username, $mysql_password) or die;
+include 'utils.php';
+
+$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
 mysql_select_db($mysql_dbname) or die;
 
 $game_id = (int)$_POST['game_id'];
@@ -8,9 +10,9 @@ $player_id = (int)$_POST['player_id'];
 $player_pw = (int)$_POST['player_pw'];
 $second_of_player = (int)$_POST['second_of_player'];
 if (array_key_exists('gzip',$_POST))
-	$data = mysql_real_escape_string(gzdecode($_POST['data']));
+	$data = escape_input(gzdecode($_POST['data']));
 else
-	$data = mysql_real_escape_string($_POST['data']);
+	$data = escape_input($_POST['data']);
 
 
 $query = "SELECT * FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";

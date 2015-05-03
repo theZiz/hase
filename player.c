@@ -605,7 +605,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 	player = (pPlayer*)malloc(sizeof(pPlayer)*pc);
 	while (player_list)
 	{
-		printf("Setting player %i\n",player_list->position_in_game);
+		printf("Setting player %i (%i)\n",player_list->id,player_list->position_in_game);
 		player[player_list->position_in_game] = player_list;
 		player_list = player_list->next;
 	}
