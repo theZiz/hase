@@ -10,8 +10,9 @@ void start_about(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 	"Version: "VERSION"\n\n"
 	"Developer:\nZiz (ziz@mailbox.org)\nGame licensed under GPLv2+\n\n"
 	"Fonts:\nPixel Mania by HiBan (CC-BY-SA)\nDejaVu Sans (Public Domain)\n\n"
-	"Music:\nOuroboros by Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com");
-	window->height += font->maxheight*13;
+	"Music:\nOuroboros by Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com\n\n"
+	"Level textures:\n8 by Ziz (CC-BY-SA)\n 1 by Binky (CC-BY-SA)");
+	window->height += font->maxheight*17;
 	window->only_ok = 1;
 	modal_window(window,resize);
 	delete_window(window);	

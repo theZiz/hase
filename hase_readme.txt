@@ -8,6 +8,13 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.5:
+- Server optimizations for older php versions
+- Button mapping while ingame
+- Windows only: Removed asking for compressed data
+- a new level texture (thx @ Binky)
+- a new sprite (thx @ Binky)
+
 1.5.4.4:
 - Compression of outgoing turn data (again up to 98% data bandwidth saving)
 - Button mapping is adjustable

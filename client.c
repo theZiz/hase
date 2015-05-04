@@ -160,7 +160,9 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			"Connection: Close\r\n"
 			"Content-Type: multipart/form-data; boundary=%s\r\n"
 			"Content-Length: %i\r\n"
+			#ifndef WIN32
 			"Accept-Encoding: gzip\r\n"
+			#endif
 			"Host: %s\r\n"
 			"\r\n",server_directory,dest,host,boundary,length,host);
 	}
@@ -173,7 +175,9 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			"Connection: Close\r\n"
 			"Content-Type: multipart/form-data; boundary=%s\r\n"
 			"Content-Length: %i\r\n"
+			#ifndef WIN32
 			"Accept-Encoding: gzip\r\n"
+			#endif
 			"Host: %s\r\n"
 			"\r\n",dest,host,boundary,length,host);
 	}

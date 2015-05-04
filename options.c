@@ -285,6 +285,9 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 				sprintf(elem->text,"Flip direction controls: No");
 			break;
 		case 8:
+			sprintf(elem->text,"Button mapping");
+			break;
+		case 9:
 			sprintf(elem->text,"Quit game");
 			break;
 	}
@@ -302,12 +305,23 @@ int options_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),in
 	add_window_element(window,0,5);
 	add_window_element(window,0,6);
 	add_window_element(window,0,7);
+	add_window_element(window,-1,8);
 	if (quit)
-		add_window_element(window,-1,8);
-	int res = modal_window(window,resize);
+		add_window_element(window,-1,9);
+	int con = 1;
 	int ret = 0;
-	if (window->selection == 7 && res == 1)
-		ret = 1;
+	while (con)
+	{
+		con = 0;
+		int res = modal_window(window,resize);
+		if (window->selection == 7 && res == 1)
+		{
+			con = 1;
+			mapping_window(font,resize);
+		}
+		if (window->selection == 8 && res == 1)
+			ret = 1;	
+	}
 	delete_window(window);
 	save_options();
 	return ret;

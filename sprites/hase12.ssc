@@ -3,9 +3,9 @@ image = ./data/hase12.png
 framesize = 34, 34
 bordersize = 34, 34
 
-author = Ziz
+author = Binky
 license = CC-BY-SA
-comment = All your hares belong to us!
+comment = You can't take the sky from me!
 
 [stand left]
 frame = 0, 0

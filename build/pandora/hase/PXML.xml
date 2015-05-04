@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="4"/>
+<version major="1" minor="5" release="4" build="5"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,15 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.5.4.5:
+- Server optimizations for older php versions
+- Button mapping while ingame
+- Windows only: Removed asking for compressed data
+- a new level texture (thx @ Binky)
+- a new sprite (thx @ Binky)1.5.4.4:
+- Compression of outgoing turn data (again up to 98% data bandwidth saving)
+- Button mapping is adjustable
 
 1.5.4.4:
 - Compression of outgoing turn data (again up to 98% data bandwidth saving)
@@ -214,7 +223,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="4" type="release"/>
+<version major="1" minor="5" release="4" build="5" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
