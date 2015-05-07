@@ -35,7 +35,8 @@ void deleteMessage(pMessage *message)
 }
 
 #ifndef WIN32
-#define INPUT_COMPRESSION
+//#define INPUT_COMPRESSION
+#define HTTP_INPUT_COMPRESSION
 #endif
 
 pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,char* dest,char* server)
@@ -146,6 +147,47 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	sprintf(temp,
 		"\r\n--%s--",boundary);
 	memcpy(&(buffer[pos]),temp,2+4+boundary_len+1);
+	
+	#ifdef HTTP_INPUT_COMPRESSION
+		if (hase_gzip)
+		{
+			//compress whole http body
+			z_stream strm;
+			strm.zalloc = Z_NULL;
+			strm.zfree = Z_NULL;
+			strm.opaque = Z_NULL;
+			strm.avail_in = length;
+			strm.next_in = buffer;
+			if (deflateInit2 (&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 31,8,Z_DEFAULT_STRATEGY) != Z_OK)
+			{
+				printf("Error: ZStream Init error\n");
+				return NULL;
+			}
+			strm.avail_out = buffer_size;
+			strm.next_out = out_buffer;
+			switch (deflate(&strm, Z_FINISH))
+			{
+				case Z_STREAM_ERROR:
+					printf("Error: ZStream error\n");
+					deflateEnd(&strm);
+					return NULL;
+				case Z_DATA_ERROR:
+					printf("Error: ZStream data error\n");
+					return NULL;
+				case Z_MEM_ERROR:
+					deflateEnd(&strm);
+					printf("Error: ZStream mem error\n");
+					return NULL;
+				case Z_NEED_DICT:
+					printf("Error: ZStream need dict error\n");
+					return NULL;
+			}
+			//printf("Compression saved %i%% (%i vs. %i)\n",100-(int)strm.total_out*100/count,(int)strm.total_out,count);
+			length = (int)strm.total_out;
+			deflateEnd(&strm);
+			buffer = out_buffer;
+		}
+	#endif
 		
 	sprintf(host,"%s",server);
 	char* server_directory = strchr(host,'/');
@@ -160,6 +202,9 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			"Connection: Close\r\n"
 			"Content-Type: multipart/form-data; boundary=%s\r\n"
 			"Content-Length: %i\r\n"
+			#ifdef HTTP_INPUT_COMPRESSION
+			"Content-Encoding: gzip\r\n"
+			#endif
 			#ifndef WIN32
 			"Accept-Encoding: gzip\r\n"
 			#endif
@@ -175,6 +220,9 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			"Connection: Close\r\n"
 			"Content-Type: multipart/form-data; boundary=%s\r\n"
 			"Content-Length: %i\r\n"
+			#ifdef HTTP_INPUT_COMPRESSION
+			"Content-Encoding: gzip\r\n"
+			#endif
 			#ifndef WIN32
 			"Accept-Encoding: gzip\r\n"
 			#endif
@@ -186,10 +234,15 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	//printf("\nMessage\n%sEND\n",buffer);
 	spNetSendTCP(server_connection,buffer,length);
 	
+	buffer = in_buffer;
+	
 	int res = spNetReceiveHTTP(server_connection,buffer,buffer_size-1);
 	buffer[res] = 0;
 	
 	spNetCloseTCP(server_connection);
+	
+	printf("%s\n",buffer);
+	
 	//HTTP error check + jumping to begin
 	if (
 		buffer[ 0] != 'H' ||
