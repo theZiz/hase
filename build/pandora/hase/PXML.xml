@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="5"/>
+<version major="1" minor="5" release="4" build="7"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,15 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.5.4.7:
+- Added fast forward for games for boring AI or replays
+
+1.5.4.6:
+- Fixed bug with chat input while chat window not open
+- Different button mappings for menu and ingame
+- Two new sprites (thx @ Comradekingu)
+- Fixed low chance of seg fault right after start of an online game
 
 1.5.4.5:
 - Server optimizations for older php versions
@@ -223,7 +232,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="5" type="release"/>
+<version major="1" minor="5" release="4" build="7" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

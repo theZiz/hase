@@ -8,6 +8,9 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.7:
+- Added fast forward for games for boring AI or replays
+
 1.5.4.6:
 - Fixed bug with chat input while chat window not open
 - Different button mappings for menu and ingame

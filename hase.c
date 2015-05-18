@@ -45,10 +45,9 @@ int game_pause = 0;
 int extra_time = 0;
 int wp_choose = 0;
 
-int show_names = 1;
-int show_map = 1;
-
 int map_w,map_h,map_size;
+
+int speed = 1;
 
 #define INPUT_AXIS_0_LEFT 0
 #define INPUT_AXIS_0_RIGHT 1
@@ -290,17 +289,17 @@ void draw(void)
 			else
 				sprintf(buffer,"%s",player[j]->name);
 			spSetBlending( SP_ONE*2/3 );
-			if (show_names)
+			if (gop_show_names())
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
 			if (j == active_player && player[j]->computer && ai_shoot_tries>1 && player[j]->weapon_points && hare == player[j]->activeHare)
 			{
 				sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
-				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+show_names)*font->maxheight,0,buffer, font );
+				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+gop_show_names())*font->maxheight,0,buffer, font );
 			}
 			if (j == active_player && player[j]->kicked == 2 && hare == player[j]->activeHare)
 			{
 				sprintf(buffer,"Zombie (Disconnected)");
-				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+show_names)*font->maxheight,0,buffer, font );
+				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+gop_show_names())*font->maxheight,0,buffer, font );
 			}
 			spSetBlending( SP_ONE );
 			hare = hare->next;
@@ -317,7 +316,7 @@ void draw(void)
 	drawTrace(player[active_player]);
 		
 	//Map
-	if (show_map)
+	if (gop_show_map())
 		draw_map(screen->w-map_w/2,font->maxheight+map_h/2);
 	
 	//HID
@@ -458,6 +457,8 @@ void draw(void)
 		sprintf(buffer,"%is",extra_time / 1000);
 	else
 		sprintf(buffer,"∞");
+	if (speed > 1)
+		sprintf(&buffer[strlen(buffer)]," (>> x%i)",speed);
 	spFontDrawMiddle( screen->w >> 1, screen->h-1-font->maxheight, 0, buffer, font );
 
 	
@@ -735,6 +736,7 @@ int quit_feedback( pWindow window, pWindowElement elem, int action )
 
 int calc(Uint32 steps)
 {
+	steps *= speed;
 	#ifdef PROFILE
 		int start_time = SDL_GetTicks();
 	#endif
@@ -812,12 +814,14 @@ int calc(Uint32 steps)
 		if (spMapGetByID(MAP_WEAPON))
 		{
 			spMapSetByID(MAP_WEAPON,0);
-			show_names = 1-show_names;
+			speed *= 2;
 		}
 		if (spMapGetByID(MAP_SHOOT))
 		{
 			spMapSetByID(MAP_SHOOT,0);
-			show_map = 1-show_map;
+			speed /= 2;
+			if (speed <= 1)
+				speed = 1;
 		}
 		if (spMapGetByID(MAP_POWER_DN))
 			zoom_d = -1;
@@ -943,7 +947,7 @@ int calc(Uint32 steps)
 		check_next_player();
 		if (player[active_player]->weapon_points)
 			countdown--;
-		if (countdown == 5000)
+		if (countdown == 5000 && speed == 1)
 			channel_end = spSoundPlay(snd_end,-1,0,0,-1);
 		if (countdown < 0)
 			next_player();
@@ -1319,7 +1323,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	maxZoom = spSqrt(spGetSizeFactor()*4)/16384*16384;
 	zoom = spMul(zoomAdjust,zoomAdjust);
 	zoom_d = 0;
-	show_names = 1;
+	speed = 1;
 	countdown = hase_game->seconds_per_turn*1000;
 	alive_count = player_count;
 	memset(input_states,0,sizeof(int)*12);

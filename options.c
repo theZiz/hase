@@ -8,8 +8,30 @@ int op_sample_volume = SP_VOLUME_MAX << VOLUME_SHIFT;
 int op_particles = 1;
 int op_rotation = 1;
 int op_direction_flip = 0;
+int op_show_names = 1;
+int op_show_map = 1;
 char op_server[512] = "ziz.gp2x.de/hase.php";
 char op_username[32] = SP_DEVICE_STRING" User";
+
+int gop_show_names()
+{
+	return op_show_names;
+}
+
+int gop_show_map()
+{
+	return op_show_map;
+}
+
+void sop_show_names(int v)
+{
+	op_show_names = v;
+}
+
+void sop_show_map(int v)
+{
+	op_show_map = v;
+}
 
 int gop_zoom()
 {
@@ -143,6 +165,10 @@ void load_options()
 			sop_rotation(atoi(entry->value));
 		if (strcmp(entry->key,"direction_flip") == 0)
 			sop_direction_flip(atoi(entry->value));
+		if (strcmp(entry->key,"show_names") == 0)
+			sop_show_names(atoi(entry->value));
+		if (strcmp(entry->key,"show_map") == 0)
+			sop_show_map(atoi(entry->value));
 		entry = entry->next;
 	}
 	spNetC4AProfilePointer profile;
@@ -168,6 +194,8 @@ void save_options()
 	spConfigSetInt(conf,"direction_flip",op_direction_flip);
 	sprintf(spConfigGetString(conf,"server",""),"%s",op_server);
 	sprintf(spConfigGetString(conf,"username",""),"%s",op_username);
+	spConfigSetInt(conf,"show_names",op_show_names);
+	spConfigSetInt(conf,"show_map",op_show_map);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }
@@ -201,6 +229,12 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 				case 7:
 					sop_direction_flip(1-gop_direction_flip());
 					break;
+				case 8:
+					sop_show_names(1-gop_show_names());
+					break;
+				case 9:
+					sop_show_map(1-gop_show_map());
+					break;
 			}
 			break;
 		case WN_ACT_RIGHT:
@@ -227,6 +261,12 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 					break;
 				case 7:
 					sop_direction_flip(1-gop_direction_flip());
+					break;
+				case 8:
+					sop_show_names(1-gop_show_names());
+					break;
+				case 9:
+					sop_show_map(1-gop_show_map());
 					break;
 			}
 			break;
@@ -285,12 +325,24 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 				sprintf(elem->text,"Flip direction controls: No");
 			break;
 		case 8:
-			sprintf(elem->text,"Ingame button mapping");
+			if (gop_show_names())
+				sprintf(elem->text,"Show names: Yes");
+			else
+				sprintf(elem->text,"Show names: No");
 			break;
 		case 9:
-			sprintf(elem->text,"Menu button mapping");
+			if (gop_show_map())
+				sprintf(elem->text,"Show map: Yes");
+			else
+				sprintf(elem->text,"Show map: No");
 			break;
 		case 10:
+			sprintf(elem->text,"Ingame button mapping");
+			break;
+		case 11:
+			sprintf(elem->text,"Menu button mapping");
+			break;
+		case 12:
 			sprintf(elem->text,"Quit game");
 			break;
 	}
@@ -308,27 +360,29 @@ int options_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),in
 	add_window_element(window,0,5);
 	add_window_element(window,0,6);
 	add_window_element(window,0,7);
-	add_window_element(window,-1,8);
-	add_window_element(window,-1,9);
+	add_window_element(window,0,8);
+	add_window_element(window,0,9);
+	add_window_element(window,-1,10);
+	add_window_element(window,-1,11);
 	if (quit)
-		add_window_element(window,-1,10);
+		add_window_element(window,-1,12);
 	int con = 1;
 	int ret = 0;
 	while (con)
 	{
 		con = 0;
 		int res = modal_window(window,resize);
-		if (window->selection == 7 && res == 1)
+		if (window->selection == 9 && res == 1)
 		{
 			con = 1;
 			mapping_window(font,resize,1);
 		}
-		if (window->selection == 8 && res == 1)
+		if (window->selection == 10 && res == 1)
 		{
 			con = 1;
 			mapping_window(font,resize,0);
 		}
-		if (window->selection == 9 && res == 1)
+		if (window->selection == 11 && res == 1)
 			ret = 1;	
 	}
 	delete_window(window);

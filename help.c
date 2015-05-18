@@ -44,9 +44,9 @@ void draw_help()
 	spFontDrawRight( 2+lw, screen->h-2- 8*HELP_DISTANCE, 0, "{view}+[<]/[^]/[>]/[v]: ", font );
 	spFontDraw     ( 2+lw, screen->h-2- 8*HELP_DISTANCE, 0, "Look around", font );
 	spFontDrawRight( 2+lw, screen->h-2- 6*HELP_DISTANCE, 0, "{view}+{weapon}: ", font );
-	spFontDraw     ( 2+lw, screen->h-2- 6*HELP_DISTANCE, 0, "Show/Hide player names", font );
+	spFontDraw     ( 2+lw, screen->h-2- 6*HELP_DISTANCE, 0, "Faster game", font );
 	spFontDrawRight( 2+lw, screen->h-2- 4*HELP_DISTANCE, 0, "{view}+{shoot}: ", font );
-	spFontDraw     ( 2+lw, screen->h-2- 4*HELP_DISTANCE, 0, "Show/Hide mini map", font );
+	spFontDraw     ( 2+lw, screen->h-2- 4*HELP_DISTANCE, 0, "Slower game", font );
 	spFontDrawRight( 2+lw, screen->h-2- 2*HELP_DISTANCE, 0, "{view}+{jump}: ", font );
 	spFontDraw     ( 2+lw, screen->h-2- 2*HELP_DISTANCE, 0, "Hide help", font );
 

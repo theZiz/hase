@@ -122,7 +122,8 @@ void items_calc()
 							if (item->beep == 0 && d <= (PLAYER_RADIUS+32)*(PLAYER_RADIUS+32))
 							{
 								item->beep = 5000;
-								spSoundPlay(snd_beep,-1,0,0,-1);
+								if (speed == 1)
+									spSoundPlay(snd_beep,-1,0,0,-1);
 							}
 							break;
 					}
