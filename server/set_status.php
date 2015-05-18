@@ -14,8 +14,6 @@ $result = mysql_query($query) or die;
 $row = mysql_fetch_array( $result );
 if ($row['admin_pw'] == $admin_pw && $row['status'] != $status)
 {
-	$query = "UPDATE " . $mysql_prefix . "game_list SET status='$status' WHERE game_id = '$game_id'";
-	mysql_query($query) or die;	
 	if ($status == 1) //game started, setting positions ingame
 	{
 		//count player
@@ -49,6 +47,8 @@ if ($row['admin_pw'] == $admin_pw && $row['status'] != $status)
 			$i++;
 		}
 	}
+	$query = "UPDATE " . $mysql_prefix . "game_list SET status='$status' WHERE game_id = '$game_id'";
+	mysql_query($query) or die;	
 }
 mysql_close($connection);
 echo "Everything: ok";

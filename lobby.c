@@ -150,8 +150,8 @@ int main(int argc, char **argv)
 {
 	srand(time(NULL));
 	spSetRand(time(NULL));
-	//spSetDefaultWindowSize( 320, 240 );
-	spSetDefaultWindowSize( 800, 480 );
+	spSetDefaultWindowSize( 320, 240 );
+	//spSetDefaultWindowSize( 800, 480 );
 	spInitCore();
 	spSetReturnBehavior(1,0);
 	spInitNet();
@@ -164,6 +164,7 @@ int main(int argc, char **argv)
 	spSoundSetMusic("./sounds/Ouroboros.ogg");
 	spSoundPlayMusic(0,-1);
 
+	spMapSetMapSet(1);
 	#ifdef DESKTOP
 		spMapDesktopHack(1);
 		spMapPoolAddForDesktopHack();
@@ -196,6 +197,38 @@ int main(int argc, char **argv)
 	spMapSetStrategy(SP_MAPPING_SWITCH);
 	spMapLoad("hase","controls.cfg");
 	spMapSave("hase","controls.cfg");
+	spMapSetMapSet(0);
+	#ifdef DESKTOP
+		spMapPoolAddForDesktopHack();
+		spMapButtonAdd(MAP_CHAT,"chat","Chat",SDLK_RETURN);
+		spMapButtonAdd(MAP_MENU,"menu","Back",SDLK_ESCAPE);
+		spMapButtonAdd(MAP_JUMP,"jump","Okay",SDLK_LCTRL);
+		spMapButtonAdd(MAP_SHOOT,"shoot","Cancel",SDLK_LALT);
+		spMapButtonAdd(MAP_WEAPON,"weapon","New game / Insult",SDLK_MENU);
+		spMapButtonAdd(MAP_VIEW,"view","Spectate",SDLK_LSHIFT);
+		spMapButtonAdd(MAP_POWER_DN,"power_down","Select left",SDLK_PAGEDOWN);
+		spMapButtonAdd(MAP_POWER_UP,"power_up","Select right",SDLK_PAGEUP);
+	#else
+		spMapPoolAdd(SP_BUTTON_START_NOWASD,"[R]");
+		spMapPoolAdd(SP_BUTTON_SELECT_NOWASD,"[B]");
+		spMapPoolAdd(SP_BUTTON_L_NOWASD,"[l]");
+		spMapPoolAdd(SP_BUTTON_R_NOWASD,"[r]");
+		spMapPoolAdd(SP_PRACTICE_OK_NOWASD,"[o]");
+		spMapPoolAdd(SP_PRACTICE_CANCEL_NOWASD,"[c]");
+		spMapPoolAdd(SP_PRACTICE_3_NOWASD,"[3]");
+		spMapPoolAdd(SP_PRACTICE_4_NOWASD,"[4]");
+		spMapButtonAdd(MAP_CHAT,"chat","Chat",SP_BUTTON_START_NOWASD);
+		spMapButtonAdd(MAP_MENU,"menu","Back",SP_BUTTON_SELECT_NOWASD);
+		spMapButtonAdd(MAP_JUMP,"jump","Okay",SP_PRACTICE_OK_NOWASD);
+		spMapButtonAdd(MAP_SHOOT,"shoot","Cancel",SP_PRACTICE_CANCEL_NOWASD);
+		spMapButtonAdd(MAP_WEAPON,"weapon","New game / Insult",SP_PRACTICE_3_NOWASD);
+		spMapButtonAdd(MAP_VIEW,"view","Spectate",SP_PRACTICE_4_NOWASD);
+		spMapButtonAdd(MAP_POWER_DN,"power_down","Select left",SP_BUTTON_L_NOWASD);
+		spMapButtonAdd(MAP_POWER_UP,"power_up","Select right",SP_BUTTON_R_NOWASD);
+	#endif
+	spMapSetStrategy(SP_MAPPING_SWITCH);
+	spMapLoad("hase","menu.cfg");
+	spMapSave("hase","menu.cfg");
 
 	resize( screen->w, screen->h );
 	init_window_sprites();

@@ -3,9 +3,9 @@ image = ./data/hase13.png
 framesize = 34, 34
 bordersize = 34, 34
 
-author = Ziz
+author = Comradekingu
 license = CC-BY-SA
-comment = All your hares belong to us!
+comment = Seal of approval is quality seal!
 
 [stand left]
 frame = 0, 0

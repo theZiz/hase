@@ -463,7 +463,11 @@ int window_calc(Uint32 steps)
 						return 2;
 				}
 				else
+				{
+					if (spIsKeyboardPolled() && window->feedback)
+						window->feedback(window,selElem,WN_ACT_END_POLL);
 					return 2;
+				}
 				break;
 			default:
 				return 2;

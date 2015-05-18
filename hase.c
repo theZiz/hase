@@ -475,8 +475,10 @@ void draw(void)
 	if (game_pause)
 		draw_message();
 
+	spMapSetMapSet(0);
 	if (chatWindow)
 		window_draw();
+	spMapSetMapSet(1);
 		
 	#ifdef PROFILE
 		draw_time = SDL_GetTicks() - start_time;
@@ -758,6 +760,7 @@ int calc(Uint32 steps)
 	{
 		spMapSetByID(MAP_MENU,0);
 		spSoundPause(1,-1);
+		spMapSetMapSet(0);
 		if (options_window(font,hase_resize,1))
 		{
 			pWindow window = create_window(quit_feedback,font,"Sure?");
@@ -767,11 +770,13 @@ int calc(Uint32 steps)
 			if (res == 1)
 				return 1;
 		}
+		spMapSetMapSet(1);
 		spSoundPause(0,-1);
 	}
 	
 	if (chatWindow)
 	{
+		spMapSetMapSet(0);
 		int result = window_calc(steps);
 		if (result == 1)
 		{
@@ -784,6 +789,7 @@ int calc(Uint32 steps)
 			delete_window(chatWindow);
 			chatWindow = NULL;
 		}
+		spMapSetMapSet(1);
 		spResetButtonsState();
 		spResetAxisState();
 	}
@@ -791,8 +797,10 @@ int calc(Uint32 steps)
 	if (spMapGetByID(MAP_CHAT) && get_channel())
 	{
 		spMapSetByID(MAP_CHAT,0);
+		spMapSetMapSet(0);
 		chatWindow = create_text_box(font,hase_resize,"Enter Message:",chatMessage,256,0,NULL,1);
 		set_recent_window(chatWindow);
+		spMapSetMapSet(1);
 	}
 	if (spMapGetByID(MAP_VIEW))
 	{
@@ -1299,12 +1307,6 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	level_pixel = (Uint16*)level_original->pixels;
 	realloc_gravity();
 	init_gravity();
-	pPlayer player_list = hase_player_list;
-	while (player_list)
-	{
-		printf("player has position %i\n",player_list->position_in_game);
-		player_list = player_list->next;
-	}
 	init_player(hase_player_list,game->player_count,game->hares_per_player);
 	items_init(game);
 	map_w = 64 * spGetSizeFactor() >> SP_ACCURACY;
@@ -1333,7 +1335,11 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	snd_low = spSoundLoad("./sounds/short_jump.wav");
 	snd_shoot = spSoundLoad("./sounds/plop.wav");
 	
+	spMapSetMapSet(1);
+	
 	int result = spLoop(draw,calc,10,resize,NULL);
+	
+	spMapSetMapSet(0);
 	
 	spSoundStop(-1,0);
 	spSoundDelete(snd_explosion);

@@ -1,10 +1,14 @@
 #include "mapping.h"
 #include "window.h"
 
+int mappingMapSet = 0;
+
 int mapping_feedback( pWindow window, pWindowElement elem, int action )
 {
+	spMapSetMapSet(mappingMapSet);
 	if (action == WN_ACT_UPDATE)
 		sprintf(elem->text,"%s: %s",spMapCaptionByID(elem->reference),spMapButtonByID(elem->reference));
+	spMapSetMapSet(0);
 	return 0;
 }
 
@@ -20,9 +24,10 @@ int mapping_calc( Uint32 steps )
 	return 0;
 }
 
-void mapping_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
+void mapping_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),int mapSet)
 {
-	pWindow window = create_window(mapping_feedback,font,"Button mapping");
+	mappingMapSet = mapSet;
+	pWindow window = create_window(mapping_feedback,font,mapSet?"Ingame button mapping":"Menu button mapping");
 	window->only_ok = 1;
 	int i;
 	for (i = 0; i < 8; i++)
@@ -31,6 +36,7 @@ void mapping_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 	{
 		if (modal_window(window,resize) == 1)
 		{
+			spMapSetMapSet(mappingMapSet);
 			char buffer[256];
 			sprintf(buffer,"Press new button for %s!\n(Was %s)",spMapCaptionByID(window->selection),spMapButtonByID(window->selection));
 			set_message(font,buffer);
@@ -41,10 +47,13 @@ void mapping_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 			pWindowElement elem;
 			for (elem = window->firstElement; elem; elem = elem->next)
 				mapping_feedback(window,elem,WN_ACT_UPDATE);
+			spMapSetMapSet(0);
 		}
 		else
 			break;
 	}
 	delete_window(window);
-	spMapSave("hase","controls.cfg");
+	spMapSetMapSet(mappingMapSet);
+	spMapSave("hase",mapSet?"controls.cfg":"menu.cfg");
+	spMapSetMapSet(0);
 }

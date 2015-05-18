@@ -1,5 +1,5 @@
 DYNAMIC = -lSDL_ttf -lSDL_mixer -lSDL_image -lSDL -lm
-CFLAGS = -O3 -fsingle-precision-constant
+CFLAGS = -fsingle-precision-constant
 GENERAL_TWEAKS = -ffast-math
 #==PC defaults==
 FLAGS = -g -DDESKTOP $(GENERAL_TWEAKS)
