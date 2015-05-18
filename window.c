@@ -41,10 +41,12 @@ void update_window_width(pWindow window)
 	window->width = spMin(spGetWindowSurface()->w,spMin(window->width,spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)));
 }
 
+#define SMALL_HACK ((spGetSizeFactor() <= SP_ONE)?4:0)
+
 pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, int action ),spFontPointer font,char* title)
 {
 	pWindow window = (pWindow)malloc(sizeof(tWindow));
-	window->height = font->maxheight*4+(spGetSizeFactor()*4 >> SP_ACCURACY)*2;
+	window->height = font->maxheight*4+(spGetSizeFactor()*4 >> SP_ACCURACY)*2-2*SMALL_HACK;
 	window->font = font;
 	window->feedback = feedback;
 	window->selection = 0;
@@ -92,7 +94,7 @@ pWindowElement add_window_element(pWindow window,int type,int reference)
 		window->feedback(window,elem,WN_ACT_UPDATE);
 	update_elem_width(elem,window);
 	update_window_width(window);
-	window->height+=3*window->font->maxheight/2;
+	window->height+=3*window->font->maxheight/2-SMALL_HACK;
 	window->count++;
 	return elem;
 }
@@ -123,7 +125,7 @@ void window_draw(void)
 	int nr = 0;
 	while (elem)
 	{
-		y+=window->font->maxheight*3/2;
+		y+=window->font->maxheight*3/2-SMALL_HACK;
 		int t_w = spFontWidth(elem->text,window->font);
 		int t_r = (screen->w+t_w)/2;
 		if (t_r > screen->w - meow)
@@ -131,7 +133,7 @@ void window_draw(void)
 		if (nr == window->selection)
 		{
 			if (window->firstElement->next) //more than one element
-				spRectangle( screen->w/2, y+window->font->maxheight/2, 0, window->width-2*meow,window->font->maxheight,LL_FG);
+				spRectangle( screen->w/2, y+window->font->maxheight/2+SMALL_HACK/2, 0, window->width-2*meow,window->font->maxheight,LL_FG);
 			selElem = elem;
 			if (elem->type == 1 && spIsKeyboardPolled())
 			{
@@ -146,7 +148,7 @@ void window_draw(void)
 	
 	if (window->show_selection)
 	{
-		y+=(spGetSizeFactor()*8 >> SP_ACCURACY)+window->font->maxheight*3/2;
+		y+=(spGetSizeFactor()*8 >> SP_ACCURACY)+window->font->maxheight*3/2-SMALL_HACK;
 		int to_left = -spFontWidth("{power_up}",window->font);
 		if (window->sprite_count && window->sprite_count[window_active])
 		{
@@ -162,16 +164,16 @@ void window_draw(void)
 		spDrawSprite(screen->w/2-to_left, y, 0, spActiveSprite(window_sprite[window_active]));
 		spFontDrawRight( screen->w/2-to_left-(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "{power_down}", window->font );
 		spFontDraw     ( screen->w/2-to_left+(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
-		y+=(spGetSizeFactor()*8 >> SP_ACCURACY);
+		y+=(spGetSizeFactor()*8 >> SP_ACCURACY)-SMALL_HACK;
 		sprintf(buffer,"\"%s\"",window_sprite[window_active]->comment);
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
 		sprintf(buffer,"made by %s (%s)",window_sprite[window_active]->author,window_sprite[window_active]->license);
-		y += window->font->maxheight;
+		y += window->font->maxheight-SMALL_HACK;
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
 	}
 	
 	
-	y = (screen->h + window->height) / 2 - meow - 3*window->font->maxheight/2;
+	y = (screen->h + window->height) / 2 - meow - 3*window->font->maxheight/2-SMALL_HACK/2;
 	if (selElem)
 	{
 		switch (selElem->type)

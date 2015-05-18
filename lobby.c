@@ -12,11 +12,13 @@
 
 SDL_Surface* screen;
 spFontPointer font = NULL;
+spFontPointer font_dark = NULL;
 
 #define BUTTON_FG spGetRGB(32,32,32)
 #define BUTTON_BG spGetRGB(220,220,220)
 #define FONT_BG spGetRGB(64,64,64)
 #define FONT_FG spGetRGB(220,220,220)
+#define FONT_DARK_FG spGetRGB(110,110,110)
 
 void resize( Uint16 w, Uint16 h )
 {
@@ -26,19 +28,33 @@ void resize( Uint16 w, Uint16 h )
 	if ( font )
 	{
 		if (spGetSizeFactor() > SP_ONE)
-			spFontReload( font, "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+		{
+			spFontReload( font     , "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+			spFontReload( font_dark, "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+		}
 		else
-			spFontReload( font, "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+		{
+			spFontReload( font     , "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+			spFontReload( font_dark, "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+		}
 	}
 	else
 	{
 		if (spGetSizeFactor() > SP_ONE)
-			font = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+		{
+			font      = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+			font_dark = spFontLoad( "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
+		}
 		else
-			font = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+		{
+			font      = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+			font_dark = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
+		}
 	}
-	spFontAdd( font, SP_FONT_GROUP_ASCII"™°∞", FONT_FG ); //whole ASCII
-	spFontAddBorder(font , 0);
+	spFontAdd( font     , SP_FONT_GROUP_ASCII"™°∞", FONT_FG ); //whole ASCII
+	spFontAdd( font_dark, SP_FONT_GROUP_ASCII"™°∞", FONT_DARK_FG ); //whole ASCII
+	spFontAddBorder(font      , 0);
+	spFontAddBorder(font_dark , spGetRGB(60,60,60));
 	#ifdef DESKTOP
 		int i;
 		for (i = 0; i < 322; i++)
@@ -76,11 +92,15 @@ void resize( Uint16 w, Uint16 h )
 	spFontAddArrowButton( font, '>', SP_BUTTON_ARROW_RIGHT, BUTTON_FG, BUTTON_BG );
 	spFontAddArrowButton( font, 'v', SP_BUTTON_ARROW_DOWN, BUTTON_FG, BUTTON_BG );
 	spFontMulWidth(font,spFloatToFixed(0.9f));
+	spFontMulWidth(font_dark,spFloatToFixed(0.9f));
 
 	spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_IF_NEEDED,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
 	spSetVirtualKeyboardBackspaceButton( spMapPoolByID(MAP_VIEW) );
 	if (spGetSizeFactor() <= SP_ONE)
+	{
 		font->maxheight = font->maxheight-1;
+		font_dark->maxheight = font_dark->maxheight-1;
+	}
 }
 
 int main_menu_feedback( pWindow window, pWindowElement elem, int action )

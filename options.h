@@ -16,6 +16,7 @@ char* gop_server();
 char* gop_username();
 int gop_show_names();
 int gop_show_map();
+int gop_global_chat();
 
 void sop_zoom(int v);
 void sop_circle(int v);
@@ -28,6 +29,7 @@ void sop_server(char* server);
 void sop_username(char* username);
 void sop_show_names(int v);
 void sop_show_map(int v);
+void sop_global_chat(int v);
 
 void load_options();
 void save_options();

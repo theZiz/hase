@@ -10,6 +10,7 @@ int op_rotation = 1;
 int op_direction_flip = 0;
 int op_show_names = 1;
 int op_show_map = 1;
+int op_global_chat = 1;
 char op_server[512] = "ziz.gp2x.de/hase.php";
 char op_username[32] = SP_DEVICE_STRING" User";
 
@@ -23,6 +24,11 @@ int gop_show_map()
 	return op_show_map;
 }
 
+int gop_global_chat()
+{
+	return op_global_chat;
+}
+
 void sop_show_names(int v)
 {
 	op_show_names = v;
@@ -31,6 +37,11 @@ void sop_show_names(int v)
 void sop_show_map(int v)
 {
 	op_show_map = v;
+}
+
+void sop_global_chat(int v)
+{
+	op_global_chat = v;
 }
 
 int gop_zoom()
@@ -169,6 +180,8 @@ void load_options()
 			sop_show_names(atoi(entry->value));
 		if (strcmp(entry->key,"show_map") == 0)
 			sop_show_map(atoi(entry->value));
+		if (strcmp(entry->key,"global_chat") == 0)
+			sop_global_chat(atoi(entry->value));
 		entry = entry->next;
 	}
 	spNetC4AProfilePointer profile;
@@ -196,6 +209,7 @@ void save_options()
 	sprintf(spConfigGetString(conf,"username",""),"%s",op_username);
 	spConfigSetInt(conf,"show_names",op_show_names);
 	spConfigSetInt(conf,"show_map",op_show_map);
+	spConfigSetInt(conf,"global_chat",op_global_chat);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }
@@ -235,6 +249,9 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 				case 9:
 					sop_show_map(1-gop_show_map());
 					break;
+				case 10:
+					sop_global_chat(1-gop_global_chat());
+					break;
 			}
 			break;
 		case WN_ACT_RIGHT:
@@ -267,6 +284,9 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 					break;
 				case 9:
 					sop_show_map(1-gop_show_map());
+					break;
+				case 10:
+					sop_global_chat(1-gop_global_chat());
 					break;
 			}
 			break;
@@ -337,12 +357,18 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 				sprintf(elem->text,"Show map: No");
 			break;
 		case 10:
-			sprintf(elem->text,"Ingame button mapping");
+			if (gop_global_chat())
+				sprintf(elem->text,"Show global chat ingame: Yes");
+			else
+				sprintf(elem->text,"Show global chat ingame: No");
 			break;
 		case 11:
-			sprintf(elem->text,"Menu button mapping");
+			sprintf(elem->text,"Ingame button mapping");
 			break;
 		case 12:
+			sprintf(elem->text,"Menu button mapping");
+			break;
+		case 13:
 			sprintf(elem->text,"Quit game");
 			break;
 	}
@@ -362,27 +388,28 @@ int options_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),in
 	add_window_element(window,0,7);
 	add_window_element(window,0,8);
 	add_window_element(window,0,9);
-	add_window_element(window,-1,10);
+	add_window_element(window,0,10);
 	add_window_element(window,-1,11);
+	add_window_element(window,-1,12);
 	if (quit)
-		add_window_element(window,-1,12);
+		add_window_element(window,-1,13);
 	int con = 1;
 	int ret = 0;
 	while (con)
 	{
 		con = 0;
 		int res = modal_window(window,resize);
-		if (window->selection == 9 && res == 1)
+		if (window->selection == 10 && res == 1)
 		{
 			con = 1;
 			mapping_window(font,resize,1);
 		}
-		if (window->selection == 10 && res == 1)
+		if (window->selection == 11 && res == 1)
 		{
 			con = 1;
 			mapping_window(font,resize,0);
 		}
-		if (window->selection == 11 && res == 1)
+		if (window->selection == 12 && res == 1)
 			ret = 1;	
 	}
 	delete_window(window);

@@ -9,6 +9,7 @@
 #define LG_WAIT 5000
 
 spFontPointer lg_font;
+spFontPointer font_dark;
 void ( *lg_resize )( Uint16 w, Uint16 h );
 int lg_counter;
 pGame lg_game;
@@ -57,7 +58,7 @@ void lg_draw(void)
 	int h = l_w-7*lg_font->maxheight;
 	spRectangle(screen->w-4-w/2, 6*lg_font->maxheight+h/2-1, 0,w,h,LL_FG);
 	if (lg_block)
-		spFontDrawTextBlock(middle,screen->w-w-4, 6*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
+		spFontDrawTextBlock(middle,screen->w-w-4, 6*lg_font->maxheight-1, 0,lg_block,h,0,NULL);
 	//Instructions on the right
 	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "{weapon}Add player  {view}Remove player", lg_font );
 	if (lg_player)
@@ -98,7 +99,7 @@ void lg_draw(void)
 	{
 		spRectangle(screen->w/2, l_w+(4+CHAT_LINES)*lg_font->maxheight/2+4, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);
 		if (lg_chat_block)
-			spFontDrawTextBlock(left,4, l_w+2*lg_font->maxheight+4, 0,lg_chat_block,CHAT_LINES*lg_font->maxheight,lg_scroll,lg_font);
+			spFontDrawTextBlock(left,4, l_w+2*lg_font->maxheight+4, 0,lg_chat_block,CHAT_LINES*lg_font->maxheight,lg_scroll,NULL);
 	}
 	//Footline
 	if (lg_reload_now)
@@ -246,16 +247,32 @@ int lg_calc(Uint32 steps)
 				sprintf(buffer,"%s: %s",get_channel()->first_message->user,message);
 				lg_chat_block = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,lg_font);
 			}
+			else
+			if (gop_global_chat())
+			{
+				sprintf(buffer,"%s: %s",get_channel()->first_message->user,get_channel()->first_message->message);
+				lg_chat_block = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,font_dark);
+			}
 			lg_last_read_message = get_channel()->first_message;
 		}
 		if (lg_last_read_message)
 			while (lg_last_read_message->next)
 			{
 				spNetIRCMessagePointer next = lg_last_read_message->next;
+				spTextBlockPointer temp = NULL;
 				if (message = ingame_message(next->message,lg_game->name))
 				{
 					sprintf(buffer,"%s: %s",next->user,message);
-					spTextBlockPointer temp = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,lg_font);
+					temp = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,lg_font);
+				}
+				else
+				if (gop_global_chat())
+				{
+					sprintf(buffer,"%s: %s",next->user,next->message);
+					temp = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,font_dark);
+				}
+				if (temp)
+				{
 					if (lg_chat_block)
 					{
 						int lc = lg_chat_block->line_count + temp->line_count;

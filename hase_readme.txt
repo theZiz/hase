@@ -8,6 +8,11 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.8:
+- Showing global chat ingame, but greyed out
+- Fixed font size for small resolution devices like the GCW
+- Removing nubs for pandora (I doubt anybody used it)
+
 1.5.4.7:
 - Added fast forward for games for boring AI or replays
 

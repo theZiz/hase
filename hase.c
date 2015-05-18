@@ -25,6 +25,7 @@ spSound* snd_low;
 spSound* snd_shoot;
 
 spFontPointer font;
+spFontPointer font_dark;
 SDL_Surface* level;
 SDL_Surface* level_original;
 Uint16* level_pixel;
@@ -333,16 +334,27 @@ void draw(void)
 		time_t now = time(NULL) - 60;
 		while (showing)
 		{
+			spFontPointer used_font = NULL;
 			char* message = showing->message;
 			if (hase_game->status == -1 || //replay
 				(message = ingame_message(showing->message,hase_game->name)))
 			{
+				used_font = font;
 				sprintf(buffer,"%s: %s",showing->user,message);
+			}
+			else
+			if (gop_global_chat())
+			{
+				used_font = font_dark;
+				sprintf(buffer,"%s: %s",showing->user,showing->message);
+			}
+			if (used_font)
+			{
 				int diff = showing->time_stamp - now;
 				if (diff < 16)
 				spSetBlending(diff * SP_ONE/16);
 				char* found = buffer;
-				while (spFontWidth(found,font) > screen->w - help_length)
+				while (spFontWidth(found,used_font) > screen->w - help_length)
 				{
 					char* end_space = found;
 					char* last_space = NULL;
@@ -355,7 +367,7 @@ void draw(void)
 						if (end_space[0] == 0)
 							was_null = 1;
 						end_space[0] = 0;
-						if (spFontWidth(found,font) > screen->w - help_length)
+						if (spFontWidth(found,used_font) > screen->w - help_length)
 						{
 							if (!was_null)
 								end_space[0] = ' ';
@@ -370,14 +382,14 @@ void draw(void)
 					if (last_space != NULL)
 						end_space = last_space;
 					end_space[0] = 0;
-					spFontDraw(2, y-font->maxheight/8, 0, found, font );
-					y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
+					spFontDraw(2, y-used_font->maxheight/8, 0, found, used_font );
+					y += used_font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 					found = end_space;
 					if (last_space)
 						found++;
 				}
-				spFontDraw(2, y-font->maxheight/8, 0, found, font );
-				y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
+				spFontDraw(2, y-used_font->maxheight/8, 0, found, used_font );
+				y += used_font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 				spSetBlending(SP_ONE);
 			}
 			showing = showing->next;
@@ -628,7 +640,7 @@ void set_input()
 	else
 	if (player[active_player]->local)
 	{
-		if (spMapGetByID(MAP_VIEW) == 0)
+		if (spMapGetByID(MAP_VIEW) == 0 && chatWindow == NULL)
 		{
 			if (spGetInput()->axis[0] < 0)
 			{
@@ -791,9 +803,9 @@ int calc(Uint32 steps)
 			delete_window(chatWindow);
 			chatWindow = NULL;
 		}
-		spMapSetMapSet(1);
 		spResetButtonsState();
 		spResetAxisState();
+		spMapSetMapSet(1);
 	}
 	
 	if (spMapGetByID(MAP_CHAT) && get_channel())
