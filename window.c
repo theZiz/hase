@@ -4,6 +4,7 @@
 pWindow mg_window = NULL;
 int window_active = 0;
 spSpriteCollectionPointer window_sprite[SPRITE_COUNT];
+SDL_Surface* logo;
 
 void init_window_sprites()
 {
@@ -116,9 +117,17 @@ void window_draw(void)
 	char buffer[256];
 	pWindow window = recent_window;
 	int meow = spGetSizeFactor()*4 >> SP_ACCURACY;
-	spRectangle(screen->w/2,screen->h/2,0,window->width-2*meow,window->height-2*meow,LL_BG);
-	spRectangleBorder(screen->w/2,screen->h/2,0,window->width,window->height,meow,meow,LL_FG);
-	int y = (screen->h - window->height) / 2 + meow + window->font->maxheight/2;
+	
+	int extra_y = 0;
+	if (window->main_menu)
+	{
+		extra_y += logo->h/2;
+		spBlitSurface(screen->w/2,screen->h/2 - extra_y * 2,0,logo);
+	}
+	
+	spRectangle(screen->w/2,screen->h/2 + extra_y,0,window->width-2*meow,window->height-2*meow,LL_BG);
+	spRectangleBorder(screen->w/2,screen->h/2 + extra_y,0,window->width,window->height,meow,meow,LL_FG);
+	int y = (screen->h - window->height) / 2 + meow + window->font->maxheight/2 + extra_y;
 	spFontDrawMiddle( screen->w/2, y , 0, window->title, window->font );
 	pWindowElement elem = window->firstElement;
 	pWindowElement selElem = NULL;
@@ -173,7 +182,7 @@ void window_draw(void)
 	}
 	
 	
-	y = (screen->h + window->height) / 2 - meow - 3*window->font->maxheight/2-SMALL_HACK/2;
+	y = (screen->h + window->height) / 2 - meow - 3*window->font->maxheight/2-SMALL_HACK/2  + extra_y;
 	if (selElem)
 	{
 		switch (selElem->type)
@@ -536,6 +545,8 @@ void set_recent_window(pWindow window)
 
 int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 {
+	if (window->main_menu)
+		logo = spLoadSurfaceZoom( "./data/logo.png", spGetSizeFactor());
 	spUnlockRenderTarget();
 	window->oldScreen = spUniqueCopySurface( spGetWindowSurface() );
 	spLockRenderTarget();
@@ -559,6 +570,8 @@ int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 	recent_window = save_window;
 	spDeleteSurface( window->oldScreen );
 	window->oldScreen = NULL;
+	if (window->main_menu)
+		spDeleteSurface( logo );
 	return res;
 }
 
