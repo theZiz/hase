@@ -8,6 +8,13 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.9:
+- Fixed two crash bugs on resizing
+- Added a logo made by comradekingu
+- Added possibility to play online / watch replays without being online in the chat
+- Fixed the menu size for most cases
+- Improved dolphin
+
 1.5.4.8:
 - Showing global chat ingame, but greyed out
 - Fixed font size for small resolution devices like the GCW

@@ -24,6 +24,8 @@ spNetIRCMessagePointer lg_last_read_message = NULL;
 Sint32 lg_scroll;
 char lg_level_string[512];
 
+int use_chat;
+
 #define CHAT_LINES 4
 
 void lg_draw(void)
@@ -92,6 +94,9 @@ void lg_draw(void)
 	//Chat
 	if (lg_game->local)
 		spFontDrawMiddle(screen->w/2, l_w+(3+CHAT_LINES)*lg_font->maxheight/2+4, 0,"No chat in local game",lg_font);
+	else
+	if (use_chat == 0)
+		spFontDrawMiddle(screen->w/2, l_w+(3+CHAT_LINES)*lg_font->maxheight/2+4, 0,"Chat deactivated",lg_font);
 	else
 	if (get_channel() == NULL)
 		spFontDrawMiddle(screen->w/2, l_w+(3+CHAT_LINES)*lg_font->maxheight/2+4, 0,"Connecting to IRC...",lg_font);
@@ -404,6 +409,7 @@ int lg_calc(Uint32 steps)
 			if (hase(lg_resize,lg_game,lg_player) < 2 && lg_game->local == 0)
 			{
 				pWindow window = create_window(delete_feedback,lg_font,"Question");
+				window->cancel_to_no = 1;
 				add_window_element(window,-1,0);
 				int res = modal_window(window,lg_resize);
 				delete_window(window);

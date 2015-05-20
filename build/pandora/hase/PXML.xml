@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="8"/>
+<version major="1" minor="5" release="4" build="9"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,13 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.5.4.9:
+- Fixed two crash bugs on resizing
+- Added a logo made by comradekingu
+- Added possibility to play online / watch replays without being online in the chat
+- Fixed the menu size for most cases
+- Improved dolphin
 
 1.5.4.8:
 - Showing global chat ingame, but greyed out
@@ -237,7 +244,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="8" type="release"/>
+<version major="1" minor="5" release="4" build="9" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

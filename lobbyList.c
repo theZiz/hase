@@ -22,6 +22,8 @@ int ll_game_hares = 3;
 spTextBlockPointer ll_chat_block = NULL;
 Sint32 ll_chat_scroll;
 
+int use_chat;
+
 pGame mom_game;
 
 void update_ll_surface()
@@ -101,6 +103,9 @@ void ll_draw(void)
 
 	int h = screen->h-(screen->w/3+4*ll_font->maxheight-4);
 		
+	if (use_chat == 0)
+		spFontDrawMiddle(screen->w/3, screen->h-2*ll_font->maxheight-h/2, 0, "Chat deactivated", ll_font);
+	else
 	if (get_channel() == NULL)
 		spFontDrawMiddle(screen->w/3, screen->h-2*ll_font->maxheight-h/2, 0, "Connecting to IRC Server...", ll_font );
 	else
@@ -496,7 +501,8 @@ int ll_reload()
 		message_box(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!");
 		return 1;
 	}
-	start_irc_client(gop_username());
+	if (use_chat)
+		start_irc_client(gop_username());
 	ll_game_count = get_games(&ll_game_list);
 	if (ll_game_count == 0)
 		ll_selected = -1;
@@ -504,8 +510,9 @@ int ll_reload()
 }
 
 
-void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
+void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), int start_chat)
 {
+	use_chat = start_chat;
 	char buffer[2048],time_buffer[128];
     time_t t = time(NULL);
     struct tm *ti = gmtime(&t);

@@ -22,6 +22,7 @@ spFontPointer font_dark = NULL;
 
 void resize( Uint16 w, Uint16 h )
 {
+	screen = spGetWindowSurface();
 	spSelectRenderTarget(screen);
 	spFontSetShadeColor(0);
 	//Font Loading
@@ -166,6 +167,12 @@ int local_game_feedback( pWindow window, pWindowElement elem, int action )
 	return 0;
 }
 
+int chat_feedback( pWindow window, pWindowElement elem, int action )
+{
+	sprintf(elem->text,"Do you want to join the chat?");
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
@@ -265,7 +272,7 @@ int main(int argc, char **argv)
 	pWindow subWindow;
 	while (!done)
 	{
-		spClearTarget(LL_FG);
+		spClearTarget(0);
 		if (modal_window(window,resize) == 1)
 			switch (window->selection)
 			{
@@ -285,7 +292,14 @@ int main(int argc, char **argv)
 					break;
 				case 1:
 					if (text_box(font,resize,"Enter player name:",gop_username(),32,0,NULL,0) == 1)
-						start_lobby(font,resize);
+					{
+						pWindow chat_window = create_window(chat_feedback,font,"Question");
+						chat_window->cancel_to_no = 1;
+						add_window_element(chat_window,-1,0);
+						int res = modal_window(chat_window,resize);
+						delete_window(chat_window);
+						start_lobby(font,resize,res == 1);
+					}
 					break;
 				case 2:
 					options_window(font,resize,0);

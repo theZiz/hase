@@ -34,12 +34,13 @@ void quit_window_sprites()
 void update_window_width(pWindow window)
 {
 	pWindowElement elem = window->firstElement;
+	window->width = spMax(spGetWindowSurface()->h,spFontWidth(window->title,window->font)+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
 	while (elem)
 	{
 		window->width = spMax(window->width,elem->width+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
 		elem = elem->next;
 	}
-	window->width = spMin(spGetWindowSurface()->w,spMin(window->width,spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)));
+	window->width = spMax(spGetWindowSurface()->w/2,spMin(window->width,spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)));
 }
 
 #define SMALL_HACK ((spGetSizeFactor() <= SP_ONE)?4:0)
@@ -53,7 +54,6 @@ pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, in
 	window->selection = 0;
 	window->firstElement = NULL;
 	sprintf(window->title,"%s",title);
-	window->width = spMax(spGetWindowSurface()->h,spFontWidth(title,font)+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
 	update_window_width(window);
 	window->do_flip = 1;
 	window->main_menu = 0;
@@ -65,6 +65,7 @@ pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, in
 	window->insult_button = 0;
 	window->text_box_char = NULL;
 	window->text_box_len = 0;
+	window->cancel_to_no = 0;
 	return window;
 }
 
@@ -237,6 +238,9 @@ void window_draw(void)
 				else
 				if (window->only_ok)
 					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Select  {shoot}Back", window->font );
+				else
+				if (window->cancel_to_no)
+					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Yes  {shoot}No", window->font );
 				else
 					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay  {shoot}Cancel", window->font );
 				break;
@@ -543,16 +547,40 @@ void set_recent_window(pWindow window)
 	recent_window = window;
 }
 
+void window_resize(Uint16 w, Uint16 h)
+{
+	recent_window->resize(w,h);
+	//Recalculating the window sizes.
+	spDeleteSurface( recent_window->oldScreen );
+	recent_window->oldScreen = spUniqueCopySurface( spGetWindowSurface() );
+	update_window_width(recent_window);
+	recent_window->height = recent_window->font->maxheight*4+(spGetSizeFactor()*4 >> SP_ACCURACY)*2-2*SMALL_HACK;
+	pWindowElement elem = recent_window->firstElement;
+	while (elem)
+	{
+		recent_window->height+=3*recent_window->font->maxheight/2-SMALL_HACK;
+		elem = elem->next;
+	}
+	if (recent_window->show_selection)
+		recent_window->height += (spGetSizeFactor()*16 >> SP_ACCURACY) + 2*recent_window->font->maxheight;
+	if (recent_window->main_menu)
+	{
+		spDeleteSurface(logo);
+		logo = spLoadSurfaceZoom( "./data/logo.png", spGetSizeFactor());
+	}
+}
+
 int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 {
 	if (window->main_menu)
 		logo = spLoadSurfaceZoom( "./data/logo.png", spGetSizeFactor());
 	spUnlockRenderTarget();
 	window->oldScreen = spUniqueCopySurface( spGetWindowSurface() );
+	window->resize = resize;
 	spLockRenderTarget();
 	pWindow save_window = recent_window;
 	recent_window = window;
-	int res = spLoop(window_draw,window_calc,10,resize,NULL);
+	int res = spLoop(window_draw,window_calc,10,window_resize,NULL);
 	if (spIsKeyboardPolled())
 	{
 		pWindowElement selElem = window->firstElement;

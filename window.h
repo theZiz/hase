@@ -32,6 +32,8 @@ typedef struct sWindow
 	int insult_button;
 	char* text_box_char;
 	int text_box_len;
+	void ( *resize )( Uint16 w, Uint16 h );
+	int cancel_to_no;
 } tWindow;
 
 #define WN_ACT_UPDATE 0
