@@ -1009,6 +1009,7 @@ int pull_thread_function(void* data)
 	if (player->kicked)
 		return 0;
 	pThreadData next_data = (pThreadData)malloc(sizeof(tThreadData));
+	int pull_count = 0;
 	while (player->input_message != -1)
 	{
 		if (player->kicked)
@@ -1032,7 +1033,12 @@ int pull_thread_function(void* data)
 			player->last_input_data_write = next_data;
 			SDL_mutexV(player->input_mutex);
 			next_data = (pThreadData)malloc(sizeof(tThreadData));
-			spSleep(50000); //50ms
+			pull_count++;
+			if (pull_count == 4)
+			{
+				pull_count = 0;
+				spSleep(50000); //50ms
+			}
 		}
 		else
 			spSleep(500000); //500ms
