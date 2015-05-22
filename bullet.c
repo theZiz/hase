@@ -404,8 +404,12 @@ void negative_impact(int X,int Y,int radius)
 	int inner_radius = (radius-BORDER_SIZE)*(radius-BORDER_SIZE);
 	int outer_radius = radius*radius;
 	int BORDER_COLOR = get_border_color();
-	for (x = -radius; x < radius+1; x++)
-		for (y = -radius; y < radius+1; y++)
+	int first_x = -spMin(radius, X);
+	int last_x = spMin(radius, LEVEL_WIDTH-1-X);
+	int first_y = -spMin(radius, Y);
+	int last_y = spMin(radius, LEVEL_HEIGHT-1-Y);
+	for (x = first_x; x <= last_x; x++)
+		for (y = first_y; y <= last_y; y++)
 		{
 			int sum = x*x+y*y;
 			if (sum > outer_radius)
