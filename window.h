@@ -34,6 +34,7 @@ typedef struct sWindow
 	int text_box_len;
 	void ( *resize )( Uint16 w, Uint16 h );
 	int cancel_to_no;
+	int zig_zag;
 } tWindow;
 
 #define WN_ACT_UPDATE 0

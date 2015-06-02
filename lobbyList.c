@@ -26,15 +26,18 @@ int use_chat;
 
 pGame mom_game;
 
+#define LL_SURFACE_DIV 16
+#define LL_MOM_PLAYER 11
+#define LL_STATUS 13
+
 void update_ll_surface()
 {
 	spSelectRenderTarget(ll_surface);
 	spClearTarget(LL_FG);
 	int pos = 0;
 	spFontDraw( 2                    , pos*ll_font->maxheight-ll_scroll/1024, 0, "Name", ll_font );
-	spFontDraw( 2+ 7*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Mom Pl.", ll_font );
-	spFontDraw( 2+10*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Max Pl.", ll_font );
-	spFontDraw( 2+13*ll_surface->w/16, pos*ll_font->maxheight-ll_scroll/1024, 0, "Status", ll_font );
+	spFontDraw( 2+LL_MOM_PLAYER*ll_surface->w/LL_SURFACE_DIV, pos*ll_font->maxheight-ll_scroll/1024, 0, "Pl.", ll_font );
+	spFontDraw( 2+LL_STATUS*ll_surface->w/LL_SURFACE_DIV, pos*ll_font->maxheight-ll_scroll/1024, 0, "Status", ll_font );
 	pos++;
 	spLine(2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, ll_surface->w-2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, 65535);
 	  
@@ -49,10 +52,8 @@ void update_ll_surface()
 		}
 		spFontDraw( 2                    , 2+pos*ll_font->maxheight-ll_scroll/1024, 0, game->name, ll_font );
 		char buffer[16];
-		sprintf(buffer,"%i",game->player_count);
-		spFontDraw( 2+ 7*ll_surface->w/16, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );
-		sprintf(buffer,"%i",game->max_player);
-		spFontDraw( 2+10*ll_surface->w/16, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );
+		sprintf(buffer,"%i/%i",game->player_count,game->max_player);
+		spFontDraw( 2+LL_MOM_PLAYER*ll_surface->w/LL_SURFACE_DIV, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );
 		switch (game->status)
 		{
 			case  1: sprintf(buffer,"Running"); break;
@@ -74,7 +75,7 @@ void update_ll_surface()
 			}
 			default: sprintf(buffer,"Open");
 		}
-		spFontDraw( 2+13*ll_surface->w/16, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );
+		spFontDraw( 2+LL_STATUS*ll_surface->w/LL_SURFACE_DIV, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );
 		game = game->next;
 		pos++;
 	}
@@ -118,8 +119,7 @@ void ll_draw(void)
 
 	if (ll_game_count > 0 && mom_game)
 	{
-		sprintf(buffer,"Players of %s",mom_game->name);
-		spFontDrawMiddle(5*screen->w/6+4, 2*ll_font->maxheight+screen->w/3-6, 0, buffer, ll_font );
+		spFontDrawMiddle(5*screen->w/6+4, 2*ll_font->maxheight+screen->w/3-6, 0, "Players", ll_font );
 		spRectangle(5*screen->w/6, screen->h-1*ll_font->maxheight-h/2, 0,screen->w/3-6,h,LL_FG);
 		spFontDrawTextBlock(middle,4*screen->w/6+5, screen->h-1*ll_font->maxheight-h-1, 0,ll_block,h+2,0,ll_font);
 	}

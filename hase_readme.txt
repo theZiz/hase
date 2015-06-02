@@ -8,6 +8,14 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.10:
+- Bug fix for building stuff on the border (thx @ sheepluva)
+- No zig zag in background for waiting for turn data
+- Fixed a bug about a flickering screen while entering chat messages
+- Removed the "Prototype" in the gcw description
+- More space for the game names in the game list in the lobby
+- Added warning sound if turn begins
+
 1.5.4.9:
 - Fixed two crash bugs on resizing
 - Added a logo made by comradekingu

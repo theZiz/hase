@@ -66,6 +66,7 @@ pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, in
 	window->text_box_char = NULL;
 	window->text_box_len = 0;
 	window->cancel_to_no = 0;
+	window->zig_zag = 1;
 	return window;
 }
 
@@ -108,9 +109,12 @@ void window_draw(void)
 	SDL_Surface* screen = spGetWindowSurface();
 	if (recent_window->oldScreen)
 		spBlitSurface(screen->w/2,screen->h/2,0,recent_window->oldScreen);
-	spSetPattern8(153,60,102,195,153,60,102,195);
-	spRectangle(screen->w/2,screen->h/2,0,screen->w,screen->h,LL_BG);
-	spDeactivatePattern();
+	if (recent_window->zig_zag)
+	{
+		spSetPattern8(153,60,102,195,153,60,102,195);
+		spRectangle(screen->w/2,screen->h/2,0,screen->w,screen->h,LL_BG);
+		spDeactivatePattern();
+	}
 
 	if (spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
 		spBlitSurface(screen->w/2,screen->h-spGetVirtualKeyboard()->h/2,0,spGetVirtualKeyboard());
@@ -125,6 +129,8 @@ void window_draw(void)
 		extra_y += logo->h/2;
 		spBlitSurface(screen->w/2,screen->h/2 - extra_y * 2,0,logo);
 	}
+	if (recent_window->zig_zag == 0)
+		extra_y -= spGetWindowSurface()->h/4;
 	
 	spRectangle(screen->w/2,screen->h/2 + extra_y,0,window->width-2*meow,window->height-2*meow,LL_BG);
 	spRectangleBorder(screen->w/2,screen->h/2 + extra_y,0,window->width,window->height,meow,meow,LL_FG);
@@ -628,6 +634,7 @@ int set_message(spFontPointer font, char* caption)
 		delete_window(mg_window);
 	mg_window = create_window(NULL,font,caption);
 	mg_window->do_flip = 0;
+	mg_window->zig_zag = 0;
 }
 
 void message_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption)

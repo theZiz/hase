@@ -498,6 +498,8 @@ void real_next_player()
 	update_targeting();
 	start_thread();
 	spSoundPause(0,-1);
+	if (player[active_player]->local)
+		spSoundPlay(snd_turn,-1,0,0,-1);
 }
 
 void check_next_player()

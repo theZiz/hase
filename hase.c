@@ -23,6 +23,7 @@ spSound* snd_beep;
 spSound* snd_high;
 spSound* snd_low;
 spSound* snd_shoot;
+spSound* snd_turn;
 
 spFontPointer font;
 spFontPointer font_dark;
@@ -813,6 +814,7 @@ int calc(Uint32 steps)
 		spMapSetByID(MAP_CHAT,0);
 		spMapSetMapSet(0);
 		chatWindow = create_text_box(font,hase_resize,"Enter Message:",chatMessage,256,0,NULL,1);
+		chatWindow->do_flip = 0;
 		set_recent_window(chatWindow);
 		spMapSetMapSet(1);
 	}
@@ -1350,9 +1352,13 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	snd_high = spSoundLoad("./sounds/high_jump.wav");
 	snd_low = spSoundLoad("./sounds/short_jump.wav");
 	snd_shoot = spSoundLoad("./sounds/plop.wav");
+	snd_turn = spSoundLoad("./sounds/your_turn.wav");
 	
 	spMapSetMapSet(1);
 	
+	if (player[active_player]->local)
+		spSoundPlay(snd_turn,-1,0,0,-1);
+
 	int result = spLoop(draw,calc,10,resize,NULL);
 	
 	spMapSetMapSet(0);
@@ -1364,6 +1370,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	spSoundDelete(snd_high);
 	spSoundDelete(snd_low);
 	spSoundDelete(snd_shoot);
+	spSoundDelete(snd_turn);
 
 	stop_thread(result < 2);
 	if (result == 2)
