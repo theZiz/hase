@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="9"/>
+<version major="1" minor="5" release="4" build="10"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,16 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.5.4.10:
+- Bug fix for building stuff on the border (thx @ sheepluva)
+- No zig zag in background for waiting for turn data
+- Fixed a bug about a flickering screen while entering chat messages
+- Removed the "Prototype" in the gcw description
+- More space for the game names in the game list in the lobby
+- Added warning sound if turn begins
+- Redrawing the level border every time
+- Added new sprite (thx @ Holysmoke)
 
 1.5.4.9:
 - Fixed two crash bugs on resizing
@@ -244,7 +254,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="9" type="release"/>
+<version major="1" minor="5" release="4" build="10" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
