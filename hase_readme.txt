@@ -15,6 +15,8 @@ Changelog
 - Removed the "Prototype" in the gcw description
 - More space for the game names in the game list in the lobby
 - Added warning sound if turn begins
+- Redrawing the level border every time
+- Added new sprite (thx @ Holysmoke)
 
 1.5.4.9:
 - Fixed two crash bugs on resizing

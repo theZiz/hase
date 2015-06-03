@@ -381,7 +381,7 @@ void bullet_impact(int X,int Y,int radius)
 	                  2*(radius+(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION)));
 	spSetHorizontalOrigin(SP_CENTER);
 	spSetVerticalOrigin(SP_CENTER);
-	//spBlitSurface(LEVEL_WIDTH/2,LEVEL_HEIGHT/2,0,level_original);
+	spRectangleBorder(LEVEL_WIDTH/2,LEVEL_HEIGHT/2,0,LEVEL_WIDTH,LEVEL_HEIGHT,4,4,BORDER_COLOR);
 	end = SDL_GetTicks();
 	printf("  Blitting: %i\n",end-begin);
 	begin=end;
