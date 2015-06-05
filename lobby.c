@@ -20,6 +20,8 @@ spFontPointer font_dark = NULL;
 #define FONT_FG spGetRGB(220,220,220)
 #define FONT_DARK_FG spGetRGB(110,110,110)
 
+spTextBlockPointer lg_chat_block;
+
 void resize( Uint16 w, Uint16 h )
 {
 	screen = spGetWindowSurface();
@@ -28,6 +30,9 @@ void resize( Uint16 w, Uint16 h )
 	//Font Loading
 	if ( font )
 	{
+		if (lg_chat_block)
+			spDeleteTextBlock(lg_chat_block);
+		lg_chat_block = NULL;
 		if (spGetSizeFactor() > SP_ONE)
 		{
 			spFontReload( font     , "./data/DejaVuSans-Bold.ttf", 8 * spGetSizeFactor() >> SP_ACCURACY);
@@ -94,8 +99,12 @@ void resize( Uint16 w, Uint16 h )
 	spFontAddArrowButton( font, 'v', SP_BUTTON_ARROW_DOWN, BUTTON_FG, BUTTON_BG );
 	spFontMulWidth(font,spFloatToFixed(0.9f));
 	spFontMulWidth(font_dark,spFloatToFixed(0.9f));
-
-	spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_IF_NEEDED,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
+	
+	#ifdef GCW_FEELING
+		spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_ALWAYS,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
+	#else
+		spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_IF_NEEDED,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
+	#endif
 	spSetVirtualKeyboardBackspaceButton( spMapPoolByID(MAP_VIEW) );
 	if (spGetSizeFactor() <= SP_ONE)
 	{
@@ -177,8 +186,11 @@ int main(int argc, char **argv)
 {
 	srand(time(NULL));
 	spSetRand(time(NULL));
-	//spSetDefaultWindowSize( 320, 240 );
-	spSetDefaultWindowSize( 800, 480 );
+	#ifdef GCW_FEELING
+		spSetDefaultWindowSize( 320, 240 );
+	#else
+		spSetDefaultWindowSize( 800, 480 );
+	#endif
 	spInitCore();
 	spSetReturnBehavior(1,0);
 	spInitNet();

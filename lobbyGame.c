@@ -60,7 +60,7 @@ void lg_draw(void)
 	int h = l_w-7*lg_font->maxheight;
 	spRectangle(screen->w-4-w/2, 6*lg_font->maxheight+h/2-1, 0,w,h,LL_FG);
 	if (lg_block)
-		spFontDrawTextBlock(middle,screen->w-w-4, 6*lg_font->maxheight-1, 0,lg_block,h,0,NULL);
+		spFontDrawTextBlock(middle,screen->w-w-4, 6*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
 	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "{weapon}Add player  {view}Remove player", lg_font );
 	if (lg_player)
