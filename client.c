@@ -1140,6 +1140,8 @@ void start_irc_client(char* name)
 	server = spNetIRCConnectServer(irc_server,irc_port,buffer,buffer2,name,"*");
 }
 
+int last_query_time = 0;
+
 void try_to_join()
 {
 	if (channel == NULL && server && spNetIRCServerReady(server))
@@ -1156,9 +1158,20 @@ void try_to_join()
 			{
 				if (c != channel && c->close_query == 0)
 				{
-					printf("%s\n",c->name);
-					spNetIRCSendMessage(server,c,"[Automatic reply] This User is within the game \"Hase\" online, which doesn't support queries. The user will not see your message!");
-					spNetIRCPartChannel(server,c);
+					int now = time(NULL);
+					if (last_query_time < now - 60)
+					{
+						if (c->last_read_message == NULL)
+							c->last_read_message = c->first_message;
+						while (c->last_read_message)
+						{
+							printf("%i Got message from %s: %s\n",now,c->last_read_message->user,c->last_read_message->message);
+							c->last_read_message = c->last_read_message->next;
+						}
+						spNetIRCSendMessage(server,c,"[Automatic reply] This User is within the game \"Hase\" online, which doesn't support queries. The user will not see your message!");
+						spNetIRCPartChannel(server,c);
+						last_query_time = now;
+					}
 					break;
 				}
 				c = c->next;
