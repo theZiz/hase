@@ -8,6 +8,11 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.11:
+- Second local player got kicked in an online game and went Zombie
+- Message, if the client becomes a zombie for the other players
+- Fixed a bug about resizing the game window
+
 1.5.4.10:
 - Bug fix for building stuff on the border (thx @ sheepluva)
 - No zig zag in background for waiting for turn data

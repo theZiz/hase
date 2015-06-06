@@ -140,7 +140,7 @@ void set_level(pGame game,char* level_string);
 int push_game(pPlayer player,int second_of_player,void* data);
 void push_game_thread(pPlayer player,int second_of_player,void* data);
 void start_push_thread();
-void end_push_thread(int kill);
+int end_push_thread(int kill);
 
 int pull_game(pPlayer player,int second_of_player,void* data);
 int pull_game_thread(pPlayer player,int second_of_player,void* data);

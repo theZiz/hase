@@ -347,6 +347,7 @@ int lg_calc(Uint32 steps)
 				else
 				{
 					lg_last_player = lg_last_player->next;
+					start_heartbeat(lg_last_player);
 					lg_counter = LG_WAIT;
 				}
 			}
@@ -380,6 +381,7 @@ int lg_calc(Uint32 steps)
 					pPlayer n = p->next;
 					if (l == NULL && n == NULL) //no prev, no next
 						return 1;
+					stop_heartbeat(p);
 					leave_game(p);
 					lg_counter = LG_WAIT;
 					if (l)
@@ -530,12 +532,12 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		if (res == 2)
 			hase(lg_resize,lg_game,lg_player);
 
-		if (!spectate && !lg_game->local)
-			stop_heartbeat(lg_player);
 
 		while (lg_player)
 		{
 			pPlayer next = lg_player->next;
+			if (!spectate && !lg_game->local)
+				stop_heartbeat(lg_player);
 			leave_game(lg_player);
 			lg_player = next;
 		}

@@ -958,7 +958,8 @@ int calc(Uint32 steps)
 		}
 		if (bullet_alpha() > 0)
 			continue;
-		check_next_player();
+		if (check_next_player())
+			return 3;
 		if (player[active_player]->weapon_points)
 			countdown--;
 		if (countdown == 5000 && speed == 1)
@@ -1373,6 +1374,8 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	spSoundDelete(snd_turn);
 
 	stop_thread(result < 2);
+	if (result == 3)
+		message_box(font,hase_resize,"You got disconnected!");
 	if (result == 2)
 	{
 		int i;

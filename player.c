@@ -402,8 +402,9 @@ void next_player()
 	next_player_go = 1;
 }
 
-void stop_thread(int kill)
+int stop_thread(int kill)
 {
+	int result = 0;
 	if (!hase_game->local && active_player >= 0)
 	{
 		if (!player[active_player]->computer)
@@ -418,7 +419,7 @@ void stop_thread(int kill)
 				spFlip();
 				push_game_thread(player[active_player],player[active_player]->time/1000,send_data);
 				memset(send_data,0,sizeof(char)*1536);
-				end_push_thread(kill);
+				result = end_push_thread(kill);
 				spResetLoop();
 			}
 			else
@@ -429,7 +430,8 @@ void stop_thread(int kill)
 		}
 		printf("Setting time of %s from %i to %i\n",player[active_player]->name,player[active_player]->time,((player[active_player]->time+999)/1000)*1000);
 		player[active_player]->time = ((player[active_player]->time+999)/1000)*1000;
-	}	
+	}
+	return result;
 }
 
 void start_thread()
@@ -455,10 +457,10 @@ void start_thread()
 
 pItem dropItem = NULL;
 
-void real_next_player()
+int real_next_player()
 {
 	spSoundPause(1,-1);
-	stop_thread(0);
+	int result = stop_thread(0);
 	int j;
 	for (j = 0; j < hase_game->player_count; j++)
 		if (player[j]->activeHare == NULL)
@@ -500,15 +502,18 @@ void real_next_player()
 	spSoundPause(0,-1);
 	if (player[active_player]->local)
 		spSoundPlay(snd_turn,-1,0,0,-1);
+	return result;
 }
 
-void check_next_player()
+int check_next_player()
 {
+	int result = 0;
 	if (next_player_go && bullet_alpha() == 0)
 	{
 		next_player_go = 0;
-		real_next_player();
+		result = real_next_player();
 	}
+	return result;
 }
 
 pHare add_hare(pHare* firstHare)

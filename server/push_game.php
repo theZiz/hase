@@ -25,6 +25,14 @@ if ($row['player_pw'] == $player_pw)
 	"VALUES ( '$game_id', '$player_id', '$second_of_player', '$data' )";
 	mysql_query($query) or die;
 }
+$now = time();
+if ($row['heartbeat_time'] < $now-60) //killed...
+{
+	$query = "UPDATE " . $mysql_prefix . "player_list SET status='-2' WHERE game_id = '$game_id' AND player_id = '$player_id'";
+	mysql_query($query) or die;		
+	echo "Error: 1";
+}
+else
 if ($row['status'] == -2) //killed...
 	echo "Error: 1";
 else

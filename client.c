@@ -890,8 +890,11 @@ int push_game(pPlayer player,int second_of_player,void* data)
 	deleteMessage(&message);
 	if (result)
 	{
+		int r = 0;
+		if (atoi(result->content) == 1) //kicked!
+			r = 2;
 		deleteMessage(&result);
-		return 0;
+		return r;
 	}
 	return 1; //Error!
 }
@@ -912,8 +915,11 @@ int push_thread_function(void* data)
 			if (push_message != -2)
 				for (; i < 3; i++)
 				{
-					if (push_game(thread_data->player,thread_data->second_of_player,thread_data->data) == 0)
+					int r = push_game(thread_data->player,thread_data->second_of_player,thread_data->data);
+					if (r == 0)
 						break;
+					if (r == 2)
+						return 1;
 				}
 			if (i == 3)
 				printf("BIG PANIC at second %i!\n",thread_data->second_of_player);
@@ -963,7 +969,7 @@ void start_push_thread()
 	push_thread = SDL_CreateThread(push_thread_function,NULL);
 }
 
-void end_push_thread(int kill)
+int end_push_thread(int kill)
 {
 	if (kill)
 		push_message = -2;
@@ -974,6 +980,7 @@ void end_push_thread(int kill)
 	SDL_DestroyMutex(push_mutex);
 	push_mutex = NULL;
 	push_thread = NULL;
+	return result;
 }
 
 int pull_game(pPlayer player,int second_of_player,void* data)
