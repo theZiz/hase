@@ -347,7 +347,8 @@ int lg_calc(Uint32 steps)
 				else
 				{
 					lg_last_player = lg_last_player->next;
-					start_heartbeat(lg_last_player);
+					if (!lg_game->local)
+						start_heartbeat(lg_last_player);
 					lg_counter = LG_WAIT;
 				}
 			}
@@ -381,7 +382,8 @@ int lg_calc(Uint32 steps)
 					pPlayer n = p->next;
 					if (l == NULL && n == NULL) //no prev, no next
 						return 1;
-					stop_heartbeat(p);
+					if (!lg_game->local)
+						stop_heartbeat(p);
 					leave_game(p);
 					lg_counter = LG_WAIT;
 					if (l)
