@@ -8,6 +8,9 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.12:
+- Fixed a bug for local hotseat playing, which caused the game to crash
+
 1.5.4.11:
 - Second local player got kicked in an online game and went Zombie
 - Message, if the client becomes a zombie for the other players

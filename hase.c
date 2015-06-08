@@ -50,6 +50,7 @@ int wp_choose = 0;
 int map_w,map_h,map_size;
 
 int speed = 1;
+int winter;
 
 #define INPUT_AXIS_0_LEFT 0
 #define INPUT_AXIS_0_RIGHT 1
@@ -1230,6 +1231,28 @@ int calc(Uint32 steps)
 			continue;
 		}
 	}
+	//Add snow
+	if (winter && gop_particles() < 4)
+	{
+		int c = (steps << 2) >> gop_particles();
+		spParticleBunchPointer p = spParticleCreate(c,hare_explosion_feedback,&particles);
+		int i;
+		for (i = 0; i < c; i++)
+		{
+			p->particle[i].x = rand() % LEVEL_WIDTH << SP_ACCURACY;
+			p->particle[i].y = rand() % LEVEL_HEIGHT << SP_ACCURACY;
+			p->particle[i].z = 0;
+			p->particle[i].dx = 0;
+			p->particle[i].dy = 0;
+			p->particle[i].dz = 0;
+			p->particle[i].data.color = 65535;
+			/*if (gravitation_force(p->particle[i].x >> SP_ACCURACY,p->particle[i].y >> SP_ACCURACY) == 0 ||
+				gravitation_force(p->particle[i].x >> SP_ACCURACY,p->particle[i].y >> SP_ACCURACY) > SP_ONE/2)
+				p->particle[i].status = -1;
+			else*/
+				p->particle[i].status = 0;
+		}		
+	}
 	#ifdef PROFILE
 		calc_time = SDL_GetTicks() - start_time;
 	#endif
@@ -1279,6 +1302,14 @@ void update_map()
 
 int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 {
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+	if (tm.tm_mon == 11 &&
+		tm.tm_mday >= 24 &&
+		tm.tm_mday <= 26)
+		winter = 1;
+	else
+		winter = 0;
 	screen = spGetWindowSurface();
 	chatWindow = NULL;
 	chatMessage[0] = 0;
