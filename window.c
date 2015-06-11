@@ -40,7 +40,7 @@ void update_window_width(pWindow window)
 		window->width = spMax(window->width,elem->width+(spGetSizeFactor()*4 >> SP_ACCURACY)*2);
 		elem = elem->next;
 	}
-	window->width = spMax(spGetWindowSurface()->w/2,spMin(window->width,spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)));
+	window->width = spMax(spGetWindowSurface()->w*3/4,spMin(window->width,spGetWindowSurface()->w-(spGetSizeFactor()*4 >> SP_ACCURACY)));
 }
 
 #define SMALL_HACK ((spGetSizeFactor() <= SP_ONE)?4:0)
@@ -218,7 +218,7 @@ void window_draw(void)
 								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}/{shoot}Back", window->font );
 							else
 							if (window->insult_button)
-								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Okay {shoot}Cancel {weapon}Insult", window->font );
+								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Letter {view}<- {chat}Ok {shoot}Cancel {weapon}Insult", window->font );
 							else
 								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Okay {shoot}Cancel", window->font );
 						}

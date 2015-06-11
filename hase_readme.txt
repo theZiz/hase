@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.13:
+- Fixed a bug, which made the heartbeat function run forever
+- Fixed ingame chat for devices with onscreen keyboard like GCW
+
 1.5.4.12:
 - Fixed a bug for local hotseat playing, which caused the game to crash
 

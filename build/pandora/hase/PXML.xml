@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="12"/>
+<version major="1" minor="5" release="4" build="13"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.5.4.13:
+- Fixed a bug, which made the heartbeat function run forever
+- Fixed ingame chat for devices with onscreen keyboard like GCW
 
 1.5.4.12:
 - Fixed a bug for local hotseat playing, which caused the game to crash
@@ -262,7 +266,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="12" type="release"/>
+<version major="1" minor="5" release="4" build="13" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

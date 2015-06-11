@@ -51,8 +51,6 @@ typedef struct sGame
 	int local;
 	pPlayer local_player;
 	int local_counter;
-	int heartbeat_message;
-	SDL_Thread* heartbeat_thread;
 	int sprite_count[SPRITE_COUNT];
 } tGame;
 
@@ -115,6 +113,9 @@ typedef struct sPlayer
 	int weapon_points;
 	int next_round_extra;
 	int kicked;
+	SDL_Thread* heartbeat_thread;
+	int heartbeat_message;
+
 } tPlayer;
 
 typedef struct sThreadData

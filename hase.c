@@ -805,8 +805,6 @@ int calc(Uint32 steps)
 			delete_window(chatWindow);
 			chatWindow = NULL;
 		}
-		spResetButtonsState();
-		spResetAxisState();
 		spMapSetMapSet(1);
 	}
 	

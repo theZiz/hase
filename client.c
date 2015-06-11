@@ -420,8 +420,6 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 			return NULL;
 	}
 	pGame game = (pGame)malloc(sizeof(tGame));
-	game->heartbeat_message = 0;
-	game->heartbeat_thread = NULL;
 	game->id = -1;
 	sprintf(game->name,"%s",game_name);
 	sprintf(game->level_string,"%s",level_string);
@@ -512,8 +510,6 @@ int get_games(pGame *gameList)
 				*gameList = (pGame)malloc(sizeof(tGame));
 				game = *gameList;
 			}
-			game->heartbeat_message = 0;
-			game->heartbeat_thread = NULL;
 			game->id = atoi(now->content);
 			game->name[0] = 0;
 			game->level_string[0] = 0;
@@ -602,6 +598,8 @@ pPlayer join_game(pGame game,char* name,int ai,int nr)
 	player->input_mutex = NULL;
 	player->input_thread = NULL;
 	player->nr = nr;
+	player->heartbeat_thread = NULL;
+	player->heartbeat_message = 0;
 	pMessage now = result;
 	while (now)
 	{
@@ -646,6 +644,8 @@ pPlayer join_game(pGame game,char* name,int ai,int nr)
 		new_player->input_thread = NULL;
 		new_player->nr = nr;
 		new_player->next = game->local_player;
+		new_player->heartbeat_thread = NULL;
+		new_player->heartbeat_message = 0;
 		game->local_player = new_player;
 	}
 	game->sprite_count[nr-1]++;
@@ -741,6 +741,8 @@ int get_game(pGame game,pPlayer *playerList)
 					player->input_message = 0;
 					player->input_mutex = NULL;
 					player->input_thread = NULL;
+					player->heartbeat_thread = NULL;
+					player->heartbeat_message = 0;
 				}
 				if (strcmp(now->name,"player_name") == 0)
 					sprintf(player->name,"%s",now->content);
@@ -801,7 +803,9 @@ int get_game(pGame game,pPlayer *playerList)
 			player->last_input_data_write = NULL;
 			player->input_message = 0;
 			player->input_mutex = NULL;
-			player->input_thread = NULL;			
+			player->input_thread = NULL;
+			player->heartbeat_thread = NULL;
+			player->heartbeat_message = 0;
 			mom_player = mom_player->next;
 			game->player_count++;
 		}
@@ -1237,11 +1241,11 @@ void heartbeat(pPlayer player)
 int heartbeat_thread_function(void* data)
 {
 	pPlayer player = data;
-	while (player->game->heartbeat_message != -1)
+	while (player->heartbeat_message != -1)
 	{
 		heartbeat(player);
 		int count = 0;
-		while (count < 50 && player->game->heartbeat_message == 0)
+		while (count < 50 && player->heartbeat_message == 0)
 		{
 			spSleep(100000);
 			count++;
@@ -1252,16 +1256,16 @@ int heartbeat_thread_function(void* data)
 
 void start_heartbeat(pPlayer player)
 {
-	player->game->heartbeat_message = 0;
-	player->game->heartbeat_thread = SDL_CreateThread(heartbeat_thread_function,(void*)player);	
+	player->heartbeat_message = 0;
+	player->heartbeat_thread = SDL_CreateThread(heartbeat_thread_function,(void*)player);	
 }
 
 void stop_heartbeat(pPlayer player)
 {
-	player->game->heartbeat_message = -1;
+	player->heartbeat_message = -1;
 	int result;
-	SDL_WaitThread(player->game->heartbeat_thread,&(result));
-	player->game->heartbeat_thread = NULL;
+	SDL_WaitThread(player->heartbeat_thread,&(result));
+	player->heartbeat_thread = NULL;
 }
 
 char* ingame_message(char* message,char* game_name)
