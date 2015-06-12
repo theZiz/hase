@@ -24,7 +24,7 @@ if ($row['status'] == -2) //killed...
 else
 {
 	$now = time();
-	if ($row['heartbeat_time'] < $now-60) //killed...
+	if ($row['heartbeat_time'] < $now-90) //killed...
 	{
 		$query = "UPDATE " . $mysql_prefix . "player_list SET status='-2' WHERE game_id = '$game_id' AND player_id = '$player_id'";
 		mysql_query($query) or die;		
@@ -34,8 +34,17 @@ else
 	{
 		if ($row['player_pw'] == $player_pw)
 		{
+			//saving push
 			$query = "INSERT INTO " . $mysql_prefix . "data_list (game_id, player_id, second_of_player, data) ".
 			"VALUES ( '$game_id', '$player_id', '$second_of_player', '$data' )";
+			mysql_query($query) or die;
+
+			//player heartbeat
+			$query = "UPDATE " . $mysql_prefix . "player_list SET heartbeat_time='$now' WHERE game_id = '$game_id' AND player_id = '$player_id'";
+			mysql_query($query) or die;
+
+			//game heartbeat
+			$query = "UPDATE " . $mysql_prefix . "game_list SET create_date='$now' WHERE game_id = '$game_id'";
 			mysql_query($query) or die;
 		}	
 		echo "Error: 0";

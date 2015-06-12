@@ -635,6 +635,8 @@ void get_ms_from_data(int ms)
 	}
 }
 
+int last_heartbeat_diff;
+
 void set_input()
 {
 	if (player[active_player]->computer)
@@ -728,7 +730,16 @@ void set_input()
 			if (game_pause)
 			{
 				char buffer[256];
-				sprintf(buffer,"Waiting for turn data\nfrom player %s...",player[active_player]->name);
+				if (last_heartbeat_diff < 0)
+					sprintf(buffer,"Waiting for turn data\nfrom player %s...\n(Player status unknown)",player[active_player]->name);
+				else
+				if (last_heartbeat_diff < 15)
+					sprintf(buffer,"Waiting for turn data\nfrom player %s...\n(Player is alive, be patient)",player[active_player]->name);
+				else
+				if (last_heartbeat_diff < 90)
+					sprintf(buffer,"Waiting for turn data\nfrom player %s...\n(Last vital sign %i seconds ago, kick at 90)",player[active_player]->name,last_heartbeat_diff);
+				else
+					sprintf(buffer,"Waiting for turn data\nfrom player %s...",player[active_player]->name);				
 				set_message(font,buffer);
 			}	
 		}

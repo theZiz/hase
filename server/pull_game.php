@@ -11,41 +11,50 @@ $second_of_player = (int)$_POST['second_of_player'];
 $query = "SELECT data FROM " . $mysql_prefix . "data_list WHERE ".
 "game_id = '$game_id' AND player_id = '$player_id' AND second_of_player = '$second_of_player'";
 $result = mysql_query($query) or die;
+
+$heartbeat_diff = 0;
+
 if (mysql_num_rows($result) > 0)
 {
 	$row = mysql_fetch_assoc( $result );
-	header("Content-length: 1539");
+	header("Content-length: 1543");
 	echo 'ACK';
 	$data = $row['data'];
 	echo $data;
+
+	$query = "SELECT * FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
+	$result = mysql_query($query) or die;
+	$row = mysql_fetch_assoc( $result );
+	$now = time();
+	$heartbeat_diff = $now - $row['heartbeat_time'];
 }
 else
 {
 	$query = "SELECT * FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
 	$result = mysql_query($query) or die;
 	$row = mysql_fetch_assoc( $result );
+
+	$now = time();
+	$heartbeat_diff = $now - $row['heartbeat_time'];
+
 	if ($row['status'] < 0)
 	{
-		header("Content-length: 3");
+		header("Content-length: 7");
 		echo 'NUL';
 	}
 	else
 	{
 		//Okay, not found. Maybe is the player dead?
-		$now = time();
-		$query = "SELECT * FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id' AND  player_id = '$player_id'";
-		$result = mysql_query($query) or die;
-		$row = mysql_fetch_assoc( $result );
-		if ($row['heartbeat_time'] < $now-60) //one minute no reaction
+		if ($heartbeat_diff > 90) //two minutes no reaction
 		{
 			$query = "UPDATE " . $mysql_prefix . "player_list SET status='-2' WHERE game_id = '$game_id' AND player_id = '$player_id'";
 			mysql_query($query) or die;		
 			//this will work on next pull
 		}
-		header("Content-length: 3");
+		header("Content-length: 7");
 		echo 'ERR';
 	}
 }
-
+echo pack("l", $heartbeat_diff);
 mysql_close($connection);
 ?>

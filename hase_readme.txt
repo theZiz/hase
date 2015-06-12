@@ -8,6 +8,9 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.14:
+- Showing the connection status of players while waiting for their turn
+
 1.5.4.13:
 - Fixed a bug, which made the heartbeat function run forever
 - Fixed ingame chat for devices with onscreen keyboard like GCW

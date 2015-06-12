@@ -38,6 +38,8 @@ void deleteMessage(pMessage *message)
 #define INPUT_COMPRESSION
 #endif
 
+int last_heartbeat_diff = -1;
+
 pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,char* dest,char* server)
 {
 	char boundary[17] = "A9B8C7D6E5F4G3H2"; //This should maybe random...
@@ -305,7 +307,6 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	else
 	#endif
 		buffer = in_buffer;
-	
 	//printf("%s\n",&buffer[pos]);
 	
 	if (direction == -1) //incoming file
@@ -315,22 +316,29 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			buffer[pos+3] == 'K')
 		{
 			memcpy(binary,&buffer[pos+4],count);
+			last_heartbeat_diff = *((int*)(&buffer[pos+4+count]));
 			pMessage result = NULL;
 			numToMessage(&result,"Okay",1);
 			return result;
 		}
-		else
 		if (buffer[pos+1] == 'N' &&
 			buffer[pos+2] == 'U' &&
 			buffer[pos+3] == 'L')
 		{
 			memset(binary,1+2+16+32,count);
+			last_heartbeat_diff = (int)(buffer[pos+4]);
 			pMessage result = NULL;
 			numToMessage(&result,"Kicked",1);
 			return result;
 		}
-		else
+		if (buffer[pos+1] == 'E' &&
+			buffer[pos+2] == 'R' &&
+			buffer[pos+3] == 'R')
+		{
+			last_heartbeat_diff = (int)(buffer[pos+4]);
 			return NULL;
+		}
+		return NULL;
 	}
 	//Parsing in init style
 	pMessage result = NULL;
@@ -1016,6 +1024,7 @@ int pull_game(pPlayer player,int second_of_player,void* data)
 
 int pull_thread_function(void* data)
 {
+	last_heartbeat_diff = -1;
 	pPlayer player = data;
 	if (player->kicked)
 		return 0;
@@ -1244,12 +1253,9 @@ int heartbeat_thread_function(void* data)
 	while (player->heartbeat_message != -1)
 	{
 		heartbeat(player);
-		int count = 0;
-		while (count < 50 && player->heartbeat_message == 0)
-		{
+		int start = SDL_GetTicks();
+		while (SDL_GetTicks() - start < 10000 && player->heartbeat_message != -1)
 			spSleep(100000);
-			count++;
-		}
 	}
 	return 0;
 }

@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="13"/>
+<version major="1" minor="5" release="4" build="14"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,9 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.5.4.14:
+- Showing the connection status of players while waiting for their turn
 
 1.5.4.13:
 - Fixed a bug, which made the heartbeat function run forever
@@ -266,7 +269,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="13" type="release"/>
+<version major="1" minor="5" release="4" build="14" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->
