@@ -361,6 +361,9 @@ void bullet_impact(int X,int Y,int radius)
 					angle = 0;
 				spBlitSurfacePart(x<<GRAVITY_RESOLUTION,y<<GRAVITY_RESOLUTION,0,
 								  gravity_surface,angle<<GRAVITY_RESOLUTION+1,f<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1,1<<GRAVITY_RESOLUTION+1);
+				/*spSetBlending(SP_ONE/2);
+				spRectangle(x<<GRAVITY_RESOLUTION,y<<GRAVITY_RESOLUTION,0,1<<GRAVITY_RESOLUTION,1<<GRAVITY_RESOLUTION,12345);
+				spSetBlending(SP_ONE);*/
 			}
 		}
 	}
@@ -372,13 +375,19 @@ void bullet_impact(int X,int Y,int radius)
 	spSetHorizontalOrigin(SP_LEFT);
 	spSetVerticalOrigin(SP_TOP);
 	spSetAlphaTest(1);
-	spBlitSurfacePart(X-radius-(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION),
-	                  Y-radius-(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION),
+	spBlitSurfacePart(X-radius-(GRAVITY_CIRCLE + 4 << GRAVITY_RESOLUTION),
+	                  Y-radius-(GRAVITY_CIRCLE + 4 << GRAVITY_RESOLUTION),
 	                  0,level_original,
-	                  X-radius-(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION),
-	                  Y-radius-(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION),
-	                  2*(radius+(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION)),
-	                  2*(radius+(GRAVITY_CIRCLE + 2 << GRAVITY_RESOLUTION)));
+	                  X-radius-(GRAVITY_CIRCLE + 4 << GRAVITY_RESOLUTION),
+	                  Y-radius-(GRAVITY_CIRCLE + 4 << GRAVITY_RESOLUTION),
+	                  2*(radius+(GRAVITY_CIRCLE + 8 << GRAVITY_RESOLUTION)),
+	                  2*(radius+(GRAVITY_CIRCLE + 8 << GRAVITY_RESOLUTION)));
+	/*spSetBlending(SP_ONE/2);
+	spRectangle(X-radius-(GRAVITY_CIRCLE + 3 << GRAVITY_RESOLUTION),
+	                  Y-radius-(GRAVITY_CIRCLE + 3 << GRAVITY_RESOLUTION),
+	                  0,2*(radius+(GRAVITY_CIRCLE + 6 << GRAVITY_RESOLUTION)),
+	                  2*(radius+(GRAVITY_CIRCLE + 6 << GRAVITY_RESOLUTION)),54321);
+	spSetBlending(SP_ONE);*/
 	spSetHorizontalOrigin(SP_CENTER);
 	spSetVerticalOrigin(SP_CENTER);
 	spRectangleBorder(LEVEL_WIDTH/2,LEVEL_HEIGHT/2,0,LEVEL_WIDTH,LEVEL_HEIGHT,4,4,BORDER_COLOR);
