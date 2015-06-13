@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.15:
+- Fixed the ghost arrow bug
+- Static linking of hase to remove the need for LD_LIBRARY_PATH
+
 1.5.4.14:
 - Showing the connection status of players while waiting for their turn
 
