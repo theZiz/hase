@@ -13,7 +13,7 @@ export SDL_AUDIODRIVER="alsa"
 #echo absolute > /proc/pandora/nub0/mode
 #echo absolute > /proc/pandora/nub1/mode
 
-LD_LIBRARY_PATH=. ./hase $*
+./hase $*
 
 #cat /tmp/nub0mode_before_hase > /proc/pandora/nub0/mode
 #cat /tmp/nub1mode_before_hase > /proc/pandora/nub1/mode

@@ -6,9 +6,9 @@ FLAGS = -g -DDESKTOP $(GENERAL_TWEAKS)
 SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
-SPARROW3D_LIB = libsparrow3d.so
-SPARROWNET_LIB = libsparrowNet.so
-SPARROWSOUND_LIB = libsparrowSound.so
+SPARROW3D_STATIC_LIB = libsparrow3d.a
+SPARROWNET_STATIC_LIB = libsparrowNet.a
+SPARROWSOUND_STATIC_LIB = libsparrowSound.a
 
 ifdef TARGET
 include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
@@ -22,13 +22,15 @@ SPARROW_LIB = $(SPARROW_FOLDER)
 endif
 LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
-DYNAMIC += -lsparrow3d -lsparrowNet -lsparrowSound
+
+DYNAMIC += -lSDL_net
+STATIC += $(SPARROW_LIB)/$(SPARROW3D_STATIC_LIB) $(SPARROW_LIB)/$(SPARROWSOUND_STATIC_LIB) $(SPARROW_LIB)/$(SPARROWNET_STATIC_LIB)
 
 ifneq ($(TARGET),win32)
 DYNAMIC += -lz
 endif
 
-CFLAGS += $(PARAMETER) $(FLAGS)
+CFLAGS += $(PARAMETER) $(FLAGS)  -DBUILDING_DLL
 
 all: hase
 	@echo "=== Built for Target "$(TARGET)" ==="
@@ -37,15 +39,9 @@ targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
 testclient: $@.c client.o level.o
-	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
-	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
-	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
 	$(CC) $(CFLAGS) $(LINK_FLAGS) $< client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
 
 hase: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o mapping.o makeBuildDir
-	cp -u $(SPARROW_LIB)/$(SPARROW3D_LIB) $(BUILD)
-	cp -u $(SPARROW_LIB)/$(SPARROWNET_LIB) $(BUILD)
-	cp -u $(SPARROW_LIB)/$(SPARROWSOUND_LIB) $(BUILD)
 	$(CC) $(CFLAGS) $(LINK_FLAGS) $< client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o mapping.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
 
 %.o: %.c %.h

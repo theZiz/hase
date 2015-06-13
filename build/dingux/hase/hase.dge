@@ -1,2 +1,2 @@
 #!/bin/sh
-LD_LIBRARY_PATH=. ./hase > log.txt
+./hase > log.txt
