@@ -3,9 +3,9 @@ image = ./data/hase17.png
 framesize = 34, 34
 bordersize = 34, 34
 
-author = Ziz
+author = Levi
 license = CC-BY-SA
-comment = All your hares belong to us!
+comment = I am a skeletal horse, not a cow!
 
 [stand left]
 frame = 0, 0

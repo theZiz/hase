@@ -11,6 +11,9 @@ Changelog
 1.5.4.15:
 - Fixed the ghost arrow bug
 - Static linking of hase to remove the need for LD_LIBRARY_PATH
+- Added sheep sprite set (thx @ Binky)
+- Added skeletal cow err... horse sprite set (thx @ Levi)
+- New explosion sound (better and quieter)
 
 1.5.4.14:
 - Showing the connection status of players while waiting for their turn
