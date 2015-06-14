@@ -1023,7 +1023,7 @@ int calc(Uint32 steps)
 									if (player[active_player]->weapon_points > 0)
 									{
 										player[active_player]->weapon_points-=weapon_cost[WP_BIG_BAZOOKA];
-										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],WP_BIG_BAZOOKA);
+										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],WP_BIG_BAZOOKA,1);
 									}
 									break;
 								}
@@ -1123,7 +1123,7 @@ int calc(Uint32 steps)
 						input_states[INPUT_BUTTON_CANCEL] = 0;
 						player[active_player]->weapon_points-=weapon_cost[w_nr];
 						if (weapon_shoot[w_nr])
-							shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr);
+							shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
 						else
 						switch (w_nr)
 						{

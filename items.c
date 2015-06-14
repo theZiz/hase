@@ -86,7 +86,7 @@ void items_calc()
 			item->beep--;
 			if (item->beep == 0)
 			{
-				pBullet bullet = shootBullet(0,0,0,0,0,NULL,NULL,WP_MINE_BOMB);
+				pBullet bullet = shootBullet(0,0,0,0,0,NULL,NULL,WP_MINE_BOMB,0);
 				bullet->x = item->x;
 				bullet->y = item->y;
 				dead = 1;

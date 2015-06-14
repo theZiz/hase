@@ -184,11 +184,12 @@ void deleteAllBullets()
 void addToTrace(pBulletTrace* firstTrace,Sint32 x,Sint32 y,pBullet bullet);
 pBulletTrace* registerTrace(pPlayer player);
 
-pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer tracePlayer,SDL_Surface* surface,int kind)
+pBullet shootBullet(int x,int y,int direction,int power,Sint32 dr,pPlayer tracePlayer,SDL_Surface* surface,int kind,int sound)
 {
 	if (weapon_shoot[kind] != 1)
 		power = SP_ONE/2;
-	spSoundPlay(snd_shoot,-1,0,0,-1);
+	if (sound)
+		spSoundPlay(snd_shoot,-1,0,0,-1);
 	pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 	bullet->next = firstBullet;
 	firstBullet = bullet;
@@ -620,7 +621,7 @@ int updateBullets()
 									rotation -= 2*SP_PI;
 							}
 							for (j = 0; j < 5;j++)
-								shootBullet(momBullet->x,momBullet->y,rotation-SP_PI/2+SP_PI*(j-2)/16,SP_ONE/8,rand()%2*2-1,NULL,weapon_surface[WP_CLUSTER],WP_SML_BAZOOKA);
+								shootBullet(momBullet->x,momBullet->y,rotation-SP_PI/2+SP_PI*(j-2)/16,SP_ONE/8,rand()%2*2-1,NULL,weapon_surface[WP_CLUSTER],WP_SML_BAZOOKA,0);
 						}
 						if (momBullet->kind == WP_MINE)
 							items_drop(2,momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY);
