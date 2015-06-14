@@ -23,6 +23,7 @@ Changelog
 - Added sheep sprite set (thx @ Binky)
 - Added skeletal cow err... horse sprite set (thx @ Levi)
 - New explosion sound (better and quieter)
+- Improved sound of cluster bomb explosion
 
 1.5.4.14:
 - Showing the connection status of players while waiting for their turn
