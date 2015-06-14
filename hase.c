@@ -178,12 +178,25 @@ void draw_map(int px,int py)
 	}
 }
 
+typedef struct sChatLine *pChatLine;
+typedef struct sChatLine
+{
+	char line[1024];
+	spFontPointer font;
+	int t;
+	pChatLine next;
+} tChatLine;
+
+pChatLine firstChatLine = NULL;
+pChatLine lastChatLine = NULL;
+int chatLineCount = 0;
+
 void draw(void)
 {
 	#ifdef PROFILE
 		int start_time = SDL_GetTicks();
 	#endif
-	char buffer[256];
+	char buffer[4096]; //Nobody will ever use more than 4096 byte :P
 	spClearTarget(0);
 	spSetFixedOrign(posX >> SP_ACCURACY,posY >> SP_ACCURACY);
 	spSetVerticalOrigin(SP_FIXED);
@@ -320,81 +333,23 @@ void draw(void)
 		
 	//Map
 	if (gop_show_map())
-		draw_map(screen->w-map_w/2,font->maxheight+map_h/2);
+		draw_map(screen->w-map_w/2,map_h/2);
 	
 	//HID
 	int y = 0;
 	if (get_channel())
 	{
-		spNetIRCMessagePointer showing = NULL;
-		if (before_showing == NULL && get_channel()->first_message)
-			showing = get_channel()->first_message;
-		else
-		if (before_showing)
-			showing = before_showing->next;
-		int help_length = spFontWidth("{view}+{jump}Help",font);
 		time_t now = time(NULL) - 60;
-		while (showing)
+		pChatLine line = firstChatLine;
+		while (line)
 		{
-			spFontPointer used_font = NULL;
-			char* message = showing->message;
-			if (hase_game->status == -1 || //replay
-				(message = ingame_message(showing->message,hase_game->name)))
-			{
-				used_font = font;
-				sprintf(buffer,"%s: %s",showing->user,message);
-			}
-			else
-			if (gop_global_chat())
-			{
-				used_font = font_dark;
-				sprintf(buffer,"%s: %s",showing->user,showing->message);
-			}
-			if (used_font)
-			{
-				int diff = showing->time_stamp - now;
-				if (diff < 16)
+			int diff = line->t - now;
+			if (diff < 16)
 				spSetBlending(diff * SP_ONE/16);
-				char* found = buffer;
-				while (spFontWidth(found,used_font) > screen->w - help_length)
-				{
-					char* end_space = found;
-					char* last_space = NULL;
-					end_space++;
-					int was_null = 0;
-					while (end_space[0])
-					{
-						while (end_space[0] && end_space[0] != ' ')
-							end_space++;
-						if (end_space[0] == 0)
-							was_null = 1;
-						end_space[0] = 0;
-						if (spFontWidth(found,used_font) > screen->w - help_length)
-						{
-							if (!was_null)
-								end_space[0] = ' ';
-							break;
-						}
-						if (!was_null)
-							end_space[0] = ' ';
-						last_space = end_space;
-						if (!was_null)
-							end_space++;
-					}
-					if (last_space != NULL)
-						end_space = last_space;
-					end_space[0] = 0;
-					spFontDraw(2, y-used_font->maxheight/8, 0, found, used_font );
-					y += used_font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
-					found = end_space;
-					if (last_space)
-						found++;
-				}
-				spFontDraw(2, y-used_font->maxheight/8, 0, found, used_font );
-				y += used_font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
-				spSetBlending(SP_ONE);
-			}
-			showing = showing->next;
+			spFontDraw(2, y-line->font->maxheight/8, 0, line->line, line->font );
+			y += line->font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
+			spSetBlending(SP_ONE);
+			line = line->next;
 		}
 	}
 	
@@ -775,12 +730,96 @@ int calc(Uint32 steps)
 		if (before_showing)
 			showing = before_showing->next;
 		time_t now = time(NULL) - 60;
+		//Adding new chat lines
 		while (showing)
 		{
-			if (showing->time_stamp > now)
-				break;
+			char buffer[4096];
+			spFontPointer used_font = NULL;
+			char* message = showing->message;
+			if (hase_game->status == -1 || //replay
+				(message = ingame_message(showing->message,hase_game->name)))
+			{
+				used_font = font;
+				sprintf(buffer,"%s: %s",showing->user,message);
+			}
+			else
+			if (gop_global_chat())
+			{
+				used_font = font_dark;
+				sprintf(buffer,"%s: %s",showing->user,showing->message);
+			}
+			if (used_font)
+			{
+				char* found = buffer;
+				while (spFontWidth(found,used_font) > screen->w)
+				{
+					char* end_space = found;
+					char* last_space = NULL;
+					end_space++;
+					int was_null = 0;
+					while (end_space[0])
+					{
+						while (end_space[0] && end_space[0] != ' ')
+							end_space++;
+						if (end_space[0] == 0)
+							was_null = 1;
+						end_space[0] = 0;
+						if (spFontWidth(found,used_font) > screen->w)
+						{
+							if (!was_null)
+								end_space[0] = ' ';
+							break;
+						}
+						if (!was_null)
+							end_space[0] = ' ';
+						last_space = end_space;
+						if (!was_null)
+							end_space++;
+					}
+					if (last_space != NULL)
+						end_space = last_space;
+					end_space[0] = 0;
+					pChatLine line = (pChatLine)malloc(sizeof(tChatLine));
+					strncpy(line->line,found,1023);
+					line->line[1023] = 0;
+					line->font = used_font;
+					line->t = showing->time_stamp;
+					line->next = NULL;
+					if (lastChatLine)
+						lastChatLine->next = line;
+					else
+						firstChatLine = line;
+					lastChatLine = line;
+					chatLineCount++;
+					found = end_space;
+					if (last_space)
+						found++;
+				}
+				pChatLine line = (pChatLine)malloc(sizeof(tChatLine));
+				strncpy(line->line,found,1023);
+				line->line[1023] = 0;
+				line->font = used_font;
+				line->t = showing->time_stamp;
+				line->next = NULL;
+				if (lastChatLine)
+					lastChatLine->next = line;
+				else
+					firstChatLine = line;
+				lastChatLine = line;
+				chatLineCount++;
+			}
 			before_showing = showing;
 			showing = showing->next;
+		}
+		//Removing old chat lines
+		while (firstChatLine && (firstChatLine->t < now || chatLineCount > spFixedToInt(spGetSizeFactor() * 5)))
+		{
+			pChatLine next = firstChatLine->next;
+			free(firstChatLine);
+			chatLineCount--;
+			if (lastChatLine == firstChatLine)
+				lastChatLine = NULL;
+			firstChatLine = next;
 		}
 	}
 	if (spMapGetByID(MAP_MENU))
@@ -1461,5 +1500,13 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	items_quit();
 	if (chatWindow)
 		delete_window(chatWindow);
+	while (firstChatLine)
+	{
+		pChatLine next = firstChatLine->next;
+		free(firstChatLine);
+		firstChatLine = next;
+	}
+	chatLineCount = 0;
+	lastChatLine = NULL;
 	return result;
 }

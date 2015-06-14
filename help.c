@@ -4,7 +4,7 @@ void draw_help()
 {
 	if (help == 0)
 	{
-		spFontDrawRight( screen->w-1, 0, 0, "{view}+{jump}Help", font );
+		spFontDrawRight( screen->w-1, screen->h-font->maxheight*4-1, 0, "{view}+{jump}Help", font );
 		return;
 	}
 	int h = 31*HELP_DISTANCE+4;

@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.16:
+- Fixed a bug about crashing the game with too long messages
+- Showing less of the chat ingame (5 lines for small resolution devices, 10 lines for higher resolution devices)
+
 1.5.4.15:
 - Fixed the ghost arrow bug
 - Static linking of hase to remove the need for LD_LIBRARY_PATH
