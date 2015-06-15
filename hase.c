@@ -4,7 +4,7 @@
 
 #include "lobbyList.h"
 #include "hase.h"
-
+#include "options.h"
 #ifdef PROFILE
 	int calc_time = 0;
 	int draw_time = 0;
@@ -409,14 +409,7 @@ void draw(void)
 		if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
 			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_power*30/SP_ONE+30);
 		else
-		{
-			float angle;
-			if (player[active_player]->activeHare->direction == 0)
-				angle = (float)player[active_player]->activeHare->w_direction*180.0f/(float)SP_PI;
-			else
-				angle = -((float)player[active_player]->activeHare->w_direction*180.0f/(float)SP_PI-180.0f);
 			sprintf(buffer,"Power: %i.%i %%",player[active_player]->activeHare->w_power*100/SP_ONE,player[active_player]->activeHare->w_power*1000/SP_ONE%10);
-		}
 		spFontDrawRight( screen->w-1, screen->h-1-3*font->maxheight, 0, buffer, font );
 	}
 	if (player[active_player]->weapon_points)
@@ -466,8 +459,6 @@ void jump(int high)
 {
 	if (player[active_player]->activeHare == NULL)
 		return;
-	Sint32 dx = spSin(player[active_player]->activeHare->rotation);
-	Sint32 dy = spCos(player[active_player]->activeHare->rotation);
 	//if (circle_is_empty(player[active_player]->x+dx >> SP_ACCURACY,player[active_player]->y+dy >> SP_ACCURACY,6,0xDEAD))
 	{
 		if (high)
@@ -976,8 +967,8 @@ int calc(Uint32 steps)
 					destY /= c;
 				}
 			}
-			posX = (Sint64)posX*(Sint64)255+(Sint64)destX >> 8;
-			posY = (Sint64)posY*(Sint64)255+(Sint64)destY >> 8;
+			posX = ((Sint64)posX*(Sint64)255+(Sint64)destX) >> 8;
+			posY = ((Sint64)posY*(Sint64)255+(Sint64)destY) >> 8;
 		}
 		if (player[active_player]->activeHare)
 		{
@@ -1394,7 +1385,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	arrow = spLoadSurface("./data/gravity.png");
 	tomato = spLoadSurfaceZoom("./data/power.png",spGetSizeFactor()/4);
 	load_weapons();
-	gravity_surface = spCreateSurface( GRAVITY_DENSITY << GRAVITY_RESOLUTION+1, GRAVITY_DENSITY << GRAVITY_RESOLUTION+1);
+	gravity_surface = spCreateSurface( GRAVITY_DENSITY << (GRAVITY_RESOLUTION+1), GRAVITY_DENSITY << (GRAVITY_RESOLUTION+1));
 	loadInformation("Creating level...");
 	level_original = create_level(game->level_string,0,0,65535);
 	texturize_level(level_original,game->level_string);

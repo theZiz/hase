@@ -122,7 +122,7 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 	printf("Parse level: %s\n",level_string);
 	//Lets overread the texture...
 	char* mom = level_string;
-	int dummy_because_strtol_loves_warnings = strtol(mom,&mom,36);
+	strtol(mom,&mom,36);
 	//Reading the width
 	int width = strtol(mom,&mom,36);
 	//Reading the height

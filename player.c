@@ -8,6 +8,7 @@ int last_ai_try = 0;
 
 #include "window.h"
 #include <math.h>
+#include "options.h"
 
 int lastAIDistance = 100000000;
 
@@ -167,8 +168,6 @@ void update_player()
 				{
 					Sint32 dx = spSin(hare->rotation);
 					Sint32 dy = spCos(hare->rotation);
-					Sint32 ox = hare->x;
-					Sint32 oy = hare->y;
 					int k;
 					for (k = 1; k <= 16; k++)
 					{
@@ -237,6 +236,24 @@ void update_player()
 			hare = hare->next;
 		}
 		while (hare != player[j]->firstHare);
+	}
+}
+
+#define SQRT_2 92672
+
+Sint32 vector_length_approx(Sint32 x,Sint32 y)
+{
+	x = abs(x);
+	y = abs(y);
+	if (x > y)
+	{
+		Sint32 factor = spDiv(y,spMax(1,x));
+		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),x);
+	}
+	else
+	{
+		Sint32 factor = spDiv(x,spMax(1,y));
+		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),y);
 	}
 }
 
@@ -505,6 +522,8 @@ int real_next_player()
 	return result;
 }
 
+Sint32 bullet_alpha();
+
 int check_next_player()
 {
 	int result = 0;
@@ -536,23 +555,6 @@ pHare add_hare(pHare* firstHare)
 	return hare;
 }
 
-#define SQRT_2 92672
-
-Sint32 vector_length_approx(Sint32 x,Sint32 y)
-{
-	x = abs(x);
-	y = abs(y);
-	if (x > y)
-	{
-		Sint32 factor = spDiv(y,spMax(1,x));
-		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),x);
-	}
-	else
-	{
-		Sint32 factor = spDiv(x,spMax(1,y));
-		return spMul(SP_ONE-factor+spMul(factor,SQRT_2),y);
-	}
-}
 
 Sint32 vector_length_guess(Sint32 x,Sint32 y)
 {

@@ -6,6 +6,8 @@
 #include "options.h"
 #include "client.h"
 
+#include "hase.h"
+
 #define LG_WAIT 5000
 
 spFontPointer lg_font;
@@ -201,7 +203,7 @@ char* lg_get_name(char* buffer)
 
 char* lg_get_combi_name(char* buffer)
 {
-	char name1[16],name2[16];
+	char name1[16];
 	//sprintf(buffer,"%s-%s",lg_get_name(name1),lg_get_name(name2));
 	sprintf(buffer,"%s",lg_get_name(name1));
 	return buffer;

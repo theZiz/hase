@@ -232,7 +232,6 @@ void fill_gravity_surface()
 	int x,y;
 	Sint32 h = spGetHFromColor(get_level_color());
 	Sint32 s = spGetSFromColor(get_level_color());
-	Sint32 v = spGetVFromColor(get_level_color());
 	for (x = 0; x < GRAVITY_DENSITY; x++)
 	{
 		int angle = (GRAVITY_DENSITY-1-x)*SP_PI*2/GRAVITY_DENSITY;

@@ -3,6 +3,7 @@
 #include "level.h"
 #include "window.h"
 #include "options.h"
+#include "hase.h"
 
 SDL_Surface* ll_surface;
 SDL_Surface* ll_level = NULL;
@@ -513,7 +514,7 @@ int ll_reload()
 void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), int start_chat)
 {
 	use_chat = start_chat;
-	char buffer[2048],time_buffer[128];
+	char time_buffer[128];
     time_t t = time(NULL);
     struct tm *ti = gmtime(&t);
     strftime(time_buffer,2048,"%c",ti);

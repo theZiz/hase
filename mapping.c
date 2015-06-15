@@ -1,5 +1,6 @@
 #include "mapping.h"
 #include "window.h"
+#include "window.h"
 
 int mappingMapSet = 0;
 

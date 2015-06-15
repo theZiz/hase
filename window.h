@@ -55,7 +55,7 @@ int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* c
 int sprite_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption,int show_selection,int* sprite_count);
 
 int set_message(spFontPointer font, char* caption);
-void draw_message_draw(void);
+void draw_message(void);
 
 void init_window_sprites();
 void quit_window_sprites();

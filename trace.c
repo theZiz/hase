@@ -70,7 +70,7 @@ pBulletTrace* registerTrace(pPlayer player)
 void drawTrace(pPlayer player)
 {
 	int BORDER_COLOR = get_border_color();
-	int i,j;
+	int i;
 	for (i = 0; i < TRACE_COUNT; i++)
 		if (player->trace[i])
 		{

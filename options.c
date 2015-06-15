@@ -1,9 +1,10 @@
 #include "options.h"
 #include "window.h"
+#include "mapping.h"
 
 int op_zoom = 1;
 int op_circle = 1;
-int op_music_volume = SP_VOLUME_MAX << VOLUME_SHIFT-1;
+int op_music_volume = SP_VOLUME_MAX << (VOLUME_SHIFT-1);
 int op_sample_volume = SP_VOLUME_MAX << VOLUME_SHIFT;
 int op_particles = 1;
 int op_rotation = 1;
@@ -106,7 +107,7 @@ void sop_music_volume(int v)
 	if (v > (SP_VOLUME_MAX << VOLUME_SHIFT))
 		v = SP_VOLUME_MAX << VOLUME_SHIFT;
 	op_music_volume = v;
-	spSoundSetMusicVolume(v >> VOLUME_SHIFT+3);
+	spSoundSetMusicVolume(v >> (VOLUME_SHIFT+3));
 }
 
 void sop_sample_volume(int v)
