@@ -38,9 +38,6 @@ all: hase
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
-testclient: $@.c client.o level.o
-	$(CC) $(CFLAGS) $(LINK_FLAGS) $< client.o level.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
-
 hase: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o mapping.o makeBuildDir
 	$(CC) $(CFLAGS) $(LINK_FLAGS) $< client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o mapping.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
 
@@ -53,7 +50,6 @@ makeBuildDir:
 
 clean:
 	rm -f *.o
-	rm -f $(BUILD)/lobby
 	rm -f $(BUILD)/hase$(SUFFIX)
 	rm -f $(BUILD)/testclient$(SUFFIX)
 
