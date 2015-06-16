@@ -3,6 +3,7 @@
 #include <zlib.h>
 #endif
 #include "options.h"
+#include <stdlib.h>
 spNetIP ip;
 
 char hase_url[512] = "";

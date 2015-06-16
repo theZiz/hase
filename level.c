@@ -1,4 +1,5 @@
 #include "level.h"
+#include <stdlib.h>
 
 void add_to_string(char* buffer,char* add)
 {

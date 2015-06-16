@@ -8,6 +8,8 @@
 
 #include "hase.h"
 
+#include <stdlib.h>
+
 #define LG_WAIT 5000
 
 spFontPointer lg_font;
@@ -251,13 +253,19 @@ int lg_calc(Uint32 steps)
 		{
 			if (message = ingame_message(get_channel()->first_message->message,lg_game->name))
 			{
-				sprintf(buffer,"%s: %s",get_channel()->first_message->user,message);
+				if (strcmp(get_channel()->first_message->ctcp,"ACTION") == 0)
+					sprintf(buffer,"*** %s %s",get_channel()->first_message->user,message);
+				else
+					sprintf(buffer,"%s: %s",get_channel()->first_message->user,message);
 				lg_chat_block = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,lg_font);
 			}
 			else
 			if (gop_global_chat())
 			{
-				sprintf(buffer,"%s: %s",get_channel()->first_message->user,get_channel()->first_message->message);
+				if (strcmp(get_channel()->first_message->ctcp,"ACTION") == 0)
+					sprintf(buffer,"*** %s %s",get_channel()->first_message->user,get_channel()->first_message->message);
+				else
+					sprintf(buffer,"%s: %s",get_channel()->first_message->user,get_channel()->first_message->message);
 				lg_chat_block = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,font_dark);
 			}
 			lg_last_read_message = get_channel()->first_message;
@@ -269,13 +277,19 @@ int lg_calc(Uint32 steps)
 				spTextBlockPointer temp = NULL;
 				if (message = ingame_message(next->message,lg_game->name))
 				{
-					sprintf(buffer,"%s: %s",next->user,message);
+					if (strcmp(next->ctcp,"ACTION") == 0)
+						sprintf(buffer,"*** %s %s",next->user,message);
+					else
+						sprintf(buffer,"%s: %s",next->user,message);
 					temp = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,lg_font);
 				}
 				else
 				if (gop_global_chat())
 				{
-					sprintf(buffer,"%s: %s",next->user,next->message);
+					if (strcmp(next->ctcp,"ACTION") == 0)
+						sprintf(buffer,"*** %s %s",next->user,next->message);
+					else
+						sprintf(buffer,"%s: %s",next->user,next->message);
 					temp = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,font_dark);
 				}
 				if (temp)

@@ -1,5 +1,6 @@
 #include "window.h"
 #include "lobbyList.h"
+#include <stdlib.h>
 
 pWindow mg_window = NULL;
 int window_active = 0;

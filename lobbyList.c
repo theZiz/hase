@@ -4,6 +4,7 @@
 #include "window.h"
 #include "options.h"
 #include "hase.h"
+#include <stdlib.h>
 
 SDL_Surface* ll_surface;
 SDL_Surface* ll_level = NULL;
@@ -229,7 +230,10 @@ int ll_calc(Uint32 steps)
 		char buffer[2048];
 		if (get_channel()->last_read_message == NULL)
 		{
-			sprintf(buffer,"%s: %s",get_channel()->first_message->user,get_channel()->first_message->message);
+			if (strcmp(get_channel()->first_message->ctcp,"ACTION") == 0)
+				sprintf(buffer,"*** %s %s",get_channel()->first_message->user,get_channel()->first_message->message);
+			else
+				sprintf(buffer,"%s: %s",get_channel()->first_message->user,get_channel()->first_message->message);
 			ll_chat_block = spCreateTextBlock(buffer,ll_surface->w-2,ll_font);
 			get_channel()->last_read_message = get_channel()->first_message;
 		}
@@ -240,7 +244,10 @@ int ll_calc(Uint32 steps)
 
 				log_message(next->user,next->message);
 				
-				sprintf(buffer,"%s: %s",next->user,next->message);
+				if (strcmp(next->ctcp,"ACTION") == 0)
+					sprintf(buffer,"*** %s %s",next->user,next->message);
+				else
+					sprintf(buffer,"%s: %s",next->user,next->message);
 				spTextBlockPointer temp = spCreateTextBlock(buffer,ll_surface->w-2,ll_font);
 				int lc = ll_chat_block->line_count + temp->line_count;
 				spTextLinePointer copyLine = (spTextLinePointer)malloc(lc*sizeof(spTextLine));

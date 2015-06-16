@@ -1,6 +1,8 @@
 #include "options.h"
 #include "window.h"
 #include "mapping.h"
+#include <stdlib.h>
+#include <string.h>
 
 int op_zoom = 1;
 int op_circle = 1;

@@ -731,13 +731,20 @@ int calc(Uint32 steps)
 				(message = ingame_message(showing->message,hase_game->name)))
 			{
 				used_font = font;
-				sprintf(buffer,"%s: %s",showing->user,message);
+				if (strcmp(showing->ctcp,"ACTION") == 0)
+					sprintf(buffer,"*** %s %s",showing->user,message);
+				else
+					sprintf(buffer,"%s: %s",showing->user,message);
+					
 			}
 			else
 			if (gop_global_chat())
 			{
 				used_font = font_dark;
-				sprintf(buffer,"%s: %s",showing->user,showing->message);
+				if (strcmp(showing->ctcp,"ACTION") == 0)
+					sprintf(buffer,"*** %s %s",showing->user,showing->message);
+				else
+					sprintf(buffer,"%s: %s",showing->user,showing->message);
 			}
 			if (used_font)
 			{
