@@ -10,22 +10,20 @@ pItem firstItem = NULL;
 
 pItem items_drop(int kind,Sint32 x,Sint32 y)
 {
-	pItem item = (pItem)malloc(sizeof(tItem));
-	if (x != -1 || y != -1)
-	{
-		item->x = x;
-		item->y = y;
-	}
-	else
+	int tries = 0;
+	if (x == -1 && y == -1)
 	while (1)
 	{
-		item->x = spRand()%LEVEL_WIDTH;
-		item->y = spRand()%LEVEL_HEIGHT;
-		if (circle_is_empty(item->x,item->y,16,NULL,1) && gravitation_force(item->x,item->y)/32768)
+		x = spRand()%LEVEL_WIDTH;
+		y = spRand()%LEVEL_HEIGHT;
+		if (circle_is_empty(x,y,16,NULL,1) && gravitation_force(x,y)/32768)
 			break;
+		if (++tries > 1000)
+			return NULL;
 	}
-	item->x <<= SP_ACCURACY;
-	item->y <<= SP_ACCURACY;
+	pItem item = (pItem)malloc(sizeof(tItem));
+	item->x = x << SP_ACCURACY;
+	item->y = y << SP_ACCURACY;
 	item->dx = 0;
 	item->dy = 0;
 	item->kind = kind;
