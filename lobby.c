@@ -9,6 +9,7 @@
 #include "about.h"
 #include "options.h"
 #include "mapping.h"
+#include <unistd.h>
 
 SDL_Surface* screen;
 spFontPointer font = NULL;
@@ -184,6 +185,9 @@ int chat_feedback( pWindow window, pWindowElement elem, int action )
 
 int main(int argc, char **argv)
 {
+	#ifndef WIN32
+		chdir(DATA_FOLDER);
+	#endif
 	srand(time(NULL));
 	spSetRand(time(NULL));
 	#ifdef GCW_FEELING

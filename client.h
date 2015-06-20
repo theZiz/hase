@@ -23,6 +23,10 @@
 
 #define SPRITE_COUNT 18
 
+#ifndef DATA_FOLDER
+	#define DATA_FOLDER "."
+#endif
+
 typedef struct sMessage *pMessage;
 typedef struct sMessage
 {

@@ -1,0 +1,16 @@
+Maybe try first, whether hase builds on your system with
+make
+Especially "sparrow3d" (http://www.github.com/theZiz/sparrow3d) is needed
+If everything is fine and you can run hase with
+./hase
+you can install it with
+(sudo) ./install.sh <bin directory> <share directory>
+e.g.:
+sudo ./install.sh /usr/local/bin /usr/local/share
+This will build hase again, but with these fixed folders, and install it
+You can uninstall hase with
+(sudo) ./uninstall.sh <bin directory> <share directory>
+and the same parameters as used for ./install.sh, e.g.
+sudo ./uninstall.sh /usr/local/bin /usr/local/share
+Alternatively you can delete the hase binary and in the binary folder
+and the hase folder in the share folder.
