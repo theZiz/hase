@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.17:
+- Support for actions in chats (/me doing something)
+- More screen space for chatting in lobby
+
 1.5.4.16:
 - Fixed a bug about crashing the game with too long messages
 - Showing less of the chat ingame (5 lines for small resolution devices, 10 lines for higher resolution devices)

@@ -92,38 +92,37 @@ void ll_draw(void)
 	SDL_Surface* screen = spGetWindowSurface();
 	spClearTarget(LL_BG);
 	char buffer[256];
-	sprintf(buffer,"Hase Lobby (Version %i)",CLIENT_VERSION);
-	spFontDrawMiddle( screen->w/2, 0*ll_font->maxheight, 0, buffer, ll_font );
-	
-	sprintf(buffer,"%i Games on Server:\n",ll_game_count);
-	spFontDrawMiddle( screen->w/3+2, 1*ll_font->maxheight, 0, buffer, ll_font );
-	spBlitSurface(screen->w/3,ll_font->maxheight*2+ll_surface->h/2,0,ll_surface);
-	
-	spFontDrawMiddle(5*screen->w/6+4, 1*ll_font->maxheight, 0, "Preview", ll_font );
-	spRectangle(5*screen->w/6, 2*ll_font->maxheight+screen->w/6-4, 0,screen->w/3-6,screen->w/3-6,LL_FG);
-	if (ll_level)
-		spBlitSurface(5*screen->w/6, 2*ll_font->maxheight+screen->w/6-4, 0,ll_level);
 
-	int h = screen->h-(screen->w/3+4*ll_font->maxheight-4);
+	sprintf(buffer,"%i Games on Server (Version %i):\n",ll_game_count,CLIENT_VERSION);
+	spFontDrawMiddle( screen->w/3+2, 0*ll_font->maxheight, 0, buffer, ll_font );
+	spBlitSurface(screen->w/3,ll_font->maxheight*1+ll_surface->h/2,0,ll_surface);
+	
+	spFontDrawMiddle(5*screen->w/6+4, 0*ll_font->maxheight, 0, "Preview & Players", ll_font );
+	spRectangle(5*screen->w/6, 1*ll_font->maxheight+screen->w/6-4, 0,screen->w/3-6,screen->w/3-6,LL_FG);
+	if (ll_level)
+		spBlitSurface(5*screen->w/6, 1*ll_font->maxheight+screen->w/6-4, 0,ll_level);
+
+	int h = screen->h-(screen->w/3+3*ll_font->maxheight-6);
 		
 	if (use_chat == 0)
-		spFontDrawMiddle(screen->w/3, screen->h-2*ll_font->maxheight-h/2, 0, "Chat deactivated", ll_font);
+		spFontDrawMiddle(screen->w/2, screen->h-2*ll_font->maxheight-h/2, 0, "Chat deactivated", ll_font);
 	else
 	if (get_channel() == NULL)
-		spFontDrawMiddle(screen->w/3, screen->h-2*ll_font->maxheight-h/2, 0, "Connecting to IRC Server...", ll_font );
+		spFontDrawMiddle(screen->w/2, screen->h-2*ll_font->maxheight-h/2, 0, "Connecting to IRC Server...", ll_font );
 	else
 	{
-		spFontDrawMiddle(screen->w/3+2, 2*ll_font->maxheight+screen->w/3-6, 0, "{chat}Chat {power_down}/{power_up}scroll", ll_font );
-		spRectangle(screen->w/3, screen->h-1*ll_font->maxheight-h/2, 0,ll_surface->w,h,LL_FG);
+		spFontDrawMiddle(screen->w/2, 1*ll_font->maxheight+screen->w/3-6, 0, "{chat}Chat {power_down}/{power_up}scroll", ll_font );
+		int rh = (h+3)/ll_font->maxheight*ll_font->maxheight;
+		spRectangle(screen->w/2, screen->h-1*ll_font->maxheight-h/2, 0,screen->w-4,rh,LL_FG);
 		if (ll_chat_block)
-			spFontDrawTextBlock(left,2, screen->h-1*ll_font->maxheight-h-1, 0,ll_chat_block,h+2,ll_chat_scroll,ll_font);
+			spFontDrawTextBlock(left,2, screen->h-1*ll_font->maxheight-h-2+(h-rh)/2, 0,ll_chat_block,rh,ll_chat_scroll,ll_font);
 	}
 
-	if (ll_game_count > 0 && mom_game)
+	if (ll_game_count > 0 && mom_game && ll_block)
 	{
-		spFontDrawMiddle(5*screen->w/6+4, 2*ll_font->maxheight+screen->w/3-6, 0, "Players", ll_font );
-		spRectangle(5*screen->w/6, screen->h-1*ll_font->maxheight-h/2, 0,screen->w/3-6,h,LL_FG);
-		spFontDrawTextBlock(middle,4*screen->w/6+5, screen->h-1*ll_font->maxheight-h-1, 0,ll_block,h+2,0,ll_font);
+		//spFontDrawMiddle(5*screen->w/6+4, 2*ll_font->maxheight+screen->w/3-6, 0, "Players", ll_font );
+		//spRectangle(5*screen->w/6, screen->h-1*ll_font->maxheight-h/2, 0,screen->w/3-6,h,LL_FG);
+		spFontDrawTextBlock(middle,4*screen->w/6+5, 1*ll_font->maxheight + 5 /*+ screen->w/6 - ll_block->line_count*ll_font->maxheight/2*/, 0,ll_block,screen->w/3-6,0,ll_font);
 	}
 	
 	if (ll_reload_now)
@@ -234,7 +233,7 @@ int ll_calc(Uint32 steps)
 				sprintf(buffer,"*** %s %s",get_channel()->first_message->user,get_channel()->first_message->message);
 			else
 				sprintf(buffer,"%s: %s",get_channel()->first_message->user,get_channel()->first_message->message);
-			ll_chat_block = spCreateTextBlock(buffer,ll_surface->w-2,ll_font);
+			ll_chat_block = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,ll_font);
 			get_channel()->last_read_message = get_channel()->first_message;
 		}
 		if (get_channel()->last_read_message)
@@ -248,7 +247,7 @@ int ll_calc(Uint32 steps)
 					sprintf(buffer,"*** %s %s",next->user,next->message);
 				else
 					sprintf(buffer,"%s: %s",next->user,next->message);
-				spTextBlockPointer temp = spCreateTextBlock(buffer,ll_surface->w-2,ll_font);
+				spTextBlockPointer temp = spCreateTextBlock(buffer,spGetWindowSurface()->w-4,ll_font);
 				int lc = ll_chat_block->line_count + temp->line_count;
 				spTextLinePointer copyLine = (spTextLinePointer)malloc(lc*sizeof(spTextLine));
 				memcpy(copyLine,ll_chat_block->line,ll_chat_block->line_count*sizeof(spTextLine));
