@@ -9,7 +9,8 @@ For version 1.6:
 	* High jumping
 	* weapon choice
 	* camera movement
-* Camera should always show hare (except for item drop)
+* Camera should always show hare (except for item drop), maybe with zoom out
+	* Or camera moves back, when hare's moving?
 * Extra time for item drop
 * When start from bigger window, not too small
 * New weapons
@@ -29,6 +30,7 @@ For version 1.6:
 	* time 5..120
 	* health 50..200
 	* Some kind of sudden death
+	* No killing borders
 * More intelligent AI
 	* if stuck, change direction
 	* Getting more wp
@@ -39,3 +41,5 @@ For version 1.6:
 * Saving and loading level designs
 * First game lobby even for replay (e.g. to download the level)
 * If sprite is higher than sprite count => random sprite
+* Less max power
+* higher min power (5%?)
