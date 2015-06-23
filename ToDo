@@ -35,3 +35,7 @@ For version 1.6:
 	* Using different weapons, especially if some hare is on them
 * Moving and exploding items (when hit)
 	* hares and items should be moved from explosions generally
+* Levels with holes
+* Saving and loading level designs
+* First game lobby even for replay (e.g. to download the level)
+* If sprite is higher than sprite count => random sprite
