@@ -1,20 +1,21 @@
 #!/bin/sh
-if [ $# -gt 1 ]
+if [ $# -gt 0 ]
 then
 	make clean
-	make PARAMETER="-DDATA_FOLDER=\"\\\"$2/hase\\\"\"" NO_DEBUG=1
-	cp hase "$1/hase"
-	if [ ! -d "$2/hase" ]; then mkdir "$2/hase";fi
-	cp -r data "$2/hase"
-	cp -r textures "$2/hase"
-	cp -r sprites "$2/hase"
-	cp -r sounds "$2/hase"
-	cp hase_readme.txt "$2/hase"
-	cp hase.png "$2/pixmaps"
-	cp hase.desktop "$2/applications"
+	make PARAMETER="-DDATA_FOLDER=\"\\\"$1/share/hase\\\"\"" NO_DEBUG=1
+	cp hase "$1/bin"
+	if [ ! -d "$1/share/hase" ]; then mkdir "$1/share/hase";fi
+	cp -r data "$1/share/hase"
+	cp -r textures "$1/share/hase"
+	cp -r sprites "$1/share/hase"
+	cp -r sounds "$1/share/hase"
+	cp hase_readme.txt "$1/share/hase"
+	cp hase.png "$1/share/pixmaps"
+	cp hase.desktop "$1/share/applications"
 	make clean
 else
-	echo "Usage: (sudo) ./install.sh <bin directory> <share directory>"
+	echo "Usage: (sudo) ./install.sh <install directory>"
 	echo "e.g:"
-	echo "\t sudo ./install.sh /usr/local/bin /usr/local/share"
+	echo "\t sudo ./install.sh /usr/local"
+	echo "which will install hase to /usr/local/bin and /usr/local/share"
 fi
