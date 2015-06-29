@@ -1,3 +1,10 @@
+Also possible in 1.5 branch:
+* Removing all modal network interaction
+* Camera should always show hare (except for item drop), maybe with zoom out
+	* Or camera moves back, when hare's moving?
+* When start from bigger window, not too small
+* First game lobby even for replay (e.g. to download the level)
+
 For version 1.6:
 * Better odds for items
 * Recording chat for replays
@@ -9,10 +16,7 @@ For version 1.6:
 	* High jumping
 	* weapon choice
 	* camera movement
-* Camera should always show hare (except for item drop), maybe with zoom out
-	* Or camera moves back, when hare's moving?
 * Extra time for item drop
-* When start from bigger window, not too small
 * New weapons
 	* Punch to hare above (2 AP, but 50 damage to avoid the "standing on hat" tactic)
 	* Anti building for tunnels (1, 2 and 3 AP version), all directions (so digger at the same time)
@@ -39,7 +43,7 @@ For version 1.6:
 	* hares and items should be moved from explosions generally
 * Levels with holes
 * Saving and loading level designs
-* First game lobby even for replay (e.g. to download the level)
+	* level window
 * If sprite is higher than sprite count => random sprite
 * Less max power
 * higher min power (5%?)
