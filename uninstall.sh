@@ -1,12 +1,12 @@
 #!/bin/sh
-if [ $# -gt 1 ]
+if [ $# -gt 0 ]
 then
-	rm -f "$1/hase"
-	rm -rf "$2/hase"
-	rm -f "$2/pixmaps/hase.png"
-	rm -f "$2/applications/hase.desktop"
+	rm -f "$1/bin/hase"
+	rm -rf "$1/share/hase"
+	rm -f "$1/share/pixmaps/hase.png"
+	rm -f "$1/share/applications/hase.desktop"
 else
-	echo "Usage: (sudo) ./uninstall.sh <bin directory> <share directory>"
+	echo "Usage: (sudo) ./uninstall.sh <install directory>"
 	echo "e.g:"
-	echo "\t sudo ./uninstall.sh /usr/local/bin /usr/local/share"
+	echo "\t sudo ./uninstall.sh /usr/local"
 fi
