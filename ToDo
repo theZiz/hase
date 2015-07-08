@@ -2,8 +2,9 @@ Also possible in 1.5 branch:
 * Removing all modal network interaction
 * Camera should always show hare (except for item drop), maybe with zoom out
 	* Or camera moves back, when hare's moving?
-* When start from bigger window, not too small
++ When start from bigger window, not too small
 * First game lobby even for replay (e.g. to download the level)
+* Two chats: One for ingame, one for general hase talk
 
 For version 1.6:
 * Better odds for items
@@ -35,6 +36,11 @@ For version 1.6:
 	* health 50..200
 	* Some kind of sudden death
 	* No killing borders
+* General UI improvements
+	* No max player, but the possibility to kick players
+	* list selection instead of entering a name
+	* level window (See also level saving and loading)
+	* Options changeable after creation
 * More intelligent AI
 	* if stuck, change direction
 	* Getting more wp
@@ -43,7 +49,7 @@ For version 1.6:
 	* hares and items should be moved from explosions generally
 * Levels with holes
 * Saving and loading level designs
-	* level window
 * If sprite is higher than sprite count => random sprite
 * Less max power
 * higher min power (5%?)
+* Mode, where the damage of a bullet increases with the time in air

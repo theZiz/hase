@@ -193,7 +193,7 @@ int main(int argc, char **argv)
 	#ifdef GCW_FEELING
 		spSetDefaultWindowSize( 320, 240 );
 	#else
-		spSetDefaultWindowSize( 800, 480 );
+		spSetDefaultWindowSize( 1024, 600 );
 	#endif
 	spInitCore();
 	spSetReturnBehavior(1,0);

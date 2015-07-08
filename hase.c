@@ -276,19 +276,7 @@ void draw(void)
 					spDrawSprite(screen->w/2+nx,screen->h/2+ny,0,target);
 					spLine(screen->w/2+x,screen->h/2+y,0,screen->w/2+nx,screen->h/2+ny,0,get_border_color());
 					//spSetBlending( SP_ONE );
-				}
-				/*if (hare->w_power)
-				{
-					Sint32 w_zoom = spMax(SP_ONE,zoom);
-					Sint32 ox = spMul(hare->x-posX-14*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
-					Sint32 oy = spMul(hare->y-posY-14* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
-					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
-					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-					spSetBlending( SP_ONE*2/3 );
-					spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(w_zoom,spGetSizeFactor())/16,spMul(hare->w_power,spMul(w_zoom,spGetSizeFactor()))/4,hare->w_direction+rotation+hare->rotation-SP_PI/2);
-					spSetBlending( SP_ONE );
-				}*/
-				
+				}				
 			}
 			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//Health bar
@@ -446,6 +434,7 @@ void draw(void)
 	#ifdef PROFILE
 		draw_time = SDL_GetTicks() - start_time;
 		sprintf(buffer,"FPS: %i\nDraw: %ims\nCalc: %ims",spGetFPS(),draw_time,calc_time);
+		printf(        "FPS: %i\tDraw: %ims\tCalc: %ims\n",spGetFPS(),draw_time,calc_time);
 		spFontDrawMiddle( screen->w >> 1, 1, 0, buffer, font );
 	#endif
 	
@@ -1410,9 +1399,9 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	map_size = spGetSizeFactor() >> SP_ACCURACY;
 	map_surface = spCreateSurface( map_w, map_h );
 	update_map();
-	zoomAdjust = spSqrt(spGetSizeFactor());
-	minZoom = spSqrt(spGetSizeFactor()/4)/16384*16384;
-	maxZoom = spSqrt(spGetSizeFactor()*4)/16384*16384;
+	zoomAdjust = spSqrt(spMin(SP_ONE*2,spGetSizeFactor()));
+	minZoom = spSqrt(spMin(SP_ONE*2,spGetSizeFactor())/4)/16384*16384;
+	maxZoom = spSqrt(spMin(SP_ONE*2,spGetSizeFactor())*4)/16384*16384;
 	zoom = spMul(zoomAdjust,zoomAdjust);
 	zoom_d = 0;
 	speed = 1;
