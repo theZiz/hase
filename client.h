@@ -167,4 +167,6 @@ void stop_heartbeat(pPlayer player);
 
 char* ingame_message(char* message,char* game_name);
 
+void start_random_music();
+
 #endif

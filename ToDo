@@ -1,11 +1,3 @@
-Also possible in 1.5 branch:
-* Removing all modal network interaction
-* Camera should always show hare (except for item drop), maybe with zoom out
-	* Or camera moves back, when hare's moving?
-+ When start from bigger window, not too small
-* First game lobby even for replay (e.g. to download the level)
-* Two chats: One for ingame, one for general hase talk
-
 For version 1.6:
 * Better odds for items
 * Recording chat for replays
@@ -50,6 +42,7 @@ For version 1.6:
 * Levels with holes
 * Saving and loading level designs
 * If sprite is higher than sprite count => random sprite
+	* same for level texture
 * Less max power
 * higher min power (5%?)
 * Mode, where the damage of a bullet increases with the time in air

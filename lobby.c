@@ -204,9 +204,7 @@ int main(int argc, char **argv)
 	spSetZTest(0);
 	load_options();
 	save_options();
-	spSoundSetMusic("./sounds/Ouroboros.ogg");
-	spSoundPlayMusic(0,-1);
-
+	start_random_music();
 	spMapSetMapSet(1);
 	#ifdef DESKTOP
 		spMapDesktopHack(1);

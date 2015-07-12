@@ -8,6 +8,13 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.5.4.18:
+- Smaller zoom level for starting with big windows
+- No blocking for some network interactions anymore (experimental)
+- Camera zooms out, to see everything important
+- More bright border color
+- More different background music tracks
+
 1.5.4.17:
 - Support for actions in chats (/me doing something)
 - More screen space for chatting in lobby

@@ -23,6 +23,7 @@ int ll_game_seconds = 45;
 int ll_game_hares = 3;
 spTextBlockPointer ll_chat_block = NULL;
 Sint32 ll_chat_scroll;
+int ll_one_reload = 0;
 
 int use_chat;
 
@@ -125,26 +126,32 @@ void ll_draw(void)
 		spFontDrawTextBlock(middle,4*screen->w/6+5, 1*ll_font->maxheight + 5 /*+ screen->w/6 - ll_block->line_count*ll_font->maxheight/2*/, 0,ll_block,screen->w/3-6,0,ll_font);
 	}
 	
-	if (ll_reload_now)
-	{
-		spFontDrawMiddle( screen->w/2, screen->h-ll_font->maxheight, 0, "Reloading list...", ll_font );
-		ll_reload_now = 2;
-	}
-	else
+	if (ll_one_reload)
 	{
 		if (mom_game && mom_game->status == -1)
 			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}/{view}Replay   {weapon}Create   {menu}Back", ll_font );
 		else
 			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}Join   {weapon}Create   {view}Spectate   {menu}Back", ll_font );
-		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
-		spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
 	}
+	else
+		spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{menu}Back", ll_font );
+	
+	if (ll_reload_now == 1)
+		ll_reload_now = 2;
+	if (ll_reload_now)
+		sprintf(buffer,"Reloading...");
+	else
+		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
+	spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
+
 	spFlip();
 }
 
 int ll_wait;
 #define MAX_WAIT 300
 #define MIN_WAIT 50
+
+SDL_Thread* ll_thread = NULL;
 
 int create_game_feedback( pWindow window, pWindowElement elem, int action )
 {
@@ -362,14 +369,28 @@ int ll_calc(Uint32 steps)
 	}
 	if (ll_reload_now == 2)
 	{
-		int a = SDL_GetTicks();
-		if (ll_reload())
-			return 1;
-		int b = SDL_GetTicks();
+		ll_reload_now = 3;
+		ll_thread = SDL_CreateThread(ll_reload,NULL);
+	}
+	if (ll_reload_now == 4)
+	{
+		int result;
+		SDL_WaitThread(ll_thread,&result);
+		ll_thread = NULL;
 		ll_reload_now = 0;
-		ll_counter = (a-b)/2; //<-black magic
-		spResetLoop();
-		steps = 0;
+		ll_counter = 0;
+		switch (result)
+		{
+			case 1:
+				message_box(ll_font,ll_resize,"No Connection to server!");
+				return 1;
+			case 2:
+				message_box(ll_font,ll_resize,"The server is under repair. Please try again later!");
+				return 1;
+			case 3:
+				message_box(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!");
+				return 1;
+		}
 	}
 	int step;
 	for (step = 0; step < steps; step++)
@@ -439,7 +460,7 @@ int ll_calc(Uint32 steps)
 		else
 			ll_wait = -1;
 	}
-	if (ll_counter >= 10000)
+	if (ll_counter >= 10000 && ll_reload_now == 0)
 		ll_reload_now = 1;
 	int total_height = (ll_game_count+1)*ll_font->maxheight+2;
 	if (ll_game_count > 1)
@@ -483,36 +504,40 @@ int ll_calc(Uint32 steps)
 	return 0;
 }
 
-int ll_reload()
+int ll_reload(void* dummy)
 {
 	if (ll_level)
 	{
-		spDeleteSurface(ll_level);
-		spDeleteTextBlock(ll_block);
+		SDL_Surface* ll_level_cp = ll_level;
+		spTextBlockPointer ll_block_cp = ll_block;
 		ll_level = NULL;
 		ll_block = NULL;
+		spDeleteSurface(ll_level_cp);
+		spDeleteTextBlock(ll_block_cp);
 	}
 	if (connect_to_server())
 	{
-		message_box(ll_font,ll_resize,"No Connection to server!");
+		ll_reload_now = 4;
 		return 1;
 	}
 	int info = server_info();
 	if (info < 0)
 	{
-		message_box(ll_font,ll_resize,"The server is under repair. Please try again later!");
-		return 1;
+		ll_reload_now = 4;
+		return 2;
 	}
 	if (info != CLIENT_VERSION)
 	{
-		message_box(ll_font,ll_resize,"Your version is too old for\nonline games. Please update!");
-		return 1;
+		ll_reload_now = 4;		
+		return 3;
 	}
 	if (use_chat)
 		start_irc_client(gop_username());
 	ll_game_count = get_games(&ll_game_list);
 	if (ll_game_count == 0)
 		ll_selected = -1;
+	ll_reload_now = 4;
+	ll_one_reload = 1;
 	return 0;
 }
 
@@ -528,6 +553,7 @@ void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), int
 	log_message("Enter lobby",time_buffer);
 	
 	ll_selected = 0;
+	ll_one_reload = 0;
 	ll_font = font;
 	ll_level = NULL;
 	ll_block = NULL;
@@ -537,6 +563,11 @@ void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), int
 	ll_reload_now = 0;
 	ll_chat_block = NULL;
 	spLoop(ll_draw,ll_calc,10,resize,NULL);
+	if (ll_thread)
+	{
+		SDL_KillThread(ll_thread);
+		ll_thread = NULL;
+	}
 	spDeleteSurface(ll_surface);
 	if (ll_level)
 		spDeleteSurface(ll_level);

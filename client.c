@@ -1288,3 +1288,31 @@ char* ingame_message(char* message,char* game_name)
 	}
 	return NULL;
 }
+
+char music_filename[7][32] =
+{
+	"./sounds/Ouroboros.ogg",
+	"./sounds/Cephalopod.ogg",
+	"./sounds/Electrodoodle.ogg",
+	"./sounds/Go Cart.ogg",
+	"./sounds/Latin Industries.ogg",
+	"./sounds/Pamgaa.ogg",
+	"./sounds/Rocket.ogg"
+};
+int last_music = -1;
+
+void start_random_music()
+{
+	spSoundStopMusic(0);
+	if (last_music == -1)
+		last_music = 0;
+	else
+	{
+		int r = last_music;
+		while (r == last_music)
+			r = rand()%7;
+		last_music = r;
+	}
+	spSoundSetMusic(music_filename[last_music]);
+	spSoundPlayMusic(0,-1);
+}
