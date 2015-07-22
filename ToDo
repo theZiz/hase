@@ -1,4 +1,4 @@
-For next version:
+For version 1.6:
 * Better odds for items
 * Recording chat for replays
 * Better movement (no stucking)
@@ -9,26 +9,43 @@ For next version:
 	* High jumping
 	* weapon choice
 	* camera movement
-* When start from bigger window, not too small
-* at least 4 new weapons
-* more intelligent AI
+* Extra time for item drop
+* New weapons
+	* Punch to hare above (2 AP, but 50 damage to avoid the "standing on hat" tactic)
+	* Anti building for tunnels (1, 2 and 3 AP version), all directions (so digger at the same time)
+	* Shotgun (3 AP shoots in 5..7 different directions
+	* Teleport (3 AP)
+	* Super peanut for flying (2 AP)
+	* controlled bomb (4 AP, 50 dmg)
+* Building/Anti building and normal targeting use different variables
+* No random mine drop on players
+* Random effect item
+* Mines should more act like the mines from hw
+* Fall damage (but no turn end)
+* More game settings
+	* default AP 1..5
+	* time 5..120
+	* health 50..200
+	* Some kind of sudden death
+	* No killing borders
+* General UI improvements
+	* No max player, but the possibility to kick players
+	* list selection instead of entering a name
+	* level window (See also level saving and loading)
+	* Options changeable after creation
+* More intelligent AI
 	* if stuck, change direction
 	* Getting more wp
 	* Using different weapons, especially if some hare is on them
 * Moving and exploding items (when hit)
-
-General:
-* smarter AI
-* more level details / new level making approach
-* more weapons
-	* digger (2 wp)
-	* teleport (3 wp)
-	* super peanut (flying) (2 wp)
-	* radio-controlled something (3 wp)
-	* gravitation trap (1 wp)
-	* Fart bomb (1 wp)
-	* low grav missile (3 wp)
-	* neg grav missile (3 wp)
-	* no grav missile (3 wp)
-
-http://pastebin.com/P0q6QE86
+	* hares and items should be moved from explosions generally
+* Levels with holes
+* Saving and loading level designs
+* If sprite is higher than sprite count => random sprite
+	* same for level texture
+* Less max power
+* higher min power (5%?)
+* Mode, where the damage of a bullet increases with the time in air
+* Rumble
+* Bouncing!
+* All player same track

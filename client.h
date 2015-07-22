@@ -23,6 +23,10 @@
 
 #define SPRITE_COUNT 18
 
+#ifndef DATA_FOLDER
+	#define DATA_FOLDER "."
+#endif
+
 typedef struct sMessage *pMessage;
 typedef struct sMessage
 {
@@ -162,5 +166,7 @@ void start_heartbeat(pPlayer player);
 void stop_heartbeat(pPlayer player);
 
 char* ingame_message(char* message,char* game_name);
+
+void start_random_music();
 
 #endif

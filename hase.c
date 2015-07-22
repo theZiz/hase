@@ -35,6 +35,7 @@ int posX,posY,rotation;
 Sint32 zoom;
 Sint32 zoom_d; 
 Sint32 zoomAdjust;
+Sint32 zoomAdjustAdjust;
 Sint32 minZoom,maxZoom;
 int help = 0;
 int countdown;
@@ -276,19 +277,7 @@ void draw(void)
 					spDrawSprite(screen->w/2+nx,screen->h/2+ny,0,target);
 					spLine(screen->w/2+x,screen->h/2+y,0,screen->w/2+nx,screen->h/2+ny,0,get_border_color());
 					//spSetBlending( SP_ONE );
-				}
-				/*if (hare->w_power)
-				{
-					Sint32 w_zoom = spMax(SP_ONE,zoom);
-					Sint32 ox = spMul(hare->x-posX-14*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
-					Sint32 oy = spMul(hare->y-posY-14* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
-					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
-					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
-					spSetBlending( SP_ONE*2/3 );
-					spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,arrow,spMul(w_zoom,spGetSizeFactor())/16,spMul(hare->w_power,spMul(w_zoom,spGetSizeFactor()))/4,hare->w_direction+rotation+hare->rotation-SP_PI/2);
-					spSetBlending( SP_ONE );
-				}*/
-				
+				}				
 			}
 			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//Health bar
@@ -446,6 +435,7 @@ void draw(void)
 	#ifdef PROFILE
 		draw_time = SDL_GetTicks() - start_time;
 		sprintf(buffer,"FPS: %i\nDraw: %ims\nCalc: %ims",spGetFPS(),draw_time,calc_time);
+		printf(        "FPS: %i\tDraw: %ims\tCalc: %ims\n",spGetFPS(),draw_time,calc_time);
 		spFontDrawMiddle( screen->w >> 1, 1, 0, buffer, font );
 	#endif
 	
@@ -923,12 +913,52 @@ int calc(Uint32 steps)
 	spParticleUpdate(&particles,steps);
 	for (i = 0; i < steps; i++)
 	{
+		//Camera
+		Sint32 superZoom = 0;
+		if (player[active_player]->activeHare)
+		{
+			int destX,destY;
+			if (dropItem && dropItem->seen)
+			{
+				destX = dropItem->x;
+				destY = dropItem->y;
+			}
+			else
+			{
+				int dxl = player[active_player]->activeHare->x;
+				int dxr = player[active_player]->activeHare->x;
+				int dyl = player[active_player]->activeHare->y;
+				int dyr = player[active_player]->activeHare->y;
+				if (firstBullet)
+				{
+					pBullet momBullet = firstBullet;
+					while (momBullet)
+					{
+						if (dxl > momBullet->x)
+							dxl = momBullet->x;
+						if (dxr < momBullet->x)
+							dxr = momBullet->x;
+						if (dyl > momBullet->y)
+							dyl = momBullet->y;
+						if (dyr < momBullet->y)
+							dyr = momBullet->y;
+						momBullet = momBullet->next;
+					}
+				}
+				destX = dxl + dxr >> 1;
+				destY = dyl + dyr >> 1;
+				superZoom = 65536/(spFixedToInt(spMax(abs(dxl-dxr),abs(dyl-dyr)))+1)*(spGetSizeFactor()*224 >> SP_ACCURACY);
+				superZoom = spSqrt(superZoom);
+			}
+			posX = ((Sint64)posX*(Sint64)255+(Sint64)destX) >> 8;
+			posY = ((Sint64)posY*(Sint64)255+(Sint64)destY) >> 8;
+		}
+		//Zoom
 		if (zoom_d == -1)
 		{
 			zoomAdjust -= 32;
 			if (zoomAdjust < minZoom)
 				zoomAdjust = minZoom;
-			zoom = spMul(zoomAdjust,zoomAdjust);
 			if ((zoomAdjust & 16383) == 0 && gop_zoom())
 				zoom_d = 0;
 			if (gop_zoom() == 0 && spMapGetByID(MAP_POWER_DN) == 0)
@@ -940,43 +970,17 @@ int calc(Uint32 steps)
 			zoomAdjust += 32;
 			if (zoomAdjust > maxZoom)
 				zoomAdjust = maxZoom;
-			zoom = spMul(zoomAdjust,zoomAdjust);
 			if ((zoomAdjust & 16383) == 0 && gop_zoom())
 				zoom_d = 0;
 			if (gop_zoom() == 0 && spMapGetByID(MAP_POWER_UP) == 0)
 				zoom_d = 0;
 		}
-		//Camera
-		if (player[active_player]->activeHare)
-		{
-			int destX,destY;
-			if (dropItem && dropItem->seen)
-			{
-				destX = dropItem->x;
-				destY = dropItem->y;
-			}
-			else
-			{
-				destX = player[active_player]->activeHare->x;
-				destY = player[active_player]->activeHare->y;
-				if (firstBullet)
-				{
-					pBullet momBullet = firstBullet;
-					int c = 1;
-					while (momBullet)
-					{
-						destX += momBullet->x*2;
-						destY += momBullet->y*2;
-						momBullet = momBullet->next;
-						c+=2;
-					}
-					destX /= c;
-					destY /= c;
-				}
-			}
-			posX = ((Sint64)posX*(Sint64)255+(Sint64)destX) >> 8;
-			posY = ((Sint64)posY*(Sint64)255+(Sint64)destY) >> 8;
-		}
+		if (zoomAdjust < superZoom || superZoom == 0)
+			zoomAdjustAdjust = zoomAdjustAdjust*255 + zoomAdjust >> 8;
+		else
+			zoomAdjustAdjust = zoomAdjustAdjust*255 + superZoom >> 8;
+		zoom = spMul(zoomAdjustAdjust,zoomAdjustAdjust);
+
 		if (player[active_player]->activeHare)
 		{
 			Sint32 goal = -player[active_player]->activeHare->cam_rotation;
@@ -1410,9 +1414,10 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	map_size = spGetSizeFactor() >> SP_ACCURACY;
 	map_surface = spCreateSurface( map_w, map_h );
 	update_map();
-	zoomAdjust = spSqrt(spGetSizeFactor());
-	minZoom = spSqrt(spGetSizeFactor()/4)/16384*16384;
-	maxZoom = spSqrt(spGetSizeFactor()*4)/16384*16384;
+	zoomAdjust = spSqrt(spMin(SP_ONE*2,spGetSizeFactor()));
+	zoomAdjustAdjust = zoomAdjust;
+	minZoom = spSqrt(spMin(SP_ONE*2,spGetSizeFactor())/4)/16384*16384;
+	maxZoom = spSqrt(spMin(SP_ONE*2,spGetSizeFactor())*4)/16384*16384;
 	zoom = spMul(zoomAdjust,zoomAdjust);
 	zoom_d = 0;
 	speed = 1;
@@ -1433,6 +1438,8 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	snd_turn = spSoundLoad("./sounds/your_turn.wav");
 	
 	spMapSetMapSet(1);
+	
+	start_random_music();
 	
 	if (player[active_player]->local)
 		spSoundPlay(snd_turn,-1,0,0,-1);

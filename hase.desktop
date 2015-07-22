@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Hase
+GenericName=Hase
+Comment=Hase - a game about hares in space
+Comment[de]=Hase - ein Spiel über Hasen im Weltraum
+Type=Application
+Exec=hase
+Icon=hase
+Terminal=false
+Categories=Game;StrategyGame;;
+StartupNotify=true
+

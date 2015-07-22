@@ -2,7 +2,14 @@ DYNAMIC = -lSDL_ttf -lSDL_mixer -lSDL_image -lSDL -lm
 CFLAGS = -O3 -fsingle-precision-constant -Wimplicit-function-declaration -Wunused
 GENERAL_TWEAKS = -ffast-math
 #==PC defaults==
-FLAGS = -g -DDESKTOP $(GENERAL_TWEAKS)
+FLAGS = -DDESKTOP $(GENERAL_TWEAKS)
+
+ifdef NO_DEBUG
+	FLAGS += -O3
+else
+	FLAGS += -g
+endif
+
 SDL = `sdl-config --cflags`
 
 SPARROW_FOLDER = ../sparrow3d
@@ -11,14 +18,13 @@ SPARROWNET_STATIC_LIB = libsparrowNet.a
 SPARROWSOUND_STATIC_LIB = libsparrowSound.a
 
 ifdef TARGET
-include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
-
-BUILD = ./build/$(TARGET)/hase
-SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
+	include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
+	BUILD = ./build/$(TARGET)/hase
+	SPARROW_LIB = $(SPARROW_FOLDER)/build/$(TARGET)/sparrow3d
 else
-TARGET = "Default (change with make TARGET=otherTarget. See All targets with make targets)"
-BUILD = .
-SPARROW_LIB = $(SPARROW_FOLDER)
+	TARGET = "Default (change with make TARGET=otherTarget. See All targets with make targets)"
+	BUILD = .
+	SPARROW_LIB = $(SPARROW_FOLDER)
 endif
 LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)

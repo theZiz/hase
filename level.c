@@ -234,7 +234,7 @@ void texturize_level(SDL_Surface* level,char* level_string)
 	Sint32 h = spGetHFromColor(level_color);
 	Sint32 s = spGetSFromColor(level_color);
 	Sint32 v = spGetVFromColor(level_color);
-	border_color = spGetHSV(h,spMin(255,s*3/2),v);
+	border_color = spGetHSV(h,spMin(255,s*3/2),spMin(255,v*3/2));
 	for (x = 0; x < level->w; x++)
 		for (y = 0; y < level->h; y++)
 			if (level_pixel[x+y*level->w]!= SP_ALPHA_COLOR)

@@ -9,6 +9,7 @@
 #include "about.h"
 #include "options.h"
 #include "mapping.h"
+#include <unistd.h>
 
 SDL_Surface* screen;
 spFontPointer font = NULL;
@@ -184,12 +185,15 @@ int chat_feedback( pWindow window, pWindowElement elem, int action )
 
 int main(int argc, char **argv)
 {
+	#ifndef WIN32
+		chdir(DATA_FOLDER);
+	#endif
 	srand(time(NULL));
 	spSetRand(time(NULL));
 	#ifdef GCW_FEELING
 		spSetDefaultWindowSize( 320, 240 );
 	#else
-		spSetDefaultWindowSize( 800, 480 );
+		spSetDefaultWindowSize( 1024, 600 );
 	#endif
 	spInitCore();
 	spSetReturnBehavior(1,0);
@@ -200,9 +204,7 @@ int main(int argc, char **argv)
 	spSetZTest(0);
 	load_options();
 	save_options();
-	spSoundSetMusic("./sounds/Ouroboros.ogg");
-	spSoundPlayMusic(0,-1);
-
+	start_random_music();
 	spMapSetMapSet(1);
 	#ifdef DESKTOP
 		spMapDesktopHack(1);
