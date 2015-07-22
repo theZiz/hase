@@ -12,13 +12,15 @@ echo "<body>" >> index.htm
 echo "Updated at the $TIME." >> index.htm
 echo "<h1>$PROGRAM download links:</h1>" >> index.htm
 echo "<?php" > symlink.php
-echo "\$zip = new ZipArchive;" >> symlink.php
-echo "\$res = \$zip->open('upload.zip');" >> symlink.php
-echo "if (\$res === TRUE) {" >> symlink.php
-echo "  \$zip->extractTo('.');" >> symlink.php
-echo "  \$zip->close();" >> symlink.php
-echo "  unlink('upload.zip');" >> symlink.php
-echo "}" >> symlink.php
+#echo "\$zip = new ZipArchive;" >> symlink.php
+#echo "\$res = \$zip->open('upload.zip');" >> symlink.php
+#echo "if (\$res === TRUE) {" >> symlink.php
+#echo "  \$zip->extractTo('.');" >> symlink.php
+#echo "  \$zip->close();" >> symlink.php
+#echo "  unlink('upload.zip');" >> symlink.php
+#echo "}" >> symlink.php
+echo "system('7z e -y upload.7z');" >> symlink.php
+echo "unlink('upload.7z');" >> symlink.php
 for f in $DEST
 do
 	if [ -e "$f/$PROGRAM/$PROGRAM" ] || [ -e "$f/$PROGRAM/$PROGRAM.exe" ]; then
