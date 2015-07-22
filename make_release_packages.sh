@@ -1,15 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 PROGRAM="hase"
 VERSION="1.5.4.18"
 DEST=./build/*
+ZIP_CALL="7z a -t7z -m0=LZMA -mmt=on -mx=9 -md=256m -mfb=512 -ms=on upload.7z"
+TIME=`date -u +"%d.%m.%Y %R"`
+
 echo "<html>" > index.htm
 echo "<head>" >> index.htm
 echo "</head>" >> index.htm
 echo "<body>" >> index.htm
-TIME=`date -u +"%d.%m.%Y %R"`
 echo "Updated at the $TIME." >> index.htm
 echo "<h1>$PROGRAM download links:</h1>" >> index.htm
 echo "<?php" > symlink.php
+echo "\$zip = new ZipArchive;" >> symlink.php
+echo "\$res = \$zip->open('upload.zip');" >> symlink.php
+echo "if (\$res === TRUE) {" >> symlink.php
+echo "  \$zip->extractTo('.');" >> symlink.php
+echo "  \$zip->close();" >> symlink.php
+echo "  unlink('upload.zip');" >> symlink.php
+echo "}" >> symlink.php
 for f in $DEST
 do
 	if [ -e "$f/$PROGRAM/$PROGRAM" ] || [ -e "$f/$PROGRAM/$PROGRAM.exe" ]; then
@@ -28,6 +37,7 @@ do
 			../make_package.sh
 			cd ..
 			echo "<a href=$PROGRAM.pnd>$NAME</a></br>" >> ../../index.htm
+			ZIP_CALL+=" $PROGRAM.pnd"
 		else
 			if [ $NAME = "i386" ] || [ $NAME = "amd64" ]; then
 				tar cfvz "$PROGRAM-$NAME-$VERSION.tar.gz" * > /dev/null
@@ -35,6 +45,7 @@ do
 				echo "<a href=$PROGRAM-$NAME-$VERSION.tar.gz>$NAME</a></br>" >> ../../index.htm
 				echo "unlink('$PROGRAM-$NAME.tar.gz');" >> ../../symlink.php
 				echo "symlink('$PROGRAM-$NAME-$VERSION.tar.gz', '$PROGRAM-$NAME.tar.gz');" >> ../../symlink.php
+				ZIP_CALL+=" $PROGRAM-$NAME-$VERSION.tar.gz"
 			else
 				#no Pandora, no PC. So we have a low resolution device!
 				if [ $NAME != "win32" ]; then
@@ -47,12 +58,14 @@ do
 					echo "<a href=$PROGRAM.opk type=\"application/x-opk+squashfs\">$NAME</a></br>" >> ../../index.htm
 					echo "unlink('$PROGRAM.opk');" >> ../../symlink.php
 					echo "symlink('$PROGRAM-$VERSION.opk', '$PROGRAM.opk');" >> ../../symlink.php
+					ZIP_CALL+=" $PROGRAM-$VERSION.opk"
 				else
-					zip -r "$PROGRAM-$NAME-$VERSION.zip" * > /dev/null
+					zip -9 -r "$PROGRAM-$NAME-$VERSION.zip" * > /dev/null
 					mv "$PROGRAM-$NAME-$VERSION.zip" ../..
 					echo "<a href=$PROGRAM-$NAME-$VERSION.zip>$NAME</a></br>" >> ../../index.htm
 					echo "unlink('$PROGRAM-$NAME.zip');" >> ../../symlink.php
 					echo "symlink('$PROGRAM-$NAME-$VERSION.zip', '$PROGRAM-$NAME.zip');" >> ../../symlink.php
+					ZIP_CALL+=" $PROGRAM-$NAME-$VERSION.zip"
 				fi
 			fi
 		fi
@@ -69,3 +82,4 @@ done
 echo "?>" >> symlink.php
 echo "</body>" >> index.htm
 echo "</html>" >> index.htm
+eval "$ZIP_CALL"
