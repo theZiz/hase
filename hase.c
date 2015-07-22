@@ -206,7 +206,30 @@ void draw(void)
 		rotation = 0;
 	
 	//Level
-	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
+	//spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
+	int a,b;
+	Uint16* pixels = spGetTargetPixel();
+	Uint16* texture = (Uint16*)level_original->pixels;
+	for (a = 0; a < LEVEL_WIDTH; a++)
+		for (b = 0; b < LEVEL_HEIGHT; b++)
+		{
+			Sint32 ox = spMul(spIntToFixed(a)-posX,zoom);
+			Sint32 oy = spMul(spIntToFixed(b)-posY,zoom);
+			Sint32	x = screen->w/2+(spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY);
+			Sint32	y = screen->h/2+(spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY);
+			if (x < 0)
+				continue;
+			if (y < 0)
+				continue;
+			if (x >= screen->w)
+				continue;
+			if (y >= screen->h)
+				continue;
+			if (texture[a+b*LEVEL_WIDTH] == SP_ALPHA_COLOR)
+				continue;
+			pixels[x+y*screen->w] = texture[a+b*LEVEL_WIDTH];
+		}
+	
 	spSetVerticalOrigin(SP_CENTER);
 	spSetHorizontalOrigin(SP_CENTER);
 	
@@ -279,7 +302,8 @@ void draw(void)
 					//spSetBlending( SP_ONE );
 				}				
 			}
-			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
+			//spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
+			spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
 			//Health bar
 			y-=zoom*3>>14;
 			spSetBlending( SP_ONE*2/3 );
