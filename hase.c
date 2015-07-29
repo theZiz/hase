@@ -280,7 +280,7 @@ void draw(void)
 					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
-					if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,weapon_explosion[w_nr]/2+4,NULL,-1))
+					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/2+4,NULL,-1))
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,0));
 					else
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
@@ -473,7 +473,7 @@ void jump(int high)
 {
 	if (player[active_player]->activeHare == NULL)
 		return;
-	//if (circle_is_empty(player[active_player]->x+dx >> SP_ACCURACY,player[active_player]->y+dy >> SP_ACCURACY,6,0xDEAD))
+	//if (circle_is_empty(player[active_player]->x+dx,player[active_player]->y+dy,6,0xDEAD))
 	{
 		if (high)
 			player[active_player]->activeHare->hops = HIGH_HOPS_TIME;
@@ -1198,7 +1198,7 @@ int calc(Uint32 steps)
 									int r = weapon_explosion[w_nr];
 									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
 									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
-									if (circle_is_empty(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2+4,NULL,-1))
+									if (circle_is_empty(ox,oy,r/2+4,NULL,-1))
 										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
 									else
 										player[active_player]->weapon_points+=weapon_cost[w_nr];

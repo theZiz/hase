@@ -43,30 +43,26 @@ void update_targeting()
 	sprite->wholeDuration = nr * new_duration;	
 }
 
-static int circle_is_empty(int x, int y, int r,pHare except,int with_players)
+#define CIRCLE_CHECKPOINTS 128
+
+static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_players)
 {
 	if (with_players != -1)
 	{
-		int a,b;
-		int start_a = x-r;
-		if (start_a < 0)
-			start_a = 0;
-		int end_a = x+r+1;
-		if (end_a > LEVEL_WIDTH)
-			end_a = LEVEL_WIDTH;
-		int start_b = y-r;
-		if (start_b < 0)
-			start_b = 0;
-		int end_b = y+r+1;
-		if (end_b > LEVEL_HEIGHT)
-			end_b = LEVEL_HEIGHT;
-		for (a = start_a; a < end_a; a++)
-			for (b = start_b; b < end_b; b++)
-			if ((a-x)*(a-x)+(b-y)*(b-y) <= r*r)
+		Sint32 a;
+		for (a = 0; a < CIRCLE_CHECKPOINTS; a++)
+		{
+			Sint32 u = spCos(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + x >> SP_ACCURACY;
+			Sint32 v = spSin(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + y >> SP_ACCURACY;
+			if (u >= 0 &&
+				v >= 0 &&
+				u < LEVEL_WIDTH &&
+				v < LEVEL_HEIGHT)
 			{
-				if (level_pixel[a+b*LEVEL_WIDTH] != SP_ALPHA_COLOR)
+				if (level_pixel[u+v*LEVEL_WIDTH] != SP_ALPHA_COLOR)
 					return 0;
 			}
+		}
 	}
 	
 	int i;
@@ -82,9 +78,7 @@ static int circle_is_empty(int x, int y, int r,pHare except,int with_players)
 					hare = hare->next;
 					continue;
 				}
-				int px = hare->x >> SP_ACCURACY;
-				int py = hare->y >> SP_ACCURACY;
-				int d = (x-px)*(x-px)+(y-py)*(y-py);
+				int d = spSquare(x-hare->x)+spSquare(y-hare->y) >> SP_ACCURACY;
 				if (d <= (r+PLAYER_PLAYER_RADIUS)*(r+PLAYER_PLAYER_RADIUS))
 					return 0;
 				hare = hare->next;
@@ -171,7 +165,7 @@ void update_player()
 					int k;
 					for (k = 1; k <= 16; k++)
 					{
-						if (circle_is_empty(spFixedToInt(hare->x+k*dx),spFixedToInt(hare->y-k*dy),PLAYER_RADIUS,hare,1))
+						if (circle_is_empty(hare->x+k*dx,hare->y-k*dy,PLAYER_RADIUS,hare,1))
 						{
 							hare->x += k*dx;
 							hare->y -= k*dy;
@@ -647,7 +641,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 				x = spRand()%LEVEL_WIDTH;
 				y = spRand()%LEVEL_HEIGHT;
 				//printf("Tried %i %i... ",x,y);
-				if (circle_is_empty(x,y,16,hare,1) && gravitation_force(x,y)/32768)
+				if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,hare,1) && gravitation_force(x,y)/32768)
 					break;
 				//printf("NOT!\n");
 			}

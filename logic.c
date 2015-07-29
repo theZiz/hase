@@ -15,7 +15,7 @@ int do_physics()
 		{							
 			hare->dx -= gravitation_x(spFixedToInt(hare->x),spFixedToInt(hare->y)) >> PHYSIC_IMPACT;
 			hare->dy -= gravitation_y(spFixedToInt(hare->x),spFixedToInt(hare->y)) >> PHYSIC_IMPACT;
-			if (circle_is_empty(spFixedToInt(hare->x+hare->dx),spFixedToInt(hare->y+hare->dy),PLAYER_RADIUS,hare,1))
+			if (circle_is_empty(hare->x+hare->dx,hare->y+hare->dy,PLAYER_RADIUS,hare,1))
 			{
 				hare->x += hare->dx;
 				hare->y += hare->dy;

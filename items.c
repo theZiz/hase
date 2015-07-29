@@ -16,7 +16,7 @@ pItem items_drop(int kind,Sint32 x,Sint32 y)
 	{
 		x = spRand()%LEVEL_WIDTH;
 		y = spRand()%LEVEL_HEIGHT;
-		if (circle_is_empty(x,y,16,NULL,1) && gravitation_force(x,y)/32768)
+		if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,NULL,1) && gravitation_force(x,y)/32768)
 			break;
 		if (++tries > 1000)
 			return NULL;
@@ -68,7 +68,7 @@ void items_calc()
 		}
 		item->dx -= gravitation_x(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
 		item->dy -= gravitation_y(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
-		if (circle_is_empty(spFixedToInt(item->x+item->dx),spFixedToInt(item->y+item->dy),PLAYER_RADIUS,NULL,1))
+		if (circle_is_empty(item->x+item->dx,item->y+item->dy,PLAYER_RADIUS,NULL,1))
 		{
 			item->x += item->dx;
 			item->y += item->dy;

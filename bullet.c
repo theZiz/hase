@@ -577,7 +577,7 @@ int updateBullets()
 		momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;
 		int dead = 0;
 		if (momBullet->impact_state == 0 &&
-			circle_is_empty(momBullet->x+momBullet->dx >> SP_ACCURACY,momBullet->y+momBullet->dy >> SP_ACCURACY,weapon_radius[momBullet->kind],NULL,1))
+			circle_is_empty(momBullet->x+momBullet->dx,momBullet->y+momBullet->dy,weapon_radius[momBullet->kind],NULL,1))
 		{
 			momBullet->x += momBullet->dx;
 			momBullet->y += momBullet->dy;
