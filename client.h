@@ -27,6 +27,8 @@
 	#define DATA_FOLDER "."
 #endif
 
+#define CIRCLE_CHECKPOINTS 32
+
 typedef struct sMessage *pMessage;
 typedef struct sMessage
 {
@@ -86,6 +88,7 @@ typedef struct sHare
 	pHare before,next;
 	int wp_x,wp_y;
 	Sint32 cam_rotation;
+	int circle_checkpoint_hit[CIRCLE_CHECKPOINTS];
 } tHare;
 
 typedef struct sPlayer

@@ -1,3 +1,7 @@
+SRC = client.c lobbyList.c lobbyGame.c level.c window.c hase.c about.c options.c mapping.c
+OBJ = $(SRC:.c=.o)
+DEP = $(SRC:.c=.d)
+
 DYNAMIC = -lSDL_ttf -lSDL_mixer -lSDL_image -lSDL -lm
 CFLAGS = -O3 -fsingle-precision-constant -Wimplicit-function-declaration -Wunused
 GENERAL_TWEAKS = -ffast-math
@@ -44,10 +48,13 @@ all: hase
 targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
-hase: lobby.c client.o lobbyList.o lobbyGame.o level.o window.o hase.o about.o options.o mapping.o makeBuildDir
-	$(CC) $(CFLAGS) $(LINK_FLAGS) $< client.o lobbyList.o lobbyGame.o window.o level.o hase.o about.o options.o mapping.o $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
+hase: lobby.c $(OBJ) makeBuildDir
+	$(CC) $(CFLAGS) $(LINK_FLAGS) $< $(OBJ) $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
 
-%.o: %.c %.h
+%.d: %.c
+	$(CC) -MM $(CFLAGS) $(INCLUDE) $(SDL) $< -MF $@
+
+%.o:
 	$(CC) $(CFLAGS) -c $< $(SDL) $(INCLUDE)
 
 makeBuildDir:
@@ -56,8 +63,12 @@ makeBuildDir:
 
 clean:
 	rm -f *.o
+	rm -f *.d
 	rm -f $(BUILD)/hase$(SUFFIX)
 	rm -f $(BUILD)/testclient$(SUFFIX)
 
 oclean:
 	rm -f *.o
+	rm -f *.d
+
+-include $(DEP)

@@ -43,10 +43,25 @@ void update_targeting()
 	sprite->wholeDuration = nr * new_duration;	
 }
 
-#define CIRCLE_CHECKPOINTS 128
+static int pixel_is_empty(int x, int y)
+{
+	if (x < 0)
+		return 1;
+	if (x >= LEVEL_WIDTH)
+		return 1;
+	if (y < 0)
+		return 1;
+	if (y >= LEVEL_WIDTH)
+		return 1;
+	if (level_pixel[x+y*LEVEL_WIDTH] != SP_ALPHA_COLOR)
+		return 0;
+	return 1;
+}
+
 
 static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_players)
 {
+	int result = 1;
 	if (with_players != -1)
 	{
 		Sint32 a;
@@ -54,13 +69,11 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 		{
 			Sint32 u = spCos(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + x >> SP_ACCURACY;
 			Sint32 v = spSin(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + y >> SP_ACCURACY;
-			if (u >= 0 &&
-				v >= 0 &&
-				u < LEVEL_WIDTH &&
-				v < LEVEL_HEIGHT)
+			if (!pixel_is_empty(u,v))
 			{
-				if (level_pixel[u+v*LEVEL_WIDTH] != SP_ALPHA_COLOR)
-					return 0;
+				if (except)
+					except->circle_checkpoint_hit[a] = 1;
+				result = 0;
 			}
 		}
 	}
@@ -78,29 +91,28 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					hare = hare->next;
 					continue;
 				}
-				int d = spSquare(x-hare->x)+spSquare(y-hare->y) >> SP_ACCURACY;
-				if (d <= (r+PLAYER_PLAYER_RADIUS)*(r+PLAYER_PLAYER_RADIUS))
-					return 0;
+				Sint32 a;
+				for (a = 0; a < CIRCLE_CHECKPOINTS; a++)
+				{
+					Sint32 u = spCos(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + x;
+					Sint32 v = spSin(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + y;
+					Sint32 X = u-hare->x;
+					Sint32 Y = v-hare->y;
+					int d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
+					if (d <= PLAYER_PLAYER_RADIUS*PLAYER_PLAYER_RADIUS)
+					{
+						if (except)
+							except->circle_checkpoint_hit[a] = 1;
+						hare->circle_checkpoint_hit[(CIRCLE_CHECKPOINTS/2+a) % CIRCLE_CHECKPOINTS] = 1;
+						result = 0;
+					}
+				}
+
 				hare = hare->next;
 			}
 			while (hare != player[i]->firstHare);
 		}
-	return 1;
-}
-
-static int pixel_is_empty(int x, int y)
-{
-	if (x < 0)
-		return 1;
-	if (x >= LEVEL_WIDTH)
-		return 1;
-	if (y < 0)
-		return 1;
-	if (y >= LEVEL_WIDTH)
-		return 1;
-	if (level_pixel[x+y*LEVEL_WIDTH] != SP_ALPHA_COLOR)
-		return 0;
-	return 1;
+	return result;
 }
 
 static Sint32 gravitation_x(int x,int y)
@@ -655,6 +667,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 			char buffer[256];
 			sprintf(buffer,"./sprites/hase%i.ssc",player[i]->nr);
 			hare->hase = spLoadSpriteCollection(buffer,NULL);
+			memset(hare->circle_checkpoint_hit,0,sizeof(int)*CIRCLE_CHECKPOINTS);
 		}
 		player[i]->activeHare = player[i]->firstHare;
 		player[i]->setActiveHare = NULL;

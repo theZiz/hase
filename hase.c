@@ -303,7 +303,26 @@ void draw(void)
 				}				
 			}
 			//spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
-			spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
+			//spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
+			int k;
+			for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
+			{
+				int X = screen->w/2+x+(spMul(spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_RADIUS,zoom) >> SP_ACCURACY);
+				int Y = screen->h/2+y+(spMul(spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_RADIUS,zoom) >> SP_ACCURACY);
+				if (X < 0)
+					continue;
+				if (Y < 0)
+					continue;
+				if (X >= screen->w)
+					continue;
+				if (Y >= screen->h)
+					continue;
+				if (hare->circle_checkpoint_hit[k])
+					pixels[X+Y*screen->w] = spGetFastRGB(0,255,0);
+				else
+					pixels[X+Y*screen->w] = spGetFastRGB(255,0,0);
+			}
+				
 			//Health bar
 			y-=zoom*3>>14;
 			spSetBlending( SP_ONE*2/3 );

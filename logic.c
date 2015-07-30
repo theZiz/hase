@@ -3,6 +3,17 @@ int do_physics()
 	int j;
 	for (j = 0; j < player_count; j++)
 	{
+		pHare hare = player[j]->firstHare;
+		if (hare)
+		do
+		{	
+			memset(hare->circle_checkpoint_hit,0,sizeof(int)*CIRCLE_CHECKPOINTS);
+			hare = hare->next;
+		}
+		while (hare != player[j]->firstHare);
+	}
+	for (j = 0; j < player_count; j++)
+	{
 		if (player[j]->firstHare == NULL)
 			continue;
 		if (player[j]->d_time > 0)

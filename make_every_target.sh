@@ -7,8 +7,8 @@ for f in $FILES
 do
 	cd ../hase
 	TARGET=`echo "$f" | cut -d/ -f3 | cut -d. -f1`
-	make oclean > /dev/null
-	make TARGET=$TARGET > /dev/null
+	make -s oclean 2>&1 > /dev/null
+	make -s TARGET=$TARGET  2>&1 > /dev/null
 	if [ $? -ne 0 ]; then
 		echo "Error compiling for \033[1;31m$TARGET\033[0m!"
 	else
@@ -16,5 +16,5 @@ do
 	fi
 done
 echo "Compiling for default..."
-make clean > /dev/null
-make > /dev/null
+make -s clean 2>&1 > /dev/null
+make -s 2>&1 > /dev/null
