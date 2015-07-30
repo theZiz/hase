@@ -14,15 +14,15 @@ frame = 0, 0
 frame = 0, 34
 
 [jump left]
-fps = 25
-frame = 0, 0, 4
 fps = 50
+frame = 0, 0, 4
+fps = 100
 frame = 136, 0, 2
 
 [jump right]
-fps = 25
-frame = 0, 34, 4
 fps = 50
+frame = 0, 34, 4
+fps = 100
 frame = 136, 34, 2
 
 [high jump left]

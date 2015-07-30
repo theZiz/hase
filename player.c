@@ -1,4 +1,4 @@
-#define HOPS_TIME 200
+#define HOPS_TIME 100
 #define HIGH_HOPS_TIME 403
 #define MAX_HEALTH 100
 #define AI_MAX_TRIES 96
@@ -181,7 +181,7 @@ void update_player()
 					{
 						case 0: //normal walk
 							angle = SP_PI/3;
-							factor = gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y))/48;
+							factor = gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y))/64+SP_ONE/128;
 							break;
 						case 1: //Fast forward
 							angle = SP_PI/3;

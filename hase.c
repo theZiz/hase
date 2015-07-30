@@ -745,6 +745,8 @@ int quit_feedback( pWindow window, pWindowElement elem, int action )
 	return 0;
 }
 
+int input_ok_on = 0;
+
 int calc(Uint32 steps)
 {
 	steps *= speed;
@@ -1138,17 +1140,16 @@ int calc(Uint32 steps)
 					if (player[active_player]->activeHare->bums)
 					{
 						if (player[active_player]->activeHare->hops <= 0)
-						{
-							input_states[INPUT_BUTTON_OK] = 0;
 							jump(1);
-						}
 						else
-						{
-							input_states[INPUT_BUTTON_OK] = 0;
+						if (input_ok_on == 0)
 							player[active_player]->activeHare->high_hops = 4;
-						}
 					}
+					input_ok_on = 1;
 				}
+				else
+					input_ok_on = 0;
+					
 				if (input_states[INPUT_AXIS_0_LEFT])
 				{
 					if (player[active_player]->activeHare->direction == 1)
@@ -1414,6 +1415,7 @@ void update_map()
 
 int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 {
+	input_ok_on = 0;
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
 	if (tm.tm_mon == 11 &&
