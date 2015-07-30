@@ -35,7 +35,19 @@ int do_physics()
 			{
 				hare->dx = 0;
 				hare->dy = 0;
-				hare->bums = 1;
+				int k;
+				for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
+				if (hare->circle_checkpoint_hit[k])
+				{
+					if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) < SP_ONE/4)
+					{
+						hare->dx += spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 8;
+						hare->dy += spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 8;
+					}
+					else
+					//if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) > spFloatToFixed(0.7))
+						hare->bums = 1;
+				}
 			}
 			if (hare->x <  0           || hare->y < 0 ||
 				hare->x >= spIntToFixed(LEVEL_WIDTH) || hare->y >= spIntToFixed(LEVEL_HEIGHT))

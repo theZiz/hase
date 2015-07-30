@@ -206,10 +206,11 @@ void draw(void)
 		rotation = 0;
 	
 	//Level
-	//spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
-	int a,b;
+	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
+
 	Uint16* pixels = spGetTargetPixel();
-	Uint16* texture = (Uint16*)level_original->pixels;
+	/*Uint16* texture = (Uint16*)level_original->pixels;
+	int a,b;
 	for (a = 0; a < LEVEL_WIDTH; a++)
 		for (b = 0; b < LEVEL_HEIGHT; b++)
 		{
@@ -228,7 +229,7 @@ void draw(void)
 			if (texture[a+b*LEVEL_WIDTH] == SP_ALPHA_COLOR)
 				continue;
 			pixels[x+y*screen->w] = texture[a+b*LEVEL_WIDTH];
-		}
+		}*/
 	
 	spSetVerticalOrigin(SP_CENTER);
 	spSetHorizontalOrigin(SP_CENTER);
@@ -302,7 +303,7 @@ void draw(void)
 					//spSetBlending( SP_ONE );
 				}				
 			}
-			//spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
+			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
 			int k;
 			for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
@@ -319,6 +320,12 @@ void draw(void)
 					continue;
 				if (hare->circle_checkpoint_hit[k])
 					pixels[X+Y*screen->w] = spGetFastRGB(0,255,0);
+				else
+				if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) < SP_ONE/4)
+					pixels[X+Y*screen->w] = spGetFastRGB(0,0,255);
+				else
+				if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) > spFloatToFixed(0.7))
+					pixels[X+Y*screen->w] = spGetFastRGB(255,255,0);
 				else
 					pixels[X+Y*screen->w] = spGetFastRGB(255,0,0);
 			}
@@ -1126,9 +1133,21 @@ int calc(Uint32 steps)
 			if (player[active_player]->activeHare)
 			{
 				//not AI
-				if (input_states[INPUT_BUTTON_OK] && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
+				if (input_states[INPUT_BUTTON_OK])
 				{
-					jump(1);
+					if (player[active_player]->activeHare->bums)
+					{
+						if (player[active_player]->activeHare->hops <= 0)
+						{
+							input_states[INPUT_BUTTON_OK] = 0;
+							jump(1);
+						}
+						else
+						{
+							input_states[INPUT_BUTTON_OK] = 0;
+							player[active_player]->activeHare->high_hops = 4;
+						}
+					}
 				}
 				if (input_states[INPUT_AXIS_0_LEFT])
 				{

@@ -174,49 +174,59 @@ void update_player()
 				{
 					Sint32 dx = spSin(hare->rotation);
 					Sint32 dy = spCos(hare->rotation);
+					Sint32 angle;
+					Sint32 factor;
+					printf("%i\n",gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y)));
+					switch (hare->high_hops)
+					{
+						case 0: //normal walk
+							angle = SP_PI/3;
+							factor = gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y))/48;
+							break;
+						case 1: //Fast forward
+							angle = SP_PI/3;
+							factor = SP_ONE/10;
+							break;
+						case 2: //super jump
+							angle = SP_PI/16;
+							factor = SP_ONE/4;
+							break;
+						case 3: //Wingadium
+							angle = 0;
+							factor = SP_ONE/4;
+							break;
+						case 4: //high jump
+							angle = SP_PI/16;
+							factor = SP_ONE/8;
+							break;
+					}
 					int k;
-					for (k = 1; k <= 16; k++)
+					for (k = 1; k <= 4; k++)
 					{
 						if (circle_is_empty(hare->x+k*dx,hare->y-k*dy,PLAYER_RADIUS,hare,1))
 						{
 							hare->x += k*dx;
 							hare->y -= k*dy;
-							Sint32 angle = SP_PI/3;
-							Sint32 divisor = 8;
-							if (hare->high_hops)
-							{
-								angle = SP_PI/10;
-								if (hare->high_hops >= 2) //super jump!
-								{
-									divisor = 4;
-									if (hare->high_hops == 3) //Wingdaium
-										angle = 0;
-								}
-								else
-									divisor = 6;
-							}
 							if (hare->direction)
 							{
-								hare->dx += spSin(hare->rotation+angle)/divisor;
-								hare->dy -= spCos(hare->rotation+angle)/divisor;
+								hare->dx += spMul(spSin(hare->rotation+angle),factor);
+								hare->dy -= spMul(spCos(hare->rotation+angle),factor);
 							}
 							else
 							{
-								hare->dx += spSin(hare->rotation-angle)/divisor;
-								hare->dy -= spCos(hare->rotation-angle)/divisor;
+								hare->dx += spMul(spSin(hare->rotation-angle),factor);
+								hare->dy -= spMul(spCos(hare->rotation-angle),factor);
+							}
+							if (hare->high_hops)
+							{
+								if (hare->high_hops < 4)
+									spSoundPlay(snd_high,-1,0,0,-1);
+								else
+									spSoundPlay(snd_low,-1,0,0,-1);
 							}
 							break;
 						}
-						if (k == 16)
-						{
-							k = -1;
-							printf("Using special magic...\n");
-						}
 					}
-					if (hare->high_hops)
-						spSoundPlay(snd_high,-1,0,0,-1);
-					else
-						spSoundPlay(snd_low,-1,0,0,-1);
 				}
 			}
 			hare->rotation = 0;

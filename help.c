@@ -7,7 +7,7 @@ void draw_help()
 		spFontDrawRight( screen->w-1, screen->h-font->maxheight*4-1, 0, "{view}+{jump}Help", font );
 		return;
 	}
-	int h = 31*HELP_DISTANCE+4;
+	int h = 33*HELP_DISTANCE+4;
 	int lw = spFontWidth("{view}+[<]/[^]/[>]/[v]: ",font);
 	int rw = spFontWidth("direction of the weapon",font);
 	int w = lw + rw + 4;
@@ -18,20 +18,22 @@ void draw_help()
 	spRectangle( w/2,screen->h-h/2,0,w,h,LL_BG);
 	spDeactivatePattern();
 
-	spFontDraw     ( 2+lw, screen->h-2-31*HELP_DISTANCE, 0, "Controls", font );
+	spFontDraw     ( 2+lw, screen->h-2-33*HELP_DISTANCE, 0, "Controls", font );
 
-	spFontDrawRight( 2+lw, screen->h-2-29*HELP_DISTANCE, 0, "[<]/[>]: ", font );
-	spFontDraw     ( 2+lw, screen->h-2-29*HELP_DISTANCE, 0, "direction & low jumps", font );
-	spFontDrawRight( 2+lw, screen->h-2-27*HELP_DISTANCE, 0, "[^]/[v]: ", font );
-	spFontDraw     ( 2+lw, screen->h-2-27*HELP_DISTANCE, 0, "direction of the weapon", font );
-	spFontDrawRight( 2+lw, screen->h-2-25*HELP_DISTANCE, 0, "{weapon}: ", font );
-	spFontDraw     ( 2+lw, screen->h-2-25*HELP_DISTANCE, 0, "Choose weapon", font );
-	spFontDrawRight( 2+lw, screen->h-2-23*HELP_DISTANCE, 0, "{shoot}: ", font );
-	spFontDraw     ( 2+lw, screen->h-2-23*HELP_DISTANCE, 0, "Shoot!", font );
-	spFontDrawRight( 2+lw, screen->h-2-21*HELP_DISTANCE, 0, "{power_down}/{power_up}: ", font );
-	spFontDraw     ( 2+lw, screen->h-2-21*HELP_DISTANCE, 0, "Weapon strength!", font );
-	spFontDrawRight( 2+lw, screen->h-2-19*HELP_DISTANCE, 0, "{jump}: ", font );
-	spFontDraw     ( 2+lw, screen->h-2-19*HELP_DISTANCE, 0, "High jump", font );
+	spFontDrawRight( 2+lw, screen->h-2-31*HELP_DISTANCE, 0, "[<]/[>]: ", font );
+	spFontDraw     ( 2+lw, screen->h-2-31*HELP_DISTANCE, 0, "direction & low jumps", font );
+	spFontDrawRight( 2+lw, screen->h-2-29*HELP_DISTANCE, 0, "[^]/[v]: ", font );
+	spFontDraw     ( 2+lw, screen->h-2-29*HELP_DISTANCE, 0, "direction of the weapon", font );
+	spFontDrawRight( 2+lw, screen->h-2-27*HELP_DISTANCE, 0, "{weapon}: ", font );
+	spFontDraw     ( 2+lw, screen->h-2-27*HELP_DISTANCE, 0, "Choose weapon", font );
+	spFontDrawRight( 2+lw, screen->h-2-25*HELP_DISTANCE, 0, "{shoot}: ", font );
+	spFontDraw     ( 2+lw, screen->h-2-25*HELP_DISTANCE, 0, "Shoot!", font );
+	spFontDrawRight( 2+lw, screen->h-2-23*HELP_DISTANCE, 0, "{power_down}/{power_up}: ", font );
+	spFontDraw     ( 2+lw, screen->h-2-23*HELP_DISTANCE, 0, "Weapon strength!", font );
+	spFontDrawRight( 2+lw, screen->h-2-21*HELP_DISTANCE, 0, "{jump}: ", font );
+	spFontDraw     ( 2+lw, screen->h-2-21*HELP_DISTANCE, 0, "jump", font );
+	spFontDrawRight( 2+lw, screen->h-2-19*HELP_DISTANCE, 0, "{jump}x2: ", font );
+	spFontDraw     ( 2+lw, screen->h-2-19*HELP_DISTANCE, 0, "high jump", font );
 	spFontDrawRight( 2+lw, screen->h-2-17*HELP_DISTANCE, 0, "{menu}: ", font );
 	spFontDraw     ( 2+lw, screen->h-2-17*HELP_DISTANCE, 0, "Options and Exit", font );
 	spFontDrawRight( 2+lw, screen->h-2-15*HELP_DISTANCE, 0, "{chat}: ", font );

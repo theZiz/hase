@@ -8,6 +8,10 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 Changelog
 =========
 
+1.6:
+- Improved movement
+
+
 1.5.4.18:
 - Smaller zoom level for starting with big windows
 - No blocking for some network interactions anymore (experimental)
