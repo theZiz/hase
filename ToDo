@@ -1,9 +1,4 @@
 For version 1.6:
-* Better odds for items
-* Recording chat for replays
-* Better movement (no stucking)
-* No hare capturing with standing on top
-* Two hares in the air fall down!
 * Tutorial
 	* Jumping and basic shooting
 	* High jumping
@@ -18,8 +13,8 @@ For version 1.6:
 	* Super peanut for flying (2 AP)
 	* controlled bomb (4 AP, 50 dmg)
 * Building/Anti building and normal targeting use different variables
-* No random mine drop on players
 * Random effect item
+* Item should not fly infinite far away
 * Mines should more act like the mines from hw
 * Fall damage (but no turn end)
 * More game settings
@@ -37,8 +32,6 @@ For version 1.6:
 	* if stuck, change direction
 	* Getting more wp
 	* Using different weapons, especially if some hare is on them
-* Moving and exploding items (when hit)
-	* hares and items should be moved from explosions generally
 * Levels with holes
 * Saving and loading level designs
 * If sprite is higher than sprite count => random sprite
@@ -47,5 +40,4 @@ For version 1.6:
 * higher min power (5%?)
 * Mode, where the damage of a bullet increases with the time in air
 * Rumble
-* Bouncing!
-* All player same track
+* Recording chat for replays

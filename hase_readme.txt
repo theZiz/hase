@@ -10,6 +10,10 @@ Changelog
 
 1.6:
 - Improved movement
+- Improved odds for items (one item per round)
+- Bouncing items
+- Hit hares and items get a force in from the explosion
+- No hare stacks floating in the air
 
 
 1.5.4.18:

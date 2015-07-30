@@ -6,7 +6,6 @@ const char item_filename[ITEMS_COUNT+1][64] = {
 };
 
 PSDL_Surface item_surface[ITEMS_COUNT+1] = {NULL,NULL,NULL};
-pItem firstItem = NULL;
 
 pItem items_drop(int kind,Sint32 x,Sint32 y)
 {
@@ -75,8 +74,8 @@ void items_calc()
 		}
 		else
 		{
-			item->dx = 0;
-			item->dy = 0;
+			item->dx = -item->dx/2;
+			item->dy = -item->dy/2;
 		}
 		int j,dead = 0;
 		if (item->beep)

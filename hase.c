@@ -499,14 +499,11 @@ void jump(int high)
 {
 	if (player[active_player]->activeHare == NULL)
 		return;
-	//if (circle_is_empty(player[active_player]->x+dx,player[active_player]->y+dy,6,0xDEAD))
-	{
-		if (high)
-			player[active_player]->activeHare->hops = HIGH_HOPS_TIME;
-		else
-			player[active_player]->activeHare->hops = HOPS_TIME;
-		player[active_player]->activeHare->high_hops = high;
-	}
+	if (high)
+		player[active_player]->activeHare->hops = HIGH_HOPS_TIME;
+	else
+		player[active_player]->activeHare->hops = HOPS_TIME;
+	player[active_player]->activeHare->high_hops = high;
 }
 
 int min_d_not_me(int x,int y,int me)

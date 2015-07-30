@@ -16,6 +16,8 @@ int active_player = 0;
 int player_count;
 pPlayer *player;
 
+pItem firstItem = NULL;
+
 void update_targeting()
 {
 	spSpritePointer sprite = spActiveSprite(targeting);
@@ -107,10 +109,30 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 						result = 0;
 					}
 				}
-
 				hare = hare->next;
 			}
 			while (hare != player[i]->firstHare);
+			pItem item = firstItem;
+			while (item)
+			{
+				if (item == (pItem)except)
+				{
+					item = item->next;
+					continue;
+				}
+				Sint32 a;
+				for (a = 0; a < CIRCLE_CHECKPOINTS; a++)
+				{
+					Sint32 u = spCos(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + x;
+					Sint32 v = spSin(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + y;
+					Sint32 X = u-item->x;
+					Sint32 Y = v-item->y;
+					int d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
+					if (d <= PLAYER_PLAYER_RADIUS*PLAYER_PLAYER_RADIUS)
+						return 0;
+				}
+				item = item->next;
+			}
 		}
 	return result;
 }
@@ -176,7 +198,6 @@ void update_player()
 					Sint32 dy = spCos(hare->rotation);
 					Sint32 angle;
 					Sint32 factor;
-					printf("%i\n",gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y)));
 					switch (hare->high_hops)
 					{
 						case 0: //normal walk
@@ -528,7 +549,7 @@ int real_next_player()
 	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
 	wp_choose = 0;
-	if (spRand()/1337%player_count == 0)
+	if (spRand()/1337%alive_count == 0)
 		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
 	update_targeting();
 	start_thread();

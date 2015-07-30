@@ -102,7 +102,7 @@ const int weapon_pos[WEAPON_Y][WEAPON_X] = {
 
 typedef SDL_Surface *PSDL_Surface;
 PSDL_Surface weapon_surface[WEAPON_MAX] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
- 
+
 void load_weapons()
 {
 	int i;
@@ -533,6 +533,57 @@ void negative_impact(int X,int Y,int radius)
 	update_map();
 }
 
+int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 *mod_dx,Sint32 *mod_dy)
+{
+	int total_break = 0;
+	Sint32 dx = x-bullet->x;
+	Sint32 dy = y-bullet->y;
+	int d = spFixedToInt(dx)*spFixedToInt(dx)+
+			spFixedToInt(dy)*spFixedToInt(dy);
+		d = weapon_explosion[bullet->kind]*weapon_explosion[bullet->kind]-d;
+	if (d > 0)
+	{
+		int damage = 0;
+		switch (bullet->kind)
+		{
+			case WP_SPELL_EXP:
+				damage = MAX_HEALTH*3/10;
+				total_break = 1;
+				break;
+			case WP_SPELL_WIN:
+				total_break = 1;
+				break;
+			case WP_SPELL_STU:
+				damage = MAX_HEALTH*7/10;
+				total_break = 1;
+				break;
+			case WP_SPELL_AVA:
+				if (hare)
+					damage = hare->health;
+				total_break = 1;
+				break;
+			default:
+				damage = d*MAX_HEALTH/weapon_health_divisor[bullet->kind];
+		}
+		if (damage)
+		{
+			if (hare)
+				hare->health -= damage;
+			if (player)
+			{
+				player->d_health -= damage;
+				player->d_time = 5000;
+			}
+			Sint32 D = spSqrt(spSquare(dx)+spSquare(dy));
+			Sint32 DX = spDiv(dx,D);
+			Sint32 DY = spDiv(dy,D);
+			*mod_dx += DX * damage >> 9;
+			*mod_dy += DY * damage >> 9;
+		}
+	}
+	return total_break;
+}
+
 int updateBullets()
 {
 	pBullet momBullet = firstBullet;
@@ -632,46 +683,25 @@ int updateBullets()
 								continue;
 							if (total_break)
 								break;
+							pItem item = firstItem;
+							while (item)
+							{
+								do_damage(item->x,item->y,momBullet,NULL,NULL,&(item->dx),&(item->dy));
+								item = item->next;
+							}
 							pHare hare = player[j]->firstHare;
 							if (hare)
 							do
 							{	
 								if (total_break)
 									break;
-								int d = spFixedToInt(hare->x-momBullet->x)*spFixedToInt(hare->x-momBullet->x)+
-										spFixedToInt(hare->y-momBullet->y)*spFixedToInt(hare->y-momBullet->y);
-									d = weapon_explosion[momBullet->kind]*weapon_explosion[momBullet->kind]-d;
-								if (d > 0)
+								total_break = do_damage(hare->x,hare->y,momBullet,hare,player[j],&(hare->dx),&(hare->dy));
+								switch (momBullet->kind)
 								{
-									int damage = 0;
-									switch (momBullet->kind)
-									{
-										case WP_SPELL_EXP:
-											damage = MAX_HEALTH*3/10;
-											total_break = 1;
-											break;
-										case WP_SPELL_WIN:
-											hare->hops = HIGH_HOPS_TIME;
-											hare->high_hops = 3;
-											total_break = 1;
-											break;
-										case WP_SPELL_STU:
-											damage = MAX_HEALTH*7/10;
-											total_break = 1;
-											break;
-										case WP_SPELL_AVA:
-											damage = hare->health;
-											total_break = 1;
-											break;
-										default:
-											damage = d*MAX_HEALTH/weapon_health_divisor[momBullet->kind];
-									}
-									if (damage)
-									{
-										hare->health -= damage;
-										player[j]->d_health -= damage;
-										player[j]->d_time = 5000;
-									}
+									case WP_SPELL_WIN:
+										hare->hops = HIGH_HOPS_TIME;
+										hare->high_hops = 3;
+										break;
 								}
 								if (hare->health <= 0)
 								{
