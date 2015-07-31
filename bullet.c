@@ -579,8 +579,8 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 			Sint32 D = spSqrt(spSquare(dx)+spSquare(dy));
 			Sint32 DX = spDiv(dx,D);
 			Sint32 DY = spDiv(dy,D);
-			*mod_dx += DX * damage >> 8;
-			*mod_dy += DY * damage >> 8;
+			*mod_dx += DX * damage >> 9;
+			*mod_dy += DY * damage >> 9;
 		}
 	}
 	return total_break;

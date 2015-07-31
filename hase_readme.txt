@@ -18,6 +18,7 @@ Changelog
 - No hare stacks floating in the air
 - Countdown starts only if the camera is on the player and not a dropped item
 - Building and shooting weapons got two different settings to avoid aim cheating ;)
+- Added Item selection sound
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows

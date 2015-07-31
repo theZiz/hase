@@ -543,7 +543,10 @@ int real_next_player()
 	memset(input_states,0,sizeof(int)*12);
 	wp_choose = 0;
 	if (spRand()/1337%alive_count == 0)
+	{
 		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
+		spSoundPlay(snd_create,-1,0,0,-1);
+	}
 	update_targeting();
 	start_thread();
 	spSoundPause(0,-1);

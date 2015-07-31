@@ -133,6 +133,7 @@ void items_calc()
 							if (d <= PLAYER_RADIUS*PLAYER_RADIUS*4)
 							{
 								hare->health += 50;
+								spSoundPlay(snd_item,-1,0,0,-1);
 								dead = 1;
 							}
 							break;
@@ -141,6 +142,7 @@ void items_calc()
 							{
 								if (player[j]->computer == 0)
 									player[j]->weapon_points++;
+								spSoundPlay(snd_item,-1,0,0,-1);
 								dead = 1;
 							}
 							break;

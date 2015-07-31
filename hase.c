@@ -24,6 +24,8 @@ spSound* snd_high;
 spSound* snd_low;
 spSound* snd_shoot;
 spSound* snd_turn;
+spSound* snd_item;
+spSound* snd_create;
 
 spFontPointer font;
 spFontPointer font_dark;
@@ -1537,6 +1539,8 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	snd_low = spSoundLoad("./sounds/short_jump.wav");
 	snd_shoot = spSoundLoad("./sounds/plop.wav");
 	snd_turn = spSoundLoad("./sounds/your_turn.wav");
+	snd_item = spSoundLoad("./sounds/item.wav");
+	snd_create = spSoundLoad("./sounds/create.wav");
 	
 	spMapSetMapSet(1);
 	
@@ -1557,6 +1561,8 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	spSoundDelete(snd_low);
 	spSoundDelete(snd_shoot);
 	spSoundDelete(snd_turn);
+	spSoundDelete(snd_item);
+	spSoundDelete(snd_create);
 
 	stop_thread(result < 2);
 	if (result == 3)

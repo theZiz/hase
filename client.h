@@ -34,7 +34,7 @@ typedef struct sMessage *pMessage;
 typedef struct sMessage
 {
 	char name[256];
-	char content[256];
+	char content[1024];
 	int l;
 	pMessage next;
 } tMessage;
