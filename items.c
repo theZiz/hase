@@ -73,9 +73,38 @@ void items_calc()
 			item->y += item->dy;
 		}
 		else
+		if (item->dx || item->dy)
 		{
-			item->dx = -item->dx/2;
-			item->dy = -item->dy/2;
+			//bounce (copy & paste from particle feedback function)!
+			Sint32 speed = vector_length_approx(item->dx,item->dy);
+			if (speed <= (SP_ONE >> 4))
+			{
+				item->dx = 0;
+				item->dy = 0;
+			}
+			else
+			{
+				Sint32 ax = spDiv(item->dx,speed);
+				Sint32 ay = spDiv(item->dy,speed);
+				Sint32 ex = gravitation_x(item->x >> SP_ACCURACY,item->y >> SP_ACCURACY);
+				Sint32 ey = gravitation_y(item->x >> SP_ACCURACY,item->y >> SP_ACCURACY);
+				Sint32 len = vector_length_approx(ex,ey);
+				if (len == 0)
+				{
+					item->dx = 0;
+					item->dy = 0;
+				}
+				else
+				{
+					ex = spDiv(ex,len);
+					ey = spDiv(ey,len);
+					Sint32 p = -2*(spMul(ex,ax)+spMul(ey,ay));
+					item->dx = spMul(p,ex)+ax;
+					item->dy = spMul(p,ey)+ay;
+					item->dx = spMul(item->dx,speed*3/4);
+					item->dy = spMul(item->dy,speed*3/4);
+				}
+			}
 		}
 		int j,dead = 0;
 		if (item->beep)
@@ -133,7 +162,7 @@ void items_calc()
 					break;
 			}
 		pItem next = item->next;
-		if (dead)
+		if (dead || item->x < 0 || item->y < 0 || spFixedToInt(item->x) >= LEVEL_WIDTH || spFixedToInt(item->y) >= LEVEL_HEIGHT)
 		{
 			if (before)
 				before->next = item->next;

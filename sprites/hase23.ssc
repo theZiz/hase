@@ -1,0 +1,38 @@
+default = stand left
+image = ./data/hase23.png
+framesize = 34, 34
+bordersize = 34, 34
+
+author = Ziz
+license = CC-BY-SA
+comment = All your hares belong to us!
+
+[stand left]
+frame = 0, 0
+
+[stand right]
+frame = 0, 34
+
+[jump left]
+fps = 50
+frame = 0, 0, 4
+fps = 100
+frame = 136, 0, 2
+
+[jump right]
+fps = 50
+frame = 0, 34, 4
+fps = 100
+frame = 136, 34, 2
+
+[high jump left]
+fps = 11
+frame = 0, 0, 4
+fps = 50
+frame = 136, 0, 2
+
+[high jump right]
+fps = 11
+frame = 0, 34, 4
+fps = 50
+frame = 136, 34, 2

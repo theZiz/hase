@@ -4,7 +4,6 @@ For version 1.6:
 	* High jumping
 	* weapon choice
 	* camera movement
-* Extra time for item drop
 * New weapons
 	* Punch to hare above (2 AP, but 50 damage to avoid the "standing on hat" tactic)
 	* Anti building for tunnels (1, 2 and 3 AP version), all directions (so digger at the same time)
@@ -12,11 +11,6 @@ For version 1.6:
 	* Teleport (3 AP)
 	* Super peanut for flying (2 AP)
 	* controlled bomb (4 AP, 50 dmg)
-* Building/Anti building and normal targeting use different variables
-* Random effect item
-* Item should not fly infinite far away
-* Mines should more act like the mines from hw
-* Fall damage (but no turn end)
 * More game settings
 	* default AP 1..5
 	* time 5..120
@@ -32,12 +26,7 @@ For version 1.6:
 	* if stuck, change direction
 	* Getting more wp
 	* Using different weapons, especially if some hare is on them
-* Levels with holes
 * Saving and loading level designs
-* If sprite is higher than sprite count => random sprite
-	* same for level texture
-* Less max power
-* higher min power (5%?)
 * Mode, where the damage of a bullet increases with the time in air
 * Rumble
 * Recording chat for replays

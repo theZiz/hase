@@ -22,6 +22,8 @@ char* create_level_string(char* buffer,int width,int height,int circles,int tria
 		int r = spRand()%(spMin(width,height) >> 3);
 		int x = LEVEL_BORDER+r+spRand()%(width-2*LEVEL_BORDER-2*r);
 		int y = LEVEL_BORDER+r+spRand()%(height-2*LEVEL_BORDER-2*r);
+		if (spRand()%5 == 0)
+			add_to_string(buffer,"-"); //negative
 		add_to_string(buffer,"*"); //circle
 		add_to_string(buffer,ltostr(x,temp,36));
 		add_to_string(buffer," ");
@@ -43,6 +45,8 @@ char* create_level_string(char* buffer,int width,int height,int circles,int tria
 		Sint32 y2 = y + ( r * spSin( a2 ) >> SP_ACCURACY );
 		Sint32 x3 = x + ( r * spCos( a3 ) >> SP_ACCURACY );
 		Sint32 y3 = y + ( r * spSin( a3 ) >> SP_ACCURACY );
+		if (spRand()%5 == 0)
+			add_to_string(buffer,"-"); //negative
 		add_to_string(buffer,"^"); //triangle
 		add_to_string(buffer,ltostr(x1,temp,36));
 		add_to_string(buffer," ");
@@ -78,7 +82,8 @@ char* create_level_string(char* buffer,int width,int height,int circles,int tria
 		Sint32 ny3 = y + ( y3 * spCos( angle ) + x3 * spSin( angle ) >> SP_ACCURACY );
 		Sint32 nx4 = x + ( x4 * spCos( angle ) - y4 * spSin( angle ) >> SP_ACCURACY );
 		Sint32 ny4 = y + ( y4 * spCos( angle ) + x4 * spSin( angle ) >> SP_ACCURACY );
-
+		if (spRand()%5 == 0)
+			add_to_string(buffer,"-"); //negative
 		add_to_string(buffer,"#"); //quad
 		add_to_string(buffer,ltostr(nx1,temp,36));
 		add_to_string(buffer," ");
@@ -147,6 +152,9 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 	SDL_Surface* level = spCreateSurface(width,height);
 	spSelectRenderTarget(level);
 	spClearTarget(SP_ALPHA_COLOR);
+	spSetAlphaTest(0);
+	
+	int negative = 0;
 	
 	while (mom[0] != 0)
 	{
@@ -154,12 +162,17 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 		//Reading the kind
 		switch (mom[0])
 		{
+			case '-':
+				mom++;
+				negative = 1;
+				break;
 			case '*': //circle
 				mom++;
 				x1 = strtol(mom,&mom,36)*zoom - border_shift >> SP_ACCURACY;
 				y1 = strtol(mom,&mom,36)*zoom - border_shift >> SP_ACCURACY;
 				x2 = strtol(mom,&mom,36)*zoom >> SP_ACCURACY;
-				spEllipse(x1,y1,0,x2,x2,color);
+				spEllipse(x1,y1,0,x2,x2,negative?SP_ALPHA_COLOR:color);
+				negative = 0;
 				break;
 			case '^': //triangle
 				mom++;
@@ -169,7 +182,8 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 				y2 = strtol(mom,&mom,36)*zoom - border_shift >> SP_ACCURACY;
 				x3 = strtol(mom,&mom,36)*zoom - border_shift >> SP_ACCURACY;
 				y3 = strtol(mom,&mom,36)*zoom - border_shift >> SP_ACCURACY;
-				spTriangle(x1,y1,0,x2,y2,0,x3,y3,0,color);
+				spTriangle(x1,y1,0,x2,y2,0,x3,y3,0,negative?SP_ALPHA_COLOR:color);
+				negative = 0;
 				break;
 			case '#': //quads
 				mom++;
@@ -181,12 +195,15 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 				y3 = strtol(mom,&mom,36)*zoom - border_shift >> SP_ACCURACY;
 				x4 = strtol(mom,&mom,36)*zoom - border_shift >> SP_ACCURACY;
 				y4 = strtol(mom,&mom,36)*zoom - border_shift >> SP_ACCURACY;
-				spQuad(x1,y1,0,x2,y2,0,x3,y3,0,x4,y4,0,color);
+				spQuad(x1,y1,0,x2,y2,0,x3,y3,0,x4,y4,0,negative?SP_ALPHA_COLOR:color);
+				negative = 0;
 				break;
 			default:
 				mom++;
+				negative = 0;
 		}
 	}
+	spSetAlphaTest(1);
 	spSelectRenderTarget(spGetWindowSurface());
 	return level;
 }
@@ -209,7 +226,7 @@ void texturize_level(SDL_Surface* level,char* level_string)
 {
 	int t = strtol(level_string,NULL,36);
 	char buffer[256];
-	sprintf(buffer,"./textures/texture%i.png",t);
+	sprintf(buffer,"./textures/texture%i.png",(t-1)%TEXTURE_COUNT+1);
 	SDL_Surface* texture = spLoadSurface(buffer);
 	spSelectRenderTarget(level);
 	Uint16* level_pixel = spGetTargetPixel();

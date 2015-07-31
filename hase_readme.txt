@@ -13,8 +13,11 @@ Changelog
 - Improved odds for items (one item per round)
 - Bouncing items
 - Hit hares and items get a force in from the explosion
+- Improved the minimal and maximal shoot power
+- Random level with holes
 - No hare stacks floating in the air
-
+- Countdown starts only if the camera is on the player and not a dropped item
+- Building and shooting weapons got two different settings to avoid target cheating ;)
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows

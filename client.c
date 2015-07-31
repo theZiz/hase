@@ -761,7 +761,7 @@ int get_game(pGame game,pPlayer *playerList)
 					player->position_in_game = atoi(now->content);
 				if (strcmp(now->name,"nr") == 0)
 				{
-					player->nr = atoi(now->content);
+					player->nr = (atoi(now->content)-1) % SPRITE_COUNT + 1;
 					game->sprite_count[player->nr-1]++;
 				}
 			}

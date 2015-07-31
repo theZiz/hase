@@ -32,6 +32,7 @@ int do_physics()
 				hare->y += hare->dy;
 			}
 			else
+			if (hare->dx || hare->dy)
 			{
 				hare->dx = 0;
 				hare->dy = 0;
@@ -45,7 +46,6 @@ int do_physics()
 						hare->dy += spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 8;
 					}
 					else
-					//if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) > spFloatToFixed(0.7))
 						hare->bums = 1;
 				}
 			}

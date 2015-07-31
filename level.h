@@ -6,7 +6,7 @@
 
 #define TEXTURE_SIZE 256
 #define TEXTURE_MASK 255
-#define TEXTURE_COUNT 8
+#define TEXTURE_COUNT 9
 #define LEVEL_BORDER 256
 
 Uint16 get_border_color();

@@ -115,11 +115,6 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 			pItem item = firstItem;
 			while (item)
 			{
-				if (item == (pItem)except)
-				{
-					item = item->next;
-					continue;
-				}
 				Sint32 a;
 				for (a = 0; a < CIRCLE_CHECKPOINTS; a++)
 				{
@@ -129,7 +124,11 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					Sint32 Y = v-item->y;
 					int d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
 					if (d <= PLAYER_PLAYER_RADIUS*PLAYER_PLAYER_RADIUS)
-						return 0;
+					{
+						if (except)
+							except->circle_checkpoint_hit[a] = 1;
+						result = 0;
+					}
 				}
 				item = item->next;
 			}
@@ -317,12 +316,7 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 				else
 				{
 					//bounce!
-					//Sint32 speed = spSqrt(spSquare(bunch->particle[i].dx)+spSquare(bunch->particle[i].dy));
 					Sint32 speed = vector_length_approx(bunch->particle[i].dx,bunch->particle[i].dy);
-					/*float l_1 = spFixedToFloat(speed);
-					float l_2 = spFixedToFloat(vector_length_approx(bunch->particle[i].dx,bunch->particle[i].dy));
-					float l_3 = spFixedToFloat(vector_length_guess(bunch->particle[i].dx,bunch->particle[i].dy));
-					printf("Real: %.4f Approx: %.4f (+-%.2f) Guess: %.4f (+-%.2f)\n",l_1,l_2,fabs((l_1-l_2)/l_1)*100.0f,l_3,fabs((l_1-l_3)/l_1)*100.0f);*/
 					if (speed <= (SP_ONE >> 4))
 						bunch->particle[i].status = -1;
 					else
@@ -331,7 +325,6 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 						Sint32 ay = spDiv(bunch->particle[i].dy,speed);
 						Sint32 ex = gravitation_x(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY);
 						Sint32 ey = gravitation_y(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY);
-						//Sint32 len = spSqrt(spSquare(ex)+spSquare(ey));
 						Sint32 len = vector_length_approx(ex,ey);
 						if (len == 0)
 							bunch->particle[i].status = -1;
@@ -549,7 +542,7 @@ int real_next_player()
 	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
 	wp_choose = 0;
-	//if (spRand()/1337%alive_count == 0)
+	if (spRand()/1337%alive_count == 0)
 		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
 	update_targeting();
 	start_thread();
@@ -676,6 +669,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 			hare->direction = 0;
 			hare->w_direction = SP_ONE/2;
 			hare->w_power = SP_ONE/2;
+			hare->w_build_distance = SP_ONE/2;
 			hare->hops = 0;
 			hare->high_hops = 0;
 			int x,y;

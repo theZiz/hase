@@ -6,7 +6,7 @@
 #include <sparrow3d.h>
 #include <string.h>
 
-#define CLIENT_VERSION 13
+#define CLIENT_VERSION 14
 
 #define TRACE_COUNT 16
 
@@ -21,13 +21,14 @@
 
 #define KEY_POLL_MASK (1 << spMapPoolByID(MAP_JUMP))
 
-#define SPRITE_COUNT 18
+#define SPRITE_COUNT 24
 
 #ifndef DATA_FOLDER
 	#define DATA_FOLDER "."
 #endif
 
 #define CIRCLE_CHECKPOINTS 32
+#define W_POWER_DIVISOR 3
 
 typedef struct sMessage *pMessage;
 typedef struct sMessage
@@ -77,6 +78,8 @@ typedef struct sHare
 	int direction;
 	int w_direction;
 	int w_power;
+	int w_build_direction;
+	int w_build_distance;
 	Sint32 x,y;
 	Sint32 dx,dy;
 	Sint32 rotation;

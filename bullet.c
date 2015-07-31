@@ -560,6 +560,8 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 			case WP_SPELL_AVA:
 				if (hare)
 					damage = hare->health;
+				else
+					damage = 100;
 				total_break = 1;
 				break;
 			default:

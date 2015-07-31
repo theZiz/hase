@@ -271,14 +271,14 @@ void draw(void)
 				{
 					
 					int r = (zoom*weapon_explosion[w_nr] >> SP_ACCURACY+1);
-					int d = 12+weapon_explosion[w_nr]+(hare->w_power*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
-					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
-					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3),zoom);
+					int d = 12+weapon_explosion[w_nr]+(hare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
+					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
+					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
 					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 
-					ox = hare->x-d*-spMul(spSin(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
-					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_direction-SP_PI/2),hare->w_power+SP_ONE*2/3);
+					ox = hare->x-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
+					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
 					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/2+4,NULL,-1))
@@ -446,7 +446,7 @@ void draw(void)
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 		spFontDrawRight( screen->w-1, screen->h-1-font->maxheight*2, 0, weapon_name[w_nr], font );
 		if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
-			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_power*30/SP_ONE+30);
+			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_build_distance*30/SP_ONE+30);
 		else
 			sprintf(buffer,"Power: %i.%i %%",player[active_player]->activeHare->w_power*100/SP_ONE,player[active_player]->activeHare->w_power*1000/SP_ONE%10);
 		spFontDrawRight( screen->w-1, screen->h-1-3*font->maxheight, 0, buffer, font );
@@ -1060,7 +1060,7 @@ int calc(Uint32 steps)
 			continue;
 		if (check_next_player())
 			return 3;
-		if (player[active_player]->weapon_points)
+		if (player[active_player]->weapon_points && !(dropItem && dropItem->seen))
 			countdown--;
 		if (countdown == 5000 && speed == 1)
 			channel_end = spSoundPlay(snd_end,-1,0,0,-1);
@@ -1097,8 +1097,8 @@ int calc(Uint32 steps)
 									int x = player[active_player]->activeHare->x;
 									int y = player[active_player]->activeHare->y;
 									int w_d = spRand()%(2*SP_PI);
-									int w_p = spRand()%SP_ONE;
-									lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/2);
+									int w_p = spRand()%(SP_ONE-SP_ONE/20-1)+SP_ONE/20+1;
+									lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/W_POWER_DIVISOR);
 									int d = min_d_not_me(x,y,active_player);
 									if (d < lastAIDistance)
 									{
@@ -1113,7 +1113,7 @@ int calc(Uint32 steps)
 									if (player[active_player]->weapon_points > 0)
 									{
 										player[active_player]->weapon_points-=weapon_cost[WP_BIG_BAZOOKA];
-										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],WP_BIG_BAZOOKA,1);
+										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],WP_BIG_BAZOOKA,1);
 									}
 									break;
 								}
@@ -1153,6 +1153,7 @@ int calc(Uint32 steps)
 					{
 						player[active_player]->activeHare->direction = 0;
 						player[active_player]->activeHare->w_direction = SP_PI-player[active_player]->activeHare->w_direction;
+						player[active_player]->activeHare->w_build_direction = SP_PI-player[active_player]->activeHare->w_build_direction;
 						direction_hold = 0;
 					}
 					direction_hold++;
@@ -1166,6 +1167,7 @@ int calc(Uint32 steps)
 					{
 						player[active_player]->activeHare->direction = 1;
 						player[active_player]->activeHare->w_direction = SP_PI-player[active_player]->activeHare->w_direction;
+						player[active_player]->activeHare->w_build_direction = SP_PI-player[active_player]->activeHare->w_build_direction;
 						direction_hold = 0;
 					}
 					direction_hold++;
@@ -1180,10 +1182,20 @@ int calc(Uint32 steps)
 					direction_pressed += SP_ONE/20;
 					if (direction_pressed >= 128*SP_ONE)
 						direction_pressed = 128*SP_ONE;
-					if (player[active_player]->activeHare->direction == 0)
-						player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
+					if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
+					{
+						if (player[active_player]->activeHare->direction == 0)
+							player[active_player]->activeHare->w_build_direction += direction_pressed >> SP_ACCURACY;
+						else
+							player[active_player]->activeHare->w_build_direction -= direction_pressed >> SP_ACCURACY;
+					}
 					else
-						player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
+					{
+						if (player[active_player]->activeHare->direction == 0)
+							player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
+						else
+							player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
+					}
 				}
 				else
 				if (input_states[INPUT_AXIS_1_RIGHT])
@@ -1191,10 +1203,20 @@ int calc(Uint32 steps)
 					direction_pressed += SP_ONE/20;
 					if (direction_pressed >= 128*SP_ONE)
 						direction_pressed = 128*SP_ONE;
-					if (player[active_player]->activeHare->direction == 0)
-						player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
+					if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
+					{
+						if (player[active_player]->activeHare->direction == 0)
+							player[active_player]->activeHare->w_build_direction -= direction_pressed >> SP_ACCURACY;
+						else
+							player[active_player]->activeHare->w_build_direction += direction_pressed >> SP_ACCURACY;
+					}
 					else
-						player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
+					{
+						if (player[active_player]->activeHare->direction == 0)
+							player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
+						else
+							player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
+					}
 				}
 				else
 					direction_pressed = 0;
@@ -1202,17 +1224,35 @@ int calc(Uint32 steps)
 				if (input_states[INPUT_BUTTON_R])
 				{
 					power_pressed += SP_ONE/100;
-					player[active_player]->activeHare->w_power += power_pressed >> SP_ACCURACY;
-					if (player[active_player]->activeHare->w_power >= SP_ONE)
-						player[active_player]->activeHare->w_power = SP_ONE;
+					if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
+					{
+						player[active_player]->activeHare->w_build_distance += power_pressed >> SP_ACCURACY;
+						if (player[active_player]->activeHare->w_build_distance >= SP_ONE)
+							player[active_player]->activeHare->w_build_distance = SP_ONE;
+					}
+					else
+					{
+						player[active_player]->activeHare->w_power += power_pressed >> SP_ACCURACY;
+						if (player[active_player]->activeHare->w_power >= SP_ONE)
+							player[active_player]->activeHare->w_power = SP_ONE;
+					}
 				}
 				else
 				if (input_states[INPUT_BUTTON_L])
 				{
 					power_pressed += SP_ONE/100;
-					player[active_player]->activeHare->w_power -= power_pressed >> SP_ACCURACY;
-					if (player[active_player]->activeHare->w_power < 0)
-						player[active_player]->activeHare->w_power = 0;
+					if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
+					{
+						player[active_player]->activeHare->w_build_distance -= power_pressed >> SP_ACCURACY;
+						if (player[active_player]->activeHare->w_build_distance < 0)
+							player[active_player]->activeHare->w_build_distance = 0;
+					}
+					else
+					{
+						player[active_player]->activeHare->w_power -= power_pressed >> SP_ACCURACY;
+						if (player[active_player]->activeHare->w_power < SP_ONE/20+1)
+							player[active_player]->activeHare->w_power = SP_ONE/20+1;
+					}
 				}
 				else
 					power_pressed = 0;
@@ -1224,16 +1264,16 @@ int calc(Uint32 steps)
 						input_states[INPUT_BUTTON_CANCEL] = 0;
 						player[active_player]->weapon_points-=weapon_cost[w_nr];
 						if (weapon_shoot[w_nr])
-							shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/2,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+							shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
 						else
 						switch (w_nr)
 						{
 							case WP_BUILD_SML:case WP_BUILD_MID:case WP_BUILD_BIG:
 								{
-									int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_power*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
+									int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 									int r = weapon_explosion[w_nr];
-									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
-									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_direction-SP_PI/2),player[active_player]->activeHare->w_power+SP_ONE*2/3);
+									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
 									if (circle_is_empty(ox,oy,r/2+4,NULL,-1))
 										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
 									else

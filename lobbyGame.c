@@ -445,7 +445,7 @@ int lg_calc(Uint32 steps)
 	if (spMapGetByID(MAP_SHOOT) && lg_game->admin_pw)
 	{
 		spMapSetByID(MAP_SHOOT,0);
-		create_level_string(lg_game->level_string,1536,1536,3,3,3);
+		create_level_string(lg_game->level_string,1536,1536,5,5,5);
 		spDeleteSurface(lg_level);
 		int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
 		lg_level = create_level(lg_game->level_string,l_w,l_w,LL_BG);
