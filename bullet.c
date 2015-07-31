@@ -577,8 +577,8 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 			Sint32 D = spSqrt(spSquare(dx)+spSquare(dy));
 			Sint32 DX = spDiv(dx,D);
 			Sint32 DY = spDiv(dy,D);
-			*mod_dx += DX * damage >> 9;
-			*mod_dy += DY * damage >> 9;
+			*mod_dx += DX * damage >> 8;
+			*mod_dy += DY * damage >> 8;
 		}
 	}
 	return total_break;
@@ -676,6 +676,12 @@ int updateBullets()
 						}
 						if (momBullet->kind == WP_MINE)
 							items_drop(2,momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY);
+						pItem item = firstItem;
+						while (item)
+						{
+							do_damage(item->x,item->y,momBullet,NULL,NULL,&(item->dx),&(item->dy));
+							item = item->next;
+						}
 						int total_break = 0;
 						for (j = 0; j < player_count; j++)
 						{
@@ -683,12 +689,6 @@ int updateBullets()
 								continue;
 							if (total_break)
 								break;
-							pItem item = firstItem;
-							while (item)
-							{
-								do_damage(item->x,item->y,momBullet,NULL,NULL,&(item->dx),&(item->dy));
-								item = item->next;
-							}
 							pHare hare = player[j]->firstHare;
 							if (hare)
 							do

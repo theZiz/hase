@@ -549,7 +549,7 @@ int real_next_player()
 	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
 	wp_choose = 0;
-	if (spRand()/1337%alive_count == 0)
+	//if (spRand()/1337%alive_count == 0)
 		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
 	update_targeting();
 	start_thread();
