@@ -304,6 +304,7 @@ int load_level(char* level_string)
 	spFileListPointer flp = NULL;
 	char path[2048];
 	spFileGetDirectory(&flp,spConfigGetPath(path,"hase/levels",""),0,0);
+	int path_l = strlen(path);
 	if (flp == NULL)
 	{
 		char buffer[2048];
@@ -318,7 +319,7 @@ int load_level(char* level_string)
 	{
 		if (f->type != SP_FILE_DIRECTORY)
 		{
-			sprintf(add_window_element(window,0,r)->text,"%s",f->name);
+			sprintf(add_window_element(window,0,r)->text,"%s",&(f->name[path_l]));
 			r++;
 		}
 		f = f->next;
