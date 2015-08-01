@@ -128,8 +128,8 @@ void ll_draw(void)
 	
 	if (ll_one_reload)
 	{
-		if (mom_game && mom_game->status == -1)
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}/{view}Replay   {weapon}Create   {menu}Back", ll_font );
+		if (mom_game && mom_game->status != 0)
+			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}/{view}Show   {weapon}Create   {menu}Back", ll_font );
 		else
 			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}Join   {weapon}Create   {view}Spectate   {menu}Back", ll_font );
 	}
@@ -324,17 +324,11 @@ int ll_calc(Uint32 steps)
 				game = game->next;
 				pos++;
 			}
-			if (game->status == 1)
-				message_box(ll_font,ll_resize,"Game already started!");
-			else
-			if (game->status == -1) //Replay!
-				hase(ll_resize,game,NULL);
-			else
-			if (game->player_count >= game->max_player)
+			if (game->status == 0 && game->player_count >= game->max_player) //want to join, but full
 				message_box(ll_font,ll_resize,"Game full!");
 			else
 			{
-				start_lobby_game(ll_font,ll_resize,game,0);
+				start_lobby_game(ll_font,ll_resize,game,game->status != 0);
 				ll_counter = 10000;
 			}
 		}
@@ -355,16 +349,8 @@ int ll_calc(Uint32 steps)
 				game = game->next;
 				pos++;
 			}
-			if (game->status == 1)
-				hase(ll_resize,game,NULL); //Already started
-			else
-			if (game->status == -1) //Replay!
-				hase(ll_resize,game,NULL);
-			else
-			{
-				start_lobby_game(ll_font,ll_resize,game,1);
-				ll_counter = 10000;
-			}
+			start_lobby_game(ll_font,ll_resize,game,1);
+			ll_counter = 10000;
 		}
 	}
 	if (ll_reload_now == 2)

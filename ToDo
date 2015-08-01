@@ -1,4 +1,14 @@
 For version 1.6:
+* More game settings
+	* default AP 1..5
+	* time 5..120
+	* health 50..200
+	* Some kind of sudden death
+	* No killing borders
+	* Mode, where the damage of a bullet increases with the time in air
+* General UI improvements
+	* No max player, but the possibility to kick players
+	* Options changeable after creation
 * Tutorial
 	* Jumping and basic shooting
 	* High jumping
@@ -11,22 +21,12 @@ For version 1.6:
 	* Teleport (3 AP)
 	* Super peanut for flying (2 AP)
 	* controlled bomb (4 AP, 50 dmg)
-* More game settings
-	* default AP 1..5
-	* time 5..120
-	* health 50..200
-	* Some kind of sudden death
-	* No killing borders
-* General UI improvements
-	* No max player, but the possibility to kick players
-	* list selection instead of entering a name
-	* level window (See also level saving and loading)
-	* Options changeable after creation
 * More intelligent AI
 	* if stuck, change direction
 	* Getting more wp
 	* Using different weapons, especially if some hare is on them
-* Saving and loading level designs
-* Mode, where the damage of a bullet increases with the time in air
+
+Nice to have
 * Rumble
 * Recording chat for replays
+* Removing of died players in the lobby

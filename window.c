@@ -98,8 +98,9 @@ pWindowElement add_window_element(pWindow window,int type,int reference)
 		window->feedback(window,elem,WN_ACT_UPDATE);
 	update_elem_width(elem,window);
 	update_window_width(window);
-	window->height+=3*window->font->maxheight/2-SMALL_HACK;
 	window->count++;
+	if (window->count < 14)
+		window->height+=3*window->font->maxheight/2-SMALL_HACK;
 	return elem;
 }
 
@@ -140,25 +141,39 @@ void window_draw(void)
 	pWindowElement elem = window->firstElement;
 	pWindowElement selElem = NULL;
 	int nr = 0;
+	int start_nr = 0;
+	if (window->count > 13)
+		start_nr = window->selection*(window->count-11)/window->count;
+	int in_nr = 0;
 	while (elem)
 	{
-		y+=window->font->maxheight*3/2-SMALL_HACK;
-		int t_w = spFontWidth(elem->text,window->font);
-		int t_r = (screen->w+t_w)/2;
-		if (t_r > screen->w - meow)
-			t_r = screen->w - meow;
-		if (nr == window->selection)
+		if (window->count < 14 || (nr >= start_nr && nr < start_nr + 13))
 		{
-			if (window->firstElement->next) //more than one element
-				spRectangle( screen->w/2, y+window->font->maxheight/2+SMALL_HACK/2, 0, window->width-2*meow,window->font->maxheight,LL_FG);
-			selElem = elem;
-			if (elem->type == 1 && spIsKeyboardPolled())
+			y+=window->font->maxheight*3/2-SMALL_HACK;
+			int t_w = spFontWidth(elem->text,window->font);
+			int t_r = (screen->w+t_w)/2;
+			if (t_r > screen->w - meow)
+				t_r = screen->w - meow;
+			if (nr == window->selection)
 			{
-				if ((SDL_GetTicks() >> 9) & 1)
-					spLine(t_r, y, 0, t_r, y+window->font->maxheight, 0,65535);
+				if (window->firstElement->next) //more than one element
+					spRectangle( screen->w/2, y+window->font->maxheight/2+SMALL_HACK/2, 0, window->width-2*meow,window->font->maxheight,LL_FG);
+				selElem = elem;
+				if (elem->type == 1 && spIsKeyboardPolled())
+				{
+					if ((SDL_GetTicks() >> 9) & 1)
+						spLine(t_r, y, 0, t_r, y+window->font->maxheight, 0,65535);
+				}
 			}
+			if (start_nr > 0 && in_nr == 0)
+				spFontDrawRight( t_r, y, 0, "...", window->font );
+			else
+			if (start_nr+13 < window->count && in_nr == 12)
+				spFontDrawRight( t_r, y, 0, "...", window->font );
+			else
+				spFontDrawRight( t_r, y, 0, elem->text, window->font );
+			in_nr++;
 		}
-		spFontDrawRight( t_r, y, 0, elem->text, window->font );
 		nr++;
 		elem = elem->next;
 	}
@@ -335,6 +350,9 @@ void fill_with_insult(char* buffer)
 	}
 }
 
+int window_pause;
+int last_window_pause;
+
 int window_calc(Uint32 steps)
 {
 	pWindow window = recent_window;
@@ -401,28 +419,54 @@ int window_calc(Uint32 steps)
 		!spIsKeyboardPolled() ||
 		spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER)
 	{
-		if (spGetInput()->axis[1] < 0)
+		int i;
+		for (i = 0; i < steps; i++)
 		{
-			spGetInput()->axis[1] = 0;
-			if (selElem->type == 1 &&
-				spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER &&
-				window->feedback)
-				window->feedback(window,selElem,WN_ACT_END_POLL);
-			window->selection = (window->selection + window->count - 1) % window->count;
-			selElem = befElem;
-		}
-		if (spGetInput()->axis[1] > 0)
-		{
-			spGetInput()->axis[1] = 0;
-			if (selElem->type == 1 &&
-				spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER &&
-				window->feedback)
-				window->feedback(window,selElem,WN_ACT_END_POLL);
-			window->selection = (window->selection + 1) % window->count;
-			if (selElem->next)
-				selElem = selElem->next;
+			if (spGetInput()->axis[1] < 0)
+			{
+				if (window_pause == 0)
+				{
+					if (selElem->type == 1 &&
+						spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER &&
+						window->feedback)
+						window->feedback(window,selElem,WN_ACT_END_POLL);
+					window->selection = (window->selection + window->count - 1) % window->count;
+					selElem = befElem;
+					last_window_pause -= 25;
+					if (last_window_pause < 25)
+						last_window_pause = 25;
+					window_pause = last_window_pause;
+				}
+				else
+					window_pause--;
+			}
 			else
-				selElem = window->firstElement;
+			if (spGetInput()->axis[1] > 0)
+			{
+				if (window_pause == 0)
+				{
+					if (selElem->type == 1 &&
+						spIsKeyboardPolled() && spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER &&
+						window->feedback)
+						window->feedback(window,selElem,WN_ACT_END_POLL);
+					window->selection = (window->selection + 1) % window->count;
+					if (selElem->next)
+						selElem = selElem->next;
+					else
+						selElem = window->firstElement;
+					last_window_pause -= 25;
+					if (last_window_pause < 25)
+						last_window_pause = 25;
+					window_pause = last_window_pause;
+				}
+				else
+					window_pause--;
+			}
+			else
+			{
+				last_window_pause = 300;
+				window_pause = 0;
+			}
 		}
 	}
 	if ((spMapGetByID(MAP_JUMP) && (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_NEVER || spIsKeyboardPolled() == 0 ))||
@@ -579,6 +623,8 @@ void window_resize(Uint16 w, Uint16 h)
 
 int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 {
+	window_pause = 0;
+	last_window_pause = 300;
 	if (window->main_menu)
 		logo = spLoadSurfaceZoom( "./data/logo.png", spGetSizeFactor());
 	spUnlockRenderTarget();

@@ -15,10 +15,12 @@ Changelog
 - Hit hares and items get a force in from the explosion
 - Improved the minimal and maximal shoot power
 - Random level with holes
+- Levels can be saved and loaded, even of already played games
 - No hare stacks floating in the air
 - Countdown starts only if the camera is on the player and not a dropped item
 - Building and shooting weapons got two different settings to avoid aim cheating ;)
 - Added Item selection sound
+- Player list for removing a player
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows

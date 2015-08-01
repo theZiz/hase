@@ -26,10 +26,14 @@ spTextBlockPointer lg_block = NULL;
 spTextBlockPointer lg_chat_block = NULL;
 spNetIRCMessagePointer lg_last_read_message = NULL;
 Sint32 lg_scroll;
-char lg_level_string[512];
+char lg_level_string[1024];
+char lg_set_level_string[1024];
+char lg_last_level_string[1024];
 SDL_Thread* lg_thread = NULL;
+int level_mode;
 
 int use_chat;
+int after_start;
 
 #define CHAT_LINES 8
 
@@ -61,32 +65,46 @@ void lg_draw(void)
 		spFontDrawTextBlock(middle,screen->w-w-4, 3*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
 	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "{weapon}Add player  {view}Remove player", lg_font );
-	if (lg_player)
+	if (level_mode)
 	{
-		spFontDraw(screen->w-2-w  , h+3*lg_font->maxheight, 0, "{weapon}Add player", lg_font );
-		spFontDraw(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "{view}Remove player", lg_font );
-	}
-	else
-		spFontDrawMiddle(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "Spectate mode!", lg_font );
-	
-	if (lg_game->admin_pw == 0)
-	{
-		spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "The game master will", lg_font );
-		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "start the game soon™.", lg_font );
+		spFontDraw(screen->w-2-w  , h+3*lg_font->maxheight, 0, "{weapon}New level", lg_font );
+		spFontDraw(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "{view}Undo last", lg_font );
+		spFontDraw(screen->w-2-w  , h+4*lg_font->maxheight, 0, "{power_down}Load", lg_font );
+		spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Save", lg_font );
+		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}/{shoot}Set and back", lg_font );
 	}
 	else
 	{
-		if (spGetSizeFactor() <= SP_ONE)
+		if (lg_player)
 		{
-			spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_down}Add AI  {power_up}Remove all AIs", lg_font );
-			spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}Start game  {shoot}New level", lg_font );
+			spFontDraw(screen->w-2-w  , h+3*lg_font->maxheight, 0, "{weapon}Add player", lg_font );
+			spFontDraw(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "{view}Remove player", lg_font );
+		}
+		else
+			spFontDrawMiddle(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "Spectate mode!", lg_font );
+		
+		if (lg_game->admin_pw == 0)
+		{
+			if (after_start)
+				spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{jump}View replay", lg_font );
+			else
+				spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "Waiting for start...", lg_font );
+			spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{shoot}Save level", lg_font );
 		}
 		else
 		{
-			spFontDraw(screen->w-2-w  , h+4*lg_font->maxheight, 0, "{power_down}Add AI", lg_font );
-			spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Remove all AIs", lg_font );
-			spFontDraw(screen->w-2-w  , h+5*lg_font->maxheight, 0, "{jump}Start game", lg_font );
-			spFontDraw(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{shoot}New level", lg_font );
+			if (spGetSizeFactor() <= SP_ONE)
+			{
+				spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_down}Add AI  {power_up}Remove all AIs", lg_font );
+				spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}Start game  {shoot}Level setup", lg_font );
+			}
+			else
+			{
+				spFontDraw(screen->w-2-w  , h+4*lg_font->maxheight, 0, "{power_down}Add AI", lg_font );
+				spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Remove all AIs", lg_font );
+				spFontDraw(screen->w-2-w  , h+5*lg_font->maxheight, 0, "{jump}Start game", lg_font );
+				spFontDraw(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{shoot}Level setup", lg_font );
+			}
 		}
 	}
 	//Chat
@@ -117,7 +135,7 @@ void lg_draw(void)
 		spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{chat}Chat {menu}Leave and close game", lg_font );
 	if (lg_reload_now == 1)
 		lg_reload_now = 2;
-	if (!lg_game->local)
+	if (!lg_game->local && !after_start)
 	{
 		if (lg_reload_now)
 			sprintf(buffer,"Reloading...");
@@ -197,7 +215,6 @@ char* lg_get_name(char* buffer)
 char* lg_get_combi_name(char* buffer)
 {
 	char name1[16];
-	//sprintf(buffer,"%s-%s",lg_get_name(name1),lg_get_name(name2));
 	sprintf(buffer,"%s",lg_get_name(name1));
 	return buffer;
 }
@@ -209,6 +226,135 @@ int delete_feedback( pWindow window, pWindowElement elem, int action )
 {
 	sprintf(elem->text,"Do you want to delete the game from the game list?");
 	return 0;
+}
+
+char level_filename[256];
+
+int save_level_feedback( pWindow window, pWindowElement elem, int action )
+{
+	switch (action)
+	{
+		case WN_ACT_START_POLL:
+			spPollKeyboardInput(level_filename,256,KEY_POLL_MASK);
+			break;
+		case WN_ACT_END_POLL:
+			spStopKeyboardInput();
+			break;
+	}
+	sprintf(elem->text,"Filename: %s",level_filename);
+	return 0;
+}
+
+int overwrite_feedback( pWindow window, pWindowElement elem, int action )
+{
+	sprintf(elem->text,"Overwrite?");
+	return 0;
+}
+
+void save_level(char* level_string)
+{
+	pWindow window = create_window(save_level_feedback,lg_font,"Enter filename for the level");
+	add_window_element(window,1,0);
+	char complete_path[2048];
+	while (1)
+	{
+		int res = modal_window(window,lg_resize);
+		if (res == 1)
+		{
+			int save = 1;
+			if (level_filename[0] == 0)
+				message_box(lg_font,lg_resize,"You didn't enter a filename!");
+			else
+			{
+				spCreateDirectoryChain( spConfigGetPath(complete_path,"hase/levels","") );
+				if (spFileExists(spConfigGetPath(complete_path,"hase/levels",level_filename)))
+				{
+					pWindow overwrite_window = create_window(overwrite_feedback,lg_font,"The file does already exist!");
+					overwrite_window->cancel_to_no = 1;
+					add_window_element(overwrite_window,-1,0);
+					if (modal_window(overwrite_window,lg_resize) != 1)
+						save = 0;
+					delete_window(overwrite_window);
+				}
+				if (save)
+				{
+					SDL_RWops *file = SDL_RWFromFile(complete_path, "wb");
+					Uint32 magic_number = (Sint32)'E'*0x1000000 + (Sint32)'S'*0x10000 + (Sint32)'A'*0x100 + (Sint32)'H';
+					SDL_RWwrite( file, &magic_number, 4 , 1);
+					Uint32 l = strlen(level_string);
+					SDL_RWwrite( file, &l, 4 , 1);
+					SDL_RWwrite( file, level_string, l , 1);
+					SDL_RWclose(file);
+					char buffer[2048];
+					sprintf(buffer,"Saved in %s",spConfigGetPath(complete_path,"hase/levels",""));
+					message_box(lg_font,lg_resize,buffer);
+					break;
+				}
+			}
+		}
+		else
+			break;
+	}
+	delete_window(window);
+}
+
+int load_level(char* level_string)
+{
+	pWindow window = create_window(NULL,lg_font,"Select level to load");
+	spFileListPointer flp = NULL;
+	char path[2048];
+	spFileGetDirectory(&flp,spConfigGetPath(path,"hase/levels",""),0,0);
+	if (flp == NULL)
+	{
+		char buffer[2048];
+		sprintf(buffer,"Nothing found in %s",path);
+		message_box(lg_font,lg_resize,buffer);
+		return 0;
+	}
+	spFileSortList(&flp,SP_FILE_SORT_BY_NAME);
+	spFileListPointer f = flp;
+	int r = 0;
+	while (f)
+	{
+		if (f->type != SP_FILE_DIRECTORY)
+		{
+			sprintf(add_window_element(window,0,r)->text,"%s",f->name);
+			r++;
+		}
+		f = f->next;
+	}
+	if (modal_window(window,lg_resize) == 1)
+	{
+		f = flp;
+		r = 0;
+		while (f)
+		{
+			if (f->type != SP_FILE_DIRECTORY)
+			{
+				if (r == window->selection)
+					break;
+				r++;
+			}
+			f = f->next;
+		}
+		SDL_RWops *file = SDL_RWFromFile(f->name, "rb");
+		Uint32 magic_number;
+		SDL_RWread( file, &magic_number, 4 , 1);
+		if (magic_number != (Sint32)'E'*0x1000000 + (Sint32)'S'*0x10000 + (Sint32)'A'*0x100 + (Sint32)'H')
+		{
+			SDL_RWclose(file);
+			message_box(lg_font,lg_resize,"No Hase level file!");
+			return 0;
+		}
+		Uint32 l;
+		SDL_RWread( file, &l, 4 , 1);
+		SDL_RWread( file, level_string, l , 1);
+		level_string[l] = 0;
+		SDL_RWclose(file);
+	}
+	spFileDeleteList(flp);
+	delete_window(window);
+	return 1;
 }
 
 int lg_calc(Uint32 steps)
@@ -328,12 +474,15 @@ int lg_calc(Uint32 steps)
 		lg_reload_now = 0;
 		lg_counter = 0;
 		lg_thread = NULL;
-		if (res == -1)
-			return -1; //stopped
-		if (res == -3)
-			return -3; //connection error
-		if (res == 1)
-			return 2; //started
+		if (!after_start)
+		{
+			if (res == -1)
+				return -1; //stopped
+			if (res == -3)
+				return -3; //connection error
+			if (res == 1)
+				return 2; //started
+		}
 		if (lg_level == NULL || strcmp(lg_level_string,lg_game->level_string))
 		{
 			spDeleteSurface(lg_level);
@@ -342,138 +491,203 @@ int lg_calc(Uint32 steps)
 			sprintf(lg_level_string,"%s",lg_game->level_string);
 		}
 	}
-	if (!lg_game->local)
+	if (!lg_game->local && !after_start)
 		lg_counter+=steps;
 	if (lg_counter >= LG_WAIT && lg_reload_now == 0)
 		lg_reload_now = 1;
+	if (spMapGetByID(MAP_JUMP) && after_start)
+	{
+		spMapSetByID(MAP_JUMP,0);
+		hase(lg_resize,lg_game,NULL);
+		return 3;
+	}
+	if (spMapGetByID(MAP_SHOOT) && lg_game->admin_pw == 0)
+	{
+		spMapSetByID(MAP_SHOOT,0);
+		save_level(lg_level_string);
+	}
 	//Spectators are leaving here ;)
 	if (lg_player == NULL)
 		return 0;
-	if (spMapGetByID(MAP_WEAPON))
+	if (level_mode == 0)
 	{
-		spMapSetByID(MAP_WEAPON,0);
-		if (lg_game->player_count >= lg_game->max_player)
-			message_box(lg_font,lg_resize,"Game full!");
-		else
+		if (spMapGetByID(MAP_WEAPON))
 		{
-			if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32,1,lg_game->sprite_count,0) == 1)
+			spMapSetByID(MAP_WEAPON,0);
+			if (lg_game->player_count >= lg_game->max_player)
+				message_box(lg_font,lg_resize,"Game full!");
+			else
 			{
-				if (lg_new_name[0] == 0)
-					message_box(lg_font,lg_resize,"No name entered...");
-				else
-				if ((lg_last_player->next = join_game(lg_game,lg_new_name,0,get_last_sprite())) == NULL)
-					message_box(lg_font,lg_resize,"Game full...");
-				else
+				if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32,1,lg_game->sprite_count,0) == 1)
 				{
-					lg_last_player = lg_last_player->next;
-					if (!lg_game->local)
-						start_heartbeat(lg_last_player);
-					lg_counter = LG_WAIT;
+					if (lg_new_name[0] == 0)
+						message_box(lg_font,lg_resize,"No name entered...");
+					else
+					if ((lg_last_player->next = join_game(lg_game,lg_new_name,0,get_last_sprite())) == NULL)
+						message_box(lg_font,lg_resize,"Game full...");
+					else
+					{
+						lg_last_player = lg_last_player->next;
+						if (!lg_game->local)
+							start_heartbeat(lg_last_player);
+						lg_counter = LG_WAIT;
+					}
 				}
 			}
 		}
-	}
-	if (spMapGetByID(MAP_VIEW))
-	{
-		spMapSetByID(MAP_VIEW,0);
-		char leave_name[33];
-		sprintf(leave_name,"%s",lg_last_player->name);
-		if (text_box(lg_font,lg_resize,"Enter player name to leave:",leave_name,32,0,NULL,0) == 1)
+		if (spMapGetByID(MAP_VIEW))
 		{
-			if (leave_name[0] == 0)
-				message_box(lg_font,lg_resize,"No name entered...");
-			else
+			spMapSetByID(MAP_VIEW,0);
+			pWindow window = create_window(NULL,lg_font,"Which player to remove?");
+			pPlayer p = lg_player;
+			int r = 0;
+			while (p)
 			{
-				//Searching player
+				sprintf(add_window_element(window,0,r)->text,"%s",p->name);
+				r++;
+				p = p->next;
+			}
+			if (modal_window(window,lg_resize) == 1)
+			{
 				pPlayer l = NULL;
-				pPlayer p = lg_player;
+				p = lg_player;
+				r = 0;
 				while (p)
 				{
-					if (strcmp(p->name,leave_name) == 0)
+					if (r == window->selection)
 						break;
+					r++;
 					l = p;
 					p = p->next;
 				}
-				if (p == NULL)
-					message_box(lg_font,lg_resize,"Player not found");
+				pPlayer n = p->next;
+				if (l == NULL && n == NULL) //no prev, no next
+					return 1;
+				if (!lg_game->local)
+					stop_heartbeat(p);
+				leave_game(p);
+				lg_counter = LG_WAIT;
+				if (l)
+					l->next = n;
 				else
-				{
-					pPlayer n = p->next;
-					if (l == NULL && n == NULL) //no prev, no next
-						return 1;
-					if (!lg_game->local)
-						stop_heartbeat(p);
-					leave_game(p);
-					lg_counter = LG_WAIT;
-					if (l)
-						l->next = n;
-					else
-						lg_player = n;
-					if (n == NULL)
-						lg_last_player = l;
-				}
+					lg_player = n;
+				if (n == NULL)
+					lg_last_player = l;
 			}
+			delete_window(window);
 		}
-	}
-	if (spMapGetByID(MAP_JUMP) && lg_game->admin_pw)
-	{
-		spMapSetByID(MAP_JUMP,0);
-		if (lg_game->player_count < 2)
-			message_box(lg_font,lg_resize,"At least two players are needed!");
-		else
+		if (spMapGetByID(MAP_JUMP) && lg_game->admin_pw)
 		{
-			printf("Running game\n");
-			set_status(lg_game,1);
-			int res = lg_reload(NULL);
-			if (res == -1)
-				return -1; //stopped
-			if (res == -3)
-				return -3; //connection error
-			if (hase(lg_resize,lg_game,lg_player) < 2 && lg_game->local == 0)
+			spMapSetByID(MAP_JUMP,0);
+			if (lg_game->player_count < 2)
+				message_box(lg_font,lg_resize,"At least two players are needed!");
+			else
 			{
-				pWindow window = create_window(delete_feedback,lg_font,"Question");
-				window->cancel_to_no = 1;
-				add_window_element(window,-1,0);
-				int res = modal_window(window,lg_resize);
-				delete_window(window);
-				if (res == 1)
-					set_status(lg_game,-2);
+				printf("Running game\n");
+				set_status(lg_game,1);
+				int res = lg_reload(NULL);
+				if (res == -1)
+					return -1; //stopped
+				if (res == -3)
+					return -3; //connection error
+				if (hase(lg_resize,lg_game,lg_player) < 2 && lg_game->local == 0)
+				{
+					pWindow window = create_window(delete_feedback,lg_font,"Question");
+					window->cancel_to_no = 1;
+					add_window_element(window,-1,0);
+					int res = modal_window(window,lg_resize);
+					delete_window(window);
+					if (res == 1)
+						set_status(lg_game,-2);
+				}
+				return 3;
 			}
-			return 3;
 		}
-	}
-	if (spMapGetByID(MAP_SHOOT) && lg_game->admin_pw)
-	{
-		spMapSetByID(MAP_SHOOT,0);
-		create_level_string(lg_game->level_string,1536,1536,5,5,5);
-		spDeleteSurface(lg_level);
-		int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
-		lg_level = create_level(lg_game->level_string,l_w,l_w,LL_BG);
-		sprintf(lg_level_string,"%s",lg_game->level_string);
-		set_level(lg_game,lg_level_string);
-	}
-	if (spMapGetByID(MAP_POWER_UP) && lg_game->admin_pw)
-	{
-		spMapSetByID(MAP_POWER_UP,0);
-		while (lg_ai_list)
+		if (spMapGetByID(MAP_SHOOT) && lg_game->admin_pw)
 		{
-			pPlayer next = lg_ai_list->next;
-			leave_game(lg_ai_list);
-			lg_ai_list = next;
+			spMapSetByID(MAP_SHOOT,0);
+			level_mode = 1;
+			memcpy(lg_set_level_string,lg_level_string,1024);
 		}
-		lg_counter = LG_WAIT;
-	}
-	if (spMapGetByID(MAP_POWER_DN) && lg_game->admin_pw)
-	{
-		spMapSetByID(MAP_POWER_DN,0);
-		char buffer[32];
-		pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1,rand()%SPRITE_COUNT+1);
-		if (ai)
+		if (spMapGetByID(MAP_POWER_UP) && lg_game->admin_pw)
 		{
-			ai->next = lg_ai_list;
-			lg_ai_list = ai;
+			spMapSetByID(MAP_POWER_UP,0);
+			while (lg_ai_list)
+			{
+				pPlayer next = lg_ai_list->next;
+				leave_game(lg_ai_list);
+				lg_ai_list = next;
+			}
 			lg_counter = LG_WAIT;
 		}
+		if (spMapGetByID(MAP_POWER_DN) && lg_game->admin_pw)
+		{
+			spMapSetByID(MAP_POWER_DN,0);
+			char buffer[32];
+			pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1,rand()%SPRITE_COUNT+1);
+			if (ai)
+			{
+				ai->next = lg_ai_list;
+				lg_ai_list = ai;
+				lg_counter = LG_WAIT;
+			}
+		}
+	}
+	else //level_mode == 1, admin_pw is set per definition
+	{
+		if (spMapGetByID(MAP_SHOOT) || spMapGetByID(MAP_JUMP))
+		{
+			spMapSetByID(MAP_SHOOT,0);
+			spMapSetByID(MAP_JUMP,0);
+			set_level(lg_game,lg_set_level_string);
+			memcpy(lg_level_string,lg_set_level_string,1024);
+			level_mode = 0;
+		}
+		if (spMapGetByID(MAP_WEAPON))
+		{
+			spMapSetByID(MAP_WEAPON,0);
+			memcpy(lg_last_level_string,lg_set_level_string,1024);
+			create_level_string(lg_set_level_string,1536,1536,5,5,5);
+			spDeleteSurface(lg_level);
+			int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+			lg_level = create_level(lg_set_level_string,l_w,l_w,LL_BG);
+		}
+		if (spMapGetByID(MAP_POWER_UP))
+		{
+			spMapSetByID(MAP_POWER_UP,0);
+			save_level(lg_set_level_string);
+		}
+		if (spMapGetByID(MAP_POWER_DN))
+		{
+			spMapSetByID(MAP_POWER_DN,0);
+			char buffer[2048];
+			memcpy(buffer,lg_set_level_string,1024);
+			if (load_level(lg_set_level_string))
+			{
+				memcpy(lg_last_level_string,buffer,1024);
+				spDeleteSurface(lg_level);
+				int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+				lg_level = create_level(lg_set_level_string,l_w,l_w,LL_BG);
+			}
+		}
+		if (spMapGetByID(MAP_VIEW))
+		{
+			spMapSetByID(MAP_VIEW,0);
+			char buffer[1024];
+			if (lg_last_level_string[0] == 0)
+				memcpy(lg_last_level_string,lg_set_level_string,1024);
+			else
+			{
+				memcpy(buffer,lg_last_level_string,1024);
+				memcpy(lg_last_level_string,lg_set_level_string,1024);
+				memcpy(lg_set_level_string,buffer,1024);
+			}
+			spDeleteSurface(lg_level);
+			int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+			lg_level = create_level(lg_set_level_string,l_w,l_w,LL_BG);
+		}
+		
+			
 	}
 	return 0;
 }
@@ -506,6 +720,9 @@ int lg_reload(void* dummy)
 
 void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), pGame game,int spectate)
 {
+	level_mode = 0;
+	level_filename[0] = 0;
+	after_start = (game->status != 0);
 	lg_game = game;
 	lg_font = font;
 	lg_counter = LG_WAIT; //instead reload
