@@ -21,6 +21,7 @@ Changelog
 - Building and shooting weapons got two different settings to avoid aim cheating ;)
 - Added Item selection sound
 - Player list for removing a player
+- Players can be kicked
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows

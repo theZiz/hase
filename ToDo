@@ -7,7 +7,7 @@ For version 1.6:
 	* No killing borders
 	* Mode, where the damage of a bullet increases with the time in air
 * General UI improvements
-	* No max player, but the possibility to kick players
+	* No max players
 	* Options changeable after creation
 * Tutorial
 	* Jumping and basic shooting
@@ -25,6 +25,11 @@ For version 1.6:
 	* if stuck, change direction
 	* Getting more wp
 	* Using different weapons, especially if some hare is on them
+* Fixing cluster bomb bug
+* Fixing spells bug
+* Fixing Wingadium
+* Fixing floating bug
+	
 
 Nice to have
 * Rumble

@@ -23,7 +23,6 @@ int ll_game_seconds = 45;
 int ll_game_hares = 3;
 spTextBlockPointer ll_chat_block = NULL;
 Sint32 ll_chat_scroll;
-int ll_one_reload = 0;
 
 int use_chat;
 
@@ -126,7 +125,7 @@ void ll_draw(void)
 		spFontDrawTextBlock(middle,4*screen->w/6+5, 1*ll_font->maxheight + 5 /*+ screen->w/6 - ll_block->line_count*ll_font->maxheight/2*/, 0,ll_block,screen->w/3-6,0,ll_font);
 	}
 	
-	if (ll_one_reload)
+	if (ll_reload_now == 0)
 	{
 		if (mom_game && mom_game->status != 0)
 			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}/{view}Show   {weapon}Create   {menu}Back", ll_font );
@@ -280,7 +279,7 @@ int ll_calc(Uint32 steps)
 		if (text_box(ll_font,ll_resize,"Enter Message:",m,256,0,NULL,1) == 1)
 			send_chat(NULL,m);
 	}
-	if (spMapGetByID(MAP_WEAPON))
+	if (spMapGetByID(MAP_WEAPON) && ll_reload_now == 0)
 	{
 		spMapSetByID(MAP_WEAPON,0);
 		int res = 1;
@@ -308,7 +307,7 @@ int ll_calc(Uint32 steps)
 		}
 		ll_counter = 10000;
 	}		
-	if (spMapGetByID(MAP_JUMP))
+	if (spMapGetByID(MAP_JUMP) && ll_reload_now == 0)
 	{
 		spMapSetByID(MAP_JUMP,0);
 		if (ll_game_count <= 0)
@@ -333,7 +332,7 @@ int ll_calc(Uint32 steps)
 			}
 		}
 	}
-	if (spMapGetByID(MAP_VIEW))
+	if (spMapGetByID(MAP_VIEW) && ll_reload_now == 0)
 	{
 		spMapSetByID(MAP_VIEW,0);
 		if (ll_game_count <= 0)
@@ -492,15 +491,6 @@ int ll_calc(Uint32 steps)
 
 int ll_reload(void* dummy)
 {
-	if (ll_level)
-	{
-		SDL_Surface* ll_level_cp = ll_level;
-		spTextBlockPointer ll_block_cp = ll_block;
-		ll_level = NULL;
-		ll_block = NULL;
-		spDeleteSurface(ll_level_cp);
-		spDeleteTextBlock(ll_block_cp);
-	}
 	if (connect_to_server())
 	{
 		ll_reload_now = 4;
@@ -522,8 +512,16 @@ int ll_reload(void* dummy)
 	ll_game_count = get_games(&ll_game_list);
 	if (ll_game_count == 0)
 		ll_selected = -1;
+	if (ll_level)
+	{
+		SDL_Surface* ll_level_cp = ll_level;
+		spTextBlockPointer ll_block_cp = ll_block;
+		ll_level = NULL;
+		ll_block = NULL;
+		spDeleteSurface(ll_level_cp);
+		spDeleteTextBlock(ll_block_cp);
+	}
 	ll_reload_now = 4;
-	ll_one_reload = 1;
 	return 0;
 }
 
@@ -539,7 +537,6 @@ void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), int
 	log_message("Enter lobby",time_buffer);
 	
 	ll_selected = 0;
-	ll_one_reload = 0;
 	ll_font = font;
 	ll_level = NULL;
 	ll_block = NULL;

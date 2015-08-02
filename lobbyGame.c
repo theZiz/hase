@@ -95,13 +95,13 @@ void lg_draw(void)
 		{
 			if (spGetSizeFactor() <= SP_ONE)
 			{
-				spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_down}Add AI  {power_up}Remove all AIs", lg_font );
+				spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_down}Add AI  {power_up}Game Setup", lg_font );
 				spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}Start game  {shoot}Level setup", lg_font );
 			}
 			else
 			{
 				spFontDraw(screen->w-2-w  , h+4*lg_font->maxheight, 0, "{power_down}Add AI", lg_font );
-				spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Remove all AIs", lg_font );
+				spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Game Setup", lg_font );
 				spFontDraw(screen->w-2-w  , h+5*lg_font->maxheight, 0, "{jump}Start game", lg_font );
 				spFontDraw(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{shoot}Level setup", lg_font );
 			}
@@ -477,7 +477,43 @@ int lg_calc(Uint32 steps)
 		lg_thread = NULL;
 		if (!after_start)
 		{
-			if (res == -1)
+			//Am I still in?
+			pPlayer p = lg_player;
+			pPlayer l = NULL;
+			while (p)
+			{
+				pPlayer q = lg_player_list;
+				while (q)
+				{
+					if (p->id == q->id)
+						break;
+					q = q->next;
+				}
+				if (q == NULL)
+				{
+					pPlayer n = p->next;
+					if (l == NULL && n == NULL) //no prev, no next, I am alone, alone alone, alone alone
+						return -4;
+					if (!lg_game->local)
+						stop_heartbeat(p);
+					if (l)
+						l->next = n;
+					else
+						lg_player = n;
+					if (n == NULL)
+						lg_last_player = l;
+					char buffer[256];
+					sprintf(buffer,"Player %s was kicked",p->name);
+					message_box(lg_font,lg_resize,buffer);
+					p = n;
+				}
+				else
+				{
+					l = p;
+					p = p->next;
+				}
+			}
+			if (res == -1 || res == -2)
 				return -1; //stopped
 			if (res == -3)
 				return -3; //connection error
@@ -539,41 +575,98 @@ int lg_calc(Uint32 steps)
 		if (spMapGetByID(MAP_VIEW))
 		{
 			spMapSetByID(MAP_VIEW,0);
-			pWindow window = create_window(NULL,lg_font,"Which player to remove?");
-			pPlayer p = lg_player;
+			pWindow window = create_window(NULL,lg_font,"Which player to remove/kick?");
+			pPlayer p;
+			if (lg_game->admin_pw)
+				p = lg_player_list;
+			else
+				p = lg_player;
 			int r = 0;
 			while (p)
 			{
-				sprintf(add_window_element(window,0,r)->text,"%s",p->name);
+				pPlayer q = lg_player;
+				while (q)
+				{
+					if (p->id == q->id)
+						break;
+					q = q->next;
+				}
+				if (q)
+					sprintf(add_window_element(window,0,r)->text,"%s (local)",p->name);
+				else
+				if (p->computer)
+					sprintf(add_window_element(window,0,r)->text,"%s (AI)",p->name);
+				else
+					sprintf(add_window_element(window,0,r)->text,"%s (online)",p->name);
 				r++;
 				p = p->next;
 			}
 			if (modal_window(window,lg_resize) == 1)
 			{
-				pPlayer l = NULL;
-				p = lg_player;
+				if (lg_game->admin_pw)
+					p = lg_player_list;
+				else
+					p = lg_player;
 				r = 0;
+				pPlayer l = NULL;
+				pPlayer q = NULL;
+				pPlayer n = NULL;
 				while (p)
 				{
 					if (r == window->selection)
+					{
+						q = lg_player;
+						while (q)
+						{
+							if (p->id == q->id)
+								break;
+							l = q;
+							q = q->next;
+						}
 						break;
+					}
 					r++;
-					l = p;
 					p = p->next;
 				}
-				pPlayer n = p->next;
-				if (l == NULL && n == NULL) //no prev, no next
-					return 1;
-				if (!lg_game->local)
-					stop_heartbeat(p);
-				leave_game(p);
-				lg_counter = LG_WAIT;
-				if (l)
-					l->next = n;
+				if (q) //p is local
+				{
+					n = q->next;
+					if (l == NULL && n == NULL) //no prev, no next, I am alone, alone alone, alone alone
+						return 1;
+					if (!lg_game->local)
+						stop_heartbeat(q);
+					if (l)
+						l->next = n;
+					else
+						lg_player = n;
+					if (n == NULL)
+						lg_last_player = l;
+					leave_game(q);
+				}
 				else
-					lg_player = n;
-				if (n == NULL)
-					lg_last_player = l;
+				if (p->computer)
+				{
+					q = lg_ai_list;
+					while (q)
+					{
+						if (p->id == q->id)
+							break;
+						l = q;
+						q = q->next;
+					}
+					n = q->next;
+					if (l)
+						l->next = n;
+					else
+						lg_ai_list = n;
+					leave_game(q);
+				}
+				else
+				{
+					kick(p);
+					SDL_Delay(200); //:P
+				}
+				lg_counter = LG_WAIT;
 			}
 			delete_window(window);
 		}
@@ -613,13 +706,7 @@ int lg_calc(Uint32 steps)
 		if (spMapGetByID(MAP_POWER_UP) && lg_game->admin_pw)
 		{
 			spMapSetByID(MAP_POWER_UP,0);
-			while (lg_ai_list)
-			{
-				pPlayer next = lg_ai_list->next;
-				leave_game(lg_ai_list);
-				lg_ai_list = next;
-			}
-			lg_counter = LG_WAIT;
+			//TODO: Game setup
 		}
 		if (spMapGetByID(MAP_POWER_DN) && lg_game->admin_pw)
 		{
@@ -768,6 +855,8 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 			message_box(font,resize,"Game was closed...");
 		if (res == -3)
 			message_box(font,resize,"Lost connection...");
+		if (res == -4)
+			message_box(font,resize,"Your last player has been kicked...");
 		if (res == 2)
 			hase(lg_resize,lg_game,lg_player);
 

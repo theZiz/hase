@@ -707,6 +707,32 @@ void leave_game(pPlayer player)
 	free(player);
 }
 
+void kick(pPlayer player)
+{
+	player->game->sprite_count[player->nr-1]--;
+	if (player->game->local == 0)
+	{
+		pMessage message = NULL;
+		numToMessage(&message,"game_id",player->game->id);
+		numToMessage(&message,"player_id",player->id);
+		numToMessage(&message,"admin_pw",player->game->admin_pw);
+		pMessage result = NULL;
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"kick.php",hase_url);
+		deleteMessage(&message);
+		deleteMessage(&result);
+	}
+	if (player->input_thread)
+		end_pull_thread(player);
+	while (player->input_data)
+	{
+		pThreadData next = player->input_data->next;
+		free(player->input_data);
+		player->input_data = next;
+	}
+}
+
 int get_game(pGame game,pPlayer *playerList)
 {
 	memset(game->sprite_count,0,sizeof(int)*SPRITE_COUNT);
