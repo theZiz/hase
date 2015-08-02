@@ -45,7 +45,7 @@ else
 	else
 	{
 		//Okay, not found. Maybe is the player dead?
-		if ($heartbeat_diff > 90) //two minutes no reaction
+		if ($heartbeat_diff > 90) //one and a half minute no reaction
 		{
 			$query = "UPDATE " . $mysql_prefix . "player_list SET status='-2' WHERE game_id = '$game_id' AND player_id = '$player_id'";
 			mysql_query($query) or die;		
