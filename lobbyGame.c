@@ -647,6 +647,7 @@ int lg_calc(Uint32 steps)
 				if (p->computer)
 				{
 					q = lg_ai_list;
+					l = NULL;
 					while (q)
 					{
 						if (p->id == q->id)
@@ -664,7 +665,7 @@ int lg_calc(Uint32 steps)
 				else
 				{
 					kick(p);
-					SDL_Delay(200); //:P
+					SDL_Delay(500); //:P
 				}
 				lg_counter = LG_WAIT;
 			}
