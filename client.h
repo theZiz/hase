@@ -147,6 +147,7 @@ void leave_game(pPlayer player);
 void kick(pPlayer player);
 int get_game(pGame game,pPlayer *playerList);
 void set_status(pGame game,int status);
+void change_game(pGame game,int max_player,int seconds_per_turn,int hares_per_player);
 void set_level(pGame game,char* level_string);
 
 int push_game(pPlayer player,int second_of_player,void* data);

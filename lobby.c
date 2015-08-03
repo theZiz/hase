@@ -128,60 +128,15 @@ int main_menu_feedback( pWindow window, pWindowElement elem, int action )
 	return 0;
 }
 
-int lo_game_players = 4;
-int lo_game_seconds = 45;
-int lo_game_hares = 3;
-
-int local_game_feedback( pWindow window, pWindowElement elem, int action )
-{
-	switch (action)
-	{
-		case WN_ACT_LEFT:
-			switch (elem->reference)
-			{
-				case 1:
-					if (lo_game_players > 2)
-						lo_game_players--;
-					break;
-				case 2:
-					if (lo_game_seconds > 5)
-						lo_game_seconds -= 5;
-					break;
-				case 3:
-					if (lo_game_hares > 1)
-						lo_game_hares--;
-					break;
-			}
-			break;
-		case WN_ACT_RIGHT:
-			switch (elem->reference)
-			{
-				case 1:
-					lo_game_players++;
-					break;
-				case 2:
-					lo_game_seconds += 5;
-					break;
-				case 3:
-					lo_game_hares++;
-					break;
-			}
-			break;
-	}
-	switch (elem->reference)
-	{
-		case 1: sprintf(elem->text,"Maximum players: %i",lo_game_players); break;
-		case 2: sprintf(elem->text,"Seconds per turn: %i",lo_game_seconds); break;
-		case 3: sprintf(elem->text,"Hares per player: %i",lo_game_hares); break;
-	}
-	return 0;
-}
-
 int chat_feedback( pWindow window, pWindowElement elem, int action )
 {
 	sprintf(elem->text,"Do you want to join the chat?");
 	return 0;
 }
+
+int lo_game_players = 4;
+int lo_game_seconds = 45;
+int lo_game_hares = 3;
 
 int main(int argc, char **argv)
 {
@@ -288,7 +243,6 @@ int main(int argc, char **argv)
 	add_window_element(window,-1,3);
 	add_window_element(window,-1,4);
 	add_window_element(window,-1,5);
-	pWindow subWindow;
 	while (!done)
 	{
 		spClearTarget(0);
@@ -296,18 +250,13 @@ int main(int argc, char **argv)
 			switch (window->selection)
 			{
 				case 0:
-					subWindow = create_window(local_game_feedback,font,"Create local game");
-					add_window_element(subWindow,0,1);
-					add_window_element(subWindow,0,2);
-					add_window_element(subWindow,0,3);
-					if (modal_window(subWindow,resize) == 1)
+					if (game_options(&lo_game_players,&lo_game_seconds,&lo_game_hares,font,resize) == 1)
 					{
 						char buffer[512];
 						pGame game = create_game("New game",lo_game_players,lo_game_seconds,create_level_string(buffer,1536,1536,3,3,3),1,lo_game_hares);
 						start_lobby_game(font,resize,game,0);
 						delete_game(game);
 					}
-					delete_window(subWindow);
 					break;
 				case 1:
 					if (text_box(font,resize,"Enter player name:",gop_username(),32,0,NULL,0) == 1)

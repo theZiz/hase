@@ -156,37 +156,6 @@ int create_game_feedback( pWindow window, pWindowElement elem, int action )
 {
 	switch (action)
 	{
-		case WN_ACT_LEFT:
-			switch (elem->reference)
-			{
-				case 1:
-					if (ll_game_players > 2)
-						ll_game_players--;
-					break;
-				case 2:
-					if (ll_game_seconds > 5)
-						ll_game_seconds -= 5;
-					break;
-				case 3:
-					if (ll_game_hares > 1)
-						ll_game_hares--;
-					break;
-			}
-			break;
-		case WN_ACT_RIGHT:
-			switch (elem->reference)
-			{
-				case 1:
-					ll_game_players++;
-					break;
-				case 2:
-					ll_game_seconds += 5;
-					break;
-				case 3:
-					ll_game_hares++;
-					break;
-			}
-			break;
 		case WN_ACT_START_POLL:
 			spPollKeyboardInput(ll_game_name,32,KEY_POLL_MASK);
 			break;
@@ -194,13 +163,7 @@ int create_game_feedback( pWindow window, pWindowElement elem, int action )
 			spStopKeyboardInput();
 			break;
 	}
-	switch (elem->reference)
-	{
-		case 0: sprintf(elem->text,"Name: %s",ll_game_name); break;
-		case 1: sprintf(elem->text,"Maximum players: %i",ll_game_players); break;
-		case 2: sprintf(elem->text,"Seconds per turn: %i",ll_game_seconds); break;
-		case 3: sprintf(elem->text,"Hares per player: %i",ll_game_hares); break;
-	}
+	sprintf(elem->text,"Name: %s",ll_game_name);
 	return 0;
 }
 
@@ -287,9 +250,6 @@ int ll_calc(Uint32 steps)
 		{
 			pWindow window = create_window(create_game_feedback,ll_font,"Create game");
 			add_window_element(window,1,0);
-			add_window_element(window,0,1);
-			add_window_element(window,0,2);
-			add_window_element(window,0,3);
 			res = modal_window(window,ll_resize);
 			delete_window(window);
 			if (res == 1 && ll_game_name[0] == 0)
@@ -299,11 +259,13 @@ int ll_calc(Uint32 steps)
 		}
 		if (res == 1)
 		{
-			char buffer[512];
-			pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0,ll_game_hares);
-			start_lobby_game(ll_font,ll_resize,game,0);
-			delete_game(game);
-			ll_counter = 10000;			
+			if (game_options(&ll_game_players,&ll_game_seconds,&ll_game_hares,ll_font,ll_resize) == 1)
+			{
+				char buffer[512];
+				pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0,ll_game_hares);
+				start_lobby_game(ll_font,ll_resize,game,0);
+				delete_game(game);
+			}
 		}
 		ll_counter = 10000;
 	}		

@@ -19,5 +19,7 @@ if ($row['admin_pw'] == $admin_pw)
 	mysql_query($query) or die;	
 }
 
+echo "error: 0";
+
 mysql_close($connection); 
 ?>

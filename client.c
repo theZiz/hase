@@ -896,19 +896,53 @@ void set_status(pGame game,int status)
 
 void set_level(pGame game,char* level_string)
 {
-	sprintf(game->level_string,"%s",level_string);
 	if (game->local == 0)
 	{
 		pMessage message = NULL;
 		numToMessage(&message,"game_id",game->id);
 		numToMessage(&message,"admin_pw",game->admin_pw);
-		addToMessage(&message,"level_string",game->level_string);
+		addToMessage(&message,"level_string",level_string);
 		pMessage result = NULL;
 		int i;
 		for (i = 0; i < 3 && result == NULL;i++)
 			result = sendMessage(message,NULL,NULL,0,"set_level.php",hase_url);
 		deleteMessage(&message);
+		if (result)
+			sprintf(game->level_string,"%s",level_string);
 		deleteMessage(&result);	
+	}
+	else
+		sprintf(game->level_string,"%s",level_string);
+}
+
+void change_game(pGame game,int max_player,int seconds_per_turn,int hares_per_player)
+{
+	if (game->local == 0)
+	{
+		pMessage message = NULL;
+		numToMessage(&message,"game_id",game->id);
+		numToMessage(&message,"admin_pw",game->admin_pw);
+		numToMessage(&message,"max_player",max_player);
+		numToMessage(&message,"seconds_per_turn",seconds_per_turn);
+		numToMessage(&message,"hares_per_player",hares_per_player);
+		pMessage result = NULL;
+		int i;
+		for (i = 0; i < 3 && result == NULL;i++)
+			result = sendMessage(message,NULL,NULL,0,"change_game.php",hase_url);
+		deleteMessage(&message);
+		if (result)
+		{
+			game->max_player = max_player;
+			game->seconds_per_turn = seconds_per_turn;
+			game->hares_per_player = hares_per_player;
+		}
+		deleteMessage(&result);	
+	}
+	else
+	{
+		game->max_player = max_player;
+		game->seconds_per_turn = seconds_per_turn;
+		game->hares_per_player = hares_per_player;
 	}
 }
 
@@ -1269,8 +1303,6 @@ void heartbeat(pPlayer player)
 	int i;
 	for (i = 0; i < 3 && result == NULL;i++)
 		result = sendMessage(message,NULL,NULL,0,"heartbeat.php",hase_url);
-	if (result == NULL)
-		return;
 	deleteMessage(&result);
 }
 

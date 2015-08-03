@@ -707,7 +707,11 @@ int lg_calc(Uint32 steps)
 		if (spMapGetByID(MAP_POWER_UP) && lg_game->admin_pw)
 		{
 			spMapSetByID(MAP_POWER_UP,0);
-			//TODO: Game setup
+			int max_player = lg_game->max_player;
+			int seconds_per_turn = lg_game->seconds_per_turn;
+			int hares_per_player = lg_game->hares_per_player;
+			if (game_options(&max_player,&seconds_per_turn,&hares_per_player,lg_font,lg_resize) == 1)
+				change_game(lg_game,max_player,seconds_per_turn,hares_per_player);
 		}
 		if (spMapGetByID(MAP_POWER_DN) && lg_game->admin_pw)
 		{
@@ -805,6 +809,72 @@ int lg_reload(void* dummy)
 		spDeleteTextBlock(old_lg_block);
 	lg_reload_now = 4;
 	return lg_game->status;
+}
+
+int lg_game_players = 4;
+int lg_game_seconds = 45;
+int lg_game_hares = 3;
+
+int game_options_feedback( pWindow window, pWindowElement elem, int action )
+{
+	switch (action)
+	{
+		case WN_ACT_LEFT:
+			switch (elem->reference)
+			{
+				case 1:
+					if (lg_game_players > 2)
+						lg_game_players--;
+					break;
+				case 2:
+					if (lg_game_seconds > 5)
+						lg_game_seconds -= 5;
+					break;
+				case 3:
+					if (lg_game_hares > 1)
+						lg_game_hares--;
+					break;
+			}
+			break;
+		case WN_ACT_RIGHT:
+			switch (elem->reference)
+			{
+				case 1:
+					lg_game_players++;
+					break;
+				case 2:
+					lg_game_seconds += 5;
+					break;
+				case 3:
+					lg_game_hares++;
+					break;
+			}
+			break;
+	}
+	switch (elem->reference)
+	{
+		case 1: sprintf(elem->text,"Maximum players: %i",lg_game_players); break;
+		case 2: sprintf(elem->text,"Seconds per turn: %i",lg_game_seconds); break;
+		case 3: sprintf(elem->text,"Hares per player: %i",lg_game_hares); break;
+	}
+	return 0;
+}
+
+int game_options(int *game_players,int* game_seconds,int* game_hares,spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
+{
+	lg_game_players = *game_players;
+	lg_game_seconds = *game_seconds;
+	lg_game_hares = *game_hares;
+	pWindow window = create_window(game_options_feedback,font,"Game options");
+	add_window_element(window,0,1);
+	add_window_element(window,0,2);
+	add_window_element(window,0,3);
+	int result = modal_window(window,resize);
+	delete_window(window);	
+	*game_players = lg_game_players;
+	*game_seconds = lg_game_seconds;
+	*game_hares = lg_game_hares;
+	return result;
 }
 
 void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), pGame game,int spectate)

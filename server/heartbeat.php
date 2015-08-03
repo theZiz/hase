@@ -16,5 +16,7 @@ mysql_query($query) or die;
 $query = "UPDATE " . $mysql_prefix . "game_list SET create_date='$now' WHERE game_id = '$game_id'";
 mysql_query($query) or die;
 
+echo "error: 0";
+
 mysql_close($connection); 
 ?>

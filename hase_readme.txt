@@ -23,6 +23,7 @@ Changelog
 - Player list for removing a player
 - Players can be kicked
 - Inactive players in the game lobby get kicked
+- General server improvements
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows

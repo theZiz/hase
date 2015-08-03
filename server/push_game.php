@@ -20,7 +20,7 @@ $result = mysql_query($query) or die;
 $row = mysql_fetch_assoc( $result );
 
 if ($row['status'] == -2) //killed...
-	echo "Error: 1";
+	echo "error: 1";
 else
 {
 	$now = time();
@@ -28,7 +28,7 @@ else
 	{
 		$query = "UPDATE " . $mysql_prefix . "player_list SET status='-2' WHERE game_id = '$game_id' AND player_id = '$player_id'";
 		mysql_query($query) or die;		
-		echo "Error: 1";
+		echo "error: 1";
 	}
 	else
 	{
@@ -47,7 +47,7 @@ else
 			$query = "UPDATE " . $mysql_prefix . "game_list SET create_date='$now' WHERE game_id = '$game_id'";
 			mysql_query($query) or die;
 		}	
-		echo "Error: 0";
+		echo "error: 0";
 	}
 }
 mysql_close($connection);

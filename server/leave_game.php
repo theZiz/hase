@@ -28,5 +28,8 @@ if ($row['player_pw'] == $player_pw)
 		mysql_query($query) or die;
 	}	
 }
+
+echo "error: 0";
+
 mysql_close($connection); 
 ?>
