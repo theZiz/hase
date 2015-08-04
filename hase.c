@@ -1510,7 +1510,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	level_pixel = (Uint16*)level_original->pixels;
 	realloc_gravity();
 	init_gravity();
-	init_player(hase_player_list,game->player_count,game->hares_per_player);
+	init_player(hase_player_list,game->player_count,game->hares_per_player,game->options);
 	items_init(game);
 	map_w = 64 * spGetSizeFactor() >> SP_ACCURACY;
 	map_h = 64 * spGetSizeFactor() >> SP_ACCURACY;

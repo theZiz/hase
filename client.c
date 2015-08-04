@@ -410,14 +410,14 @@ int server_info()
 	return 0;
 }
 
-pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string,int local,int hares_per_player)
+pGame create_game(char* game_name,Uint32 options,int seconds_per_turn,char* level_string,int local,int hares_per_player)
 {
 	pMessage result = NULL;
 	if (local == 0)
 	{
 		pMessage message = NULL;
 		addToMessage(&message,"game_name",game_name);
-		numToMessage(&message,"max_player",max_player);
+		numToMessage(&message,"options",options);
 		numToMessage(&message,"seconds_per_turn",seconds_per_turn);
 		numToMessage(&message,"hares_per_player",hares_per_player);
 		addToMessage(&message,"level_string",level_string);
@@ -432,7 +432,7 @@ pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* leve
 	game->id = -1;
 	sprintf(game->name,"%s",game_name);
 	sprintf(game->level_string,"%s",level_string);
-	game->max_player = max_player;
+	game->options.compressed = options;
 	game->player_count = 0;
 	game->create_date = 0;
 	game->seconds_per_turn = seconds_per_turn;
@@ -522,7 +522,7 @@ int get_games(pGame *gameList)
 			game->id = atoi(now->content);
 			game->name[0] = 0;
 			game->level_string[0] = 0;
-			game->max_player = 0;
+			game->options.compressed = 0;
 			game->player_count = 0;
 			game->create_date = 0;
 			game->seconds_per_turn = 0;
@@ -534,8 +534,8 @@ int get_games(pGame *gameList)
 		}
 		if (strcmp(now->name,"game_name") == 0)
 			sprintf(game->name,"%s",now->content);
-		if (strcmp(now->name,"max_player") == 0)
-			game->max_player = atoi(now->content);
+		if (strcmp(now->name,"options") == 0)
+			game->options.compressed = atoi(now->content);
 		if (strcmp(now->name,"player_count") == 0)
 			game->player_count = atoi(now->content);
 		if (strcmp(now->name,"create_date") == 0)
@@ -627,18 +627,6 @@ pPlayer join_game(pGame game,char* name,int ai,int nr)
 	deleteMessage(&result);
 	if (game->local)
 	{
-		int count = 0;
-		pPlayer p = game->local_player;
-		while (p)
-		{
-			count++;
-			p = p->next;
-		}
-		if (count >= game->max_player)
-		{
-			free(player);
-			return NULL;
-		}
 		pPlayer new_player = (pPlayer)malloc(sizeof(tPlayer));
 		sprintf(new_player->name,"%s",player->name);
 		new_player->computer = player->computer;
@@ -795,8 +783,8 @@ int get_game(pGame game,pPlayer *playerList)
 				sprintf(game->name,"%s",now->content);
 			if (strcmp(now->name,"level_string") == 0)
 				sprintf(game->level_string,"%s",now->content);
-			if (strcmp(now->name,"max_player") == 0)
-				game->max_player = atoi(now->content);
+			if (strcmp(now->name,"options") == 0)
+				game->options.compressed = atoi(now->content);
 			if (strcmp(now->name,"player_count") == 0)
 				game->player_count = atoi(now->content);
 			if (strcmp(now->name,"create_date") == 0)
@@ -915,14 +903,14 @@ void set_level(pGame game,char* level_string)
 		sprintf(game->level_string,"%s",level_string);
 }
 
-void change_game(pGame game,int max_player,int seconds_per_turn,int hares_per_player)
+void change_game(pGame game,Uint32 options,int seconds_per_turn,int hares_per_player)
 {
 	if (game->local == 0)
 	{
 		pMessage message = NULL;
 		numToMessage(&message,"game_id",game->id);
 		numToMessage(&message,"admin_pw",game->admin_pw);
-		numToMessage(&message,"max_player",max_player);
+		numToMessage(&message,"options",options);
 		numToMessage(&message,"seconds_per_turn",seconds_per_turn);
 		numToMessage(&message,"hares_per_player",hares_per_player);
 		pMessage result = NULL;
@@ -932,7 +920,7 @@ void change_game(pGame game,int max_player,int seconds_per_turn,int hares_per_pl
 		deleteMessage(&message);
 		if (result)
 		{
-			game->max_player = max_player;
+			game->options.compressed = options;
 			game->seconds_per_turn = seconds_per_turn;
 			game->hares_per_player = hares_per_player;
 		}
@@ -940,7 +928,7 @@ void change_game(pGame game,int max_player,int seconds_per_turn,int hares_per_pl
 	}
 	else
 	{
-		game->max_player = max_player;
+		game->options.compressed = options;
 		game->seconds_per_turn = seconds_per_turn;
 		game->hares_per_player = hares_per_player;
 	}

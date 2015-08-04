@@ -14,7 +14,7 @@ mysql_query($query) or die;
 $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."game_list` (".
 "`game_id` int(11) NOT NULL,".
 "  `game_name` varchar(32) NOT NULL,".
-"  `max_player` int(11) NOT NULL,".
+"  `options` int(11) NOT NULL,".
 "  `seconds_per_turn` int(11) NOT NULL,".
 "  `admin_pw` int(11) NOT NULL,".
 "  `create_date` int(11) NOT NULL,".

@@ -547,25 +547,25 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 		switch (bullet->kind)
 		{
 			case WP_SPELL_EXP:
-				damage = MAX_HEALTH*3/10;
+				damage = DMG_HEALTH*3/10;
 				total_break = 1;
 				break;
 			case WP_SPELL_WIN:
 				total_break = 1;
 				break;
 			case WP_SPELL_STU:
-				damage = MAX_HEALTH*7/10;
+				damage = DMG_HEALTH*7/10;
 				total_break = 1;
 				break;
 			case WP_SPELL_AVA:
 				if (hare)
 					damage = hare->health;
 				else
-					damage = 100;
+					damage = DMG_HEALTH;
 				total_break = 1;
 				break;
 			default:
-				damage = d*MAX_HEALTH/weapon_health_divisor[bullet->kind];
+				damage = d*DMG_HEALTH/weapon_health_divisor[bullet->kind];
 		}
 		if (damage)
 		{

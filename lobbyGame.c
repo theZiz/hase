@@ -52,11 +52,33 @@ void lg_draw(void)
 	spFontDrawMiddle(2+l_w/2, 5, 0, buffer, lg_font );
 	//Informations
 	int w = screen->w-8-l_w;
-	sprintf(buffer,"Seconds per turn: %i",lg_game->seconds_per_turn);
+	sprintf(buffer,"Turn: %is   Hares: %i",lg_game->seconds_per_turn,lg_game->hares_per_player);
 	spFontDraw(screen->w-w, 0*lg_font->maxheight, 0, buffer, lg_font );
-	sprintf(buffer,"Hares per player: %i",lg_game->hares_per_player);
+
+	if (lg_game->options.bytewise.ragnarok_border & 15)
+		sprintf(buffer,"AP: %i   HP: %i   Infinite border",
+			((lg_game->options.bytewise.ap_health >> 4)+1),
+			((lg_game->options.bytewise.ap_health & 15)+1)*50);
+	else
+		sprintf(buffer,"AP: %i   HP: %i   Killing border",
+			((lg_game->options.bytewise.ap_health >> 4)+1),
+			((lg_game->options.bytewise.ap_health & 15)+1)*50);
 	spFontDraw(screen->w-w, 1*lg_font->maxheight, 0, buffer, lg_font );
-	sprintf(buffer,"Maximum players: %i",lg_game->max_player);
+	switch (lg_game->options.bytewise.ragnarok_border >> 4)
+	{
+		case 0:
+			sprintf(buffer,"Ragnarök: Yes");
+			break;
+		case 7:
+			sprintf(buffer,"Ragnarök: No");
+			break;
+		default:
+			sprintf(buffer,"Ragnarök: %i",(lg_game->options.bytewise.ragnarok_border >> 4)*5);
+	}
+	if (lg_game->options.bytewise.distant_damage)
+		sprintf(&buffer[strlen(buffer)],"   Distant dmg: Yes");
+	else
+		sprintf(&buffer[strlen(buffer)],"   Distant dmg: No");
 	spFontDraw(screen->w-w, 2*lg_font->maxheight, 0, buffer, lg_font );
 	//player block
 	int h = l_w-6*lg_font->maxheight;
@@ -551,24 +573,19 @@ int lg_calc(Uint32 steps)
 		if (spMapGetByID(MAP_WEAPON))
 		{
 			spMapSetByID(MAP_WEAPON,0);
-			if (lg_game->player_count >= lg_game->max_player)
-				message_box(lg_font,lg_resize,"Game full!");
-			else
+			if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32,1,lg_game->sprite_count,0) == 1)
 			{
-				if (text_box(lg_font,lg_resize,"Enter player name:",lg_new_name,32,1,lg_game->sprite_count,0) == 1)
+				if (lg_new_name[0] == 0)
+					message_box(lg_font,lg_resize,"No name entered...");
+				else
+				if ((lg_last_player->next = join_game(lg_game,lg_new_name,0,get_last_sprite())) == NULL)
+					message_box(lg_font,lg_resize,"Error while joining...");
+				else
 				{
-					if (lg_new_name[0] == 0)
-						message_box(lg_font,lg_resize,"No name entered...");
-					else
-					if ((lg_last_player->next = join_game(lg_game,lg_new_name,0,get_last_sprite())) == NULL)
-						message_box(lg_font,lg_resize,"Game full...");
-					else
-					{
-						lg_last_player = lg_last_player->next;
-						if (!lg_game->local)
-							start_heartbeat(lg_last_player);
-						lg_counter = LG_WAIT;
-					}
+					lg_last_player = lg_last_player->next;
+					if (!lg_game->local)
+						start_heartbeat(lg_last_player);
+					lg_counter = LG_WAIT;
 				}
 			}
 		}
@@ -707,11 +724,11 @@ int lg_calc(Uint32 steps)
 		if (spMapGetByID(MAP_POWER_UP) && lg_game->admin_pw)
 		{
 			spMapSetByID(MAP_POWER_UP,0);
-			int max_player = lg_game->max_player;
+			Uint32 options = lg_game->options.compressed;
 			int seconds_per_turn = lg_game->seconds_per_turn;
 			int hares_per_player = lg_game->hares_per_player;
-			if (game_options(&max_player,&seconds_per_turn,&hares_per_player,lg_font,lg_resize) == 1)
-				change_game(lg_game,max_player,seconds_per_turn,hares_per_player);
+			if (game_options(&options,&seconds_per_turn,&hares_per_player,lg_font,lg_resize) == 1)
+				change_game(lg_game,options,seconds_per_turn,hares_per_player);
 		}
 		if (spMapGetByID(MAP_POWER_DN) && lg_game->admin_pw)
 		{
@@ -811,28 +828,55 @@ int lg_reload(void* dummy)
 	return lg_game->status;
 }
 
-int lg_game_players = 4;
+Uint32 lg_game_options = (2 << 4) | 1 | (3 << 12);
 int lg_game_seconds = 45;
 int lg_game_hares = 3;
 
 int game_options_feedback( pWindow window, pWindowElement elem, int action )
 {
+	game_options_union options;
+	options.compressed = lg_game_options;
+	int ap = options.bytewise.ap_health >> 4;
+	int health = options.bytewise.ap_health & 15;
+	int ragnarok = options.bytewise.ragnarok_border >> 4;
+	int border = options.bytewise.ragnarok_border & 15;
+	int distant_damage = options.bytewise.distant_damage;
 	switch (action)
 	{
 		case WN_ACT_LEFT:
 			switch (elem->reference)
 			{
 				case 1:
-					if (lg_game_players > 2)
-						lg_game_players--;
-					break;
-				case 2:
+					if (lg_game_seconds > 90)
+						lg_game_seconds -= 30;
+					else
 					if (lg_game_seconds > 5)
 						lg_game_seconds -= 5;
 					break;
-				case 3:
+				case 2:
 					if (lg_game_hares > 1)
 						lg_game_hares--;
+					break;
+				case 3:
+					ap--;
+					if (ap < 0)
+						ap = 4;
+					break;
+				case 4:
+					health--;
+					if (health < 0)
+						health = 6;
+					break;
+				case 5:
+					ragnarok--;
+					if (ragnarok < 0)
+						ragnarok = 7;
+					break;
+				case 6:
+					border = 1-border;
+					break;
+				case 7:
+					distant_damage = 1-distant_damage;
 					break;
 			}
 			break;
@@ -840,38 +884,88 @@ int game_options_feedback( pWindow window, pWindowElement elem, int action )
 			switch (elem->reference)
 			{
 				case 1:
-					lg_game_players++;
+					if (lg_game_seconds < 90)
+						lg_game_seconds += 5;
+					else
+						lg_game_seconds += 30;
 					break;
 				case 2:
-					lg_game_seconds += 5;
+					lg_game_hares++;
 					break;
 				case 3:
-					lg_game_hares++;
+					ap++;
+					if (ap > 4)
+						ap = 0;
+					break;
+				case 4:
+					health++;
+					if (health > 6)
+						health = 0;
+					break;
+				case 5:
+					ragnarok++;
+					if (ragnarok > 7)
+						ragnarok = 0;
+					break;
+				case 6:
+					border = 1-border;
+					break;
+				case 7:
+					distant_damage = 1-distant_damage;
 					break;
 			}
 			break;
 	}
 	switch (elem->reference)
 	{
-		case 1: sprintf(elem->text,"Maximum players: %i",lg_game_players); break;
-		case 2: sprintf(elem->text,"Seconds per turn: %i",lg_game_seconds); break;
-		case 3: sprintf(elem->text,"Hares per player: %i",lg_game_hares); break;
+		case 1: sprintf(elem->text,"Seconds per turn: %i",lg_game_seconds); break;
+		case 2: sprintf(elem->text,"Hares per player: %i",lg_game_hares); break;
+		case 3: sprintf(elem->text,"Start action points: %i",ap+1); break;
+		case 4: sprintf(elem->text,"Health: %i",(health+2)*25); break;
+		case 5:
+			switch (ragnarok)
+			{
+				case 0: sprintf(elem->text,"Ragnarök: Instant"); break;
+				case 7: sprintf(elem->text,"Ragnarök: No"); break;
+				default: sprintf(elem->text,"Ragnarök after %i rounds",ragnarok*5);
+			}		
+			break;
+		case 6:
+			if (border)
+				sprintf(elem->text,"Border behaviour: Infinite");
+			else
+				sprintf(elem->text,"Border behaviour: Killing");			
+			break;
+		case 7:
+			if (distant_damage)
+				sprintf(elem->text,"Long shot extra damage: Yes");
+			else
+				sprintf(elem->text,"Long shot extra damage: No");			
+			break;
 	}
+	options.bytewise.ap_health = (ap << 4) | (health & 15);
+	options.bytewise.ragnarok_border = (ragnarok << 4) | (border & 15);
+	options.bytewise.distant_damage = distant_damage;
+	lg_game_options = options.compressed;
 	return 0;
 }
 
-int game_options(int *game_players,int* game_seconds,int* game_hares,spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
+int game_options(Uint32 *game_opt,int* game_seconds,int* game_hares,spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 {
-	lg_game_players = *game_players;
+	lg_game_options = *game_opt;
 	lg_game_seconds = *game_seconds;
 	lg_game_hares = *game_hares;
 	pWindow window = create_window(game_options_feedback,font,"Game options");
 	add_window_element(window,0,1);
 	add_window_element(window,0,2);
 	add_window_element(window,0,3);
+	add_window_element(window,0,4);
+	add_window_element(window,0,5);
+	add_window_element(window,0,6);
+	add_window_element(window,0,7);
 	int result = modal_window(window,resize);
 	delete_window(window);	
-	*game_players = lg_game_players;
+	*game_opt = lg_game_options;
 	*game_seconds = lg_game_seconds;
 	*game_hares = lg_game_hares;
 	return result;

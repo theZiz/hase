@@ -1,6 +1,7 @@
 #define HOPS_TIME 100
 #define HIGH_HOPS_TIME 403
-#define MAX_HEALTH 100
+#define DMG_HEALTH 100
+int MAX_HEALTH = 100;
 #define AI_MAX_TRIES 96
 #define AI_TRIES_EVERY_MS 32
 int ai_shoot_tries = 0;
@@ -536,7 +537,7 @@ int real_next_player()
 		hare = hare->next;
 	}
 	while (hare != player[active_player]->firstHare);
-	player[active_player]->weapon_points = 3 + player[active_player]->next_round_extra;
+	player[active_player]->weapon_points = (hase_game->options.bytewise.ap_health >> 4) + 1 + player[active_player]->next_round_extra;
 	player[active_player]->next_round_extra = 0;
 
 	extra_time = 0;
@@ -638,8 +639,9 @@ pHare del_hare(pHare hare,pHare* firstHare)
 	return next;
 }
 
-void init_player(pPlayer player_list,int pc,int hc)
+void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 {
+	MAX_HEALTH = ((options.bytewise.ap_health & 15) + 2) * 25;
 	lastAIDistance = 100000000;
 	dropItem = NULL;
 	next_player_go = 0;
@@ -710,7 +712,7 @@ void init_player(pPlayer player_list,int pc,int hc)
 	rotation = -player[active_player]->firstHare->rotation;
 	ai_shoot_tries = 0;
 	last_ai_try = 0;
-	player[active_player]->weapon_points = 3;
+	player[active_player]->weapon_points = (options.bytewise.ap_health >> 4) + 1;
 	extra_time = 0;
 	start_thread();
 }

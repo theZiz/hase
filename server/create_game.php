@@ -7,7 +7,7 @@ mysql_select_db($mysql_dbname) or die;
 
 $game_name = escape_input($_POST['game_name']);
 $level_string = escape_input($_POST['level_string']);
-$max_player = (int)$_POST['max_player'];
+$options = (int)$_POST['options'];
 $seconds_per_turn = (int)$_POST['seconds_per_turn'];
 try {
 	$hares_per_player = (int)$_POST['hares_per_player'];
@@ -19,8 +19,8 @@ $admin_pw = 0;
 while ($admin_pw == 0)
 	$admin_pw = rand();
 
-$query = "INSERT INTO " . $mysql_prefix . "game_list (game_name, max_player, seconds_per_turn, admin_pw, create_date, status, level_string, hares_per_player) ".
-"VALUES ( '$game_name', '$max_player', '$seconds_per_turn', '$admin_pw', '$create_date', '0', '$level_string', '$hares_per_player')";
+$query = "INSERT INTO " . $mysql_prefix . "game_list (game_name, options, seconds_per_turn, admin_pw, create_date, status, level_string, hares_per_player) ".
+"VALUES ( '$game_name', '$options', '$seconds_per_turn', '$admin_pw', '$create_date', '0', '$level_string', '$hares_per_player')";
 
 mysql_query($query) or die;
 $game_id = mysql_insert_id();

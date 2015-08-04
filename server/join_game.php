@@ -16,13 +16,13 @@ $result = mysql_query("SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player
 $row = mysql_fetch_assoc($result);
 $player_count = $row['total'];
 
-//getting max_players
+//getting optionss
 $result = mysql_query("SELECT * FROM " . $mysql_prefix . "game_list WHERE game_id='$game_id'");
 $row = mysql_fetch_assoc($result);
-$max_player = $row['max_player'];
+$options = $row['options'];
 $status = $row['status'];
 
-if ($player_count >= $max_player || $status != 0)
+if ($player_count >= $options || $status != 0)
 {
 	echo "error: 1";
 }

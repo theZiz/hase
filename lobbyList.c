@@ -18,7 +18,7 @@ pPlayer ll_player_list = NULL;
 spTextBlockPointer ll_block = NULL;
 void ( *ll_resize )( Uint16 w, Uint16 h );
 char ll_game_name[33] = "New game";
-int ll_game_players = 4;
+Uint32 ll_game_options = (2 << 4) | 2 | (3 << 12);
 int ll_game_seconds = 45;
 int ll_game_hares = 3;
 spTextBlockPointer ll_chat_block = NULL;
@@ -54,7 +54,7 @@ void update_ll_surface()
 		}
 		spFontDraw( 2                    , 2+pos*ll_font->maxheight-ll_scroll/1024, 0, game->name, ll_font );
 		char buffer[16];
-		sprintf(buffer,"%i/%i",game->player_count,game->max_player);
+		sprintf(buffer,"%i",game->player_count);
 		spFontDraw( 2+LL_MOM_PLAYER*ll_surface->w/LL_SURFACE_DIV, 2+pos*ll_font->maxheight-ll_scroll/1024, 0, buffer, ll_font );
 		switch (game->status)
 		{
@@ -259,10 +259,10 @@ int ll_calc(Uint32 steps)
 		}
 		if (res == 1)
 		{
-			if (game_options(&ll_game_players,&ll_game_seconds,&ll_game_hares,ll_font,ll_resize) == 1)
+			if (game_options(&ll_game_options,&ll_game_seconds,&ll_game_hares,ll_font,ll_resize) == 1)
 			{
 				char buffer[512];
-				pGame game = create_game(ll_game_name,ll_game_players,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0,ll_game_hares);
+				pGame game = create_game(ll_game_name,ll_game_options,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0,ll_game_hares);
 				start_lobby_game(ll_font,ll_resize,game,0);
 				delete_game(game);
 			}
@@ -285,13 +285,8 @@ int ll_calc(Uint32 steps)
 				game = game->next;
 				pos++;
 			}
-			if (game->status == 0 && game->player_count >= game->max_player) //want to join, but full
-				message_box(ll_font,ll_resize,"Game full!");
-			else
-			{
-				start_lobby_game(ll_font,ll_resize,game,game->status != 0);
-				ll_counter = 10000;
-			}
+			start_lobby_game(ll_font,ll_resize,game,game->status != 0);
+			ll_counter = 10000;
 		}
 	}
 	if (spMapGetByID(MAP_VIEW) && ll_reload_now == 0)

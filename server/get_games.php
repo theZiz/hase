@@ -37,7 +37,7 @@ while ($row = mysql_fetch_array( $result ))
 	if ($status == -2)
 		continue;
 	$game_name = $row['game_name'];
-	$max_player = $row['max_player'];
+	$options = $row['options'];
 	$seconds_per_turn = $row['seconds_per_turn'];
 	$hares_per_player = $row['hares_per_player'];
 	//count player
@@ -49,7 +49,7 @@ while ($row = mysql_fetch_array( $result ))
 	echo "status: $status", PHP_EOL;
 	echo "seconds_per_turn: $seconds_per_turn", PHP_EOL;
 	echo "hares_per_player: $hares_per_player", PHP_EOL;
-	echo "max_player: $max_player", PHP_EOL;
+	echo "options: $options", PHP_EOL;
 	echo "game_name: $game_name", PHP_EOL;
 	echo "game_id: $game_id", PHP_EOL;
 	$i = $i + 1;

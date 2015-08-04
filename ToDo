@@ -1,13 +1,8 @@
 For version 1.6:
 * More game settings
-	* default AP 1..5
-	* time 5..120
-	* health 50..200
-	* Some kind of sudden death
-	* No killing borders
-	* Mode, where the damage of a bullet increases with the time in air
-* General UI improvements
-	* No max players
+	* Some kind of sudden death (no, instant, 5, 10, 15, 20, 25, 30 rounds) (4 bit)
+	* No killing borders (4 bit)
+	* Mode, where the damage of a bullet increases with the time in air (4 bit)
 * Tutorial
 	* Jumping and basic shooting
 	* High jumping

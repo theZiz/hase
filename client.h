@@ -41,13 +41,26 @@ typedef struct sMessage
 
 typedef struct sPlayer *pPlayer;
 
+typedef union
+{
+	Uint32 compressed;
+	struct
+	{
+		Uint8 ap_health;
+		Uint8 ragnarok_border;
+		Uint8 distant_damage;
+		Uint8 reserved;
+	} bytewise;
+} game_options_union;
+
+
 typedef struct sGame *pGame;
 typedef struct sGame
 {
 	int id;
 	char name[33];
 	char level_string[512];
-	int max_player;
+	game_options_union options;
 	int player_count;
 	int create_date;
 	int seconds_per_turn;
@@ -137,7 +150,7 @@ typedef struct sThreadData
 } tThreadData;
 
 int server_info();
-pGame create_game(char* game_name,int max_player,int seconds_per_turn,char* level_string,int local,int hares_per_player);
+pGame create_game(char* game_name,Uint32 options,int seconds_per_turn,char* level_string,int local,int hares_per_player);
 void delete_game_list(pGame game);
 void delete_game(pGame game);
 int get_games(pGame *gameList);
@@ -147,7 +160,7 @@ void leave_game(pPlayer player);
 void kick(pPlayer player);
 int get_game(pGame game,pPlayer *playerList);
 void set_status(pGame game,int status);
-void change_game(pGame game,int max_player,int seconds_per_turn,int hares_per_player);
+void change_game(pGame game,Uint32 options,int seconds_per_turn,int hares_per_player);
 void set_level(pGame game,char* level_string);
 
 int push_game(pPlayer player,int second_of_player,void* data);
