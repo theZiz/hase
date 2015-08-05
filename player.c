@@ -61,6 +61,7 @@ static int pixel_is_empty(int x, int y)
 	return 1;
 }
 
+pHare last_circle_hit = NULL;
 
 static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_players)
 {
@@ -107,6 +108,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 						if (except)
 							except->circle_checkpoint_hit[a] = 1;
 						hare->circle_checkpoint_hit[(CIRCLE_CHECKPOINTS/2+a) % CIRCLE_CHECKPOINTS] = 1;
+						last_circle_hit = hare;
 						result = 0;
 					}
 				}
@@ -214,7 +216,7 @@ void update_player()
 							break;
 						case 3: //Wingadium
 							angle = 0;
-							factor = SP_ONE/4;
+							factor = SP_ONE/5;
 							break;
 						case 4: //high jump
 							angle = SP_PI/16;

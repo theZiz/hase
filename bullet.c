@@ -72,7 +72,7 @@ const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16,2,2,2,2,4};
 
 const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,2,2,2,2,4};
 
-const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,12,12,12,12,20};
+const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,0,0,0,0,20};
 
 const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,3000,0,0,0,2048,0,0,0,0,2560,0,0,0,0,4096};
 
@@ -165,6 +165,7 @@ typedef struct sBullet
 	pBullet next;
 	int kind;
 	SDL_Surface* surface;
+	pHare hit;
 } tBullet;
 
 #define IMPACT_TIME 30
@@ -552,15 +553,14 @@ void negative_impact(int X,int Y,int radius)
 	update_map();
 }
 
-int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 *mod_dx,Sint32 *mod_dy)
+int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 *mod_dx,Sint32 *mod_dy,int* d)
 {
 	int total_break = 0;
 	Sint32 dx = x-bullet->x;
 	Sint32 dy = y-bullet->y;
-	int d = spFixedToInt(dx)*spFixedToInt(dx)+
-			spFixedToInt(dy)*spFixedToInt(dy);
-		d = weapon_explosion[bullet->kind]*weapon_explosion[bullet->kind]-d;
-	if (d > 0)
+	*d = spFixedToInt(dx)*spFixedToInt(dx) + spFixedToInt(dy)*spFixedToInt(dy);
+	*d = weapon_explosion[bullet->kind]*weapon_explosion[bullet->kind]-*d;
+	if (*d > 0 || hare == bullet->hit)
 	{
 		int damage = 0;
 		switch (bullet->kind)
@@ -584,7 +584,7 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 				total_break = 1;
 				break;
 			default:
-				damage = d*DMG_HEALTH/weapon_health_divisor[bullet->kind];
+				damage = *d*DMG_HEALTH/weapon_health_divisor[bullet->kind];
 		}
 		if (hase_game->options.bytewise.distant_damage)
 		{
@@ -593,7 +593,7 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 			else
 				damage *= 2;
 		}
-		if (damage)
+		if (damage > 0)
 		{
 			if (hare)
 				hare->health -= damage;
@@ -655,6 +655,7 @@ int updateBullets()
 		int speed = abs(momBullet->dx)+abs(momBullet->dy);
 		momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;
 		int dead = 0;
+		last_circle_hit = NULL;
 		if (momBullet->impact_state == 0 &&
 			circle_is_empty(momBullet->x+momBullet->dx,momBullet->y+momBullet->dy,weapon_radius[momBullet->kind],NULL,1))
 		{
@@ -669,6 +670,7 @@ int updateBullets()
 				case 0:
 					momBullet->impact_state = 1;
 					momBullet->impact_counter = IMPACT_TIME;
+					momBullet->hit = last_circle_hit;
 					break;
 				case 1:
 					momBullet->impact_counter--;
@@ -707,7 +709,8 @@ int updateBullets()
 						pItem item = firstItem;
 						while (item)
 						{
-							do_damage(item->x,item->y,momBullet,NULL,NULL,&(item->dx),&(item->dy));
+							int d;
+							do_damage(item->x,item->y,momBullet,NULL,NULL,&(item->dx),&(item->dy),&d);
 							item = item->next;
 						}
 						int total_break = 0;
@@ -723,13 +726,12 @@ int updateBullets()
 							{	
 								if (total_break)
 									break;
-								total_break = do_damage(hare->x,hare->y,momBullet,hare,player[j],&(hare->dx),&(hare->dy));
-								switch (momBullet->kind)
+								int d;
+								total_break = do_damage(hare->x,hare->y,momBullet,hare,player[j],&(hare->dx),&(hare->dy),&d);
+								if (momBullet->kind == WP_SPELL_WIN && hare == momBullet->hit)
 								{
-									case WP_SPELL_WIN:
-										hare->hops = HIGH_HOPS_TIME;
-										hare->high_hops = 3;
-										break;
+									hare->hops = HIGH_HOPS_TIME;
+									hare->high_hops = 3;
 								}
 								if (hare->health <= 0)
 								{

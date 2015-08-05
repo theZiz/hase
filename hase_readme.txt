@@ -4,6 +4,7 @@ Hase
 Hase is a game about hares in space. It is a bit like Worms or Artillery, but with gravitation.
 The game itself is licsensed under GPLv2+.
 The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domain)
+The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 
 Changelog
 =========
@@ -33,6 +34,8 @@ Changelog
 - Bullets don't live more than 30 seconds
 - Added option for a sudden death like event: Ragnarök
 - Decreased the damage of the cluster bomb
+- Decreased the impact of Wingardium Leviosa
+- Hopefully fixed the inaccurary of the spells if another hare is close to the impact
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows
