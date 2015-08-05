@@ -49,8 +49,7 @@ int do_physics()
 						hare->bums = 1;
 				}
 			}
-			if (hare->x <  0           || hare->y < 0 ||
-				hare->x >= spIntToFixed(LEVEL_WIDTH) || hare->y >= spIntToFixed(LEVEL_HEIGHT))
+			if (((hase_game->options.bytewise.ragnarok_border & 15) == 0) && (hare->x <  0 || hare->y < 0 || hare->x >= spIntToFixed(LEVEL_WIDTH) || hare->y >= spIntToFixed(LEVEL_HEIGHT)))
 			{
 				if (hare == player[j]->activeHare ||
 					hare == player[j]->setActiveHare)
@@ -67,7 +66,20 @@ int do_physics()
 					return 1;
 			}
 			else
+			{
+				if (hase_game->options.bytewise.ragnarok_border & 15)
+				{
+					if (hare->x < 0)
+						hare->x += spIntToFixed(LEVEL_WIDTH);
+					if (hare->y < 0)
+						hare->y += spIntToFixed(LEVEL_HEIGHT);
+					if (hare->x >= spIntToFixed(LEVEL_WIDTH))
+						hare->x -= spIntToFixed(LEVEL_WIDTH);
+					if (hare->y >= spIntToFixed(LEVEL_HEIGHT))
+						hare->y -= spIntToFixed(LEVEL_HEIGHT);
+				}
 				hare = hare->next;
+			}
 		}
 		while (hare != player[j]->firstHare);
 	}

@@ -58,11 +58,11 @@ void lg_draw(void)
 	if (lg_game->options.bytewise.ragnarok_border & 15)
 		sprintf(buffer,"AP: %i   HP: %i   Infinite border",
 			((lg_game->options.bytewise.ap_health >> 4)+1),
-			((lg_game->options.bytewise.ap_health & 15)+1)*50);
+			((lg_game->options.bytewise.ap_health & 15)+2)*25);
 	else
 		sprintf(buffer,"AP: %i   HP: %i   Killing border",
 			((lg_game->options.bytewise.ap_health >> 4)+1),
-			((lg_game->options.bytewise.ap_health & 15)+1)*50);
+			((lg_game->options.bytewise.ap_health & 15)+2)*25);
 	spFontDraw(screen->w-w, 1*lg_font->maxheight, 0, buffer, lg_font );
 	switch (lg_game->options.bytewise.ragnarok_border >> 4)
 	{
@@ -968,6 +968,8 @@ int game_options(Uint32 *game_opt,int* game_seconds,int* game_hares,spFontPointe
 	*game_opt = lg_game_options;
 	*game_seconds = lg_game_seconds;
 	*game_hares = lg_game_hares;
+	if (result == 1)
+		save_options();
 	return result;
 }
 

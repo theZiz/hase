@@ -27,6 +27,12 @@ Changelog
 - Removed max players - if you are too many, kick players ;)
 - Start action points setup
 - Start health setup
+- Added option for infinite level instead of a killing border
+- Game mode, where the damage of the bullets depends on the time flying
+- Saving the game settings
+- Bullets don't live more than 30 seconds
+- Added option for a sudden death like event: Ragnarök
+- Decreased the damage of the cluster bomb
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows

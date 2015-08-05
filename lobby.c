@@ -58,8 +58,8 @@ void resize( Uint16 w, Uint16 h )
 			font_dark = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
 		}
 	}
-	spFontAdd( font     , SP_FONT_GROUP_ASCII"™°∞ö", FONT_FG ); //whole ASCII
-	spFontAdd( font_dark, SP_FONT_GROUP_ASCII"™°∞ö", FONT_DARK_FG ); //whole ASCII
+	spFontAdd( font     , SP_FONT_GROUP_ASCII"™°∞öÖ", FONT_FG ); //whole ASCII
+	spFontAdd( font_dark, SP_FONT_GROUP_ASCII"™°∞öÖ", FONT_DARK_FG ); //whole ASCII
 	spFontAddBorder(font      , 0);
 	spFontAddBorder(font_dark , spGetRGB(60,60,60));
 	#ifdef DESKTOP
@@ -133,10 +133,6 @@ int chat_feedback( pWindow window, pWindowElement elem, int action )
 	sprintf(elem->text,"Do you want to join the chat?");
 	return 0;
 }
-
-Uint32 lo_game_options = (2 << 4) | 2 | (3 << 12);
-int lo_game_seconds = 45;
-int lo_game_hares = 3;
 
 int main(int argc, char **argv)
 {
@@ -250,10 +246,10 @@ int main(int argc, char **argv)
 			switch (window->selection)
 			{
 				case 0:
-					if (game_options(&lo_game_options,&lo_game_seconds,&lo_game_hares,font,resize) == 1)
+					if (game_options(gop_game_options_ptr(),gop_game_seconds_ptr(),gop_game_hares_ptr(),font,resize) == 1)
 					{
 						char buffer[512];
-						pGame game = create_game("New game",lo_game_options,lo_game_seconds,create_level_string(buffer,1536,1536,3,3,3),1,lo_game_hares);
+						pGame game = create_game("New game",*gop_game_options_ptr(),*gop_game_seconds_ptr(),create_level_string(buffer,1536,1536,3,3,3),1,*gop_game_hares_ptr());
 						start_lobby_game(font,resize,game,0);
 						delete_game(game);
 					}

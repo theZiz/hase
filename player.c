@@ -507,6 +507,9 @@ pItem dropItem = NULL;
 
 int real_next_player()
 {
+	int ragnarok_turn = (hase_game->options.bytewise.ragnarok_border >> 4)*5;
+	if (ragnarok_turn == 35)
+		ragnarok_turn = -1;
 	spSoundPause(1,-1);
 	int result = stop_thread(0);
 	int j;
@@ -522,6 +525,23 @@ int real_next_player()
 	do
 	{
 		active_player = (active_player+1)%player_count;
+		if (active_player == 0)
+		{
+			turn_count++;
+			printf("Turn %i begins\n",turn_count+1);
+			if (ragnarok_turn == turn_count)
+			{
+				pItem item = firstItem;
+				while (item)
+				{
+					item->kind = 4;
+					item = item->next;
+				}
+				printf("RAGNARÖK!\n");
+			}
+			if (ragnarok_turn <= turn_count)
+				ragnarok_counter = 3000;
+		}
 	}
 	while (player[active_player]->firstHare == NULL);
 	player[active_player]->activeHare = player[active_player]->activeHare->next;
@@ -543,10 +563,19 @@ int real_next_player()
 	extra_time = 0;
 	memset(input_states,0,sizeof(int)*12);
 	wp_choose = 0;
-	if (spRand()/1337%alive_count == 0)
+	if (ragnarok_turn == -1 || turn_count+1 < ragnarok_turn)
 	{
-		dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
-		spSoundPlay(snd_create,-1,0,0,-1);
+		if (spRand()/1337%alive_count == 0)
+		{
+			dropItem = items_drop(spRand()/1337%ITEMS_COUNT,-1,-1);
+			spSoundPlay(snd_create,-1,0,0,-1);
+		}
+	}
+	else
+	{
+		int i;
+		for (i = 0; i <= turn_count-ragnarok_turn;i++)
+			items_drop(4,-1,-1);
 	}
 	update_targeting();
 	start_thread();

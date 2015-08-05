@@ -18,9 +18,6 @@ pPlayer ll_player_list = NULL;
 spTextBlockPointer ll_block = NULL;
 void ( *ll_resize )( Uint16 w, Uint16 h );
 char ll_game_name[33] = "New game";
-Uint32 ll_game_options = (2 << 4) | 2 | (3 << 12);
-int ll_game_seconds = 45;
-int ll_game_hares = 3;
 spTextBlockPointer ll_chat_block = NULL;
 Sint32 ll_chat_scroll;
 
@@ -259,10 +256,10 @@ int ll_calc(Uint32 steps)
 		}
 		if (res == 1)
 		{
-			if (game_options(&ll_game_options,&ll_game_seconds,&ll_game_hares,ll_font,ll_resize) == 1)
+			if (game_options(gop_game_options_ptr(),gop_game_seconds_ptr(),gop_game_hares_ptr(),ll_font,ll_resize) == 1)
 			{
 				char buffer[512];
-				pGame game = create_game(ll_game_name,ll_game_options,ll_game_seconds,create_level_string(buffer,1536,1536,3,3,3),0,ll_game_hares);
+				pGame game = create_game(ll_game_name,*gop_game_options_ptr(),*gop_game_seconds_ptr(),create_level_string(buffer,1536,1536,3,3,3),0,*gop_game_hares_ptr());
 				start_lobby_game(ll_font,ll_resize,game,0);
 				delete_game(game);
 			}

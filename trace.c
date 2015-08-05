@@ -86,7 +86,8 @@ void drawTrace(pPlayer player)
 				oy = spMul(trace->y-posY,zoom);
 				Sint32 x1 = screen->w/2+(spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY);
 				Sint32 y1 = screen->h/2+(spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY);
-				spLine(x0,y0,0,x1,y1,0,BORDER_COLOR);
+				if (abs(x0-x1)+abs(y0-y1) < (LEVEL_WIDTH + LEVEL_WIDTH) / 4)
+					spLine(x0,y0,0,x1,y1,0,BORDER_COLOR);
 				x0 = x1;
 				y0 = y1;
 				trace = trace->next;

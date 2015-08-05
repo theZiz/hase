@@ -1,8 +1,4 @@
 For version 1.6:
-* More game settings
-	* Some kind of sudden death (no, instant, 5, 10, 15, 20, 25, 30 rounds) (4 bit)
-	* No killing borders (4 bit)
-	* Mode, where the damage of a bullet increases with the time in air (4 bit)
 * Tutorial
 	* Jumping and basic shooting
 	* High jumping
@@ -19,7 +15,6 @@ For version 1.6:
 	* if stuck, change direction
 	* Getting more wp
 	* Using different weapons, especially if some hare is on them
-* Fixing cluster bomb bug
 * Fixing spells bug
 * Fixing Wingadium
 * Fixing floating bug

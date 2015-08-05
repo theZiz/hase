@@ -3,6 +3,7 @@
 #include "mapping.h"
 #include <stdlib.h>
 #include <string.h>
+#include "client.h"
 
 int op_zoom = 1;
 int op_circle = 1;
@@ -16,6 +17,10 @@ int op_show_map = 1;
 int op_global_chat = 1;
 char op_server[512] = "ziz.gp2x.de/hase.php";
 char op_username[32] = SP_DEVICE_STRING" User";
+Uint32 op_game_options = (2 << 4) | 2 | (3 << 12);
+int op_game_seconds = 45;
+int op_game_hares = 3;
+
 
 int gop_show_names()
 {
@@ -92,6 +97,21 @@ char* gop_username()
 	return op_username;
 }
 
+Uint32* gop_game_options_ptr()
+{
+	return &op_game_options;
+}
+
+int* gop_game_hares_ptr()
+{
+	return &op_game_hares;
+}
+
+int* gop_game_seconds_ptr()
+{
+	return &op_game_seconds;
+}
+
 void sop_zoom(int v)
 {
 	op_zoom = v & 1;
@@ -151,6 +171,41 @@ void sop_username(char* username)
 	snprintf(op_username,32,"%s",username);
 }
 
+void sop_game_options(Uint32 options)
+{
+	game_options_union opu;
+	opu.compressed = options;
+	int ap = opu.bytewise.ap_health >> 4;
+	int health = opu.bytewise.ap_health & 15;
+	int ragnarok = opu.bytewise.ragnarok_border >> 4;
+	int border = opu.bytewise.ragnarok_border & 15;
+	int distant_damage = opu.bytewise.distant_damage;
+	if (ap > 4)
+		ap = 4;
+	if (health > 6)
+		health = 6;
+	if (ragnarok > 7)
+		ragnarok = 7;
+	if (border > 1)
+		border = 1;
+	if (distant_damage > 1)
+		distant_damage = 1;
+	opu.bytewise.ap_health = (ap << 4) | (health & 15);
+	opu.bytewise.ragnarok_border = (ragnarok << 4) | (border & 15);
+	opu.bytewise.distant_damage = distant_damage;
+	op_game_options = opu.compressed;
+}
+
+void sop_game_hares(int hares)
+{
+	op_game_hares = spMax(1,hares);
+}
+
+void sop_game_seconds(int seconds)
+{
+	op_game_seconds = spMax(1,seconds/5)*5;
+}
+
 void load_options()
 {
 	spConfigPointer conf = spConfigRead("config.ini","hase");
@@ -185,6 +240,12 @@ void load_options()
 			sop_show_map(atoi(entry->value));
 		if (strcmp(entry->key,"global_chat") == 0)
 			sop_global_chat(atoi(entry->value));
+		if (strcmp(entry->key,"game_options") == 0)
+			sop_game_options(atoi(entry->value));
+		if (strcmp(entry->key,"game_hares") == 0)
+			sop_game_hares(atoi(entry->value));
+		if (strcmp(entry->key,"game_seconds") == 0)
+			sop_game_seconds(atoi(entry->value));
 		entry = entry->next;
 	}
 	spNetC4AProfilePointer profile;
@@ -213,6 +274,9 @@ void save_options()
 	spConfigSetInt(conf,"show_names",op_show_names);
 	spConfigSetInt(conf,"show_map",op_show_map);
 	spConfigSetInt(conf,"global_chat",op_global_chat);
+	spConfigSetInt(conf,"game_options",op_game_options);
+	spConfigSetInt(conf,"game_seconds",op_game_seconds);
+	spConfigSetInt(conf,"game_hares",op_game_hares);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }

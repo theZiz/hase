@@ -5,6 +5,7 @@
 #include "lobbyList.h"
 #include "hase.h"
 #include "options.h"
+
 #ifdef PROFILE
 	int calc_time = 0;
 	int draw_time = 0;
@@ -54,6 +55,9 @@ int map_w,map_h,map_size;
 
 int speed = 1;
 int winter;
+
+int turn_count = 0;
+int ragnarok_counter;
 
 #define INPUT_AXIS_0_LEFT 0
 #define INPUT_AXIS_0_RIGHT 1
@@ -166,6 +170,9 @@ void draw_map(int px,int py)
 			case 2:
 				spRectangle(x,y,0,map_size,map_size,spGetFastRGB(100,50,0));
 				break;
+			case 4:
+				spRectangle(x,y,0,map_size,map_size,spGetFastRGB(100,100,100));
+				break;
 		}
 		item = item->next;
 	}
@@ -210,8 +217,8 @@ void draw(void)
 	//Level
 	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
 
-	Uint16* pixels = spGetTargetPixel();
-	/*Uint16* texture = (Uint16*)level_original->pixels;
+	/*Uint16* pixels = spGetTargetPixel();
+	Uint16* texture = (Uint16*)level_original->pixels;
 	int a,b;
 	for (a = 0; a < LEVEL_WIDTH; a++)
 		for (b = 0; b < LEVEL_HEIGHT; b++)
@@ -307,7 +314,7 @@ void draw(void)
 			}
 			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
-			int k;
+			/*int k;
 			for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
 			{
 				int X = screen->w/2+x+(spMul(spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_RADIUS,zoom) >> SP_ACCURACY);
@@ -330,7 +337,7 @@ void draw(void)
 					pixels[X+Y*screen->w] = spGetFastRGB(255,255,0);
 				else
 					pixels[X+Y*screen->w] = spGetFastRGB(255,0,0);
-			}
+			}*/
 				
 			//Health bar
 			y-=zoom*3>>14;
@@ -453,6 +460,11 @@ void draw(void)
 			sprintf(buffer,"Power: %i.%i %%",player[active_player]->activeHare->w_power*100/SP_ONE,player[active_player]->activeHare->w_power*1000/SP_ONE%10);
 		spFontDrawRight( screen->w-1, screen->h-1-3*font->maxheight, 0, buffer, font );
 	}
+	if (ragnarok_counter)
+	{
+		sprintf(buffer,"RAGNARÖK %i",turn_count - (hase_game->options.bytewise.ragnarok_border >> 4)*5 + 1);
+		spFontDrawMiddle( screen->w >> 1, screen->h*2/3, 0, buffer, font );
+	}	
 	if (player[active_player]->weapon_points)
 		sprintf(buffer,"%is",countdown / 1000);
 	else
@@ -1062,6 +1074,8 @@ int calc(Uint32 steps)
 			continue;
 		if (check_next_player())
 			return 3;
+		if (ragnarok_counter)
+			ragnarok_counter--;
 		if (player[active_player]->weapon_points && !(dropItem && dropItem->seen))
 			countdown--;
 		if (countdown == 5000 && speed == 1)
@@ -1531,6 +1545,8 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	memset(send_data,0,1536*sizeof(char));
 	game_pause = 0;
 	wp_choose = 0;
+	turn_count = 0;
+	ragnarok_counter = 0;
 	snd_explosion = spSoundLoad("./sounds/explosion.wav");
 	snd_beep = spSoundLoad("./sounds/beep.wav");
 	snd_end = spSoundLoad("./sounds/end_beep.wav");
@@ -1548,6 +1564,11 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	
 	if (player[active_player]->local)
 		spSoundPlay(snd_turn,-1,0,0,-1);
+	if ((hase_game->options.bytewise.ragnarok_border >> 4) == 0)
+	{
+		ragnarok_counter = 3000;
+		items_drop(4,-1,-1);
+	}
 
 	int result = spLoop(draw,calc,10,resize,NULL);
 	

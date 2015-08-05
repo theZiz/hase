@@ -31,6 +31,10 @@ void sop_show_names(int v);
 void sop_show_map(int v);
 void sop_global_chat(int v);
 
+Uint32* gop_game_options_ptr();
+int* gop_game_hares_ptr();
+int* gop_game_seconds_ptr();
+
 void load_options();
 void save_options();
 

@@ -138,7 +138,6 @@ typedef struct sPlayer
 	int kicked;
 	SDL_Thread* heartbeat_thread;
 	int heartbeat_message;
-
 } tPlayer;
 
 typedef struct sThreadData

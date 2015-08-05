@@ -1,11 +1,12 @@
-const char item_filename[ITEMS_COUNT+1][64] = {
+const char item_filename[ITEMS_COUNT+2][64] = {
 	"./data/health.png",
 	"./data/power.png",
 	"./data/mine.png",
-	"./data/mine_beep.png"
+	"./data/mine_beep.png",
+	"./data/skull.png"
 };
 
-PSDL_Surface item_surface[ITEMS_COUNT+1] = {NULL,NULL,NULL};
+PSDL_Surface item_surface[ITEMS_COUNT+2] = {NULL,NULL,NULL,NULL,NULL};
 
 pItem items_drop(int kind,Sint32 x,Sint32 y)
 {
@@ -15,7 +16,7 @@ pItem items_drop(int kind,Sint32 x,Sint32 y)
 	{
 		x = spRand()%LEVEL_WIDTH;
 		y = spRand()%LEVEL_HEIGHT;
-		if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,NULL,1) && gravitation_force(x,y)/32768)
+		if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,NULL,1) && gravitation_force(x,y)/8192)
 			break;
 		if (++tries > 1000)
 			return NULL;
@@ -37,7 +38,7 @@ pItem items_drop(int kind,Sint32 x,Sint32 y)
 void items_init(pGame game)
 {
 	int i;
-	for (i = 0; i <= ITEMS_COUNT; i++)
+	for (i = 0; i <= ITEMS_COUNT+1; i++)
 		item_surface[i] = spLoadSurface(item_filename[i]);
 }
 
@@ -77,10 +78,12 @@ void items_calc()
 		{
 			//bounce (copy & paste from particle feedback function)!
 			Sint32 speed = vector_length_approx(item->dx,item->dy);
-			if (speed <= (SP_ONE >> 4))
+			if (speed <= (SP_ONE >> 2))
 			{
 				item->dx = 0;
 				item->dy = 0;
+				if (item->kind == 4) //skull
+					item->beep = 1;
 			}
 			else
 			{
@@ -115,6 +118,7 @@ void items_calc()
 				pBullet bullet = shootBullet(0,0,0,0,0,NULL,NULL,WP_MINE_BOMB,0);
 				bullet->x = item->x;
 				bullet->y = item->y;
+				bullet->age = 1000;
 				dead = 1;
 			}
 		}
@@ -164,7 +168,7 @@ void items_calc()
 					break;
 			}
 		pItem next = item->next;
-		if (dead || item->x < 0 || item->y < 0 || spFixedToInt(item->x) >= LEVEL_WIDTH || spFixedToInt(item->y) >= LEVEL_HEIGHT)
+		if (dead || (((hase_game->options.bytewise.ragnarok_border & 15) == 0) && (item->x < 0 || item->y < 0 || spFixedToInt(item->x) >= LEVEL_WIDTH || spFixedToInt(item->y) >= LEVEL_HEIGHT)))
 		{
 			if (before)
 				before->next = item->next;
@@ -175,7 +179,20 @@ void items_calc()
 			free(item);
 		}
 		else
+		{
+			if (hase_game->options.bytewise.ragnarok_border & 15)
+			{
+				if (item->x < 0)
+					item->x += spIntToFixed(LEVEL_WIDTH);
+				if (item->y < 0)
+					item->y += spIntToFixed(LEVEL_HEIGHT);
+				if (item->x >= spIntToFixed(LEVEL_WIDTH))
+					item->x -= spIntToFixed(LEVEL_WIDTH);
+				if (item->y >= spIntToFixed(LEVEL_HEIGHT))
+					item->y -= spIntToFixed(LEVEL_HEIGHT);
+			}
 			before = item;
+		}
 		item = next;
 	}
 	

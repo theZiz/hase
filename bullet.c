@@ -1,7 +1,7 @@
 #define WEAPON_X 4
 #define WEAPON_Y 4
 
-#define WEAPON_MAX 17
+#define WEAPON_MAX 18
 
 #define WP_BIG_BAZOOKA 0
 #define WP_MID_BAZOOKA 1
@@ -20,6 +20,7 @@
 #define WP_SPELL_WIN 14
 #define WP_SPELL_STU 15
 #define WP_SPELL_AVA 16
+#define WP_CLUSTER_CLUSTER 17
 
 const char weapon_name[WEAPON_MAX][64] = {
 	"Big carrot bazooka",
@@ -38,7 +39,8 @@ const char weapon_name[WEAPON_MAX][64] = {
 	"Expelliarmus",
 	"Wingardium Leviosa",
 	"Stupor",
-	"Avada Kedavra"
+	"Avada Kedavra",
+	""
 };
 
 const char weapon_description[WEAPON_MAX][64] = {
@@ -58,20 +60,21 @@ const char weapon_description[WEAPON_MAX][64] = {
 	"A spell. Deals a little damage",
 	"A spell. Forces a direct up jump",
 	"A spell. Deals a lot damage",
-	"A spell. If hit, the hare dies"
+	"A spell. If hit, the hare dies",
+	""
 };
  
-const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,2,1,1,1,0,2,3,4,5};
+const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,2,1,1,1,0,2,3,4,5,0};
 
-const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0,0,spGetFastRGB(200,200,255),spGetFastRGB(255,255,0),spGetFastRGB(255,0,0),spGetFastRGB(0,255,0)};
+const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0,0,spGetFastRGB(200,200,255),spGetFastRGB(255,255,0),spGetFastRGB(255,0,0),spGetFastRGB(0,255,0),1};
 
-const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16,2,2,2,2};
+const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16,2,2,2,2,4};
 
-const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,2,2,2,2};
+const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,2,2,2,2,4};
 
-const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,12,12,12,12};
+const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,12,12,12,12,20};
 
-const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,2048,0,0,0,2048,0,0,0,0,2560,0,0,0,0};
+const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,3000,0,0,0,2048,0,0,0,0,2560,0,0,0,0,4096};
 
 const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/bazooka_big.png",
@@ -90,7 +93,8 @@ const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/expelliarmus.png",
 	"./data/wingardium.png",
 	"./data/stupor.png",
-	"./data/avada.png"
+	"./data/avada.png",
+	"./data/cluster.png"
 };
 
 const int weapon_pos[WEAPON_Y][WEAPON_X] = {
@@ -101,7 +105,7 @@ const int weapon_pos[WEAPON_Y][WEAPON_X] = {
 };
 
 typedef SDL_Surface *PSDL_Surface;
-PSDL_Surface weapon_surface[WEAPON_MAX] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+PSDL_Surface weapon_surface[WEAPON_MAX] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 
 void load_weapons()
 {
@@ -229,6 +233,19 @@ void drawBullets()
 				spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,momBullet->surface,zoom*weapon_size[momBullet->kind]/16,zoom*weapon_size[momBullet->kind]/16,momBullet->rotation);
 			else
 				spEllipse(screen->w/2+x,screen->h/2+y,0,spFixedToInt(zoom*weapon_size[momBullet->kind]),spFixedToInt(zoom*weapon_size[momBullet->kind]),weapon_shoot[momBullet->kind]);
+			if (momBullet->age > 20000)
+			{
+				char buffer[32];
+				sprintf(buffer,"%is",(30000-momBullet->age)/1000);
+				spFontDrawMiddle( screen->w/2+x,screen->h/2+y,0, buffer, font );
+			}
+			else
+			if (hase_game->options.bytewise.distant_damage)
+			{
+				char buffer[32];
+				sprintf(buffer,"%i%%",spMin(200,momBullet->age/10));
+				spFontDrawMiddle( screen->w/2+x,screen->h/2+y,0, buffer, font );
+			}
 		}
 		momBullet = momBullet->next;
 	}
@@ -248,9 +265,12 @@ void bullet_impact(int X,int Y,int radius)
 	int outer_radius = (radius+BORDER_SIZE)*(radius+BORDER_SIZE);
 	int c = 0;
 	int inc = (1<<gop_particles()-1)-1;
-	for (x = -radius-BORDER_SIZE; x < radius+BORDER_SIZE+1; x++)
-	{
-		for (y = -radius-BORDER_SIZE; y < radius+BORDER_SIZE+1; y++)
+	int first_x = -spMin(radius+BORDER_SIZE, X);
+	int last_x = spMin(radius+BORDER_SIZE, LEVEL_WIDTH-1-X);
+	int first_y = -spMin(radius+BORDER_SIZE, Y);
+	int last_y = spMin(radius+BORDER_SIZE, LEVEL_HEIGHT-1-Y);
+	for (x = first_x; x <= last_x; x++)
+		for (y = first_y; y <= last_y; y++)
 		{
 			int sum = x*x+y*y;
 			if (sum > outer_radius)
@@ -259,7 +279,6 @@ void bullet_impact(int X,int Y,int radius)
 				if ((x & inc) == inc && (y & inc) == inc)
 					c++;
 		}
-	}
 	spParticleBunchPointer p = NULL;
 	if (gop_particles() != 4)
 		p = spParticleCreate(c,hare_explosion_feedback,&particles);	
@@ -567,6 +586,13 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 			default:
 				damage = d*DMG_HEALTH/weapon_health_divisor[bullet->kind];
 		}
+		if (hase_game->options.bytewise.distant_damage)
+		{
+			if (bullet->age < 2000)
+				damage = damage * bullet->age / 1000;
+			else
+				damage *= 2;
+		}
 		if (damage)
 		{
 			if (hare)
@@ -674,7 +700,7 @@ int updateBullets()
 									rotation -= 2*SP_PI;
 							}
 							for (j = 0; j < 5;j++)
-								shootBullet(momBullet->x,momBullet->y,rotation-SP_PI/2+SP_PI*(j-2)/16,SP_ONE/8,rand()%2*2-1,NULL,weapon_surface[WP_CLUSTER],WP_SML_BAZOOKA,0);
+								shootBullet(momBullet->x,momBullet->y,rotation-SP_PI/2+SP_PI*(j-2)/16,SP_ONE/8,rand()%2*2-1,NULL,weapon_surface[WP_CLUSTER_CLUSTER],WP_CLUSTER_CLUSTER,0)->age = momBullet->age;
 						}
 						if (momBullet->kind == WP_MINE)
 							items_drop(2,momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY);
@@ -739,7 +765,10 @@ int updateBullets()
 					break;
 			}
 		}
-		if (dead || momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT)
+				
+		if (dead ||
+			(((hase_game->options.bytewise.ragnarok_border & 15) == 0) && (momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT)) ||
+			momBullet->age > 30000)
 		{
 			if (before)
 				before->next = momBullet->next;
@@ -753,6 +782,17 @@ int updateBullets()
 		}
 		else
 		{
+			if ((hase_game->options.bytewise.ragnarok_border & 15) && (momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT))
+			{
+				if (momBullet->x < 0)
+					momBullet->x += spIntToFixed(LEVEL_WIDTH);
+				if (momBullet->y < 0)
+					momBullet->y += spIntToFixed(LEVEL_HEIGHT);
+				if (momBullet->x >= spIntToFixed(LEVEL_WIDTH))
+					momBullet->x -= spIntToFixed(LEVEL_WIDTH);
+				if (momBullet->y >= spIntToFixed(LEVEL_HEIGHT))
+					momBullet->y -= spIntToFixed(LEVEL_HEIGHT);
+			}
 			before = momBullet;
 			momBullet = momBullet->next;
 		}
