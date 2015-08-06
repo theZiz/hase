@@ -1,7 +1,7 @@
 #define WEAPON_X 4
-#define WEAPON_Y 4
+#define WEAPON_Y 6
 
-#define WEAPON_MAX 18
+#define WEAPON_MAX 26
 
 #define WP_BIG_BAZOOKA 0
 #define WP_MID_BAZOOKA 1
@@ -21,6 +21,15 @@
 #define WP_SPELL_STU 15
 #define WP_SPELL_AVA 16
 #define WP_CLUSTER_CLUSTER 17
+#define WP_TUNNEL_BIG 18
+#define WP_TUNNEL_MID 19
+#define WP_TUNNEL_SML 20
+#define WP_POTATO 21
+#define WP_SHOTGUN 22
+#define WP_TELEPORT 23
+#define WP_ABOVE 24
+#define WP_SURRENDER 25
+
 
 const char weapon_name[WEAPON_MAX][64] = {
 	"Big carrot bazooka",
@@ -40,7 +49,15 @@ const char weapon_name[WEAPON_MAX][64] = {
 	"Wingardium Leviosa",
 	"Stupor",
 	"Avada Kedavra",
-	""
+	"",
+	"Big Tunnel circle",
+	"Middle Tunnel circle",
+	"Small Tunnel circle",
+	"Potato",
+	"Shotgun",
+	"Teleport",
+	"Above killer",
+	"Surrender"
 };
 
 const char weapon_description[WEAPON_MAX][64] = {
@@ -61,20 +78,28 @@ const char weapon_description[WEAPON_MAX][64] = {
 	"A spell. Forces a direct up jump",
 	"A spell. Deals a lot damage",
 	"A spell. If hit, the hare dies",
-	""
+	"",
+	"Digs a big hole (no damage)",
+	"Digs a hole (no damage)",
+	"Digs a small hole (no damage)",
+	"A very powerful potato",
+	"Shoot in 5 directions at once",
+	"Teleport to a close destination",
+	"Damage the hare on your head",
+	"End your turn"
 };
  
-const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,2,1,1,1,0,2,3,4,5,0};
+const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,2,1,1,1,0,2,3,4,5,0,3,2,1,4,3,2,3,0};
 
-const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0,0,spGetFastRGB(200,200,255),spGetFastRGB(255,255,0),spGetFastRGB(255,0,0),spGetFastRGB(0,255,0),1};
+const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0,0,spGetFastRGB(200,200,255),spGetFastRGB(255,255,0),spGetFastRGB(255,0,0),spGetFastRGB(0,255,0),1,0,0,0,1,1,0,0,0};
 
-const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16,2,2,2,2,4};
+const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16,2,2,2,2,4,0,0,0,4,4,0,0,0};
 
-const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,2,2,2,2,4};
+const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,2,2,2,2,4,0,0,0,4,4,0,0,0};
 
-const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,0,0,0,0,20};
+const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,0,0,0,0,20,64,48,32,38,20,48,0,0};
 
-const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,3000,0,0,0,2048,0,0,0,0,2560,0,0,0,0,4096};
+const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,3000,0,0,0,2048,0,0,0,0,2560,0,0,0,0,4096,0,0,0,1664,3500,0,0,0};
 
 const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/bazooka_big.png",
@@ -94,14 +119,24 @@ const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/wingardium.png",
 	"./data/stupor.png",
 	"./data/avada.png",
-	"./data/cluster.png"
+	"./data/cluster.png",
+	"./data/tunnel_big.png",
+	"./data/tunnel_middle.png",
+	"./data/tunnel_small.png",
+	"./data/potato.png",
+	"./data/shotgun.png",
+	"./data/teleport.png",
+	"./data/above.png",
+	"./data/surrender.png"
 };
 
 const int weapon_pos[WEAPON_Y][WEAPON_X] = {
 	{WP_BIG_BAZOOKA, WP_MID_BAZOOKA, WP_SML_BAZOOKA,   WP_CLUSTER},
-	{  WP_BUILD_BIG,   WP_BUILD_MID,   WP_BUILD_SML,      WP_MINE},
 	{  WP_SPELL_EXP,   WP_SPELL_WIN,   WP_SPELL_STU, WP_SPELL_AVA},
-	{ WP_SUPER_JUMP,    WP_KAIO_KEN,   WP_PREV_HARE, WP_NEXT_HARE}
+	{     WP_POTATO,        WP_MINE,     WP_SHOTGUN,     WP_ABOVE},
+	{  WP_BUILD_BIG,   WP_BUILD_MID,   WP_BUILD_SML, WP_SUPER_JUMP},
+	{ WP_TUNNEL_BIG,  WP_TUNNEL_MID,  WP_TUNNEL_SML, WP_TELEPORT},
+	{   WP_KAIO_KEN,   WP_PREV_HARE,   WP_NEXT_HARE, WP_SURRENDER}
 };
 
 typedef SDL_Surface *PSDL_Surface;
