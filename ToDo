@@ -4,8 +4,6 @@ For version 1.6:
 	* Potato
 	* Shotgun (3 AP shoots in 5..7 different directions
 	* Punch to hare above (2 AP, but 50 damage to avoid the "standing on hat" tactic)
-	* Anti building for tunnels (1, 2 and 3 AP version), all directions (so digger at the same time)
-	* Teleport (3 AP)
 	* Surrender (0 AP)
 * More intelligent AI
 	* if stuck, change direction

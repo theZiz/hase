@@ -99,7 +99,7 @@ const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,2,2,2,2,4,0,0,
 
 const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,0,0,0,0,20,64,48,32,38,20,48,0,0};
 
-const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,3000,0,0,0,2048,0,0,0,0,2560,0,0,0,0,4096,0,0,0,1664,3500,0,0,0};
+const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,3000,0,0,0,2048,0,0,0,0,2560,0,0,0,0,4096,0,0,0,1792,3500,0,0,0};
 
 const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/bazooka_big.png",
@@ -595,7 +595,7 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 	Sint32 dy = y-bullet->y;
 	*d = spFixedToInt(dx)*spFixedToInt(dx) + spFixedToInt(dy)*spFixedToInt(dy);
 	*d = weapon_explosion[bullet->kind]*weapon_explosion[bullet->kind]-*d;
-	if (*d > 0 || hare == bullet->hit)
+	if (*d > 0 || (hare && hare == bullet->hit))
 	{
 		int damage = 0;
 		switch (bullet->kind)

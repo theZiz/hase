@@ -321,7 +321,7 @@ void draw(void)
 				if (w_nr == WP_TELEPORT)
 				{
 					
-					int r = (zoom*12 >> SP_ACCURACY+1);
+					int r = (zoom*20 >> SP_ACCURACY+1);
 					int d = 12+weapon_explosion[w_nr]+(hare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
 					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
@@ -1006,7 +1006,7 @@ int calc(Uint32 steps)
 			posY -= spDiv(spSin(-rotation+3*SP_PI/2),zoom*3/4)*steps;
 		}
 	}
-	int i;
+	int i,j;
 	update_player_sprite(steps);
 	int result = 0;
 	if (game_pause)
@@ -1332,7 +1332,10 @@ int calc(Uint32 steps)
 						input_states[INPUT_BUTTON_CANCEL] = 0;
 						player[active_player]->weapon_points-=weapon_cost[w_nr];
 						if (weapon_shoot[w_nr])
-							shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+						{
+							for (j = ((w_nr == WP_SHOTGUN)?-2:0); j <= ((w_nr == WP_SHOTGUN)?2:0); j++)
+								shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI+j*SP_PI/64,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+						}
 						else
 						switch (w_nr)
 						{
@@ -1368,6 +1371,7 @@ int calc(Uint32 steps)
 									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
 									if (circle_is_empty(ox,oy,r/2+4,NULL,1))
 									{
+										hareplosion(player[active_player]->activeHare);
 										player[active_player]->activeHare->x = ox;
 										player[active_player]->activeHare->y = oy;
 									}
@@ -1389,6 +1393,9 @@ int calc(Uint32 steps)
 								break;
 							case WP_NEXT_HARE:
 								player[active_player]->activeHare = player[active_player]->activeHare->next;
+								break;
+							case WP_SURRENDER:
+								next_player();
 								break;
 						}
 					}

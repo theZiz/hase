@@ -36,6 +36,10 @@ Changelog
 - Decreased the damage of the cluster bomb
 - Decreased the impact of Wingardium Leviosa
 - Hopefully fixed the inaccurary of the spells if another hare is close to the impact
+- New weapons:
+	- Digger (opposite of the building tool)
+	- Teleport
+	- Surrender
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows

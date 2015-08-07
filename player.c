@@ -115,7 +115,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 				hare = hare->next;
 			}
 			while (hare != player[i]->firstHare);
-			pItem item = firstItem;
+			/*pItem item = firstItem;
 			while (item)
 			{
 				Sint32 a;
@@ -134,7 +134,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					}
 				}
 				item = item->next;
-			}
+			}*/
 		}
 	return result;
 }
@@ -628,21 +628,8 @@ Sint32 vector_length_guess(Sint32 x,Sint32 y)
 	return spMax(x,y);
 }
 
-
-
-pHare del_hare(pHare hare,pHare* firstHare)
+void hareplosion(pHare hare)
 {
-	pHare next = NULL;
-	if (hare->next == hare)
-		*firstHare = NULL;
-	else
-	{
-		hare->before->next = hare->next;
-		hare->next->before = hare->before;
-		if (*firstHare == hare)
-			*firstHare = hare->next;
-		next = hare->next;
-	}
 	if (gop_particles() != 4)
 	{
 		int inc = (1<<gop_particles()+gop_particles()-1)-1;
@@ -665,6 +652,22 @@ pHare del_hare(pHare hare,pHare* firstHare)
 			bunch->particle[i].dy /= 4;
 		}
 	}
+}
+
+pHare del_hare(pHare hare,pHare* firstHare)
+{
+	pHare next = NULL;
+	if (hare->next == hare)
+		*firstHare = NULL;
+	else
+	{
+		hare->before->next = hare->next;
+		hare->next->before = hare->before;
+		if (*firstHare == hare)
+			*firstHare = hare->next;
+		next = hare->next;
+	}
+	hareplosion(hare);
 	spDeleteSpriteCollection(hare->hase,0);
 	free(hare);
 	return next;

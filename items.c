@@ -16,10 +16,8 @@ pItem items_drop(int kind,Sint32 x,Sint32 y)
 	{
 		x = spRand()%LEVEL_WIDTH;
 		y = spRand()%LEVEL_HEIGHT;
-		if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,NULL,1) && gravitation_force(x,y)/8192)
+		if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,NULL,1) && (++tries > 1000 || gravitation_force(x,y)/8192))
 			break;
-		if (++tries > 1000)
-			return NULL;
 	}
 	pItem item = (pItem)malloc(sizeof(tItem));
 	item->x = x << SP_ACCURACY;
