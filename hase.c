@@ -339,6 +339,30 @@ void draw(void)
 					spSetBlending( SP_ONE );
 				}
 				else
+				if (w_nr == WP_ABOVE)
+				{
+					int r = (zoom*20 >> SP_ACCURACY+1);
+					int once = 0;
+					int k;
+					for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
+					{
+						if (hare->circle_checkpoint_hare[k] && spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) < -SP_ONE/4)
+						{
+							Sint32 ox = spMul(hare->circle_checkpoint_hare[k]->x-posX,zoom);
+							Sint32 oy = spMul(hare->circle_checkpoint_hare[k]->y-posY,zoom);
+							Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
+							Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
+
+							spSetBlending( SP_ONE*2/3 );
+							spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
+							spSetBlending( SP_ONE );
+							once = 1;
+						}
+					}
+					if (!once)
+						spFontDrawMiddle( screen->w >> 1, screen->h/3, 0, "No target on head", font );
+				}
+				else
 				//Arrow
 				{
 					Sint32 w_zoom = spMax(SP_ONE/2,zoom);
@@ -1396,6 +1420,28 @@ int calc(Uint32 steps)
 								break;
 							case WP_SURRENDER:
 								next_player();
+								break;
+							case WP_ABOVE:
+								for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
+									if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
+									{
+										pBullet bullet = (pBullet)malloc(sizeof(tBullet));
+										bullet->x = player[active_player]->activeHare->x;
+										bullet->y = player[active_player]->activeHare->y;
+										bullet->kind = WP_ABOVE;
+										bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
+										int d;
+										do_damage(
+											player[active_player]->activeHare->circle_checkpoint_hare[j]->x,
+											player[active_player]->activeHare->circle_checkpoint_hare[j]->y,
+											bullet,
+											player[active_player]->activeHare->circle_checkpoint_hare[j],
+											NULL,
+											&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dx),
+											&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dy),
+											&d);
+										free(bullet);
+									}
 								break;
 						}
 					}

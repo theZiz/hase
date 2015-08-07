@@ -588,8 +588,27 @@ void negative_impact(int X,int Y,int radius)
 	update_map();
 }
 
-int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 *mod_dx,Sint32 *mod_dy,int* d)
+int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer p,Sint32 *mod_dx,Sint32 *mod_dy,int* d)
 {
+	if (p == NULL && hare)
+	{
+		int j;
+		for (j = 0; j < player_count; j++)
+		{
+			pHare h = player[j]->firstHare;
+			if (h)
+			do
+			{	
+				if (h == hare)
+				{
+					p = player[j];
+					break;
+				}
+				h = h->next;
+			}
+			while (h != player[j]->firstHare);
+		}
+	}
 	int total_break = 0;
 	Sint32 dx = x-bullet->x;
 	Sint32 dy = y-bullet->y;
@@ -618,10 +637,15 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 					damage = DMG_HEALTH;
 				total_break = 1;
 				break;
+			case WP_ABOVE:
+				if (hare)
+					damage = DMG_HEALTH/2;
+				total_break = 1;
+				break;
 			default:
 				damage = *d*DMG_HEALTH/weapon_health_divisor[bullet->kind];
 		}
-		if (hase_game->options.bytewise.distant_damage)
+		if (hase_game->options.bytewise.distant_damage && bullet->kind != WP_ABOVE)
 		{
 			if (bullet->age < 2000)
 				damage = damage * bullet->age / 1000;
@@ -632,10 +656,10 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer player,Sint32 
 		{
 			if (hare)
 				hare->health -= damage;
-			if (player)
+			if (p)
 			{
-				player->d_health -= damage;
-				player->d_time = 5000;
+				p->d_health -= damage;
+				p->d_time = 5000;
 			}
 			Sint32 D = spSqrt(spSquare(dx)+spSquare(dy));
 			Sint32 DX = spDiv(dx,D);

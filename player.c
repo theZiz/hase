@@ -106,7 +106,11 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					if (d <= PLAYER_PLAYER_RADIUS*PLAYER_PLAYER_RADIUS)
 					{
 						if (except)
+						{
 							except->circle_checkpoint_hit[a] = 1;
+							except->circle_checkpoint_hare[a] = hare;
+							hare->circle_checkpoint_hare[(CIRCLE_CHECKPOINTS/2+a) % CIRCLE_CHECKPOINTS] = except;
+						}
 						hare->circle_checkpoint_hit[(CIRCLE_CHECKPOINTS/2+a) % CIRCLE_CHECKPOINTS] = 1;
 						last_circle_hit = hare;
 						result = 0;
@@ -732,6 +736,7 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 			sprintf(buffer,"./sprites/hase%i.ssc",player[i]->nr);
 			hare->hase = spLoadSpriteCollection(buffer,NULL);
 			memset(hare->circle_checkpoint_hit,0,sizeof(int)*CIRCLE_CHECKPOINTS);
+			memset(hare->circle_checkpoint_hare,0,sizeof(pHare)*CIRCLE_CHECKPOINTS);
 		}
 		player[i]->activeHare = player[i]->firstHare;
 		player[i]->setActiveHare = NULL;

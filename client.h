@@ -105,6 +105,7 @@ typedef struct sHare
 	int wp_x,wp_y;
 	Sint32 cam_rotation;
 	int circle_checkpoint_hit[CIRCLE_CHECKPOINTS];
+	pHare circle_checkpoint_hare[CIRCLE_CHECKPOINTS];
 } tHare;
 
 typedef struct sPlayer

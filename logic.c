@@ -8,6 +8,7 @@ int do_physics()
 		do
 		{	
 			memset(hare->circle_checkpoint_hit,0,sizeof(int)*CIRCLE_CHECKPOINTS);
+			memset(hare->circle_checkpoint_hare,0,sizeof(pHare)*CIRCLE_CHECKPOINTS);
 			hare = hare->next;
 		}
 		while (hare != player[j]->firstHare);

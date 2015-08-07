@@ -40,6 +40,9 @@ Changelog
 	- Digger (opposite of the building tool)
 	- Teleport
 	- Surrender
+	- Potato
+	- Hit the hare on your head
+	- Shotgun
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows

@@ -1,10 +1,5 @@
 For version 1.6:
 * Help
-* New weapons
-	* Potato
-	* Shotgun (3 AP shoots in 5..7 different directions
-	* Punch to hare above (2 AP, but 50 damage to avoid the "standing on hat" tactic)
-	* Surrender (0 AP)
 * More intelligent AI
 	* if stuck, change direction
 	* Getting more wp
