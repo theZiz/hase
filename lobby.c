@@ -58,8 +58,8 @@ void resize( Uint16 w, Uint16 h )
 			font_dark = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
 		}
 	}
-	spFontAdd( font     , SP_FONT_GROUP_ASCII"™°∞öÖäÄüÜ", FONT_FG ); //whole ASCII
-	spFontAdd( font_dark, SP_FONT_GROUP_ASCII"™°∞öÖäÄüÜ", FONT_DARK_FG ); //whole ASCII
+	spFontAdd( font     , SP_FONT_GROUP_ASCII"™°∞öÖäÄüÜß", FONT_FG ); //whole ASCII
+	spFontAdd( font_dark, SP_FONT_GROUP_ASCII"™°∞öÖäÄüÜß", FONT_DARK_FG ); //whole ASCII
 	spFontAddBorder(font      , 0);
 	spFontAddBorder(font_dark , spGetRGB(60,60,60));
 	#ifdef DESKTOP
