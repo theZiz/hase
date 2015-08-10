@@ -134,6 +134,12 @@ int chat_feedback( pWindow window, pWindowElement elem, int action )
 	return 0;
 }
 
+int level_feedback( pWindow window, pWindowElement elem, int action )
+{
+	sprintf(elem->text,"Do you want to save the level?");
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	#ifndef WIN32
@@ -251,6 +257,12 @@ int main(int argc, char **argv)
 						char buffer[512];
 						pGame game = create_game("New game",*gop_game_options_ptr(),*gop_game_seconds_ptr(),create_level_string(buffer,1536,1536,3,3,3),1,*gop_game_hares_ptr());
 						start_lobby_game(font,resize,game,0);
+						pWindow level_window = create_window(level_feedback,font,"Question");
+						level_window->cancel_to_no = 1;
+						add_window_element(level_window,-1,0);
+						if (modal_window(level_window,resize) == 1)
+							save_level(game->level_string);
+						delete_window(level_window);
 						delete_game(game);
 					}
 					break;
