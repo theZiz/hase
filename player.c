@@ -228,6 +228,7 @@ void update_player()
 							break;
 					}
 					int k;
+					hare->jump_failed = 0;
 					for (k = 1; k <= 4; k++)
 					{
 						if (circle_is_empty(hare->x+k*dx,hare->y-k*dy,PLAYER_RADIUS,hare,1))
@@ -254,6 +255,8 @@ void update_player()
 							break;
 						}
 					}
+					if (k == 5)
+						hare->jump_failed = 1;
 				}
 			}
 			hare->rotation = 0;
@@ -737,6 +740,7 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 			hare->hase = spLoadSpriteCollection(buffer,NULL);
 			memset(hare->circle_checkpoint_hit,0,sizeof(int)*CIRCLE_CHECKPOINTS);
 			memset(hare->circle_checkpoint_hare,0,sizeof(pHare)*CIRCLE_CHECKPOINTS);
+			hare->jump_failed = 0;
 		}
 		player[i]->activeHare = player[i]->firstHare;
 		player[i]->setActiveHare = NULL;

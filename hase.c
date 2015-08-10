@@ -1163,8 +1163,11 @@ int calc(Uint32 steps)
 					{
 						if (ai_shoot_tries == 0)
 						{
-							jump((spRand()%4==0)?1:0);
-							if (spRand()%4 == 0)
+							if (player[active_player]->activeHare->jump_failed || spRand()%16 == 0)
+								player[active_player]->activeHare->direction = 1-player[active_player]->activeHare->direction;
+							player[active_player]->activeHare->jump_failed = 0;
+							jump((spRand()%2)?(spRand()%2)?1:4:0);
+							if (spRand()%8 == 0)
 								ai_shoot_tries = 1;
 						}
 						else
@@ -1194,10 +1197,87 @@ int calc(Uint32 steps)
 								else
 								{
 									//Shoot!
-									if (player[active_player]->weapon_points > 0)
+									int once = 0;
+									if (player[active_player]->weapon_points >= weapon_cost[WP_ABOVE])
 									{
-										player[active_player]->weapon_points-=weapon_cost[WP_BIG_BAZOOKA];
-										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],WP_BIG_BAZOOKA,1);
+										for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
+											if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
+											{
+												pBullet bullet = (pBullet)malloc(sizeof(tBullet));
+												bullet->x = player[active_player]->activeHare->x;
+												bullet->y = player[active_player]->activeHare->y;
+												bullet->kind = WP_ABOVE;
+												bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
+												int d;
+												int k;
+												for (k = 0; k < player_count; k++)
+												{
+													pHare h = player[k]->firstHare;
+													if (h)
+													do
+													{	
+														if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
+															break;
+														h = h->next;
+													}
+													while (h != player[k]->firstHare);
+												}
+												do_damage(
+													player[active_player]->activeHare->circle_checkpoint_hare[j]->x,
+													player[active_player]->activeHare->circle_checkpoint_hare[j]->y,
+													bullet,
+													player[active_player]->activeHare->circle_checkpoint_hare[j],
+													player[k],
+													&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dx),
+													&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dy),
+													&d);
+												if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
+												{
+													player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(player[k]->firstHare));
+													if (player[k]->firstHare == NULL)
+														alive_count--;
+												}
+												free(bullet);
+												once = 1;
+											}
+										if (once)
+										{
+											player[active_player]->weapon_points-=weapon_cost[WP_ABOVE]; //pay
+											player[active_player]->activeHare->wp_x = 3;
+											player[active_player]->activeHare->wp_y = 2;
+											ai_shoot_tries = 0;
+											lastAIDistance = 100000000;
+										}
+									}
+									if (!once && player[active_player]->weapon_points > 0)
+									{
+										int w_nr;
+										switch (player[active_player]->weapon_points - spRand()%spMin(player[active_player]->weapon_points,3))
+										{
+											case 1:
+												w_nr = WP_SML_BAZOOKA;
+												player[active_player]->activeHare->wp_x = 2;
+												player[active_player]->activeHare->wp_y = 0;
+												break;
+											case 2:
+												w_nr = WP_MID_BAZOOKA;
+												player[active_player]->activeHare->wp_x = 1;
+												player[active_player]->activeHare->wp_y = 0;
+												break;
+											case 3:
+												w_nr = WP_BIG_BAZOOKA;
+												player[active_player]->activeHare->wp_x = 0;
+												player[active_player]->activeHare->wp_y = 0;
+												break;
+											default:
+												w_nr = WP_POTATO;
+												player[active_player]->activeHare->wp_x = 0;
+												player[active_player]->activeHare->wp_y = 2;
+										}
+										player[active_player]->weapon_points-=weapon_cost[w_nr];
+										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+										ai_shoot_tries = 0;
+										lastAIDistance = 100000000;
 									}
 									break;
 								}
@@ -1209,7 +1289,12 @@ int calc(Uint32 steps)
 				{
 					//RUNNING!
 					if (player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
-						jump((spRand()%4==0)?1:0);
+					{
+						if (player[active_player]->activeHare->jump_failed || spRand()%16 == 0)
+							player[active_player]->activeHare->direction = 1-player[active_player]->activeHare->direction;
+						player[active_player]->activeHare->jump_failed = 0;					
+						jump((spRand()%2)?(spRand()%2)?1:4:0);
+					}
 				}
 			}
 			else
@@ -1353,6 +1438,7 @@ int calc(Uint32 steps)
 					//Shoot!
 					if (player[active_player]->weapon_points - weapon_cost[w_nr] >= 0)
 					{
+						int once;
 						input_states[INPUT_BUTTON_CANCEL] = 0;
 						player[active_player]->weapon_points-=weapon_cost[w_nr];
 						if (weapon_shoot[w_nr])
@@ -1422,6 +1508,7 @@ int calc(Uint32 steps)
 								next_player();
 								break;
 							case WP_ABOVE:
+								once = 0;
 								for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
 									if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
 									{
@@ -1431,17 +1518,45 @@ int calc(Uint32 steps)
 										bullet->kind = WP_ABOVE;
 										bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
 										int d;
+										int k;
+										pPlayer p;
+										for (k = 0; k < player_count; k++)
+										{
+											pHare h = player[k]->firstHare;
+											if (h)
+											do
+											{	
+												if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
+												{
+													p = player[k];
+													break;
+												}
+												h = h->next;
+											}
+											while (h != player[k]->firstHare);
+										}
 										do_damage(
 											player[active_player]->activeHare->circle_checkpoint_hare[j]->x,
 											player[active_player]->activeHare->circle_checkpoint_hare[j]->y,
 											bullet,
 											player[active_player]->activeHare->circle_checkpoint_hare[j],
-											NULL,
+											p,
 											&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dx),
 											&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dy),
 											&d);
+										if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
+										{
+											player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(p->firstHare));
+											if (p->firstHare == NULL)
+												alive_count--;
+											if (alive_count < 2)
+												result = 2;
+										}
 										free(bullet);
+										once = 1;
 									}
+								if (!once)
+									player[active_player]->weapon_points+=weapon_cost[w_nr]; //payback
 								break;
 						}
 					}
