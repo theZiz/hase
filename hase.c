@@ -1166,7 +1166,18 @@ int calc(Uint32 steps)
 							if (player[active_player]->activeHare->jump_failed || spRand()%16 == 0)
 								player[active_player]->activeHare->direction = 1-player[active_player]->activeHare->direction;
 							player[active_player]->activeHare->jump_failed = 0;
-							jump((spRand()%2)?(spRand()%2)?1:4:0);
+							switch (spRand()%7)
+							{
+								case 0: case 1: case 2: case 3:
+									jump(0);
+									break;
+								case 4: case 5:
+									jump(1);
+									break;
+								case 6:
+									jump(4);
+									break;
+							}
 							if (spRand()%8 == 0)
 								ai_shoot_tries = 1;
 						}
@@ -1210,6 +1221,7 @@ int calc(Uint32 steps)
 												bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
 												int d;
 												int k;
+												pPlayer p;
 												for (k = 0; k < player_count; k++)
 												{
 													pHare h = player[k]->firstHare;
@@ -1217,7 +1229,10 @@ int calc(Uint32 steps)
 													do
 													{	
 														if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
+														{
+															p = player[k];
 															break;
+														}
 														h = h->next;
 													}
 													while (h != player[k]->firstHare);
@@ -1227,14 +1242,14 @@ int calc(Uint32 steps)
 													player[active_player]->activeHare->circle_checkpoint_hare[j]->y,
 													bullet,
 													player[active_player]->activeHare->circle_checkpoint_hare[j],
-													player[k],
+													p,
 													&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dx),
 													&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dy),
 													&d);
 												if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
 												{
-													player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(player[k]->firstHare));
-													if (player[k]->firstHare == NULL)
+													player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(p->firstHare));
+													if (p->firstHare == NULL)
 														alive_count--;
 												}
 												free(bullet);
@@ -1252,7 +1267,10 @@ int calc(Uint32 steps)
 									if (!once && player[active_player]->weapon_points > 0)
 									{
 										int w_nr;
-										switch (player[active_player]->weapon_points - spRand()%spMin(player[active_player]->weapon_points,3))
+										int use_points = spMin(4,player[active_player]->weapon_points);
+										if (spRand()%2)
+											use_points -= spRand()%use_points;
+										switch (use_points)
 										{
 											case 1:
 												w_nr = WP_SML_BAZOOKA;
@@ -1293,7 +1311,18 @@ int calc(Uint32 steps)
 						if (player[active_player]->activeHare->jump_failed || spRand()%16 == 0)
 							player[active_player]->activeHare->direction = 1-player[active_player]->activeHare->direction;
 						player[active_player]->activeHare->jump_failed = 0;					
-						jump((spRand()%2)?(spRand()%2)?1:4:0);
+						switch (spRand()%7)
+						{
+							case 0: case 1: case 2: case 3:
+								jump(0);
+								break;
+							case 4: case 5:
+								jump(1);
+								break;
+							case 6:
+								jump(4);
+								break;
+						}
 					}
 				}
 			}
