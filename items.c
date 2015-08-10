@@ -142,8 +142,7 @@ void items_calc()
 						case 1: //power
 							if (d <= PLAYER_RADIUS*PLAYER_RADIUS*4)
 							{
-								if (player[j]->computer == 0)
-									player[j]->weapon_points++;
+								player[j]->weapon_points++;
 								spSoundPlay(snd_item,-1,0,0,-1);
 								dead = 1;
 							}

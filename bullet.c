@@ -590,25 +590,6 @@ void negative_impact(int X,int Y,int radius)
 
 int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer p,Sint32 *mod_dx,Sint32 *mod_dy,int* d)
 {
-	if (p == NULL && hare)
-	{
-		int j;
-		for (j = 0; j < player_count; j++)
-		{
-			pHare h = player[j]->firstHare;
-			if (h)
-			do
-			{	
-				if (h == hare)
-				{
-					p = player[j];
-					break;
-				}
-				h = h->next;
-			}
-			while (h != player[j]->firstHare);
-		}
-	}
 	int total_break = 0;
 	Sint32 dx = x-bullet->x;
 	Sint32 dy = y-bullet->y;

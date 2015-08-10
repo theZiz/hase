@@ -43,6 +43,7 @@ Changelog
 	- Potato
 	- Hit the hare on your head
 	- Shotgun
+- Improved AI
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows
