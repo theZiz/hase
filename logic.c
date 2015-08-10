@@ -43,8 +43,8 @@ int do_physics()
 				{
 					if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) < SP_ONE/4)
 					{
-						hare->dx += spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 8;
-						hare->dy += spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 8;
+						hare->dx += spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 7;
+						hare->dy += spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 7;
 					}
 					else
 						hare->bums = 1;

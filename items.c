@@ -16,7 +16,7 @@ pItem items_drop(int kind,Sint32 x,Sint32 y)
 	{
 		x = spRand()%LEVEL_WIDTH;
 		y = spRand()%LEVEL_HEIGHT;
-		if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,NULL,1) && (++tries > 1000 || gravitation_force(x,y)/8192))
+		if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,NULL,1) && (++tries > 1000 || gravitation_force(x,y)/16384))
 			break;
 	}
 	pItem item = (pItem)malloc(sizeof(tItem));
@@ -66,7 +66,7 @@ void items_calc()
 		}
 		item->dx -= gravitation_x(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
 		item->dy -= gravitation_y(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
-		if (circle_is_empty(item->x+item->dx,item->y+item->dy,PLAYER_RADIUS,NULL,1))
+		if (circle_is_empty(item->x+item->dx,item->y+item->dy,PLAYER_RADIUS,NULL,0))
 		{
 			item->x += item->dx;
 			item->y += item->dy;
@@ -145,6 +145,7 @@ void items_calc()
 								player[j]->weapon_points++;
 								spSoundPlay(snd_item,-1,0,0,-1);
 								dead = 1;
+								use_points = 0;
 							}
 							break;
 						case 2: //mine

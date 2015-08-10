@@ -93,13 +93,13 @@ const int weapon_cost[WEAPON_MAX] = {3,2,1,3,3,2,1,3,2,1,1,1,0,2,3,4,5,0,3,2,1,4
 
 const int weapon_shoot[WEAPON_MAX] = {1,1,1,1,0,0,0,1,0,0,0,0,0,spGetFastRGB(200,200,255),spGetFastRGB(255,255,0),spGetFastRGB(255,0,0),spGetFastRGB(0,255,0),1,0,0,0,1,1,0,0,0};
 
-const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16,2,2,2,2,4,0,0,0,4,4,0,0,0};
+const int weapon_radius[WEAPON_MAX] = {4,4,4,4,0,0,0,4,0,0,0,0,16,4,4,4,4,4,0,0,0,4,4,0,0,0};
 
-const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,2,2,2,2,4,0,0,0,4,4,0,0,0};
+const int weapon_size[WEAPON_MAX] =    {4,4,4,4,0,0,0,8,0,0,0,0,8,4,4,4,4,4,0,0,0,4,4,0,0,0};
 
 const int weapon_explosion[WEAPON_MAX] = {32,26,20,20,64,48,32,12,0,0,0,0,32,0,0,0,0,20,64,48,32,38,20,48,0,0};
 
-const int weapon_health_divisor[WEAPON_MAX] = {1792,1920,2048,3000,0,0,0,2048,0,0,0,0,2560,0,0,0,0,4096,0,0,0,1792,3500,0,0,0};
+const int weapon_health_divisor[WEAPON_MAX] = {1920,2048,2176,3072,0,0,0,2048,0,0,0,0,2560,0,0,0,0,4096,0,0,0,1920,3584,0,0,0};
 
 const char weapon_filename[WEAPON_MAX][64] = {
 	"./data/bazooka_big.png",

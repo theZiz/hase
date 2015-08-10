@@ -1142,7 +1142,8 @@ int pull_game_thread(pPlayer player,int second_of_player,void* data)
 	{
 		player->kicked = 2;
 		result = 0;
-		memset(data,1+2+16+32,1536);
+		//memset(data,1+2+16+32,1536);
+		memset(data,255,1536);
 	}
 	return result;
 }

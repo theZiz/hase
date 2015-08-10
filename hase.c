@@ -69,8 +69,8 @@ int ragnarok_counter;
 #define INPUT_BUTTON_4 7
 #define INPUT_BUTTON_L 8
 #define INPUT_BUTTON_R 9
-#define INPUT_BUTTON_START 10
-#define INPUT_BUTTON_SELECT 11
+#define INPUT_ZOMBIE 10
+#define INPUT_RESERVED 11
 int input_states[12];
 char button_states[8];
 unsigned char send_data[1536];
@@ -217,7 +217,7 @@ void draw(void)
 	//Level
 	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
 
-	Uint16* pixels = spGetTargetPixel();
+	//Uint16* pixels = spGetTargetPixel();
 	/*Uint16* texture = (Uint16*)level_original->pixels;
 	int a,b;
 	for (a = 0; a < LEVEL_WIDTH; a++)
@@ -290,7 +290,7 @@ void draw(void)
 					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
-					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/2+4,NULL,-1))
+					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/4+6,NULL,-1))
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,0));
 					else
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
@@ -311,7 +311,7 @@ void draw(void)
 					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
-					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/2+4,NULL,0) == 0)
+					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/4,NULL,0) == 0)
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,0));
 					else
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
@@ -332,7 +332,7 @@ void draw(void)
 					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
-					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/2+4,NULL,1))
+					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/4+6,NULL,1))
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(0,255,255));
 					else
 						spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,spGetFastRGB(255,0,0));
@@ -380,7 +380,7 @@ void draw(void)
 			}
 			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
-			int k;
+			/*int k;
 			for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
 			{
 				int X = screen->w/2+x+(spMul(spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_RADIUS,zoom) >> SP_ACCURACY);
@@ -403,7 +403,7 @@ void draw(void)
 					pixels[X+Y*screen->w] = spGetFastRGB(255,255,0);
 				else
 					pixels[X+Y*screen->w] = spGetFastRGB(255,0,0);
-			}
+			}*/
 				
 			//Health bar
 			y-=zoom*3>>14;
@@ -528,7 +528,7 @@ void draw(void)
 			sprintf(buffer,"Power: %i.%i %%",player[active_player]->activeHare->w_power*100/SP_ONE,player[active_player]->activeHare->w_power*1000/SP_ONE%10);
 		spFontDrawRight( screen->w-1, screen->h-1-3*font->maxheight, 0, buffer, font );
 	}
-	if (ragnarok_counter)
+	if (ragnarok_counter && (hase_game->options.bytewise.ragnarok_border >> 4) < 7)
 	{
 		sprintf(buffer,"RAGNARÖK %i",turn_count - (hase_game->options.bytewise.ragnarok_border >> 4)*5 + 1);
 		spFontDrawMiddle( screen->w >> 1, screen->h*2/3, 0, buffer, font );
@@ -588,7 +588,7 @@ void jump(int high)
 	player[active_player]->activeHare->high_hops = high;
 }
 
-int min_d_not_me(int x,int y,int me)
+int min_d_not_me(int x,int y,int me, int r)
 {
 	int min_d = LEVEL_WIDTH*LEVEL_WIDTH;
 	int i;
@@ -609,7 +609,7 @@ int min_d_not_me(int x,int y,int me)
 			}
 			else
 			{
-				if (d < 1024) //to near to me!!!
+				if (d < r*r) //to near to me!!!
 					return LEVEL_WIDTH*LEVEL_WIDTH;
 			}
 			hare = hare->next;
@@ -763,9 +763,9 @@ void set_input()
 				input_states[INPUT_BUTTON_4] = spMapGetByID(MAP_VIEW);
 
 			if (spMapGetByID(MAP_CHAT) != button_states[MAP_CHAT])
-				input_states[INPUT_BUTTON_START] = spMapGetByID(MAP_CHAT);
+				input_states[INPUT_ZOMBIE] = spMapGetByID(MAP_CHAT);
 			if (spMapGetByID(MAP_MENU) != button_states[MAP_MENU])
-				input_states[INPUT_BUTTON_SELECT] = spMapGetByID(MAP_MENU);
+				input_states[INPUT_RESERVED] = spMapGetByID(MAP_MENU);
 		}
 		else
 			memset(input_states,0,sizeof(int)*12);
@@ -1166,7 +1166,7 @@ int calc(Uint32 steps)
 							if (player[active_player]->activeHare->jump_failed || spRand()%16 == 0)
 								player[active_player]->activeHare->direction = 1-player[active_player]->activeHare->direction;
 							player[active_player]->activeHare->jump_failed = 0;
-							switch (spRand()%7)
+							switch (spRand()/1337%7)
 							{
 								case 0: case 1: case 2: case 3:
 									jump(0);
@@ -1183,121 +1183,124 @@ int calc(Uint32 steps)
 						}
 						else
 						{
+							int once = 0;
 							if (last_ai_try < AI_TRIES_EVERY_MS)
 								last_ai_try++;
 							else
 							{
-								last_ai_try = 0;
-								ai_shoot_tries++;
-								if (ai_shoot_tries < AI_MAX_TRIES)
+								if (player[active_player]->weapon_points >= weapon_cost[WP_ABOVE])
 								{
-									//Lets first try...
-									int x = player[active_player]->activeHare->x;
-									int y = player[active_player]->activeHare->y;
-									int w_d = spRand()%(2*SP_PI);
-									int w_p = spRand()%(SP_ONE-SP_ONE/20-1)+SP_ONE/20+1;
-									lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/W_POWER_DIVISOR);
-									int d = min_d_not_me(x,y,active_player);
-									if (d < lastAIDistance)
+									for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
+										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
+										{
+											pBullet bullet = (pBullet)malloc(sizeof(tBullet));
+											bullet->x = player[active_player]->activeHare->x;
+											bullet->y = player[active_player]->activeHare->y;
+											bullet->kind = WP_ABOVE;
+											bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
+											int d;
+											int k;
+											pPlayer p;
+											for (k = 0; k < player_count; k++)
+											{
+												pHare h = player[k]->firstHare;
+												if (h)
+												do
+												{	
+													if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
+													{
+														p = player[k];
+														break;
+													}
+													h = h->next;
+												}
+												while (h != player[k]->firstHare);
+											}
+											do_damage(
+												player[active_player]->activeHare->circle_checkpoint_hare[j]->x,
+												player[active_player]->activeHare->circle_checkpoint_hare[j]->y,
+												bullet,
+												player[active_player]->activeHare->circle_checkpoint_hare[j],
+												p,
+												&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dx),
+												&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dy),
+												&d);
+											if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
+											{
+												player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(p->firstHare));
+												if (p->firstHare == NULL)
+													alive_count--;
+											}
+											free(bullet);
+											once = 1;
+										}
+									if (once)
 									{
-										lastAIDistance = d;
-										player[active_player]->activeHare->w_direction = w_d;
-										player[active_player]->activeHare->w_power = w_p;
+										player[active_player]->weapon_points-=weapon_cost[WP_ABOVE]; //pay
+										player[active_player]->activeHare->wp_x = 3;
+										player[active_player]->activeHare->wp_y = 2;
+										ai_shoot_tries = 0;
+										lastAIDistance = 100000000;
 									}
 								}
-								else
+								if (!once)
 								{
-									//Shoot!
-									int once = 0;
-									if (player[active_player]->weapon_points >= weapon_cost[WP_ABOVE])
+									last_ai_try = 0;
+									ai_shoot_tries++;
+									if (use_points == 0)
 									{
-										for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
-											if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
-											{
-												pBullet bullet = (pBullet)malloc(sizeof(tBullet));
-												bullet->x = player[active_player]->activeHare->x;
-												bullet->y = player[active_player]->activeHare->y;
-												bullet->kind = WP_ABOVE;
-												bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
-												int d;
-												int k;
-												pPlayer p;
-												for (k = 0; k < player_count; k++)
-												{
-													pHare h = player[k]->firstHare;
-													if (h)
-													do
-													{	
-														if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
-														{
-															p = player[k];
-															break;
-														}
-														h = h->next;
-													}
-													while (h != player[k]->firstHare);
-												}
-												do_damage(
-													player[active_player]->activeHare->circle_checkpoint_hare[j]->x,
-													player[active_player]->activeHare->circle_checkpoint_hare[j]->y,
-													bullet,
-													player[active_player]->activeHare->circle_checkpoint_hare[j],
-													p,
-													&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dx),
-													&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dy),
-													&d);
-												if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
-												{
-													player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(p->firstHare));
-													if (p->firstHare == NULL)
-														alive_count--;
-												}
-												free(bullet);
-												once = 1;
-											}
-										if (once)
-										{
-											player[active_player]->weapon_points-=weapon_cost[WP_ABOVE]; //pay
-											player[active_player]->activeHare->wp_x = 3;
-											player[active_player]->activeHare->wp_y = 2;
-											ai_shoot_tries = 0;
-											lastAIDistance = 100000000;
-										}
-									}
-									if (!once && player[active_player]->weapon_points > 0)
-									{
-										int w_nr;
-										int use_points = spMin(4,player[active_player]->weapon_points);
-										if (spRand()%2)
-											use_points -= spRand()%use_points;
+										use_points = spMin(4,player[active_player]->weapon_points);
+										if (spRand()/1337%2)
+											use_points -= spRand()/1337%use_points;
 										switch (use_points)
 										{
 											case 1:
-												w_nr = WP_SML_BAZOOKA;
 												player[active_player]->activeHare->wp_x = 2;
 												player[active_player]->activeHare->wp_y = 0;
 												break;
 											case 2:
-												w_nr = WP_MID_BAZOOKA;
 												player[active_player]->activeHare->wp_x = 1;
 												player[active_player]->activeHare->wp_y = 0;
 												break;
 											case 3:
-												w_nr = WP_BIG_BAZOOKA;
 												player[active_player]->activeHare->wp_x = 0;
 												player[active_player]->activeHare->wp_y = 0;
 												break;
 											default:
-												w_nr = WP_POTATO;
 												player[active_player]->activeHare->wp_x = 0;
 												player[active_player]->activeHare->wp_y = 2;
 										}
-										player[active_player]->weapon_points-=weapon_cost[w_nr];
-										shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
-										ai_shoot_tries = 0;
-										lastAIDistance = 100000000;
 									}
-									break;
+									int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
+									if (ai_shoot_tries < AI_MAX_TRIES)
+									{
+										//Lets first try...
+										int x = player[active_player]->activeHare->x;
+										int y = player[active_player]->activeHare->y;
+										int w_d = spRand()%(2*SP_PI);
+										int w_p = spRand()%(SP_ONE-SP_ONE/20-1)+SP_ONE/20+1;
+										lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/W_POWER_DIVISOR);
+										int d = min_d_not_me(x,y,active_player,weapon_explosion[w_nr]);
+										if (d < lastAIDistance)
+										{
+											lastAIDistance = d;
+											player[active_player]->activeHare->w_direction = w_d;
+											player[active_player]->activeHare->w_power = w_p;
+										}
+									}
+									else
+									{
+										//Shoot!
+										if (player[active_player]->weapon_points > 0)
+										{
+											player[active_player]->weapon_points-=weapon_cost[w_nr];
+											shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+											ai_shoot_tries = 0;
+											lastAIDistance = 100000000;
+											use_points = 0;
+										}
+										break;
+									}
 								}
 							}
 						}
@@ -1311,7 +1314,7 @@ int calc(Uint32 steps)
 						if (player[active_player]->activeHare->jump_failed || spRand()%16 == 0)
 							player[active_player]->activeHare->direction = 1-player[active_player]->activeHare->direction;
 						player[active_player]->activeHare->jump_failed = 0;					
-						switch (spRand()%7)
+						switch (spRand()/1337%7)
 						{
 							case 0: case 1: case 2: case 3:
 								jump(0);
@@ -1330,263 +1333,268 @@ int calc(Uint32 steps)
 			if (player[active_player]->activeHare)
 			{
 				//not AI
-				if (input_states[INPUT_BUTTON_OK])
-				{
-					if (player[active_player]->activeHare->bums)
-					{
-						if (player[active_player]->activeHare->hops <= 0)
-							jump(1);
-						else
-						if (input_ok_on == 0)
-							player[active_player]->activeHare->high_hops = 4;
-					}
-					input_ok_on = 1;
-				}
+				if (input_states[INPUT_ZOMBIE]) //but Zombie
+					next_player();
 				else
-					input_ok_on = 0;
-					
-				if (input_states[INPUT_AXIS_0_LEFT])
 				{
-					if (player[active_player]->activeHare->direction == 1)
+					if (input_states[INPUT_BUTTON_OK])
 					{
-						player[active_player]->activeHare->direction = 0;
-						player[active_player]->activeHare->w_direction = SP_PI-player[active_player]->activeHare->w_direction;
-						player[active_player]->activeHare->w_build_direction = SP_PI-player[active_player]->activeHare->w_build_direction;
-						direction_hold = 0;
-					}
-					direction_hold++;
-					if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
-						jump(0);
-				}
-				else
-				if (input_states[INPUT_AXIS_0_RIGHT])
-				{
-					if (player[active_player]->activeHare->direction == 0)
-					{
-						player[active_player]->activeHare->direction = 1;
-						player[active_player]->activeHare->w_direction = SP_PI-player[active_player]->activeHare->w_direction;
-						player[active_player]->activeHare->w_build_direction = SP_PI-player[active_player]->activeHare->w_build_direction;
-						direction_hold = 0;
-					}
-					direction_hold++;
-					if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
-						jump(0);
-				}
-				else
-					direction_hold = 0;
-				
-				if (input_states[INPUT_AXIS_1_LEFT])
-				{
-					direction_pressed += SP_ONE/20;
-					if (direction_pressed >= 128*SP_ONE)
-						direction_pressed = 128*SP_ONE;
-					if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
-						w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
-						w_nr == WP_TELEPORT)
-					{
-						if (player[active_player]->activeHare->direction == 0)
-							player[active_player]->activeHare->w_build_direction += direction_pressed >> SP_ACCURACY;
-						else
-							player[active_player]->activeHare->w_build_direction -= direction_pressed >> SP_ACCURACY;
-					}
-					else
-					{
-						if (player[active_player]->activeHare->direction == 0)
-							player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
-						else
-							player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
-					}
-				}
-				else
-				if (input_states[INPUT_AXIS_1_RIGHT])
-				{
-					direction_pressed += SP_ONE/20;
-					if (direction_pressed >= 128*SP_ONE)
-						direction_pressed = 128*SP_ONE;
-					if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
-						w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
-						w_nr == WP_TELEPORT)
-					{
-						if (player[active_player]->activeHare->direction == 0)
-							player[active_player]->activeHare->w_build_direction -= direction_pressed >> SP_ACCURACY;
-						else
-							player[active_player]->activeHare->w_build_direction += direction_pressed >> SP_ACCURACY;
-					}
-					else
-					{
-						if (player[active_player]->activeHare->direction == 0)
-							player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
-						else
-							player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
-					}
-				}
-				else
-					direction_pressed = 0;
-
-				if (input_states[INPUT_BUTTON_R])
-				{
-					power_pressed += SP_ONE/100;
-					if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
-						w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
-						w_nr == WP_TELEPORT)
-					{
-						player[active_player]->activeHare->w_build_distance += power_pressed >> SP_ACCURACY;
-						if (player[active_player]->activeHare->w_build_distance >= SP_ONE)
-							player[active_player]->activeHare->w_build_distance = SP_ONE;
-					}
-					else
-					{
-						player[active_player]->activeHare->w_power += power_pressed >> SP_ACCURACY;
-						if (player[active_player]->activeHare->w_power >= SP_ONE)
-							player[active_player]->activeHare->w_power = SP_ONE;
-					}
-				}
-				else
-				if (input_states[INPUT_BUTTON_L])
-				{
-					power_pressed += SP_ONE/100;
-					if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
-						w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
-						w_nr == WP_TELEPORT)
-					{
-						player[active_player]->activeHare->w_build_distance -= power_pressed >> SP_ACCURACY;
-						if (player[active_player]->activeHare->w_build_distance < 0)
-							player[active_player]->activeHare->w_build_distance = 0;
-					}
-					else
-					{
-						player[active_player]->activeHare->w_power -= power_pressed >> SP_ACCURACY;
-						if (player[active_player]->activeHare->w_power < SP_ONE/20+1)
-							player[active_player]->activeHare->w_power = SP_ONE/20+1;
-					}
-				}
-				else
-					power_pressed = 0;
-				if (input_states[INPUT_BUTTON_CANCEL] && player[active_player]->activeHare)
-				{
-					//Shoot!
-					if (player[active_player]->weapon_points - weapon_cost[w_nr] >= 0)
-					{
-						int once;
-						input_states[INPUT_BUTTON_CANCEL] = 0;
-						player[active_player]->weapon_points-=weapon_cost[w_nr];
-						if (weapon_shoot[w_nr])
+						if (player[active_player]->activeHare->bums)
 						{
-							for (j = ((w_nr == WP_SHOTGUN)?-2:0); j <= ((w_nr == WP_SHOTGUN)?2:0); j++)
-								shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI+j*SP_PI/64,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+							if (player[active_player]->activeHare->hops <= 0)
+								jump(1);
+							else
+							if (input_ok_on == 0)
+								player[active_player]->activeHare->high_hops = 4;
+						}
+						input_ok_on = 1;
+					}
+					else
+						input_ok_on = 0;
+						
+					if (input_states[INPUT_AXIS_0_LEFT])
+					{
+						if (player[active_player]->activeHare->direction == 1)
+						{
+							player[active_player]->activeHare->direction = 0;
+							player[active_player]->activeHare->w_direction = SP_PI-player[active_player]->activeHare->w_direction;
+							player[active_player]->activeHare->w_build_direction = SP_PI-player[active_player]->activeHare->w_build_direction;
+							direction_hold = 0;
+						}
+						direction_hold++;
+						if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
+							jump(0);
+					}
+					else
+					if (input_states[INPUT_AXIS_0_RIGHT])
+					{
+						if (player[active_player]->activeHare->direction == 0)
+						{
+							player[active_player]->activeHare->direction = 1;
+							player[active_player]->activeHare->w_direction = SP_PI-player[active_player]->activeHare->w_direction;
+							player[active_player]->activeHare->w_build_direction = SP_PI-player[active_player]->activeHare->w_build_direction;
+							direction_hold = 0;
+						}
+						direction_hold++;
+						if (direction_hold >= DIRECTION_HOLD_TIME && player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
+							jump(0);
+					}
+					else
+						direction_hold = 0;
+					
+					if (input_states[INPUT_AXIS_1_LEFT])
+					{
+						direction_pressed += SP_ONE/20;
+						if (direction_pressed >= 128*SP_ONE)
+							direction_pressed = 128*SP_ONE;
+						if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
+							w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
+							w_nr == WP_TELEPORT)
+						{
+							if (player[active_player]->activeHare->direction == 0)
+								player[active_player]->activeHare->w_build_direction += direction_pressed >> SP_ACCURACY;
+							else
+								player[active_player]->activeHare->w_build_direction -= direction_pressed >> SP_ACCURACY;
 						}
 						else
-						switch (w_nr)
 						{
-							case WP_BUILD_SML:case WP_BUILD_MID:case WP_BUILD_BIG:
-								{
-									int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
-									int r = weapon_explosion[w_nr];
-									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-									if (circle_is_empty(ox,oy,r/2+4,NULL,-1))
-										negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
-									else
-										player[active_player]->weapon_points+=weapon_cost[w_nr];
-								}
-								break;
-							case WP_TUNNEL_SML:case WP_TUNNEL_MID:case WP_TUNNEL_BIG:
-								{
-									int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
-									int r = weapon_explosion[w_nr];
-									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-									if (circle_is_empty(ox,oy,r/2+4,NULL,0))
-										player[active_player]->weapon_points+=weapon_cost[w_nr];
-									else
-										bullet_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
-								}
-								break;
-							case WP_TELEPORT:
-								{
-									int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
-									int r = weapon_explosion[w_nr];
-									int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-									int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-									if (circle_is_empty(ox,oy,r/2+4,NULL,1))
+							if (player[active_player]->activeHare->direction == 0)
+								player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
+							else
+								player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
+						}
+					}
+					else
+					if (input_states[INPUT_AXIS_1_RIGHT])
+					{
+						direction_pressed += SP_ONE/20;
+						if (direction_pressed >= 128*SP_ONE)
+							direction_pressed = 128*SP_ONE;
+						if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
+							w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
+							w_nr == WP_TELEPORT)
+						{
+							if (player[active_player]->activeHare->direction == 0)
+								player[active_player]->activeHare->w_build_direction -= direction_pressed >> SP_ACCURACY;
+							else
+								player[active_player]->activeHare->w_build_direction += direction_pressed >> SP_ACCURACY;
+						}
+						else
+						{
+							if (player[active_player]->activeHare->direction == 0)
+								player[active_player]->activeHare->w_direction -= direction_pressed >> SP_ACCURACY;
+							else
+								player[active_player]->activeHare->w_direction += direction_pressed >> SP_ACCURACY;
+						}
+					}
+					else
+						direction_pressed = 0;
+
+					if (input_states[INPUT_BUTTON_R])
+					{
+						power_pressed += SP_ONE/100;
+						if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
+							w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
+							w_nr == WP_TELEPORT)
+						{
+							player[active_player]->activeHare->w_build_distance += power_pressed >> SP_ACCURACY;
+							if (player[active_player]->activeHare->w_build_distance >= SP_ONE)
+								player[active_player]->activeHare->w_build_distance = SP_ONE;
+						}
+						else
+						{
+							player[active_player]->activeHare->w_power += power_pressed >> SP_ACCURACY;
+							if (player[active_player]->activeHare->w_power >= SP_ONE)
+								player[active_player]->activeHare->w_power = SP_ONE;
+						}
+					}
+					else
+					if (input_states[INPUT_BUTTON_L])
+					{
+						power_pressed += SP_ONE/100;
+						if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
+							w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
+							w_nr == WP_TELEPORT)
+						{
+							player[active_player]->activeHare->w_build_distance -= power_pressed >> SP_ACCURACY;
+							if (player[active_player]->activeHare->w_build_distance < 0)
+								player[active_player]->activeHare->w_build_distance = 0;
+						}
+						else
+						{
+							player[active_player]->activeHare->w_power -= power_pressed >> SP_ACCURACY;
+							if (player[active_player]->activeHare->w_power < SP_ONE/20+1)
+								player[active_player]->activeHare->w_power = SP_ONE/20+1;
+						}
+					}
+					else
+						power_pressed = 0;
+					if (input_states[INPUT_BUTTON_CANCEL] && player[active_player]->activeHare)
+					{
+						//Shoot!
+						if (player[active_player]->weapon_points - weapon_cost[w_nr] >= 0)
+						{
+							int once;
+							input_states[INPUT_BUTTON_CANCEL] = 0;
+							player[active_player]->weapon_points-=weapon_cost[w_nr];
+							if (weapon_shoot[w_nr])
+							{
+								for (j = ((w_nr == WP_SHOTGUN)?-2:0); j <= ((w_nr == WP_SHOTGUN)?2:0); j++)
+									shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI+j*SP_PI/64,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+							}
+							else
+							switch (w_nr)
+							{
+								case WP_BUILD_SML:case WP_BUILD_MID:case WP_BUILD_BIG:
 									{
-										hareplosion(player[active_player]->activeHare);
-										player[active_player]->activeHare->x = ox;
-										player[active_player]->activeHare->y = oy;
+										int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
+										int r = weapon_explosion[w_nr];
+										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										if (circle_is_empty(ox,oy,r/4+6,NULL,-1))
+											negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
+										else
+											player[active_player]->weapon_points+=weapon_cost[w_nr];
 									}
-									else
-										player[active_player]->weapon_points+=weapon_cost[w_nr];
-								}
-								break;
-							case WP_SUPER_JUMP:
-								if (player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
-									jump(2); //jump is possible
-								else
-									player[active_player]->weapon_points+=weapon_cost[w_nr]; //payback						
-								break;
-							case WP_KAIO_KEN:
-								player[active_player]->next_round_extra++;
-								break;
-							case WP_PREV_HARE:
-								player[active_player]->activeHare = player[active_player]->activeHare->before;
-								break;
-							case WP_NEXT_HARE:
-								player[active_player]->activeHare = player[active_player]->activeHare->next;
-								break;
-							case WP_SURRENDER:
-								next_player();
-								break;
-							case WP_ABOVE:
-								once = 0;
-								for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
-									if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
+									break;
+								case WP_TUNNEL_SML:case WP_TUNNEL_MID:case WP_TUNNEL_BIG:
 									{
-										pBullet bullet = (pBullet)malloc(sizeof(tBullet));
-										bullet->x = player[active_player]->activeHare->x;
-										bullet->y = player[active_player]->activeHare->y;
-										bullet->kind = WP_ABOVE;
-										bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
-										int d;
-										int k;
-										pPlayer p;
-										for (k = 0; k < player_count; k++)
+										int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
+										int r = weapon_explosion[w_nr];
+										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										if (circle_is_empty(ox,oy,r/4,NULL,0))
+											player[active_player]->weapon_points+=weapon_cost[w_nr];
+										else
+											bullet_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
+									}
+									break;
+								case WP_TELEPORT:
+									{
+										int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
+										int r = weapon_explosion[w_nr];
+										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										if (circle_is_empty(ox,oy,r/4+6,NULL,1))
 										{
-											pHare h = player[k]->firstHare;
-											if (h)
-											do
-											{	
-												if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
-												{
-													p = player[k];
-													break;
+											hareplosion(player[active_player]->activeHare);
+											player[active_player]->activeHare->x = ox;
+											player[active_player]->activeHare->y = oy;
+										}
+										else
+											player[active_player]->weapon_points+=weapon_cost[w_nr];
+									}
+									break;
+								case WP_SUPER_JUMP:
+									if (player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
+										jump(2); //jump is possible
+									else
+										player[active_player]->weapon_points+=weapon_cost[w_nr]; //payback						
+									break;
+								case WP_KAIO_KEN:
+									player[active_player]->next_round_extra++;
+									break;
+								case WP_PREV_HARE:
+									player[active_player]->activeHare = player[active_player]->activeHare->before;
+									break;
+								case WP_NEXT_HARE:
+									player[active_player]->activeHare = player[active_player]->activeHare->next;
+									break;
+								case WP_SURRENDER:
+									next_player();
+									break;
+								case WP_ABOVE:
+									once = 0;
+									for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
+										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
+										{
+											pBullet bullet = (pBullet)malloc(sizeof(tBullet));
+											bullet->x = player[active_player]->activeHare->x;
+											bullet->y = player[active_player]->activeHare->y;
+											bullet->kind = WP_ABOVE;
+											bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
+											int d;
+											int k;
+											pPlayer p;
+											for (k = 0; k < player_count; k++)
+											{
+												pHare h = player[k]->firstHare;
+												if (h)
+												do
+												{	
+													if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
+													{
+														p = player[k];
+														break;
+													}
+													h = h->next;
 												}
-												h = h->next;
+												while (h != player[k]->firstHare);
 											}
-											while (h != player[k]->firstHare);
+											do_damage(
+												player[active_player]->activeHare->circle_checkpoint_hare[j]->x,
+												player[active_player]->activeHare->circle_checkpoint_hare[j]->y,
+												bullet,
+												player[active_player]->activeHare->circle_checkpoint_hare[j],
+												p,
+												&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dx),
+												&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dy),
+												&d);
+											if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
+											{
+												player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(p->firstHare));
+												if (p->firstHare == NULL)
+													alive_count--;
+												if (alive_count < 2)
+													result = 2;
+											}
+											free(bullet);
+											once = 1;
 										}
-										do_damage(
-											player[active_player]->activeHare->circle_checkpoint_hare[j]->x,
-											player[active_player]->activeHare->circle_checkpoint_hare[j]->y,
-											bullet,
-											player[active_player]->activeHare->circle_checkpoint_hare[j],
-											p,
-											&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dx),
-											&(player[active_player]->activeHare->circle_checkpoint_hare[j]->dy),
-											&d);
-										if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
-										{
-											player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(p->firstHare));
-											if (p->firstHare == NULL)
-												alive_count--;
-											if (alive_count < 2)
-												result = 2;
-										}
-										free(bullet);
-										once = 1;
-									}
-								if (!once)
-									player[active_player]->weapon_points+=weapon_cost[w_nr]; //payback
-								break;
+									if (!once)
+										player[active_player]->weapon_points+=weapon_cost[w_nr]; //payback
+									break;
+							}
 						}
 					}
 				}

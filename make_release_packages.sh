@@ -1,9 +1,12 @@
 #!/bin/bash
 PROGRAM="hase"
-VERSION="1.5.4.18"
+VERSION="1.6"
 DEST=./build/*
 ZIP_CALL="7z a -t7z -m0=LZMA -mmt=on -mx=9 -md=256m -mfb=512 -ms=on upload.7z"
+RM_CALL="rm upload.7z"
 TIME=`date -u +"%d.%m.%Y %R"`
+
+eval "$RM_CALL"
 
 echo "<html>" > index.htm
 echo "<head>" >> index.htm

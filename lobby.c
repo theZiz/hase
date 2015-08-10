@@ -58,8 +58,8 @@ void resize( Uint16 w, Uint16 h )
 			font_dark = spFontLoad( "./data/PixelManiaConden.ttf", 16 * spGetSizeFactor() >> SP_ACCURACY);
 		}
 	}
-	spFontAdd( font     , SP_FONT_GROUP_ASCII"™°∞öÖ", FONT_FG ); //whole ASCII
-	spFontAdd( font_dark, SP_FONT_GROUP_ASCII"™°∞öÖ", FONT_DARK_FG ); //whole ASCII
+	spFontAdd( font     , SP_FONT_GROUP_ASCII"™°∞öÖäÄüÜ", FONT_FG ); //whole ASCII
+	spFontAdd( font_dark, SP_FONT_GROUP_ASCII"™°∞öÖäÄüÜ", FONT_DARK_FG ); //whole ASCII
 	spFontAddBorder(font      , 0);
 	spFontAddBorder(font_dark , spGetRGB(60,60,60));
 	#ifdef DESKTOP
@@ -162,10 +162,6 @@ int main(int argc, char **argv)
 	load_options();
 	save_options();
 	
-	int b = 65537;
-	b = spSqrt(b);
-	int a = spFixedToInt(spDivHigh(spIntToFixed(256),b));
-	printf("%i\n",a);
 	start_random_music();
 	spMapSetMapSet(1);
 	#ifdef DESKTOP
@@ -256,13 +252,15 @@ int main(int argc, char **argv)
 					{
 						char buffer[512];
 						pGame game = create_game("New game",*gop_game_options_ptr(),*gop_game_seconds_ptr(),create_level_string(buffer,1536,1536,3,3,3),1,*gop_game_hares_ptr());
-						start_lobby_game(font,resize,game,0);
-						pWindow level_window = create_window(level_feedback,font,"Question");
-						level_window->cancel_to_no = 1;
-						add_window_element(level_window,-1,0);
-						if (modal_window(level_window,resize) == 1)
-							save_level(game->level_string);
-						delete_window(level_window);
+						if (start_lobby_game(font,resize,game,0))
+						{
+							pWindow level_window = create_window(level_feedback,font,"Question");
+							level_window->cancel_to_no = 1;
+							add_window_element(level_window,-1,0);
+							if (modal_window(level_window,resize) == 1)
+								save_level(game->level_string);
+							delete_window(level_window);
+						}
 						delete_game(game);
 					}
 					break;

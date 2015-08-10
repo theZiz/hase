@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="5" release="4" build="18"/>
+<version major="1" minor="6" release="0" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,41 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+1.6:
+- Improved movement
+- Improved odds for items (one item per round)
+- Bouncing items
+- Hit hares and items get a force in from the explosion
+- Improved the minimal and maximal shoot power
+- Random level with holes
+- Levels can be saved and loaded, even of already played games
+- No hare stacks floating in the air
+- Countdown starts only if the camera is on the player and not a dropped item
+- Building and shooting weapons got two different settings to avoid aim cheating ;)
+- Added Item selection sound
+- Player list for removing a player
+- Players can be kicked
+- Inactive players in the game lobby get kicked
+- General server improvements
+- Removed max players - if you are too many, kick players ;)
+- Start action points setup
+- Start health setup
+- Added option for infinite level instead of a killing border
+- Game mode, where the damage of the bullets depends on the time flying
+- Saving the game settings
+- Bullets don't live more than 30 seconds
+- Added option for a sudden death like event: Ragnarök
+- Decreased the damage of the cluster bomb
+- Decreased the impact of Wingardium Leviosa
+- Hopefully fixed the inaccurary of the spells if another hare is close to the impact
+- New weapons:
+	- Digger (opposite of the building tool)
+	- Teleport
+	- Surrender
+	- Potato
+	- Hit the hare on your head
+	- Shotgun
+- Improved AI
 
 1.5.4.18:
 - Smaller zoom level for starting with big windows
@@ -292,7 +327,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="5" release="4" build="18" type="release"/>
+<version major="1" minor="6" release="0" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

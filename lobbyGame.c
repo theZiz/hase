@@ -973,8 +973,9 @@ int game_options(Uint32 *game_opt,int* game_seconds,int* game_hares,spFontPointe
 	return result;
 }
 
-void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), pGame game,int spectate)
+int start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), pGame game,int spectate)
 {
+	int result = 0;
 	level_mode = 0;
 	level_filename[0] = 0;
 	after_start = (game->status != 0);
@@ -1025,7 +1026,12 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		if (res == -4)
 			message_box(font,resize,"Your last player has been kicked...");
 		if (res == 2)
+		{
 			hase(lg_resize,lg_game,lg_player);
+			result = 1;
+		}
+		if (res == 3)
+			result = 1;
 
 		if (lg_thread)
 		{
@@ -1050,5 +1056,6 @@ void start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h )
 		}
 			
 	}
+	return result;
 }
 

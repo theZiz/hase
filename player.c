@@ -6,6 +6,7 @@ int MAX_HEALTH = 100;
 #define AI_TRIES_EVERY_MS 32
 int ai_shoot_tries = 0;
 int last_ai_try = 0;
+int use_points = 0;
 
 #include "window.h"
 #include <math.h>
@@ -103,7 +104,10 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					Sint32 X = u-hare->x;
 					Sint32 Y = v-hare->y;
 					int d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
-					if (d <= PLAYER_PLAYER_RADIUS*PLAYER_PLAYER_RADIUS)
+					/*if (x == (467 << SP_ACCURACY) && y == (1160 << SP_ACCURACY) &&
+						(hare->x >> SP_ACCURACY) == 467 && (hare->y >> SP_ACCURACY) == 1160)
+						printf("%i: %i\n",a,d);*/
+					if (d <= r*r)
 					{
 						if (except)
 						{
@@ -130,7 +134,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					Sint32 X = u-item->x;
 					Sint32 Y = v-item->y;
 					int d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
-					if (d <= PLAYER_PLAYER_RADIUS*PLAYER_PLAYER_RADIUS)
+					if (d <= r*r)
 					{
 						if (except)
 							except->circle_checkpoint_hit[a] = 1;
@@ -529,6 +533,7 @@ int real_next_player()
 			player[j]->setActiveHare = NULL;
 		}
 	ai_shoot_tries = 0;
+	use_points = 0;
 	last_ai_try = 0;
 	lastAIDistance = 100000000;
 	do
@@ -724,7 +729,7 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 				x = spRand()%LEVEL_WIDTH;
 				y = spRand()%LEVEL_HEIGHT;
 				//printf("Tried %i %i... ",x,y);
-				if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,hare,1) && gravitation_force(x,y)/32768)
+				if (circle_is_empty(x<<SP_ACCURACY,y<<SP_ACCURACY,16,NULL,1) && gravitation_force(x,y)/32768)
 					break;
 				//printf("NOT!\n");
 			}
@@ -755,6 +760,7 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 	rotation = -player[active_player]->firstHare->rotation;
 	ai_shoot_tries = 0;
 	last_ai_try = 0;
+	use_points = 0;
 	player[active_player]->weapon_points = (options.bytewise.ap_health >> 4) + 1;
 	extra_time = 0;
 	start_thread();
