@@ -66,7 +66,7 @@ void items_calc()
 		}
 		item->dx -= gravitation_x(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
 		item->dy -= gravitation_y(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
-		if (circle_is_empty(item->x+item->dx,item->y+item->dy,PLAYER_RADIUS,NULL,0))
+		if (circle_is_empty(item->x+item->dx,item->y+item->dy,PLAYER_RADIUS,NULL,1))
 		{
 			item->x += item->dx;
 			item->y += item->dy;
@@ -80,8 +80,6 @@ void items_calc()
 			{
 				item->dx = 0;
 				item->dy = 0;
-				if (item->kind == 4) //skull
-					item->beep = 1;
 			}
 			else
 			{
@@ -106,6 +104,8 @@ void items_calc()
 					item->dy = spMul(item->dy,speed*3/4);
 				}
 			}
+			if (item->kind == 4) //skull
+				item->beep = 1;
 		}
 		int j,dead = 0;
 		if (item->beep)

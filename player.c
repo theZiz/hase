@@ -721,6 +721,7 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 			hare->w_direction = SP_ONE/2;
 			hare->w_power = SP_ONE/2;
 			hare->w_build_distance = SP_ONE/2;
+			hare->w_build_direction = SP_ONE/2;
 			hare->hops = 0;
 			hare->high_hops = 0;
 			int x,y;
