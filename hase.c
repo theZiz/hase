@@ -426,7 +426,7 @@ void draw(void)
 				sprintf(buffer,"Aiming (%2i%%)",ai_shoot_tries*100/AI_MAX_TRIES);
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+gop_show_names())*font->maxheight,0,buffer, font );
 			}
-			if (j == active_player && player[j]->kicked == 2 && hare == player[j]->activeHare)
+			if (player[j]->kicked == 2)
 			{
 				sprintf(buffer,"Zombie (Disconnected)");
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-(1+gop_show_names())*font->maxheight,0,buffer, font );
@@ -1188,7 +1188,7 @@ int calc(Uint32 steps)
 								last_ai_try++;
 							else
 							{
-								if (player[active_player]->weapon_points >= weapon_cost[WP_ABOVE])
+								if (player[active_player]->weapon_points >= weapon_cost[WP_ABOVE] && ai_shoot_tries == 1)
 								{
 									for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
 										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
