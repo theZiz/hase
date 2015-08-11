@@ -64,6 +64,9 @@ static int pixel_is_empty(int x, int y)
 
 pHare last_circle_hit = NULL;
 
+Sint32 circle_checkpoint_u[CIRCLE_CHECKPOINTS];
+Sint32 circle_checkpoint_v[CIRCLE_CHECKPOINTS];
+
 static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_players)
 {
 	int result = 1;
@@ -72,8 +75,8 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 		Sint32 a;
 		for (a = 0; a < CIRCLE_CHECKPOINTS; a++)
 		{
-			Sint32 u = spCos(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + x >> SP_ACCURACY;
-			Sint32 v = spSin(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + y >> SP_ACCURACY;
+			Sint32 u = circle_checkpoint_u[a]*r + x >> SP_ACCURACY;
+			Sint32 v = circle_checkpoint_v[a]*r + y >> SP_ACCURACY;
 			if (!pixel_is_empty(u,v))
 			{
 				if (except)
@@ -99,8 +102,8 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 				Sint32 a;
 				for (a = 0; a < CIRCLE_CHECKPOINTS; a++)
 				{
-					Sint32 u = spCos(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + x;
-					Sint32 v = spSin(a*2*SP_PI/CIRCLE_CHECKPOINTS)*r + y;
+					Sint32 u = circle_checkpoint_u[a]*r + x;
+					Sint32 v = circle_checkpoint_v[a]*r + y;
 					Sint32 X = u-hare->x;
 					Sint32 Y = v-hare->y;
 					int d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
@@ -687,6 +690,12 @@ pHare del_hare(pHare hare,pHare* firstHare)
 
 void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 {
+	Sint32 a;
+	for (a = 0; a < CIRCLE_CHECKPOINTS; a++)
+	{
+		circle_checkpoint_u[a] = spCos(a*2*SP_PI/CIRCLE_CHECKPOINTS);
+		circle_checkpoint_v[a] = spSin(a*2*SP_PI/CIRCLE_CHECKPOINTS);
+	}
 	MAX_HEALTH = ((options.bytewise.ap_health & 15) + 2) * 25;
 	lastAIDistance = 100000000;
 	dropItem = NULL;
