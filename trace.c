@@ -1,13 +1,4 @@
 #define TRACE_LENGTH 30
-#define TRACE_UPDATE 5
-int trace_count = TRACE_UPDATE-1;
-typedef struct sTrace
-{
-	Sint32 x,y;
-} tTrace;
-
-tTrace trace[TRACE_LENGTH];
-int traceLength;
 
 void lastPoint(int* x,int* y,int direction,int power)
 {
