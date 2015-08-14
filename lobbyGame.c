@@ -288,8 +288,10 @@ void save_level(char* level_string)
 				message_box(lg_font,lg_resize,"You didn't enter a filename!");
 			else
 			{
-				spCreateDirectoryChain( spConfigGetPath(complete_path,"hase/levels","") );
-				if (spFileExists(spConfigGetPath(complete_path,"hase/levels",level_filename)))
+				spCreateDirectoryChain( spConfigGetPath(complete_path,"hase","levels") );
+				char level_path[2048];
+				sprintf(level_path,"levels/%s",level_filename);
+				if (spFileExists(spConfigGetPath(complete_path,"hase",level_path)))
 				{
 					pWindow overwrite_window = create_window(overwrite_feedback,lg_font,"The file does already exist!");
 					overwrite_window->cancel_to_no = 1;
@@ -308,7 +310,7 @@ void save_level(char* level_string)
 					SDL_RWwrite( file, level_string, l , 1);
 					SDL_RWclose(file);
 					char buffer[2048];
-					sprintf(buffer,"Saved in %s",spConfigGetPath(complete_path,"hase/levels",""));
+					sprintf(buffer,"Saved in %s",spConfigGetPath(complete_path,"hase","levels"));
 					message_box(lg_font,lg_resize,buffer);
 					break;
 				}
@@ -325,8 +327,8 @@ int load_level(char* level_string)
 	pWindow window = create_window(NULL,lg_font,"Select level to load");
 	spFileListPointer flp = NULL;
 	char path[2048];
-	spFileGetDirectory(&flp,spConfigGetPath(path,"hase/levels",""),0,0);
-	int path_l = strlen(path);
+	spFileGetDirectory(&flp,spConfigGetPath(path,"hase","levels"),0,0);
+	int path_l = strlen(path)+1;
 	if (flp == NULL)
 	{
 		char buffer[2048];

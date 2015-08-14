@@ -121,7 +121,7 @@ int main_menu_feedback( pWindow window, pWindowElement elem, int action )
 		case 0: sprintf(elem->text,"Local Game"); break;
 		case 1: sprintf(elem->text,"Online Game"); break;
 		case 2: sprintf(elem->text,"Options"); break;
-		case 3: sprintf(elem->text,"Help"); break;
+		case 3: sprintf(elem->text,"How to Play"); break;
 		case 4: sprintf(elem->text,"About"); break;
 		case 5: sprintf(elem->text,"Exit"); break;
 	}
@@ -241,6 +241,12 @@ int main(int argc, char **argv)
 	add_window_element(window,-1,3);
 	add_window_element(window,-1,4);
 	add_window_element(window,-1,5);
+	if (gop_first_game())
+	{
+		window->selection = 3;
+		sop_first_game(0);
+		save_options();
+	}
 	while (!done)
 	{
 		spClearTarget(0);

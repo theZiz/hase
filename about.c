@@ -40,7 +40,7 @@ spFontPointer help_font;
 void help_draw(void)
 {
 	spClearTarget(LL_BG);
-	spFontDrawMiddle( spGetWindowSurface()->w/2,   2, 0, "Help", help_font );
+	spFontDrawMiddle( spGetWindowSurface()->w/2,   2, 0, "How to Play", help_font );
 	int h = spGetWindowSurface()->h - 4 - 4*help_font->maxheight;
 	spFontDrawTextBlock(left,2+spGetWindowSurface()->w/6,2*help_font->maxheight+2, 0,help_block,h,help_scroll,help_font);
 	if (help_scroll != SP_ONE)

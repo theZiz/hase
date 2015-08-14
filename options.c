@@ -20,7 +20,17 @@ char op_username[32] = SP_DEVICE_STRING" User";
 Uint32 op_game_options = (2 << 4) | 2 | (3 << 12);
 int op_game_seconds = 45;
 int op_game_hares = 3;
+int op_first_game = 1;
 
+int gop_first_game()
+{
+	return op_first_game;
+}
+
+void sop_first_game(int g)
+{
+	op_first_game = g;
+}
 
 int gop_show_names()
 {
@@ -246,6 +256,8 @@ void load_options()
 			sop_game_hares(atoi(entry->value));
 		if (strcmp(entry->key,"game_seconds") == 0)
 			sop_game_seconds(atoi(entry->value));
+		if (strcmp(entry->key,"first_game") == 0)
+			sop_first_game(atoi(entry->value));
 		entry = entry->next;
 	}
 	spNetC4AProfilePointer profile;
@@ -277,6 +289,7 @@ void save_options()
 	spConfigSetInt(conf,"game_options",op_game_options);
 	spConfigSetInt(conf,"game_seconds",op_game_seconds);
 	spConfigSetInt(conf,"game_hares",op_game_hares);
+	spConfigSetInt(conf,"first_game",op_first_game);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }

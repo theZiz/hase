@@ -9,6 +9,9 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.0.1:
+- Renamed "Help" to "How to play" and made it the selected entry at first start
+
 1.6:
 - Improved movement
 - Improved odds for items (one item per round)
