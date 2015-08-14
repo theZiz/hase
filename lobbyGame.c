@@ -275,6 +275,7 @@ int overwrite_feedback( pWindow window, pWindowElement elem, int action )
 
 void save_level(char* level_string)
 {
+	level_filename[0] = 0;
 	pWindow window = create_window(save_level_feedback,lg_font,"Enter filename for the level");
 	add_window_element(window,1,0);
 	char complete_path[2048];
@@ -302,13 +303,83 @@ void save_level(char* level_string)
 				}
 				if (save)
 				{
-					SDL_RWops *file = SDL_RWFromFile(complete_path, "wb");
+					/*SDL_RWops *file = SDL_RWFromFile(complete_path, "wb");
 					Uint32 magic_number = (Sint32)'E'*0x1000000 + (Sint32)'S'*0x10000 + (Sint32)'A'*0x100 + (Sint32)'H';
 					SDL_RWwrite( file, &magic_number, 4 , 1);
 					Uint32 l = strlen(level_string);
 					SDL_RWwrite( file, &l, 4 , 1);
 					SDL_RWwrite( file, level_string, l , 1);
-					SDL_RWclose(file);
+					SDL_RWclose(file);*/
+					FILE* file = fopen (complete_path,"w");
+					fprintf (file, "version 14\n");
+					
+					//Reading the texture...
+					char* mom = level_string;
+					int t = strtol(mom,&mom,36);
+					//Reading the width
+					int width = strtol(mom,&mom,36);
+					//Reading the height
+					int height = strtol(mom,&mom,36);
+					fprintf(file, "%i %i %i\n",t,width,height);
+					int negative = 0;
+					while (mom[0] != 0)
+					{
+						Sint32 x1,y1,x2,y2,x3,y3,x4,y4;
+						//Reading the kind
+						switch (mom[0])
+						{
+							case '-':
+								mom++;
+								negative = 1;
+								break;
+							case '*': //circle
+								mom++;
+								x1 = strtol(mom,&mom,36);
+								y1 = strtol(mom,&mom,36);
+								x2 = strtol(mom,&mom,36);
+								if (negative)
+									fprintf(file, "-circle %i %i %i\n",x1,y1,x2);
+								else
+									fprintf(file, "circle %i %i %i\n",x1,y1,x2);
+								negative = 0;
+								break;
+							case '^': //triangle
+								mom++;
+								x1 = strtol(mom,&mom,36);
+								y1 = strtol(mom,&mom,36);
+								x2 = strtol(mom,&mom,36);
+								y2 = strtol(mom,&mom,36);
+								x3 = strtol(mom,&mom,36);
+								y3 = strtol(mom,&mom,36);
+								if (negative)
+									fprintf(file, "-triangle %i %i %i %i %i %i\n",x1,y1,x2,y2,x3,y3);
+								else
+									fprintf(file, "triangle %i %i %i %i %i %i\n",x1,y1,x2,y2,x3,y3);
+								negative = 0;
+								break;
+							case '#': //quads
+								mom++;
+								x1 = strtol(mom,&mom,36);
+								y1 = strtol(mom,&mom,36);
+								x2 = strtol(mom,&mom,36);
+								y2 = strtol(mom,&mom,36);
+								x3 = strtol(mom,&mom,36);
+								y3 = strtol(mom,&mom,36);
+								x4 = strtol(mom,&mom,36);
+								y4 = strtol(mom,&mom,36);
+								if (negative)
+									fprintf(file, "-quad %i %i %i %i %i %i %i %i\n",x1,y1,x2,y2,x3,y3,x4,y4);
+								else
+									fprintf(file, "quad %i %i %i %i %i %i %i %i\n",x1,y1,x2,y2,x3,y3,x4,y4);
+								negative = 0;
+								break;
+							default:
+								mom++;
+								negative = 0;
+						}
+					}
+					fclose (file);
+
 					char buffer[2048];
 					sprintf(buffer,"Saved in %s",spConfigGetPath(complete_path,"hase","levels"));
 					message_box(lg_font,lg_resize,buffer);
@@ -327,11 +398,11 @@ int load_level(char* level_string)
 	pWindow window = create_window(NULL,lg_font,"Select level to load");
 	spFileListPointer flp = NULL;
 	char path[2048];
+	char buffer[2048];
 	spFileGetDirectory(&flp,spConfigGetPath(path,"hase","levels"),0,0);
 	int path_l = strlen(path)+1;
 	if (flp == NULL)
 	{
-		char buffer[2048];
 		sprintf(buffer,"Nothing found in %s",path);
 		message_box(lg_font,lg_resize,buffer);
 		return 0;
@@ -362,20 +433,125 @@ int load_level(char* level_string)
 			}
 			f = f->next;
 		}
+		//Let's first try the old binary format
 		SDL_RWops *file = SDL_RWFromFile(f->name, "rb");
 		Uint32 magic_number;
 		SDL_RWread( file, &magic_number, 4 , 1);
 		if (magic_number != (Sint32)'E'*0x1000000 + (Sint32)'S'*0x10000 + (Sint32)'A'*0x100 + (Sint32)'H')
 		{
+			//Okay, new and better format
+			SDL_RWseek(file,0,RW_SEEK_SET);
+			spReadOneLine( file, buffer, 2048);
+			char* end = strchr(buffer,' ');
+			if (end == NULL || ((end[0] = 0) && strcmp(buffer,"version")))
+			{
+				message_box(lg_font,lg_resize,"Hase file corrupted");
+				SDL_RWclose(file);
+				spFileDeleteList(flp);
+				delete_window(window);
+				return 0;
+			}
+			end++;
+			int version = atoi(end);
+			if (version > CLIENT_VERSION)
+			{
+				message_box(lg_font,lg_resize,"Hase file too new. Update your version!");
+				SDL_RWclose(file);
+				spFileDeleteList(flp);
+				delete_window(window);
+				return 0;
+			}
+			char result[1024];
+			result[0] = 0;
+			spReadOneLine( file, buffer, 2048);
+			char* mom = buffer;
+			int t = strtol(mom,&mom,10);
+			int width = strtol(mom,&mom,10);
+			int height = strtol(mom,&mom,10);
+			char temp[16];
+			add_to_string(result,ltostr(t,temp,36));
+			add_to_string(result," ");
+			add_to_string(result,ltostr(width,temp,36));
+			add_to_string(result," ");
+			add_to_string(result,ltostr(height,temp,36));
+			//Now reading step by step
+			int lc = 3;
+			while (spReadOneLine( file, buffer, 2048) == 0)
+			{
+				int negative = 0;
+				char* end = strchr(buffer,' ');
+				if (end == NULL)
+				{
+					sprintf(buffer,"Error in line %i",lc);
+					message_box(lg_font,lg_resize,buffer);
+					SDL_RWclose(file);
+					spFileDeleteList(flp);
+					delete_window(window);
+					return 0;
+				}
+				end[0] = 0;
+				end++;
+				int i;
+				if (strcmp(buffer,"circle") == 0 || (strcmp(buffer,"-circle") == 0 && (negative = 1)))
+				{
+					if (negative)
+						add_to_string(result,"-");
+					add_to_string(result,"*");
+					for (i = 0; i < 3; i++)
+					{
+						add_to_string(result,ltostr(strtol(end,&end,10),temp,36));
+						if (i != 2)
+							add_to_string(result," ");
+					}
+				}
+				else
+				if (strcmp(buffer,"triangle") == 0 || (strcmp(buffer,"-triangle") == 0 && (negative = 1)))
+				{
+					if (negative)
+						add_to_string(result,"-");
+					add_to_string(result,"^");
+					for (i = 0; i < 6; i++)
+					{
+						add_to_string(result,ltostr(strtol(end,&end,10),temp,36));
+						if (i != 5)
+							add_to_string(result," ");
+					}
+				}
+				else
+				if (strcmp(buffer,"quad") == 0 || (strcmp(buffer,"-quad") == 0 && (negative = 1)))
+				{
+					if (negative)
+						add_to_string(result,"-");
+					add_to_string(result,"#");
+					for (i = 0; i < 8; i++)
+					{
+						add_to_string(result,ltostr(strtol(end,&end,10),temp,36));
+						if (i != 7)
+							add_to_string(result," ");
+					}
+				}
+				else
+				{
+					sprintf(result,"Don't know %s",buffer);
+					message_box(lg_font,lg_resize,result);
+					SDL_RWclose(file);
+					spFileDeleteList(flp);
+					delete_window(window);
+					return 0;
+				}
+				lc++;
+			}
 			SDL_RWclose(file);
-			message_box(lg_font,lg_resize,"No Hase level file!");
-			return 0;
+			memcpy(level_string,result,1024);
 		}
-		Uint32 l;
-		SDL_RWread( file, &l, 4 , 1);
-		SDL_RWread( file, level_string, l , 1);
-		level_string[l] = 0;
-		SDL_RWclose(file);
+		else
+		{
+			Uint32 l;
+			SDL_RWread( file, &l, 4 , 1);
+			SDL_RWread( file, level_string, l , 1);
+			level_string[l] = 0;
+			SDL_RWclose(file);
+		}
 	}
 	spFileDeleteList(flp);
 	delete_window(window);
