@@ -14,7 +14,14 @@ while ($row = mysql_fetch_array( $result ))
 	$game_id = $row['game_id'];
 	$create_date = $row['create_date'];
 	$status = $row['status'];
-	if ($create_date < $now-3600*24*7) //7 days
+	if ($create_date < $now-3600*24*7) //mark as deleted after 7 days
+	{
+		$query = "UPDATE " . $mysql_prefix . "game_list SET status='-2' WHERE game_id = '$game_id'";
+		mysql_query($query) or die;
+		continue;
+	}
+	else
+	if ($create_date < $now-3600*24*8) //delete after 8 days
 	{
 		$query = "DELETE FROM " . $mysql_prefix . "game_list WHERE game_id = '$game_id'";
 		mysql_query($query) or die;

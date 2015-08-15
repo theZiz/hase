@@ -106,7 +106,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					Sint32 v = circle_checkpoint_v[a]*r + y;
 					Sint32 X = u-hare->x;
 					Sint32 Y = v-hare->y;
-					int d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
+					Sint32 d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
 					/*if (x == (467 << SP_ACCURACY) && y == (1160 << SP_ACCURACY) &&
 						(hare->x >> SP_ACCURACY) == 467 && (hare->y >> SP_ACCURACY) == 1160)
 						printf("%i: %i\n",a,d);*/
