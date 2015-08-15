@@ -9,6 +9,10 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.0.2:
+- Traces fade out
+- New level save format (easier to edit and to change)
+
 1.6.0.1:
 - Renamed "Help" to "How to play" and made it the selected entry at first start
 
