@@ -71,13 +71,25 @@ int do_physics()
 				if (hase_game->options.bytewise.ragnarok_border & 15)
 				{
 					if (hare->x < 0)
+					{
 						hare->x += spIntToFixed(LEVEL_WIDTH);
+						posX += spIntToFixed(LEVEL_WIDTH);
+					}
 					if (hare->y < 0)
+					{
 						hare->y += spIntToFixed(LEVEL_HEIGHT);
+						posY += spIntToFixed(LEVEL_HEIGHT);
+					}
 					if (hare->x >= spIntToFixed(LEVEL_WIDTH))
+					{
 						hare->x -= spIntToFixed(LEVEL_WIDTH);
+						posX -= spIntToFixed(LEVEL_WIDTH);
+					}
 					if (hare->y >= spIntToFixed(LEVEL_HEIGHT))
+					{
 						hare->y -= spIntToFixed(LEVEL_HEIGHT);
+						posY -= spIntToFixed(LEVEL_HEIGHT);
+					}
 				}
 				hare = hare->next;
 			}

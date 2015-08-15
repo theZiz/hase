@@ -827,13 +827,25 @@ int updateBullets()
 			if ((hase_game->options.bytewise.ragnarok_border & 15) && (momBullet->x < 0 || momBullet->y < 0 || spFixedToInt(momBullet->x) >= LEVEL_WIDTH || spFixedToInt(momBullet->y) >= LEVEL_HEIGHT))
 			{
 				if (momBullet->x < 0)
+				{
 					momBullet->x += spIntToFixed(LEVEL_WIDTH);
+					posX += spIntToFixed(LEVEL_WIDTH);
+				}
 				if (momBullet->y < 0)
+				{
 					momBullet->y += spIntToFixed(LEVEL_HEIGHT);
+					posY += spIntToFixed(LEVEL_HEIGHT);
+				}
 				if (momBullet->x >= spIntToFixed(LEVEL_WIDTH))
+				{
 					momBullet->x -= spIntToFixed(LEVEL_WIDTH);
+					posX -= spIntToFixed(LEVEL_WIDTH);
+				}
 				if (momBullet->y >= spIntToFixed(LEVEL_HEIGHT))
+				{
 					momBullet->y -= spIntToFixed(LEVEL_HEIGHT);
+					posY -= spIntToFixed(LEVEL_HEIGHT);
+				}
 			}
 			before = momBullet;
 			momBullet = momBullet->next;
