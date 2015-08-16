@@ -1168,22 +1168,24 @@ void end_pull_thread(pPlayer player)
 	//player->last_input_data_write = NULL;
 }
 
+spNetIRCServerPointer server = NULL;
+spNetIRCChannelPointer channel = NULL;
+
 int connect_to_server()
 {
-	char server[512];
-	sprintf(server,"%s",gop_server());
+	if (server)
+		return 0;
+	char buffer[512];
+	sprintf(buffer,"%s",gop_server());
 	char* slash;
-	if (slash = strchr(server,'/'))
+	if (slash = strchr(buffer,'/'))
 		slash[0] = 0;
-	ip = spNetResolve(server,80);
-	printf("IP of %s: %i.%i.%i.%i\n",server,ip.address.ipv4_bytes[0],ip.address.ipv4_bytes[1],ip.address.ipv4_bytes[2],ip.address.ipv4_bytes[3]);
+	ip = spNetResolve(buffer,80);
+	printf("IP of %s: %i.%i.%i.%i\n",buffer,ip.address.ipv4_bytes[0],ip.address.ipv4_bytes[1],ip.address.ipv4_bytes[2],ip.address.ipv4_bytes[3]);
 	if (ip.address.ipv4 == SP_INVALID_IP)
 		return 1;
 	return 0;
 }
-
-spNetIRCServerPointer server = NULL;
-spNetIRCChannelPointer channel = NULL;
 
 void start_irc_client(char* name)
 {

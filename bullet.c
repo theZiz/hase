@@ -454,6 +454,7 @@ void bullet_impact(int X,int Y,int radius)
 	spSelectRenderTarget(screen);
 	update_map();
 	spSoundPlay(snd_explosion,-1,0,0,-1);
+	spResetLoop();
 }
 
 void negative_impact(int X,int Y,int radius)
@@ -586,6 +587,7 @@ void negative_impact(int X,int Y,int radius)
 	//spSetBlending(SP_ONE);
 	spSelectRenderTarget(screen);
 	update_map();
+	spResetLoop();
 }
 
 int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer p,Sint32 *mod_dx,Sint32 *mod_dy,int* d)

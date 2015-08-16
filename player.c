@@ -87,6 +87,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 	}
 	
 	int i;
+	Sint32 R = r*r;
 	if (with_players)
 		for (i = 0; i < player_count; i++)
 		{
@@ -95,6 +96,14 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 			do
 			{
 				if (hare == except)
+				{
+					hare = hare->next;
+					continue;
+				}
+				//Pretest
+				int dx = spFixedToInt(x-hare->x);
+				int dy = spFixedToInt(y-hare->y);
+				if (dx*dx+dy*dy > 8*R) //== (sqrt(2)*2*r)²
 				{
 					hare = hare->next;
 					continue;
@@ -110,7 +119,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					/*if (x == (467 << SP_ACCURACY) && y == (1160 << SP_ACCURACY) &&
 						(hare->x >> SP_ACCURACY) == 467 && (hare->y >> SP_ACCURACY) == 1160)
 						printf("%i: %i\n",a,d);*/
-					if (d <= r*r)
+					if (d <= R)
 					{
 						if (except)
 						{
@@ -137,7 +146,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 					Sint32 X = u-item->x;
 					Sint32 Y = v-item->y;
 					int d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
-					if (d <= r*r)
+					if (d <= R)
 					{
 						if (except)
 							except->circle_checkpoint_hit[a] = 1;
@@ -599,19 +608,23 @@ int real_next_player()
 	spSoundPause(0,-1);
 	if (player[active_player]->local)
 		spSoundPlay(snd_turn,-1,0,0,-1);
+	spResetLoop();
 	return result;
 }
 
 Sint32 bullet_alpha();
 
-int check_next_player()
+int check_next_player(int* worked)
 {
 	int result = 0;
 	if (next_player_go && bullet_alpha() == 0)
 	{
 		next_player_go = 0;
 		result = real_next_player();
+		*worked = 1;
 	}
+	else
+		*worked = 0;
 	return result;
 }
 

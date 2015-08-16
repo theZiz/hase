@@ -1140,8 +1140,11 @@ int calc(Uint32 steps)
 		}
 		if (bullet_alpha() > 0)
 			continue;
-		if (check_next_player())
+		int worked;
+		if (check_next_player(&worked))
 			return 3;
+		if (worked)
+			break;
 		if (ragnarok_counter)
 			ragnarok_counter--;
 		if (player[active_player]->weapon_points && !(dropItem && dropItem->seen))

@@ -341,7 +341,6 @@ int ll_calc(Uint32 steps)
 		{
 			if (ll_wait == -1)
 			{
-				
 				ll_wait = MAX_WAIT;
 				ll_selected--;
 				if (ll_level)
@@ -384,7 +383,6 @@ int ll_calc(Uint32 steps)
 			else
 			if (ll_wait == 0)
 			{
-				
 				ll_wait = MIN_WAIT;
 				ll_selected++;
 				if (ll_level)
