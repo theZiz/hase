@@ -181,25 +181,13 @@ void items_calc()
 			if (hase_game->options.bytewise.ragnarok_border & 15)
 			{
 				if (item->x < 0)
-				{
 					item->x += spIntToFixed(LEVEL_WIDTH);
-					posX += spIntToFixed(LEVEL_WIDTH);
-				}
 				if (item->y < 0)
-				{
 					item->y += spIntToFixed(LEVEL_HEIGHT);
-					posY += spIntToFixed(LEVEL_HEIGHT);
-				}
 				if (item->x >= spIntToFixed(LEVEL_WIDTH))
-				{
 					item->x -= spIntToFixed(LEVEL_WIDTH);
-					posX -= spIntToFixed(LEVEL_WIDTH);
-				}
 				if (item->y >= spIntToFixed(LEVEL_HEIGHT))
-				{
 					item->y -= spIntToFixed(LEVEL_HEIGHT);
-					posY -= spIntToFixed(LEVEL_HEIGHT);
-				}
 			}
 			before = item;
 		}

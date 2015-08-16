@@ -13,6 +13,7 @@ Changelog
 - Traces fade out
 - New level save format (easier to edit and to change)
 - Camera changes at border warp, too
+- Speed improvements, especially for CC units
 
 1.6.0.1:
 - Renamed "Help" to "How to play" and made it the selected entry at first start
