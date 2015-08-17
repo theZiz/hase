@@ -16,6 +16,8 @@ Changelog
 - Items don't land on the head, but are collected
 - Decreased the bunny collision box again
 - Tomtatoes collected outside own turn are added next turn
+- Made the weapons menu wide instead of high for low screen devices
+- AI shoots if no time is left instead of jumping around
 - Traces fade out
 - New level save format (easier to edit and to change)
 - Camera changes at border warp, too

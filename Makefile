@@ -21,6 +21,8 @@ SPARROW3D_STATIC_LIB = libsparrow3d.a
 SPARROWNET_STATIC_LIB = libsparrowNet.a
 SPARROWSOUND_STATIC_LIB = libsparrowSound.a
 
+DYNAMIC += -lSDL_net
+
 ifdef TARGET
 	include $(SPARROW_FOLDER)/target-files/$(TARGET).mk
 	BUILD = ./build/$(TARGET)/hase
@@ -33,8 +35,7 @@ endif
 LIB += -L$(SPARROW_LIB)
 INCLUDE += -I$(SPARROW_FOLDER)
 
-DYNAMIC += -lSDL_net
-STATIC += $(SPARROW_LIB)/$(SPARROW3D_STATIC_LIB) $(SPARROW_LIB)/$(SPARROWSOUND_STATIC_LIB) $(SPARROW_LIB)/$(SPARROWNET_STATIC_LIB)
+HASE_STATIC = $(SPARROW_LIB)/$(SPARROW3D_STATIC_LIB) $(SPARROW_LIB)/$(SPARROWSOUND_STATIC_LIB) $(SPARROW_LIB)/$(SPARROWNET_STATIC_LIB) $(STATIC)
 
 ifneq ($(TARGET),win32)
 DYNAMIC += -lz
@@ -49,7 +50,7 @@ targets:
 	@echo "The targets are the same like for sparrow3d. :P"
 
 hase: lobby.c $(OBJ) makeBuildDir
-	$(CC) $(CFLAGS) $(LINK_FLAGS) $< $(OBJ) $(SDL) $(INCLUDE) $(LIB) $(STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
+	$(CC) $(CFLAGS) $(LINK_FLAGS) $< $(OBJ) $(SDL) $(INCLUDE) $(LIB) $(HASE_STATIC) $(DYNAMIC) -o $(BUILD)/$@$(SUFFIX)
 
 %.d: %.c
 	$(CC) -MM $(CFLAGS) $(INCLUDE) $(SDL) $< -MF $@

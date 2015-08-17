@@ -214,7 +214,7 @@ void draw(void)
 	//Level
 	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
 
-	Uint16* pixels = spGetTargetPixel();
+	//Uint16* pixels = spGetTargetPixel();
 	/*Uint16* texture = (Uint16*)level_original->pixels;
 	int a,b;
 	for (a = 0; a < LEVEL_WIDTH; a++)
@@ -377,7 +377,7 @@ void draw(void)
 			}
 			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
-			int k;
+			/*int k;
 			for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
 			{
 				int X = screen->w/2+x+(spMul(spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_PLAYER_RADIUS,zoom) >> SP_ACCURACY);
@@ -400,7 +400,7 @@ void draw(void)
 					pixels[X+Y*screen->w] = spGetFastRGB(255,255,0);
 				else
 					pixels[X+Y*screen->w] = spGetFastRGB(255,0,0);
-			}
+			}*/
 				
 			//Health bar
 			y-=zoom*3>>14;
@@ -1178,7 +1178,7 @@ int calc(Uint32 steps)
 									jump(4);
 									break;
 							}
-							if (spRand()%8 == 0)
+							if (spRand()%spMax(1,spMin(countdown/2000,8)) == 0)
 								ai_shoot_tries = 1;
 						}
 						else
@@ -1237,8 +1237,8 @@ int calc(Uint32 steps)
 									if (once)
 									{
 										player[active_player]->weapon_points-=weapon_cost[WP_ABOVE]; //pay
-										player[active_player]->activeHare->wp_x = 3;
-										player[active_player]->activeHare->wp_y = 2;
+										player[active_player]->activeHare->wp_x = 2;
+										player[active_player]->activeHare->wp_y = 3;
 										ai_shoot_tries = 0;
 										lastAIDistance = 100000000;
 									}
@@ -1255,20 +1255,20 @@ int calc(Uint32 steps)
 										switch (use_points)
 										{
 											case 1:
-												player[active_player]->activeHare->wp_x = 2;
-												player[active_player]->activeHare->wp_y = 0;
+												player[active_player]->activeHare->wp_x = 0;
+												player[active_player]->activeHare->wp_y = 2;
 												break;
 											case 2:
-												player[active_player]->activeHare->wp_x = 1;
-												player[active_player]->activeHare->wp_y = 0;
+												player[active_player]->activeHare->wp_x = 0;
+												player[active_player]->activeHare->wp_y = 1;
 												break;
 											case 3:
 												player[active_player]->activeHare->wp_x = 0;
 												player[active_player]->activeHare->wp_y = 0;
 												break;
 											default:
-												player[active_player]->activeHare->wp_x = 0;
-												player[active_player]->activeHare->wp_y = 2;
+												player[active_player]->activeHare->wp_x = 2;
+												player[active_player]->activeHare->wp_y = 0;
 										}
 									}
 									int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];

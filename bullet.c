@@ -1,5 +1,5 @@
-#define WEAPON_X 4
-#define WEAPON_Y 6
+#define WEAPON_X 6
+#define WEAPON_Y 4
 
 #define WEAPON_MAX 26
 
@@ -131,12 +131,10 @@ const char weapon_filename[WEAPON_MAX][64] = {
 };
 
 const int weapon_pos[WEAPON_Y][WEAPON_X] = {
-	{WP_BIG_BAZOOKA, WP_MID_BAZOOKA, WP_SML_BAZOOKA,   WP_CLUSTER},
-	{  WP_SPELL_EXP,   WP_SPELL_WIN,   WP_SPELL_STU, WP_SPELL_AVA},
-	{     WP_POTATO,        WP_MINE,     WP_SHOTGUN,     WP_ABOVE},
-	{  WP_BUILD_BIG,   WP_BUILD_MID,   WP_BUILD_SML, WP_SUPER_JUMP},
-	{ WP_TUNNEL_BIG,  WP_TUNNEL_MID,  WP_TUNNEL_SML, WP_TELEPORT},
-	{   WP_KAIO_KEN,   WP_PREV_HARE,   WP_NEXT_HARE, WP_SURRENDER}
+	{WP_BIG_BAZOOKA, WP_SPELL_EXP,  WP_POTATO,  WP_BUILD_BIG, WP_TUNNEL_BIG,  WP_KAIO_KEN},
+	{WP_MID_BAZOOKA, WP_SPELL_WIN,    WP_MINE,  WP_BUILD_MID, WP_TUNNEL_MID, WP_PREV_HARE},
+	{WP_SML_BAZOOKA, WP_SPELL_STU, WP_SHOTGUN,  WP_BUILD_SML, WP_TUNNEL_SML, WP_NEXT_HARE},
+	{    WP_CLUSTER, WP_SPELL_AVA,   WP_ABOVE, WP_SUPER_JUMP,   WP_TELEPORT, WP_SURRENDER}
 };
 
 typedef SDL_Surface *PSDL_Surface;
@@ -158,32 +156,32 @@ void delete_weapons()
 
 void draw_weapons()
 {
-	int x,y,w = 0,i = 0;
+	int factor = 21 * (SP_ONE*2/4+spGetSizeFactor()*3/4) >> SP_ACCURACY;
+	int x,y,w = factor * WEAPON_X,i = 0;
 	for (i = 0;i<WEAPON_MAX;i++)
 		w = spMax(spFontWidth(weapon_description[i],font),w);
-	int factor = 24 * (SP_ONE+spGetSizeFactor()/2) >> SP_ACCURACY;
 	int h = WEAPON_Y*factor + 3*font->maxheight;
 	spSetPattern8(153,60,102,195,153,60,102,195);
-	spRectangle(screen->w/2,screen->h/2,0,w,h,LL_BG);
+	spRectangle(screen->w/2,screen->h/2-h/6,0,w,h,LL_BG);
 	spDeactivatePattern();
 	for (x = 0;x<WEAPON_X;x++)
 		for (y = 0;y<WEAPON_Y;y++)
 		{
 			if (player[active_player]->weapon_points < weapon_cost[weapon_pos[y][x]])
 				spSetPattern8(136,85,34,85,136,85,34,85);
-			spRotozoomSurface((screen->w-(WEAPON_X-x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-h+y*factor*2)/2+factor/2+font->maxheight,0,weapon_surface[weapon_pos[y][x]],SP_ONE/2+spGetSizeFactor()/4,SP_ONE/2+spGetSizeFactor()/4,0);
+			spRotozoomSurface((screen->w-(WEAPON_X-x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-4*h/3+y*factor*2)/2+factor/2+font->maxheight,0,weapon_surface[weapon_pos[y][x]],spGetSizeFactor()/2,spGetSizeFactor()/2,0);
 			spDeactivatePattern();
 		}
-	spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*1,0,"{jump}/{weapon}Choose",font);
+	spFontDraw((screen->w-w)/2,(screen->h+2*h/3)/2-font->maxheight*1,0,"{jump}/{weapon}Choose",font);
 	if (player[active_player]->activeHare)
 	{
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
-		spFontDrawMiddle(screen->w/2,(screen->h-h)/2,0,weapon_name[w_nr],font);
-		spRectangleBorder((screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-1)*factor*2+(WEAPON_X-1)*factor)/2,(screen->h-h+player[active_player]->activeHare->wp_y*factor*2)/2+factor/2+font->maxheight-1,0,factor-4,factor-4,2,2,get_border_color());
-		spFontDraw((screen->w-w)/2,(screen->h+h)/2-font->maxheight*2,0,weapon_description[w_nr],font);
-		spFontDrawRight((screen->w+w)/2 - weapon_cost[w_nr] * tomato->w,(screen->h+h)/2-font->maxheight*1,0,"Cost:",font);
+		spFontDrawMiddle(screen->w/2,(screen->h-4*h/3)/2,0,weapon_name[w_nr],font);
+		spRectangleBorder((screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-1)*factor*2+(WEAPON_X-1)*factor)/2-1,(screen->h-4*h/3+player[active_player]->activeHare->wp_y*factor*2)/2+factor/2+font->maxheight-1,0,factor-4,factor-4,2,2,get_border_color());
+		spFontDraw((screen->w-w)/2,(screen->h+2*h/3)/2-font->maxheight*2,0,weapon_description[w_nr],font);
+		spFontDrawRight((screen->w+w)/2 - weapon_cost[w_nr] * tomato->w,(screen->h+2*h/3)/2-font->maxheight*1,0,"Cost:",font);
 		for (i = 0; i < weapon_cost[w_nr]; i++)
-			spBlitSurface( (screen->w+w)/2 - tomato->w*(2*i+1)/2, (screen->h+h)/2-font->maxheight/2,0,tomato);
+			spBlitSurface( (screen->w+w)/2 - tomato->w*(2*i+1)/2, (screen->h+2*h/3)/2-font->maxheight/2,0,tomato);
 	}
 }
 
