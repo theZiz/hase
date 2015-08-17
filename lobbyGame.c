@@ -440,7 +440,7 @@ int load_level(char* level_string)
 		if (magic_number != (Sint32)'E'*0x1000000 + (Sint32)'S'*0x10000 + (Sint32)'A'*0x100 + (Sint32)'H')
 		{
 			//Okay, new and better format
-			SDL_RWseek(file,0,RW_SEEK_SET);
+			SDL_RWseek(file,0,0);
 			spReadOneLine( file, buffer, 2048);
 			char* end = strchr(buffer,' ');
 			if (end == NULL || ((end[0] = 0) && strcmp(buffer,"version")))
