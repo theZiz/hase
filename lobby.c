@@ -271,7 +271,8 @@ int main(int argc, char **argv)
 					}
 					break;
 				case 1:
-					if (text_box(font,resize,"Enter player name:",gop_username(),32,0,NULL,0) == 1)
+					if (text_box(font,resize,"Enter player name:",gop_username(),32,0,NULL,0) == 1 &&
+						(gop_username()[0] || message_box(font,resize,"No name entered...")))
 					{
 						pWindow chat_window = create_window(chat_feedback,font,"Question");
 						chat_window->cancel_to_no = 1;

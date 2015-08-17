@@ -133,6 +133,9 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 	int width = strtol(mom,&mom,36);
 	//Reading the height
 	int height = strtol(mom,&mom,36);
+	//However we need to ignore this
+	width = LEVEL_WIDTH;
+	height = LEVEL_HEIGHT;
 	
 	Sint32 zoom = SP_ONE;
 	int border_shift = 0;
@@ -203,6 +206,8 @@ SDL_Surface* create_level(char* level_string,int alt_width,int alt_height,int co
 				negative = 0;
 		}
 	}
+	if (alt_width <= 0 || alt_height <= 0)
+		spRectangleBorder(width/2,height/2,0,width,height,LEVEL_BORDER,LEVEL_BORDER,SP_ALPHA_COLOR);
 	spSetAlphaTest(1);
 	spSelectRenderTarget(spGetWindowSurface());
 	return level;

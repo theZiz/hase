@@ -9,6 +9,9 @@
 #define TEXTURE_COUNT 9
 #define LEVEL_BORDER 256
 
+#define LEVEL_WIDTH 1536
+#define LEVEL_HEIGHT 1536
+
 Uint16 get_border_color();
 Uint16 get_level_color();
 void add_to_string(char* buffer,char* add);

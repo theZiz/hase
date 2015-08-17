@@ -66,7 +66,7 @@ void items_calc()
 		}
 		item->dx -= gravitation_x(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
 		item->dy -= gravitation_y(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
-		if (circle_is_empty(item->x+item->dx,item->y+item->dy,PLAYER_RADIUS,NULL,1))
+		if (circle_is_empty(item->x+item->dx,item->y+item->dy,PLAYER_RADIUS,NULL,0))
 		{
 			item->x += item->dx;
 			item->y += item->dy;
@@ -142,7 +142,10 @@ void items_calc()
 						case 1: //power
 							if (d <= PLAYER_RADIUS*PLAYER_RADIUS*4)
 							{
-								player[j]->weapon_points++;
+								if (j == active_player)
+									player[j]->weapon_points++;
+								else
+									player[j]->next_round_extra++;
 								spSoundPlay(snd_item,-1,0,0,-1);
 								dead = 1;
 								use_points = 0;

@@ -723,7 +723,7 @@ int lg_calc(Uint32 steps)
 		if (lg_level == NULL || strcmp(lg_level_string,lg_game->level_string))
 		{
 			spDeleteSurface(lg_level);
-			int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+			int l_w = spGetWindowSurface()->h-(CHAT_LINES+1)*lg_font->maxheight;
 			lg_level = create_level(lg_game->level_string,l_w,l_w,LL_BG);
 			sprintf(lg_level_string,"%s",lg_game->level_string);
 		}
@@ -937,7 +937,7 @@ int lg_calc(Uint32 steps)
 			memcpy(lg_last_level_string,lg_set_level_string,1024);
 			create_level_string(lg_set_level_string,1536,1536,5,5,5);
 			spDeleteSurface(lg_level);
-			int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+			int l_w = spGetWindowSurface()->h-(1+CHAT_LINES)*lg_font->maxheight;
 			lg_level = create_level(lg_set_level_string,l_w,l_w,LL_BG);
 		}
 		if (spMapGetByID(MAP_POWER_UP))
@@ -954,7 +954,7 @@ int lg_calc(Uint32 steps)
 			{
 				memcpy(lg_last_level_string,buffer,1024);
 				spDeleteSurface(lg_level);
-				int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+				int l_w = spGetWindowSurface()->h-(1+CHAT_LINES)*lg_font->maxheight;
 				lg_level = create_level(lg_set_level_string,l_w,l_w,LL_BG);
 			}
 		}
@@ -971,7 +971,7 @@ int lg_calc(Uint32 steps)
 				memcpy(lg_set_level_string,buffer,1024);
 			}
 			spDeleteSurface(lg_level);
-			int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+			int l_w = spGetWindowSurface()->h-(1+CHAT_LINES)*lg_font->maxheight;
 			lg_level = create_level(lg_set_level_string,l_w,l_w,LL_BG);
 		}
 		
@@ -987,7 +987,7 @@ int lg_reload(void* dummy)
 		lg_reload_now = 4;
 		return -1;
 	}
-	int l_w = spGetWindowSurface()->h-(4+CHAT_LINES)*lg_font->maxheight;
+	int l_w = spGetWindowSurface()->h-(1+CHAT_LINES)*lg_font->maxheight;
 	char temp[4096] = "";
 	pPlayer player = lg_player_list;
 	while (player)
@@ -1165,21 +1165,21 @@ int start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),
 	lg_last_read_message = get_channel()?get_channel()->last_read_message:NULL;
 	lg_resize = resize;
 	if (spectate ||
-		game->local == 1 && text_box(font,resize,"Enter player name:",gop_username(),32,1,NULL,0) == 1 ||
-		game->local == 0 && sprite_box(font,resize,"Choose sprite!",1,game->admin_pw?NULL:game->sprite_count) == 1)
+		(game->local == 1 && text_box(font,resize,"Enter player name:",gop_username(),32,1,NULL,0) == 1) ||
+		(game->local == 0 && sprite_box(font,resize,"Choose sprite!",1,game->admin_pw?NULL:game->sprite_count) == 1))
 	{
 		if (!spectate)
 		{
 			if (gop_username()[0] == 0)
 			{
 				message_box(font,resize,"No name entered...");
-				return;
+				return result;
 			}
 			save_options();
 			if ((lg_player = join_game(game,gop_username(),0,get_last_sprite())) == NULL)
 			{
 				message_box(font,resize,"Game full...");
-				return;
+				return result;
 			}
 			lg_last_player = lg_player;
 		}

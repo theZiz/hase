@@ -50,7 +50,7 @@ int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ));
 pWindow create_text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection,int* sprite_count,int insult_button);
 void delete_window(pWindow window);
 
-void message_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption);
+int message_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption);
 int text_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption, char* text,int len,int show_selection,int* sprite_count,int insult_button);
 int sprite_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption,int show_selection,int* sprite_count);
 

@@ -6,7 +6,7 @@
 #include <sparrow3d.h>
 #include <string.h>
 
-#define CLIENT_VERSION 14
+#define CLIENT_VERSION 15
 
 #define TRACE_COUNT 16
 

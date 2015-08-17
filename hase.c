@@ -14,9 +14,6 @@
 pGame hase_game;
 pPlayer hase_player_list = NULL;
 
-#define LEVEL_WIDTH 1536
-#define LEVEL_HEIGHT 1536
-
 spSound* snd_explosion;
 spSound* snd_end;
 int channel_end;
@@ -217,7 +214,7 @@ void draw(void)
 	//Level
 	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
 
-	//Uint16* pixels = spGetTargetPixel();
+	Uint16* pixels = spGetTargetPixel();
 	/*Uint16* texture = (Uint16*)level_original->pixels;
 	int a,b;
 	for (a = 0; a < LEVEL_WIDTH; a++)
@@ -380,11 +377,11 @@ void draw(void)
 			}
 			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
-			/*int k;
+			int k;
 			for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
 			{
-				int X = screen->w/2+x+(spMul(spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_RADIUS,zoom) >> SP_ACCURACY);
-				int Y = screen->h/2+y+(spMul(spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_RADIUS,zoom) >> SP_ACCURACY);
+				int X = screen->w/2+x+(spMul(spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_PLAYER_RADIUS,zoom) >> SP_ACCURACY);
+				int Y = screen->h/2+y+(spMul(spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + rotation)*PLAYER_PLAYER_RADIUS,zoom) >> SP_ACCURACY);
 				if (X < 0)
 					continue;
 				if (Y < 0)
@@ -403,7 +400,7 @@ void draw(void)
 					pixels[X+Y*screen->w] = spGetFastRGB(255,255,0);
 				else
 					pixels[X+Y*screen->w] = spGetFastRGB(255,0,0);
-			}*/
+			}
 				
 			//Health bar
 			y-=zoom*3>>14;
@@ -1794,6 +1791,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	for (k = 0; k < 4 && game->name[k]; k++)
 		f[k] = game->name[k];
 	Uint32 seed = f[0]+f[1]*256+f[2]*65536+f[3]*16777216;
+	printf("Seed: %i\n",seed);
 	spSetRand(seed);
 	loadInformation("Loading images...");
 	targeting = spLoadSpriteCollection("./data/targeting.ssc",NULL);

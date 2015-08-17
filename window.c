@@ -684,12 +684,13 @@ int set_message(spFontPointer font, char* caption)
 	mg_window->zig_zag = 0;
 }
 
-void message_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption)
+int message_box(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), char* caption)
 {
 	pWindow window = create_window(NULL,font,caption);
 	window->only_ok = 1;
 	modal_window(window,resize);
 	delete_window(window);
+	return 0;
 }
 
 int text_box_feedback( pWindow window, pWindowElement elem, int action )

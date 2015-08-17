@@ -24,10 +24,10 @@ int do_physics()
 		pHare hare = player[j]->firstHare;
 		if (hare)
 		do
-		{							
+		{
 			hare->dx -= gravitation_x(spFixedToInt(hare->x),spFixedToInt(hare->y)) >> PHYSIC_IMPACT;
 			hare->dy -= gravitation_y(spFixedToInt(hare->x),spFixedToInt(hare->y)) >> PHYSIC_IMPACT;
-			if (circle_is_empty(hare->x+hare->dx,hare->y+hare->dy,PLAYER_RADIUS,hare,1))
+			if (circle_is_empty(hare->x+hare->dx,hare->y+hare->dy,PLAYER_PLAYER_RADIUS,hare,1))
 			{
 				hare->x += hare->dx;
 				hare->y += hare->dy;
@@ -35,6 +35,7 @@ int do_physics()
 			else
 			if (hare->dx || hare->dy)
 			{
+				Sint32 speed = spSqrt(spSquare(hare->dx)+spSquare(hare->dy));
 				hare->dx = 0;
 				hare->dy = 0;
 				int k;
@@ -43,8 +44,15 @@ int do_physics()
 				{
 					if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) < SP_ONE/4)
 					{
-						hare->dx += spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 7;
-						hare->dy += spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI) >> 7;
+						Sint32 dx = spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI);
+						Sint32 dy = spSin(k*2*SP_PI/CIRCLE_CHECKPOINTS + SP_PI);
+						hare->dx += spMul(dx,speed) >> 3;
+						hare->dy += spMul(dy,speed) >> 3;
+						if (circle_is_empty(hare->x+dx,hare->y+dy,PLAYER_PLAYER_RADIUS,hare,1))
+						{
+							hare->x += dx;
+							hare->y += dy;							
+						}
 					}
 					else
 						hare->bums = 1;

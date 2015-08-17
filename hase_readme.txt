@@ -9,11 +9,19 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
-1.6.0.2:
+1.6.1:
+- Fixed some stucking bugs
+- levels are cutted around the 1024x1024 center
+- level width and height are fixed to 1536x1536
+- Items don't land on the head, but are collected
+- Decreased the bunny collision box again
+- Tomtatoes collected outside own turn are added next turn
 - Traces fade out
 - New level save format (easier to edit and to change)
 - Camera changes at border warp, too
 - Speed improvements, especially for CC units
+- No enter of empty name possible anymore
+- Computer player don't get kicked after timeout in game lobby
 
 1.6.0.1:
 - Renamed "Help" to "How to play" and made it the selected entry at first start

@@ -103,7 +103,7 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 				//Pretest
 				int dx = spFixedToInt(x-hare->x);
 				int dy = spFixedToInt(y-hare->y);
-				if (dx*dx+dy*dy > 8*R) //== (sqrt(2)*2*r)²
+				if (dx*dx+dy*dy > (r+PLAYER_PLAYER_RADIUS)*(r+PLAYER_PLAYER_RADIUS)*2) //== (sqrt(2)*(pr+r))²
 				{
 					hare = hare->next;
 					continue;
@@ -111,8 +111,8 @@ static int circle_is_empty(Sint32 x, Sint32 y,int r,pHare except,int with_player
 				Sint32 a;
 				for (a = 0; a < CIRCLE_CHECKPOINTS; a++)
 				{
-					Sint32 u = circle_checkpoint_u[a]*r + x;
-					Sint32 v = circle_checkpoint_v[a]*r + y;
+					Sint32 u = circle_checkpoint_u[a]*PLAYER_PLAYER_RADIUS + x;
+					Sint32 v = circle_checkpoint_v[a]*PLAYER_PLAYER_RADIUS + y;
 					Sint32 X = u-hare->x;
 					Sint32 Y = v-hare->y;
 					Sint32 d = spSquare(X)+spSquare(Y) >> SP_ACCURACY;
@@ -213,7 +213,7 @@ void update_player()
 		{
 			if (hare->hops > 0)
 			{
-				hare->hops --;
+				hare->hops--;
 				if (hare->hops <= 0)
 				{
 					Sint32 dx = spSin(hare->rotation);
@@ -247,7 +247,7 @@ void update_player()
 					hare->jump_failed = 0;
 					for (k = 1; k <= 4; k++)
 					{
-						if (circle_is_empty(hare->x+k*dx,hare->y-k*dy,PLAYER_RADIUS,hare,1))
+						if (circle_is_empty(hare->x+k*dx,hare->y-k*dy,PLAYER_PLAYER_RADIUS,hare,1))
 						{
 							hare->x += k*dx;
 							hare->y -= k*dy;
@@ -270,6 +270,11 @@ void update_player()
 							}
 							break;
 						}
+						//1,2,3,4,0
+						if (k == 0)
+							break;
+						if (k == 4)
+							k = -1;
 					}
 					if (k == 5)
 						hare->jump_failed = 1;

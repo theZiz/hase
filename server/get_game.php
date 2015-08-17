@@ -19,7 +19,7 @@ while ($row = mysql_fetch_array( $result ))
 {
 	$now = time();
 	$heartbeat_diff = $now - $row['heartbeat_time'];
-	if ($game_row['status'] == 0 && $heartbeat_diff > 90) //one and a half minute no reaction
+	if ($game_row['status'] == 0 && $row['computer'] == 0 && $heartbeat_diff > 90) //one and a half minute no reaction
 	{
 		$player_id = $row['player_id'];
 		$query = "DELETE FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id' AND player_id = '$player_id'";
