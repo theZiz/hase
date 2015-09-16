@@ -171,8 +171,16 @@ static Sint32 gravitation_x(int x,int y)
 		return 0;
 	if (gx2 < 0 || gy2 < 0 || gx2 >= (LEVEL_WIDTH >> GRAVITY_RESOLUTION) || gy2 >= (LEVEL_HEIGHT >> GRAVITY_RESOLUTION))
 		return 0;
-	int g1 = gravity[gx2+gy1*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x * rx + gravity[gx1+gy1*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
-	int g2 = gravity[gx2+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x * rx + gravity[gx1+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
+	int g1 = gravity[gx2+gy1*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x * rx + gravity[gx1+gy1*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x * ((1<<GRAVITY_RESOLUTION)-rx);
+	if (g1 >= 0)
+		g1 >>= GRAVITY_RESOLUTION;
+	else
+		g1 = -(-g1 >> GRAVITY_RESOLUTION);
+	int g2 = gravity[gx2+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x * rx + gravity[gx1+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].x * ((1<<GRAVITY_RESOLUTION)-rx);
+	if (g2 >= 0)
+		g2 >>= GRAVITY_RESOLUTION;
+	else
+		g2 = -(-g2 >> GRAVITY_RESOLUTION);
 	return g2 * ry + g1 * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION;
 }
 
@@ -188,8 +196,16 @@ static Sint32 gravitation_y(int x,int y)
 		return 0;
 	if (gx2 < 0 || gy2 < 0 || gx2 >= (LEVEL_WIDTH >> GRAVITY_RESOLUTION) || gy2 >= (LEVEL_HEIGHT >> GRAVITY_RESOLUTION))
 		return 0;
-	int g1 = gravity[gx2+gy1*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * rx + gravity[gx1+gy1*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
-	int g2 = gravity[gx2+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * rx + gravity[gx1+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * ((1<<GRAVITY_RESOLUTION)-rx) >> GRAVITY_RESOLUTION;
+	int g1 = gravity[gx2+gy1*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * rx + gravity[gx1+gy1*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * ((1<<GRAVITY_RESOLUTION)-rx);
+	if (g1 >= 0)
+		g1 >>= GRAVITY_RESOLUTION;
+	else
+		g1 = -(-g1 >> GRAVITY_RESOLUTION);
+	int g2 = gravity[gx2+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * rx + gravity[gx1+gy2*(LEVEL_WIDTH>>GRAVITY_RESOLUTION)].y * ((1<<GRAVITY_RESOLUTION)-rx);
+	if (g2 >= 0)
+		g2 >>= GRAVITY_RESOLUTION;
+	else
+		g2 = -(-g2 >> GRAVITY_RESOLUTION);
 	return g2 * ry + g1 * ((1<<GRAVITY_RESOLUTION)-ry) >> GRAVITY_RESOLUTION;
 }
 
@@ -280,11 +296,11 @@ void update_player()
 						hare->jump_failed = 1;
 				}
 			}
-			hare->rotation = 0;
 			hare->bums = 0;
 			int force = gravitation_force(spFixedToInt(hare->x),spFixedToInt(hare->y));
 			if (force)
 			{
+				hare->rotation = 0;
 				Sint32 ac = spDiv(-gravitation_y(spFixedToInt(hare->x),spFixedToInt(hare->y)),force);
 				if (ac < -SP_ONE)
 					ac = -SP_ONE;
@@ -337,8 +353,18 @@ int hare_explosion_feedback( spParticleBunchPointer bunch, Sint32 action, Sint32
 			if (bunch->particle[i].status >= 0)
 			{
 				touched = 1;
-				bunch->particle[i].dx -= gravitation_x(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) * extra_data >> PHYSIC_IMPACT;
-				bunch->particle[i].dy -= gravitation_y(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) * extra_data >> PHYSIC_IMPACT;
+				Sint32 d = gravitation_x(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) * extra_data;
+				if (d >= 0)
+					d >>= PHYSIC_IMPACT;
+				else
+					d = -(-d >> PHYSIC_IMPACT);				
+				bunch->particle[i].dx -= d;
+				d = gravitation_y(bunch->particle[i].x >> SP_ACCURACY,bunch->particle[i].y >> SP_ACCURACY) * extra_data;
+				if (d >= 0)
+					d >>= PHYSIC_IMPACT;
+				else
+					d = -(-d >> PHYSIC_IMPACT);
+				bunch->particle[i].dy -= d;
 				if (pixel_is_empty(bunch->particle[i].x+bunch->particle[i].dx * extra_data >> SP_ACCURACY,bunch->particle[i].y+bunch->particle[i].dy * extra_data >> SP_ACCURACY))
 				{
 					bunch->particle[i].x += bunch->particle[i].dx * extra_data;

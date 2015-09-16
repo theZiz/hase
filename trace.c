@@ -10,8 +10,18 @@ void lastPoint(int* x,int* y,int direction,int power)
 	for (j = 1; j < TRACE_LENGTH; j++)
 		for (i = 0; i < TRACE_STEP; i++)
 		{
-			dx -= gravitation_x((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			dy -= gravitation_y((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			Sint32 d = gravitation_x((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY);
+			if (d >= 0)
+				d >>= PHYSIC_IMPACT;
+			else
+				d = -(-d >> PHYSIC_IMPACT);
+			dx -= d;
+			d = gravitation_y((*x) >> SP_ACCURACY,(*y) >> SP_ACCURACY);
+			if (d >= 0)
+				d >>= PHYSIC_IMPACT;
+			else
+				d = -(-d >> PHYSIC_IMPACT);
+			dy -= d;
 			if (circle_is_empty((*x)+dx,(*y)+dy,weapon_radius[0],NULL,1) &&
 			    (*x) >= 0 && (*y) >= 0 &&
 			    spFixedToInt((*x)) < LEVEL_WIDTH && spFixedToInt((*y)) < LEVEL_HEIGHT)

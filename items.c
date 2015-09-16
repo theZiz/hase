@@ -64,8 +64,18 @@ void items_calc()
 			while (item->rotation >= 2*SP_PI)
 				item->rotation -= 2*SP_PI;
 		}
-		item->dx -= gravitation_x(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
-		item->dy -= gravitation_y(spFixedToInt(item->x),spFixedToInt(item->y)) >> PHYSIC_IMPACT;
+		Sint32 d = gravitation_x(spFixedToInt(item->x),spFixedToInt(item->y));
+		if (d >= 0)
+			d >>= PHYSIC_IMPACT;
+		else
+			d = -(-d >> PHYSIC_IMPACT);
+		item->dx -= d;
+		d = gravitation_y(spFixedToInt(item->x),spFixedToInt(item->y));
+		if (d >= 0)
+			d >>= PHYSIC_IMPACT;
+		else
+			d = -(-d >> PHYSIC_IMPACT);
+		item->dy -= d;
 		if (circle_is_empty(item->x+item->dx,item->y+item->dy,PLAYER_RADIUS,NULL,0))
 		{
 			item->x += item->dx;
@@ -158,6 +168,10 @@ void items_calc()
 								if (speed == 1)
 									spSoundPlay(snd_beep,-1,0,0,-1);
 							}
+							break;
+						case 4: //skull
+							if (item->beep == 0 && d <= PLAYER_RADIUS*PLAYER_RADIUS*4)
+								item->beep = 1;
 							break;
 					}
 					if (dead)

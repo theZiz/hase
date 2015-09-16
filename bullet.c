@@ -689,8 +689,18 @@ int updateBullets()
 		}
 		if (weapon_shoot[momBullet->kind] == 1)
 		{
-			momBullet->dx -= gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
-			momBullet->dy -= gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY) >> PHYSIC_IMPACT;
+			Sint32 d = gravitation_x(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY);
+			if (d >= 0)
+				d >>= PHYSIC_IMPACT;
+			else
+				d = -(-d >> PHYSIC_IMPACT);
+			momBullet->dx -= d;
+			d = gravitation_y(momBullet->x >> SP_ACCURACY,momBullet->y >> SP_ACCURACY);
+			if (d >= 0)
+				d >>= PHYSIC_IMPACT;
+			else
+				d = -(-d >> PHYSIC_IMPACT);
+			momBullet->dy -= d;
 		}
 		int speed = abs(momBullet->dx)+abs(momBullet->dy);
 		momBullet->rotation+=momBullet->dr*speed/BULLET_SPEED_DOWN;

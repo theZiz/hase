@@ -68,6 +68,7 @@ pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, in
 	window->text_box_len = 0;
 	window->cancel_to_no = 0;
 	window->zig_zag = 1;
+	window->sizeFactor = spGetSizeFactor();
 	return window;
 }
 
@@ -108,6 +109,19 @@ pWindow recent_window = NULL;
 
 void window_draw(void)
 {
+	Sint32 sizeFactor = spGetSizeFactor();
+	if (recent_window->sizeFactor != sizeFactor)
+	{
+		pWindowElement elem = recent_window->firstElement;
+		while (elem)
+		{
+			elem->width = elem->width * sizeFactor / recent_window->sizeFactor;
+			elem = elem->next;
+		}
+		recent_window->width = recent_window->width * sizeFactor / recent_window->sizeFactor;
+		recent_window->height = recent_window->height * sizeFactor / recent_window->sizeFactor;
+		recent_window->sizeFactor = sizeFactor;
+	}
 	SDL_Surface* screen = spGetWindowSurface();
 	if (recent_window->oldScreen)
 		spBlitSurface(screen->w/2,screen->h/2,0,recent_window->oldScreen);
@@ -123,7 +137,7 @@ void window_draw(void)
 
 	char buffer[256];
 	pWindow window = recent_window;
-	int meow = spGetSizeFactor()*4 >> SP_ACCURACY;
+	int meow = sizeFactor*4 >> SP_ACCURACY;
 	
 	int extra_y = 0;
 	if (window->main_menu)
@@ -180,7 +194,7 @@ void window_draw(void)
 	
 	if (window->show_selection)
 	{
-		y+=(spGetSizeFactor()*8 >> SP_ACCURACY)+window->font->maxheight*3/2-SMALL_HACK;
+		y+=(sizeFactor*8 >> SP_ACCURACY)+window->font->maxheight*3/2-SMALL_HACK;
 		int to_left = -spFontWidth("{power_up}",window->font);
 		if (window->sprite_count && window->sprite_count[window_active])
 		{
@@ -194,9 +208,9 @@ void window_draw(void)
 		to_left += spFontWidth(buffer,window->font);
 		to_left /= 2;
 		spDrawSprite(screen->w/2-to_left, y, 0, spActiveSprite(window_sprite[window_active]));
-		spFontDrawRight( screen->w/2-to_left-(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "{power_down}", window->font );
-		spFontDraw     ( screen->w/2-to_left+(spGetSizeFactor()*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
-		y+=(spGetSizeFactor()*8 >> SP_ACCURACY)-SMALL_HACK;
+		spFontDrawRight( screen->w/2-to_left-(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "{power_down}", window->font );
+		spFontDraw     ( screen->w/2-to_left+(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
+		y+=(sizeFactor*8 >> SP_ACCURACY)-SMALL_HACK;
 		sprintf(buffer,"\"%s\"",window_sprite[window_active]->comment);
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
 		sprintf(buffer,"made by %s (%s)",window_sprite[window_active]->author,window_sprite[window_active]->license);
@@ -619,6 +633,7 @@ void window_resize(Uint16 w, Uint16 h)
 		spDeleteSurface(logo);
 		logo = spLoadSurfaceZoom( "./data/logo.png", spGetSizeFactor());
 	}
+	recent_window->sizeFactor = spGetSizeFactor();
 }
 
 int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))

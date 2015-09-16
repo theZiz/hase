@@ -35,6 +35,7 @@ typedef struct sWindow
 	void ( *resize )( Uint16 w, Uint16 h );
 	int cancel_to_no;
 	int zig_zag;
+	Sint32 sizeFactor;
 } tWindow;
 
 #define WN_ACT_UPDATE 0

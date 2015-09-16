@@ -912,7 +912,20 @@ int lg_calc(Uint32 steps)
 		{
 			spMapSetByID(MAP_POWER_DN,0);
 			char buffer[32];
-			pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1,rand()%SPRITE_COUNT+1);
+			//Get lowest count of sprites
+			int count = lg_game->sprite_count[0];
+			int i;
+			for (i = 1; i < SPRITE_COUNT; i++)
+				if (lg_game->sprite_count[i] < count)
+					count = lg_game->sprite_count[i];
+			//dicing sprites until one of the rarest is choosen
+			int s;
+			do
+			{
+				s = rand()%SPRITE_COUNT;
+			}
+			while (lg_game->sprite_count[s] > count);
+			pPlayer ai = join_game(lg_game,lg_get_combi_name(buffer),1,s+1);
 			if (ai)
 			{
 				ai->next = lg_ai_list;

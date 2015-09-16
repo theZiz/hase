@@ -269,8 +269,6 @@ void draw(void)
 					spEllipse(screen->w/2+x,screen->h/2+y,0,r,r,65535);
 					spSetBlending( SP_ONE );
 				}
-				//Weapon
-				//spRotozoomSurface(screen->w/2+x,screen->h/2+y,0,weapon_surface[hare->wp_y][hare->wp_x],zoom/2,zoom/2,hare->w_direction+rotation+hare->rotation);
 				int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 				//building
 				if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
@@ -278,13 +276,13 @@ void draw(void)
 					
 					int r = (zoom*weapon_explosion[w_nr] >> SP_ACCURACY+1);
 					int d = 12+weapon_explosion[w_nr]+(hare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
-					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
-					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
+					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
+					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
 					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 
-					ox = hare->x-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
-					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
+					ox = hare->x-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
+					oy = hare->y-d* spMul(spCos(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
 					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/4+6,NULL,-1))
@@ -299,13 +297,13 @@ void draw(void)
 					
 					int r = (zoom*weapon_explosion[w_nr] >> SP_ACCURACY+1);
 					int d = 12+weapon_explosion[w_nr]+(hare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
-					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
-					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
+					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
+					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
 					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 
-					ox = hare->x-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
-					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
+					ox = hare->x-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
+					oy = hare->y-d* spMul(spCos(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
 					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/4,NULL,0) == 0)
@@ -320,13 +318,13 @@ void draw(void)
 					
 					int r = (zoom*20 >> SP_ACCURACY+1);
 					int d = 12+weapon_explosion[w_nr]+(hare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
-					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
-					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
+					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
+					Sint32 oy = spMul(hare->y-posY-d* spMul(spCos(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
 					Sint32	x = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32	y = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 
-					ox = hare->x-d*-spMul(spSin(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
-					oy = hare->y-d* spMul(spCos(hare->rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
+					ox = hare->x-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
+					oy = hare->y-d* spMul(spCos(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3);
 
 					spSetBlending( SP_ONE*2/3 );
 					if (circle_is_empty(ox,oy,weapon_explosion[w_nr]/4+6,NULL,1))
@@ -343,7 +341,7 @@ void draw(void)
 					int k;
 					for (k = 0; k < CIRCLE_CHECKPOINTS; k++)
 					{
-						if (hare->circle_checkpoint_hare[k] && spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) < -SP_ONE/4)
+						if (hare->circle_checkpoint_hare[k] && spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->cam_rotation - SP_PI/2) < -SP_ONE/4)
 						{
 							Sint32 ox = spMul(hare->circle_checkpoint_hare[k]->x-posX,zoom);
 							Sint32 oy = spMul(hare->circle_checkpoint_hare[k]->y-posY,zoom);
@@ -365,8 +363,8 @@ void draw(void)
 					Sint32 w_zoom = spMax(SP_ONE/2,zoom);
 					spSpritePointer target = spActiveSprite(targeting);
 					spSetSpriteZoom(target,w_zoom,w_zoom);
-					Sint32 ox = spMul(hare->x-posX,zoom)-spMul(20*-spSin(hare->rotation+hare->w_direction-SP_PI/2),w_zoom);
-					Sint32 oy = spMul(hare->y-posY,zoom)-spMul(20* spCos(hare->rotation+hare->w_direction-SP_PI/2),w_zoom);
+					Sint32 ox = spMul(hare->x-posX,zoom)-spMul(20*-spSin(hare->cam_rotation+hare->w_direction-SP_PI/2),w_zoom);
+					Sint32 oy = spMul(hare->y-posY,zoom)-spMul(20* spCos(hare->cam_rotation+hare->w_direction-SP_PI/2),w_zoom);
 					Sint32 nx = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation)) >> SP_ACCURACY;
 					Sint32 ny = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation)) >> SP_ACCURACY;
 					//spSetBlending( SP_ONE*2/3 );
@@ -393,10 +391,10 @@ void draw(void)
 				if (hare->circle_checkpoint_hit[k])
 					pixels[X+Y*screen->w] = spGetFastRGB(0,255,0);
 				else
-				if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) < SP_ONE/4)
+				if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->cam_rotation - SP_PI/2) < SP_ONE/4)
 					pixels[X+Y*screen->w] = spGetFastRGB(0,0,255);
 				else
-				if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->rotation - SP_PI/2) > spFloatToFixed(0.7))
+				if (spCos(k*2*SP_PI/CIRCLE_CHECKPOINTS - hare->cam_rotation - SP_PI/2) > spFloatToFixed(0.7))
 					pixels[X+Y*screen->w] = spGetFastRGB(255,255,0);
 				else
 					pixels[X+Y*screen->w] = spGetFastRGB(255,0,0);
@@ -405,16 +403,42 @@ void draw(void)
 			//Health bar
 			y-=zoom*3>>14;
 			spSetBlending( SP_ONE*2/3 );
-			spRectangle( screen->w/2+x,screen->h/2+y,0,zoom >> 12,zoom >> 15,spGetRGB(255,0,0));
+			spRectangle(
+				screen->w/2+x+(hare->health*zoom/MAX_HEALTH >> 13),
+				screen->h/2+y,
+				0,
+				(MAX_HEALTH-hare->health)*zoom/MAX_HEALTH >> 12,
+				zoom >> 15,
+				spGetRGB(255,0,0));
+			if (hare->health > MAX_HEALTH)
+			{
+				spRectangle(
+					screen->w/2+x+(hare->health*zoom/MAX_HEALTH >> 13),
+					screen->h/2+y,
+					0,
+					(hare->health-MAX_HEALTH)*zoom/MAX_HEALTH >> 12,
+					zoom >> 15,
+					spGetRGB(255,255,255));
+			}
 			spSetBlending( SP_ONE );
-			spRectangle( screen->w/2+x-((MAX_HEALTH-hare->health)*zoom/MAX_HEALTH >> 13),screen->h/2+y,0,
-				hare->health*zoom/MAX_HEALTH >> 12,zoom >> 15,spGetRGB(0,255,0));
+			int use_health = spMin(MAX_HEALTH,hare->health);
+			spRectangle(
+				screen->w/2+x-((MAX_HEALTH-use_health)*zoom/MAX_HEALTH >> 13),
+				screen->h/2+y,
+				0,
+				use_health*zoom/MAX_HEALTH >> 12,
+				zoom >> 15,
+				spGetRGB(0,255,0));
 			//labels
 			y-=zoom>>15;
 			if (player[j]->computer)
 				sprintf(buffer,"%s (AI)",player[j]->name);
 			else
-				sprintf(buffer,"%s",player[j]->name);
+				//sprintf(buffer,"%s",player[j]->name);
+			{
+				Sint32 speed = spSqrt(spSquare(hare->dx)+spSquare(hare->dy));
+				sprintf(buffer,"%.3f",spFixedToFloat(speed));
+			}
 			spSetBlending( SP_ONE*2/3 );
 			if (gop_show_names())
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
@@ -724,7 +748,7 @@ void set_input()
 				input_states[INPUT_AXIS_0_LEFT] = 0;
 				input_states[INPUT_AXIS_0_RIGHT] = 0;
 			}		
-			if (gop_direction_flip() && !gop_rotation() && player[active_player]->activeHare->rotation > SP_PI/2 && player[active_player]->activeHare->rotation < SP_PI*3/2)
+			if (gop_direction_flip() && !gop_rotation() && player[active_player]->activeHare->cam_rotation > SP_PI/2 && player[active_player]->activeHare->cam_rotation < SP_PI*3/2)
 			{
 				int temp = input_states[INPUT_AXIS_0_LEFT];
 				input_states[INPUT_AXIS_0_LEFT] = input_states[INPUT_AXIS_0_RIGHT];
@@ -1191,7 +1215,7 @@ int calc(Uint32 steps)
 								if (player[active_player]->weapon_points >= weapon_cost[WP_ABOVE] && ai_shoot_tries == 1)
 								{
 									for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
-										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
+										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->cam_rotation - SP_PI/2) < -SP_ONE/4)
 										{
 											pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 											bullet->x = player[active_player]->activeHare->x;
@@ -1279,7 +1303,7 @@ int calc(Uint32 steps)
 										int y = player[active_player]->activeHare->y;
 										int w_d = spRand()%(2*SP_PI);
 										int w_p = spRand()%(SP_ONE-SP_ONE/20-1)+SP_ONE/20+1;
-										lastPoint(&x,&y,player[active_player]->activeHare->rotation+w_d+SP_PI,w_p/W_POWER_DIVISOR);
+										lastPoint(&x,&y,player[active_player]->activeHare->cam_rotation+w_d+SP_PI,w_p/W_POWER_DIVISOR);
 										int d = min_d_not_me(x,y,active_player,weapon_explosion[w_nr]);
 										if (d < lastAIDistance)
 										{
@@ -1294,7 +1318,7 @@ int calc(Uint32 steps)
 										if (player[active_player]->weapon_points > 0)
 										{
 											player[active_player]->weapon_points-=weapon_cost[w_nr];
-											shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+											shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->cam_rotation+SP_PI,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
 											ai_shoot_tries = 0;
 											lastAIDistance = 100000000;
 											use_points = 0;
@@ -1480,7 +1504,7 @@ int calc(Uint32 steps)
 							if (weapon_shoot[w_nr])
 							{
 								for (j = ((w_nr == WP_SHOTGUN)?-2:0); j <= ((w_nr == WP_SHOTGUN)?2:0); j++)
-									shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->rotation+SP_PI+j*SP_PI/64,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
+									shootBullet(player[active_player]->activeHare->x,player[active_player]->activeHare->y,player[active_player]->activeHare->w_direction+player[active_player]->activeHare->cam_rotation+SP_PI+j*SP_PI/64,player[active_player]->activeHare->w_power/W_POWER_DIVISOR,player[active_player]->activeHare->direction?1:-1,player[active_player],weapon_surface[w_nr],w_nr,1);
 							}
 							else
 							switch (w_nr)
@@ -1489,8 +1513,8 @@ int calc(Uint32 steps)
 									{
 										int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 										int r = weapon_explosion[w_nr];
-										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->cam_rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->cam_rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
 										if (circle_is_empty(ox,oy,r/4+6,NULL,-1))
 											negative_impact(ox>>SP_ACCURACY,oy>>SP_ACCURACY,r/2);
 										else
@@ -1501,8 +1525,8 @@ int calc(Uint32 steps)
 									{
 										int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 										int r = weapon_explosion[w_nr];
-										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->cam_rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->cam_rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
 										if (circle_is_empty(ox,oy,r/4,NULL,0))
 											player[active_player]->weapon_points+=weapon_cost[w_nr];
 										else
@@ -1513,8 +1537,8 @@ int calc(Uint32 steps)
 									{
 										int d = 12+weapon_explosion[w_nr]+(player[active_player]->activeHare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 										int r = weapon_explosion[w_nr];
-										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
-										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int ox = player[active_player]->activeHare->x-d*-spMul(spSin(player[active_player]->activeHare->cam_rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
+										int oy = player[active_player]->activeHare->y-d* spMul(spCos(player[active_player]->activeHare->cam_rotation+player[active_player]->activeHare->w_build_direction-SP_PI/2),player[active_player]->activeHare->w_build_distance+SP_ONE*2/3);
 										if (circle_is_empty(ox,oy,r/4+6,NULL,1))
 										{
 											hareplosion(player[active_player]->activeHare);
@@ -1546,7 +1570,7 @@ int calc(Uint32 steps)
 								case WP_ABOVE:
 									once = 0;
 									for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
-										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->rotation - SP_PI/2) < -SP_ONE/4)
+										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->cam_rotation - SP_PI/2) < -SP_ONE/4)
 										{
 											pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 											bullet->x = player[active_player]->activeHare->x;

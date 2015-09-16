@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="6" release="1" build="0"/>
+<version major="1" minor="6" release="2" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,16 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.6.2:
+- Fixed skull behaviour in end game
+- Fixed bug about random accelaration in no gravity areas
+- Made it easier to shoot while mid air (removed crosshairs hopping)
+- AI doesn't choose already choosen sprites
+- Life over max health is shown differently
+- Fixed menu resize bug
+
+1.6.1:
 - Fixed some stucking bugs
 - levels are cutted around the 1024x1024 center
 - level width and height are fixed to 1536x1536
@@ -346,7 +356,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="6" release="1" build="0" type="release"/>
+<version major="1" minor="6" release="2" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

@@ -9,6 +9,14 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.2:
+- Fixed skull behaviour in end game
+- Fixed bug about random accelaration in no gravity areas
+- Made it easier to shoot while mid air (removed crosshairs hopping)
+- AI doesn't choose already choosen sprites
+- Life over max health is shown differently
+- Fixed menu resize bug
+
 1.6.1:
 - Fixed some stucking bugs
 - levels are cutted around the 1024x1024 center
