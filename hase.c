@@ -434,11 +434,7 @@ void draw(void)
 			if (player[j]->computer)
 				sprintf(buffer,"%s (AI)",player[j]->name);
 			else
-				//sprintf(buffer,"%s",player[j]->name);
-			{
-				Sint32 speed = spSqrt(spSquare(hare->dx)+spSquare(hare->dy));
-				sprintf(buffer,"%.3f",spFixedToFloat(speed));
-			}
+				sprintf(buffer,"%s",player[j]->name);
 			spSetBlending( SP_ONE*2/3 );
 			if (gop_show_names())
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y-font->maxheight,0,buffer, font );
