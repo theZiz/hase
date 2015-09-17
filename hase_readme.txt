@@ -9,6 +9,9 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.2.1:
+- IRC should reconnect after timeout
+
 1.6.2:
 - Fixed skull behaviour in end game
 - Fixed bug about random accelaration in no gravity areas
