@@ -535,15 +535,30 @@ void draw(void)
 		spBlitSurface( screen->w-1 - tomato->w*(2*i+1)/2, screen->h-1-font->maxheight/2,0,tomato);
 	if (player[active_player]->activeHare)
 	{
+		char number[32];
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 		spFontDrawRight( screen->w-1, screen->h-1-font->maxheight*2, 0, weapon_name[w_nr], font );
+		int bar_w = spFontWidth(" 88.8 % ",font);
+		int bar_s;
 		if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
 			w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG ||
 			w_nr == WP_TELEPORT)
-			sprintf(buffer,"Distance: %i",player[active_player]->activeHare->w_build_distance*30/SP_ONE+30);
+		{
+			sprintf(buffer,"Distance:");
+			sprintf(number,"%i.%i %%",player[active_player]->activeHare->w_build_distance*100/SP_ONE,player[active_player]->activeHare->w_build_distance*1000/SP_ONE%10);
+			bar_s = spFixedToInt(player[active_player]->activeHare->w_build_distance * bar_w);
+		}
 		else
-			sprintf(buffer,"Power: %i.%i %%",player[active_player]->activeHare->w_power*100/SP_ONE,player[active_player]->activeHare->w_power*1000/SP_ONE%10);
-		spFontDrawRight( screen->w-1, screen->h-1-3*font->maxheight, 0, buffer, font );
+		{
+			sprintf(buffer,"Power:");
+			sprintf(number,"%i.%i %%",player[active_player]->activeHare->w_power*100/SP_ONE,player[active_player]->activeHare->w_power*1000/SP_ONE%10);
+			bar_s = spFixedToInt(player[active_player]->activeHare->w_power * bar_w);
+		}
+		spFontDrawRight ( screen->w-1-bar_w  , screen->h-1-3*font->maxheight, 0, buffer, font );
+		spSetPattern8(153,60,102,195,153,60,102,195);
+		spRectangle( screen->w-1-bar_w + bar_s/2, screen->h-1-3*font->maxheight + font->maxheight / 2,0, bar_s,font->maxheight,spGetHSV(SP_PI*2/3*bar_s/bar_w,255,255));
+		spDeactivatePattern();
+		spFontDrawMiddle( screen->w-1-bar_w/2, screen->h-1-3*font->maxheight, 0, number, font );
 	}
 	if (ragnarok_counter && (hase_game->options.bytewise.ragnarok_border >> 4) < 7)
 	{

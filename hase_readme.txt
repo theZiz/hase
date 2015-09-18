@@ -9,6 +9,13 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.2.2:
+- Improved game lobby GUI
+- Saving sprite selection
+- Improved main menu design
+- Improved ingame help
+- Added a power bar instead of pure percent
+
 1.6.2.1:
 - IRC should reconnect after timeout
 

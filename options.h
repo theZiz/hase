@@ -18,6 +18,7 @@ int gop_show_names();
 int gop_show_map();
 int gop_global_chat();
 int gop_first_game();
+int gop_sprite();
 
 void sop_zoom(int v);
 void sop_circle(int v);
@@ -32,6 +33,7 @@ void sop_show_names(int v);
 void sop_show_map(int v);
 void sop_global_chat(int v);
 void sop_first_game(int g);
+void sop_sprite(int v);
 
 Uint32* gop_game_options_ptr();
 int* gop_game_hares_ptr();

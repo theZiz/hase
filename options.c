@@ -21,6 +21,7 @@ Uint32 op_game_options = (2 << 4) | 2 | (3 << 12);
 int op_game_seconds = 45;
 int op_game_hares = 3;
 int op_first_game = 1;
+int op_sprite = 0;
 
 int gop_first_game()
 {
@@ -122,6 +123,11 @@ int* gop_game_seconds_ptr()
 	return &op_game_seconds;
 }
 
+int gop_sprite()
+{
+	return op_sprite;
+}
+
 void sop_zoom(int v)
 {
 	op_zoom = v & 1;
@@ -216,6 +222,11 @@ void sop_game_seconds(int seconds)
 	op_game_seconds = spMax(1,seconds/5)*5;
 }
 
+void sop_sprite(int v)
+{
+	op_sprite = spMax(0,spMin(v,SPRITE_COUNT-1));
+}
+
 void load_options()
 {
 	spConfigPointer conf = spConfigRead("config.ini","hase");
@@ -258,6 +269,8 @@ void load_options()
 			sop_game_seconds(atoi(entry->value));
 		if (strcmp(entry->key,"first_game") == 0)
 			sop_first_game(atoi(entry->value));
+		if (strcmp(entry->key,"sprite") == 0)
+			sop_sprite(atoi(entry->value));
 		entry = entry->next;
 	}
 	spNetC4AProfilePointer profile;
@@ -290,6 +303,7 @@ void save_options()
 	spConfigSetInt(conf,"game_seconds",op_game_seconds);
 	spConfigSetInt(conf,"game_hares",op_game_hares);
 	spConfigSetInt(conf,"first_game",op_first_game);
+	spConfigSetInt(conf,"sprite",op_sprite);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }

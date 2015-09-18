@@ -87,46 +87,69 @@ void lg_draw(void)
 		spFontDrawTextBlock(middle,screen->w-w-4, 3*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
 	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "{weapon}Add player  {view}Remove player", lg_font );
+	int biggest_l = spFontWidth("{weapon}",lg_font);
+	int biggest_r = spFontWidth("{power_down}",lg_font);
+	biggest_l = spMax(biggest_l,spFontWidth("{view}",lg_font));
+	biggest_r = spMax(biggest_r,spFontWidth("{power_up}",lg_font));
 	if (level_mode)
 	{
-		spFontDraw(screen->w-2-w  , h+3*lg_font->maxheight, 0, "{weapon}New level", lg_font );
-		spFontDraw(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "{view}Undo last", lg_font );
-		spFontDraw(screen->w-2-w  , h+4*lg_font->maxheight, 0, "{power_down}Load", lg_font );
-		spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Save", lg_font );
+		if (spGetSizeFactor() <= SP_ONE)
+		{
+			spFontDraw(screen->w-2-w  , h+3*lg_font->maxheight, 0, "{weapon}New level", lg_font );
+			spFontDraw(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "{power_down}Load", lg_font );
+			spFontDraw(screen->w-2-w  , h+4*lg_font->maxheight, 0, "{view}Undo Last", lg_font );
+			spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Save", lg_font );
+		}
+		else
+		{
+			spFontDrawRight(screen->w-2-w  +biggest_l, h+3*lg_font->maxheight, 0, "{weapon}", lg_font );
+			spFontDraw     (screen->w-2-w  +biggest_l, h+3*lg_font->maxheight, 0, "New level", lg_font );
+			spFontDrawRight(screen->w-2-w/2+biggest_r, h+3*lg_font->maxheight, 0, "{power_down}", lg_font );
+			spFontDraw     (screen->w-2-w/2+biggest_r, h+3*lg_font->maxheight, 0, "Load", lg_font );
+			spFontDrawRight(screen->w-2-w  +biggest_l, h+4*lg_font->maxheight, 0, "{view}", lg_font );
+			spFontDraw     (screen->w-2-w  +biggest_l, h+4*lg_font->maxheight, 0, "Undo Last", lg_font );
+			spFontDrawRight(screen->w-2-w/2+biggest_r, h+4*lg_font->maxheight, 0, "{power_up}", lg_font );
+			spFontDraw     (screen->w-2-w/2+biggest_r, h+4*lg_font->maxheight, 0, "Save", lg_font );
+		}
 		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}/{shoot}Set and back", lg_font );
 	}
 	else
 	{
+		//Add these two, because I didn't need them for the level view
+		biggest_l = spMax(biggest_l,spFontWidth("{jump}",lg_font));
+		biggest_r = spMax(biggest_r,spFontWidth("{shoot}",lg_font));
+
+
+
 		if (lg_player)
 		{
-			spFontDraw(screen->w-2-w  , h+3*lg_font->maxheight, 0, "{weapon}Add player", lg_font );
-			spFontDraw(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "{view}Remove player", lg_font );
+			spFontDrawRight(screen->w-2-w  +biggest_l, h+3*lg_font->maxheight, 0, "{weapon}", lg_font );
+			spFontDraw     (screen->w-2-w  +biggest_l, h+3*lg_font->maxheight, 0, "Add player", lg_font );
+			spFontDrawRight(screen->w-2-w  +biggest_l, h+4*lg_font->maxheight, 0, "{view}", lg_font );
+			spFontDraw     (screen->w-2-w  +biggest_l, h+4*lg_font->maxheight, 0, "Remove player", lg_font );
 		}
 		else
-			spFontDrawMiddle(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "Spectate mode!", lg_font );
+			spFontDrawMiddle(screen->w-2-3*w/4, h+7*lg_font->maxheight/2, 0, "Spectate mode!", lg_font );
 		
 		if (lg_game->admin_pw == 0)
 		{
 			if (after_start)
-				spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{jump}View replay", lg_font );
+				spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}View replay", lg_font );
 			else
-				spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "Waiting for start...", lg_font );
-			spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{shoot}Save level", lg_font );
+				spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "Waiting for start...", lg_font );
+			spFontDrawRight(screen->w-2-w/2+biggest_r, h+7*lg_font->maxheight/2, 0, "{shoot}", lg_font );
+			spFontDraw     (screen->w-2-w/2+biggest_r, h+7*lg_font->maxheight/2, 0, "Save level", lg_font );
 		}
 		else
 		{
-			if (spGetSizeFactor() <= SP_ONE)
-			{
-				spFontDrawMiddle(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_down}Add AI  {power_up}Game Setup", lg_font );
-				spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}Start game  {shoot}Level setup", lg_font );
-			}
-			else
-			{
-				spFontDraw(screen->w-2-w  , h+4*lg_font->maxheight, 0, "{power_down}Add AI", lg_font );
-				spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Game Setup", lg_font );
-				spFontDraw(screen->w-2-w  , h+5*lg_font->maxheight, 0, "{jump}Start game", lg_font );
-				spFontDraw(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{shoot}Level setup", lg_font );
-			}
+			spFontDrawRight(screen->w-2-w/2+biggest_r, h+3*lg_font->maxheight, 0, "{power_down}", lg_font );
+			spFontDraw     (screen->w-2-w/2+biggest_r, h+3*lg_font->maxheight, 0, "Add AI", lg_font );
+			spFontDrawRight(screen->w-2-w/2+biggest_r, h+4*lg_font->maxheight, 0, "{power_up}", lg_font );
+			spFontDraw     (screen->w-2-w/2+biggest_r, h+4*lg_font->maxheight, 0, "Game Setup", lg_font );
+			spFontDrawRight(screen->w-2-w  +biggest_l, h+5*lg_font->maxheight, 0, "{jump}", lg_font );
+			spFontDraw     (screen->w-2-w  +biggest_l, h+5*lg_font->maxheight, 0, "Start game", lg_font );
+			spFontDrawRight(screen->w-2-w/2+biggest_r, h+5*lg_font->maxheight, 0, "{shoot}", lg_font );
+			spFontDraw     (screen->w-2-w/2+biggest_r, h+5*lg_font->maxheight, 0, "Level Setup", lg_font );
 		}
 	}
 	//Chat

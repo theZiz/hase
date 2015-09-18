@@ -1,9 +1,9 @@
 #include "window.h"
 #include "lobbyList.h"
+#include "options.h"
 #include <stdlib.h>
 
 pWindow mg_window = NULL;
-int window_active = 0;
 spSpriteCollectionPointer window_sprite[SPRITE_COUNT];
 SDL_Surface* logo;
 
@@ -22,7 +22,7 @@ void init_window_sprites()
 
 int get_last_sprite()
 {
-	return window_active+1;
+	return gop_sprite()+1;
 }
 
 void quit_window_sprites()
@@ -144,6 +144,9 @@ void window_draw(void)
 	{
 		extra_y += logo->h/2;
 		spBlitSurface(screen->w/2,screen->h/2 - extra_y * 2,0,logo);
+		spSetSpriteZoom(spActiveSprite(window_sprite[gop_sprite()]),spGetSizeFactor(),spGetSizeFactor());
+		spDrawSprite(screen->w/2 - logo->h/4,screen->h/2 - extra_y * 2  - logo->h/4,0, spActiveSprite(window_sprite[gop_sprite()]));
+		spSetSpriteZoom(spActiveSprite(window_sprite[gop_sprite()]),SP_ONE,SP_ONE);
 	}
 	if (recent_window->zig_zag == 0)
 		extra_y -= spGetWindowSurface()->h/4;
@@ -196,24 +199,24 @@ void window_draw(void)
 	{
 		y+=(sizeFactor*8 >> SP_ACCURACY)+window->font->maxheight*3/2-SMALL_HACK;
 		int to_left = -spFontWidth("{power_up}",window->font);
-		if (window->sprite_count && window->sprite_count[window_active])
+		if (window->sprite_count && window->sprite_count[gop_sprite()])
 		{
-			if (window->sprite_count[window_active] == 1)
+			if (window->sprite_count[gop_sprite()] == 1)
 				sprintf(buffer,"{power_up} (already used one time)");
 			else
-				sprintf(buffer,"{power_up} (already used %i times)",window->sprite_count[window_active]);
+				sprintf(buffer,"{power_up} (already used %i times)",window->sprite_count[gop_sprite()]);
 		}
 		else
 			sprintf(buffer,"{power_up}");
 		to_left += spFontWidth(buffer,window->font);
 		to_left /= 2;
-		spDrawSprite(screen->w/2-to_left, y, 0, spActiveSprite(window_sprite[window_active]));
+		spDrawSprite(screen->w/2-to_left, y, 0, spActiveSprite(window_sprite[gop_sprite()]));
 		spFontDrawRight( screen->w/2-to_left-(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "{power_down}", window->font );
 		spFontDraw     ( screen->w/2-to_left+(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
 		y+=(sizeFactor*8 >> SP_ACCURACY)-SMALL_HACK;
-		sprintf(buffer,"\"%s\"",window_sprite[window_active]->comment);
+		sprintf(buffer,"\"%s\"",window_sprite[gop_sprite()]->comment);
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
-		sprintf(buffer,"made by %s (%s)",window_sprite[window_active]->author,window_sprite[window_active]->license);
+		sprintf(buffer,"made by %s (%s)",window_sprite[gop_sprite()]->author,window_sprite[gop_sprite()]->license);
 		y += window->font->maxheight-SMALL_HACK;
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
 	}
@@ -382,18 +385,19 @@ int window_calc(Uint32 steps)
 		spGetInput()->keyboard.lastSize = 1;
 	}
 	
+	if (window->show_selection || window->main_menu)
+		spUpdateSprite(spActiveSprite(window_sprite[gop_sprite()]),steps);	
 	if (window->show_selection)
 	{
-		spUpdateSprite(spActiveSprite(window_sprite[window_active]),steps);
 		if (spMapGetByID(MAP_POWER_DN))
 		{
 			spMapSetByID(MAP_POWER_DN,0);
-			window_active = (window_active + SPRITE_COUNT - 1) % SPRITE_COUNT;
+			sop_sprite((gop_sprite() + SPRITE_COUNT - 1) % SPRITE_COUNT);
 		}
 		if (spMapGetByID(MAP_POWER_UP))
 		{
 			spMapSetByID(MAP_POWER_UP,0);
-			window_active = (window_active + 1) % SPRITE_COUNT;
+			sop_sprite((gop_sprite() + 1) % SPRITE_COUNT);
 		}
 	}
 	pWindowElement selElem = window->firstElement;
@@ -668,6 +672,8 @@ int modal_window(pWindow window, void ( *resize )( Uint16 w, Uint16 h ))
 	window->oldScreen = NULL;
 	if (window->main_menu)
 		spDeleteSurface( logo );
+	if (window->show_selection)
+		save_options();
 	return res;
 }
 
