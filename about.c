@@ -6,7 +6,7 @@ void start_about(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 	pWindow window = create_window(NULL,font,"Developer:\nZiz (ziz@mailbox.org)\nGame licensed under GPLv2+\n\n"
 	"Fonts:\nPixel Mania by HiBan (CC-BY-SA)\nDejaVu Sans (Public Domain)\n\n"
 	"Music:\nAll by Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com\n\n"
-	"GFX:\n8 textures by Ziz (CC-BY-SA)\n 1 texture by Binky (CC-BY-SA)\n logo by Comradekingu (CC-BY-SA)\n\n");
+	"GFX:\n8 textures by Ziz (CC-BY-SA)\n 1 texture by Binky (CC-BY-SA)\n logo by Comradekingu, adapted by Ziz (CC-BY-SA)\n\n");
 	window->height += font->maxheight*16;
 	window->only_ok = 1;
 	modal_window(window,resize);

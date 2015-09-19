@@ -3,7 +3,7 @@ image = ./data/hase9.png
 framesize = 34, 34
 bordersize = 34, 34
 
-author = pmprog
+author = mady by pmprog
 license = CC-BY-SA
 comment = I am a guy.
 

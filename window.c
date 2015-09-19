@@ -219,7 +219,7 @@ void window_draw(void)
 			y+=(sizeFactor*6 >> SP_ACCURACY);
 		sprintf(buffer,"\"%s\"",window_sprite[gop_sprite()]->comment);
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
-		sprintf(buffer,"made by %s (%s)",window_sprite[gop_sprite()]->author,window_sprite[gop_sprite()]->license);
+		sprintf(buffer,"%s (%s)",window_sprite[gop_sprite()]->author,window_sprite[gop_sprite()]->license);
 		y += window->font->maxheight-SMALL_HACK;
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
 	}
