@@ -1,9 +1,9 @@
 default = stand left
-image = ./data/hase14.png
+image = ./data/hase25.png
 framesize = 34, 34
 bordersize = 34, 34
 
-author = Comradekingu, changed by Ziz
+author = Comradekingu
 license = CC-BY-SA
 comment = Moon moon dolphin
 
