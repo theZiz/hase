@@ -1028,7 +1028,8 @@ int calc(Uint32 steps)
 		if (spMapGetByID(MAP_WEAPON))
 		{
 			spMapSetByID(MAP_WEAPON,0);
-			speed *= 2;
+			if ((spGetSizeFactor() > SP_ONE || speed < 16) && speed < 64)
+				speed *= 2;
 		}
 		if (spMapGetByID(MAP_SHOOT))
 		{

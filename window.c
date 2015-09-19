@@ -144,9 +144,10 @@ void window_draw(void)
 	{
 		extra_y += logo->h/2;
 		spBlitSurface(screen->w/2,screen->h/2 - extra_y * 2,0,logo);
+		Sint32 zoom = spActiveSprite(window_sprite[gop_sprite()])->zoomX;
 		spSetSpriteZoom(spActiveSprite(window_sprite[gop_sprite()]),spGetSizeFactor(),spGetSizeFactor());
 		spDrawSprite(screen->w/2 - logo->h/4,screen->h/2 - extra_y * 2  - logo->h/4,0, spActiveSprite(window_sprite[gop_sprite()]));
-		spSetSpriteZoom(spActiveSprite(window_sprite[gop_sprite()]),SP_ONE,SP_ONE);
+		spSetSpriteZoom(spActiveSprite(window_sprite[gop_sprite()]),zoom,zoom);
 	}
 	if (recent_window->zig_zag == 0)
 		extra_y -= spGetWindowSurface()->h/4;
@@ -214,6 +215,8 @@ void window_draw(void)
 		spFontDrawRight( screen->w/2-to_left-(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "{power_down}", window->font );
 		spFontDraw     ( screen->w/2-to_left+(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
 		y+=(sizeFactor*8 >> SP_ACCURACY)-SMALL_HACK;
+		if (spGetSizeFactor() <= SP_ONE)
+			y+=(sizeFactor*6 >> SP_ACCURACY);
 		sprintf(buffer,"\"%s\"",window_sprite[gop_sprite()]->comment);
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
 		sprintf(buffer,"made by %s (%s)",window_sprite[gop_sprite()]->author,window_sprite[gop_sprite()]->license);
