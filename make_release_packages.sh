@@ -9,6 +9,8 @@ TIME=`date -u +"%d.%m.%Y %R"`
 eval "$RM_CALL"
 
 cat header.htm > index.htm
+echo "<p>Updated at the $TIME.</p>" >> index.htm
+echo "<ul>" >> index.htm
 echo "<?php" > symlink.php
 #echo "\$zip = new ZipArchive;" >> symlink.php
 #echo "\$res = \$zip->open('upload.zip');" >> symlink.php
