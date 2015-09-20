@@ -8,12 +8,7 @@ TIME=`date -u +"%d.%m.%Y %R"`
 
 eval "$RM_CALL"
 
-echo "<html>" > index.htm
-echo "<head>" >> index.htm
-echo "</head>" >> index.htm
-echo "<body>" >> index.htm
-echo "Updated at the $TIME." >> index.htm
-echo "<h1>$PROGRAM download links:</h1>" >> index.htm
+cat header.htm > index.htm
 echo "<?php" > symlink.php
 #echo "\$zip = new ZipArchive;" >> symlink.php
 #echo "\$res = \$zip->open('upload.zip');" >> symlink.php
@@ -41,13 +36,13 @@ do
 			cd $PROGRAM
 			../make_package.sh
 			cd ..
-			echo "<a href=$PROGRAM.pnd>$NAME</a></br>" >> ../../index.htm
+			echo "<li><a href=$PROGRAM.pnd>$NAME</a></li>" >> ../../index.htm
 			ZIP_CALL+=" $PROGRAM.pnd"
 		else
 			if [ $NAME = "i386" ] || [ $NAME = "amd64" ]; then
 				tar cfvz "$PROGRAM-$NAME-$VERSION.tar.gz" * > /dev/null
 				mv "$PROGRAM-$NAME-$VERSION.tar.gz" ../..
-				echo "<a href=$PROGRAM-$NAME-$VERSION.tar.gz>$NAME</a></br>" >> ../../index.htm
+				echo "<li><a href=$PROGRAM-$NAME-$VERSION.tar.gz>$NAME</a></li>" >> ../../index.htm
 				echo "unlink('$PROGRAM-$NAME.tar.gz');" >> ../../symlink.php
 				echo "symlink('$PROGRAM-$NAME-$VERSION.tar.gz', '$PROGRAM-$NAME.tar.gz');" >> ../../symlink.php
 				ZIP_CALL+=" $PROGRAM-$NAME-$VERSION.tar.gz"
@@ -60,14 +55,14 @@ do
 					cp ../../small_resolution_censorship/* "$PROGRAM/data"
 					mksquashfs * "$PROGRAM-$VERSION.opk" -all-root -noappend -no-exports -no-xattrs
 					mv "$PROGRAM-$VERSION.opk" ../..
-					echo "<a href=$PROGRAM.opk type=\"application/x-opk+squashfs\">$NAME</a></br>" >> ../../index.htm
+					echo "<li><a href=$PROGRAM.opk type=\"application/x-opk+squashfs\">$NAME</a></li>" >> ../../index.htm
 					echo "unlink('$PROGRAM.opk');" >> ../../symlink.php
 					echo "symlink('$PROGRAM-$VERSION.opk', '$PROGRAM.opk');" >> ../../symlink.php
 					ZIP_CALL+=" $PROGRAM-$VERSION.opk"
 				else
 					zip -9 -r "$PROGRAM-$NAME-$VERSION.zip" * > /dev/null
 					mv "$PROGRAM-$NAME-$VERSION.zip" ../..
-					echo "<a href=$PROGRAM-$NAME-$VERSION.zip>$NAME</a></br>" >> ../../index.htm
+					echo "<li><a href=$PROGRAM-$NAME-$VERSION.zip>$NAME</a></li>" >> ../../index.htm
 					echo "unlink('$PROGRAM-$NAME.zip');" >> ../../symlink.php
 					echo "symlink('$PROGRAM-$NAME-$VERSION.zip', '$PROGRAM-$NAME.zip');" >> ../../symlink.php
 					ZIP_CALL+=" $PROGRAM-$NAME-$VERSION.zip"
@@ -85,6 +80,5 @@ do
 	fi
 done
 echo "?>" >> symlink.php
-echo "</body>" >> index.htm
-echo "</html>" >> index.htm
+cat footer.htm >> index.htm
 eval "$ZIP_CALL"
