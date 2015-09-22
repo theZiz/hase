@@ -1123,9 +1123,7 @@ int calc(Uint32 steps)
 			zoomAdjust -= 32;
 			if (zoomAdjust < minZoom)
 				zoomAdjust = minZoom;
-			if ((zoomAdjust & 16383) == 0 && gop_zoom())
-				zoom_d = 0;
-			if (gop_zoom() == 0 && spMapGetByID(MAP_POWER_DN) == 0)
+			if (spMapGetByID(MAP_POWER_DN) == 0)
 				zoom_d = 0;
 		}
 		else
@@ -1134,9 +1132,7 @@ int calc(Uint32 steps)
 			zoomAdjust += 32;
 			if (zoomAdjust > maxZoom)
 				zoomAdjust = maxZoom;
-			if ((zoomAdjust & 16383) == 0 && gop_zoom())
-				zoom_d = 0;
-			if (gop_zoom() == 0 && spMapGetByID(MAP_POWER_UP) == 0)
+			if (spMapGetByID(MAP_POWER_UP) == 0)
 				zoom_d = 0;
 		}
 		if (zoomAdjust < superZoom || superZoom == 0)

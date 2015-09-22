@@ -9,6 +9,11 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.2.3:
+- Removed locking zoom option, which nobody understood
+- Added new coloured moon dolphin
+- Fixed pandora start script
+
 1.6.2.2:
 - Improved game lobby GUI
 - Saving sprite selection

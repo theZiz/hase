@@ -21,7 +21,7 @@
 
 #define KEY_POLL_MASK (1 << spMapPoolByID(MAP_JUMP))
 
-#define SPRITE_COUNT 25
+#define SPRITE_COUNT 26
 
 #ifndef DATA_FOLDER
 	#define DATA_FOLDER "."

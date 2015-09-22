@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="6" release="2" build="2"/>
+<version major="1" minor="6" release="2" build="3"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,11 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.6.2.3:
+- Removed locking zoom option, which nobody understood
+- Added new coloured moon dolphin
+- Fixed pandora start script
 
 1.6.2.2:
 - Improved game lobby GUI
@@ -366,7 +371,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="6" release="2" build="2" type="release"/>
+<version major="1" minor="6" release="2" build="3" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

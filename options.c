@@ -5,7 +5,6 @@
 #include <string.h>
 #include "client.h"
 
-int op_zoom = 1;
 int op_circle = 1;
 int op_music_volume = SP_VOLUME_MAX << (VOLUME_SHIFT-1);
 int op_sample_volume = SP_VOLUME_MAX << VOLUME_SHIFT;
@@ -61,11 +60,6 @@ void sop_show_map(int v)
 void sop_global_chat(int v)
 {
 	op_global_chat = v;
-}
-
-int gop_zoom()
-{
-	return op_zoom;
 }
 
 int gop_circle()
@@ -126,11 +120,6 @@ int* gop_game_seconds_ptr()
 int gop_sprite()
 {
 	return op_sprite;
-}
-
-void sop_zoom(int v)
-{
-	op_zoom = v & 1;
 }
 
 void sop_circle(int v)
@@ -241,8 +230,6 @@ void load_options()
 		}
 		if (strcmp(entry->key,"server") == 0)
 			sop_server(entry->value);
-		if (strcmp(entry->key,"zoom") == 0)
-			sop_zoom(atoi(entry->value));
 		if (strcmp(entry->key,"circle") == 0)
 			sop_circle(atoi(entry->value));
 		if (strcmp(entry->key,"music_volume") == 0)
@@ -287,7 +274,6 @@ void load_options()
 void save_options()
 {
 	spConfigPointer conf = spConfigRead("config.ini","hase");
-	spConfigSetInt(conf,"zoom",op_zoom);
 	spConfigSetInt(conf,"circle",op_circle);
 	spConfigSetInt(conf,"music_volume",op_music_volume);
 	spConfigSetInt(conf,"sample_volume",op_sample_volume);
@@ -316,34 +302,31 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 			switch (elem->reference)
 			{
 				case 1:
-					sop_zoom(1-gop_zoom());
-					break;
-				case 2:
 					sop_circle(1-gop_circle());
 					break;
-				case 3:
+				case 2:
 					sop_music_volume(gop_music_volume()-1);
 					break;
-				case 4:
+				case 3:
 					sop_sample_volume(gop_sample_volume()-1);
 					break;
-				case 5:
+				case 4:
 					sop_particles(gop_particles()-1);
 					break;
-				case 6:
+				case 5:
 					sop_rotation(1-gop_rotation());
 					options_feedback(window,elem->next,WN_ACT_UPDATE);
 					break;
-				case 7:
+				case 6:
 					sop_direction_flip(1-gop_direction_flip());
 					break;
-				case 8:
+				case 7:
 					sop_show_names(1-gop_show_names());
 					break;
-				case 9:
+				case 8:
 					sop_show_map(1-gop_show_map());
 					break;
-				case 10:
+				case 9:
 					sop_global_chat(1-gop_global_chat());
 					break;
 			}
@@ -352,34 +335,31 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 			switch (elem->reference)
 			{
 				case 1:
-					sop_zoom(1-gop_zoom());
-					break;
-				case 2:
 					sop_circle(1-gop_circle());
 					break;
-				case 3:
+				case 2:
 					sop_music_volume(gop_music_volume()+1);
 					break;
-				case 4:
+				case 3:
 					sop_sample_volume(gop_sample_volume()+1);
 					break;
-				case 5:
+				case 4:
 					sop_particles(gop_particles()+1);
 					break;
-				case 6:
+				case 5:
 					sop_rotation(1-gop_rotation());
 					options_feedback(window,elem->next,WN_ACT_UPDATE);
 					break;
-				case 7:
+				case 6:
 					sop_direction_flip(1-gop_direction_flip());
 					break;
-				case 8:
+				case 7:
 					sop_show_names(1-gop_show_names());
 					break;
-				case 9:
+				case 8:
 					sop_show_map(1-gop_show_map());
 					break;
-				case 10:
+				case 9:
 					sop_global_chat(1-gop_global_chat());
 					break;
 			}
@@ -389,24 +369,18 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 	switch (elem->reference)
 	{
 		case 1:
-			if (gop_zoom())
-				sprintf(elem->text,"Locking zoom: Yes");
-			else
-				sprintf(elem->text,"Locking zoom: No");
-			break;
-		case 2:
 			if (gop_circle())
 				sprintf(elem->text,"Mark active hare: Yes");
 			else
 				sprintf(elem->text,"Mark active hare: No");
 			break;
-		case 3:
+		case 2:
 			sprintf(elem->text,"Music volume: %i%%",gop_music_volume()*100/SP_VOLUME_MAX >> VOLUME_SHIFT);
 			break;
-		case 4:
+		case 3:
 			sprintf(elem->text,"Effect volume: %i%%",gop_sample_volume()*100/SP_VOLUME_MAX >> VOLUME_SHIFT);
 			break;
-		case 5:
+		case 4:
 			switch (gop_particles())
 			{
 				case 1:
@@ -423,13 +397,13 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 					break;
 			}
 			break;
-		case 6:
+		case 5:
 			if (gop_rotation())
 				sprintf(elem->text,"Rotating level: Yes");
 			else
 				sprintf(elem->text,"Rotating level: No");
 			break;
-		case 7:
+		case 6:
 			if (gop_rotation())
 				sprintf(elem->text,"(Setting deactivated)");
 			else
@@ -438,31 +412,31 @@ int options_feedback( pWindow window, pWindowElement elem, int action )
 			else
 				sprintf(elem->text,"Flip direction controls: No");
 			break;
-		case 8:
+		case 7:
 			if (gop_show_names())
 				sprintf(elem->text,"Show names: Yes");
 			else
 				sprintf(elem->text,"Show names: No");
 			break;
-		case 9:
+		case 8:
 			if (gop_show_map())
 				sprintf(elem->text,"Show map: Yes");
 			else
 				sprintf(elem->text,"Show map: No");
 			break;
-		case 10:
+		case 9:
 			if (gop_global_chat())
 				sprintf(elem->text,"Show global chat ingame: Yes");
 			else
 				sprintf(elem->text,"Show global chat ingame: No");
 			break;
-		case 11:
+		case 10:
 			sprintf(elem->text,"Ingame button mapping");
 			break;
-		case 12:
+		case 11:
 			sprintf(elem->text,"Menu button mapping");
 			break;
-		case 13:
+		case 12:
 			sprintf(elem->text,"Quit game");
 			break;
 	}
@@ -474,36 +448,35 @@ int options_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),in
 	pWindow window = create_window(options_feedback,font,"Options");
 	window->only_ok = 1;
 	add_window_element(window,0,1);
-	add_window_element(window,0,2);
+	add_window_element(window,2,2);
 	add_window_element(window,2,3);
-	add_window_element(window,2,4);
+	add_window_element(window,0,4);
 	add_window_element(window,0,5);
 	add_window_element(window,0,6);
 	add_window_element(window,0,7);
 	add_window_element(window,0,8);
 	add_window_element(window,0,9);
-	add_window_element(window,0,10);
+	add_window_element(window,-1,10);
 	add_window_element(window,-1,11);
-	add_window_element(window,-1,12);
 	if (quit)
-		add_window_element(window,-1,13);
+		add_window_element(window,-1,12);
 	int con = 1;
 	int ret = 0;
 	while (con)
 	{
 		con = 0;
 		int res = modal_window(window,resize);
-		if (window->selection == 10 && res == 1)
+		if (window->selection == 9 && res == 1)
 		{
 			con = 1;
 			mapping_window(font,resize,1);
 		}
-		if (window->selection == 11 && res == 1)
+		if (window->selection == 10 && res == 1)
 		{
 			con = 1;
 			mapping_window(font,resize,0);
 		}
-		if (window->selection == 12 && res == 1)
+		if (window->selection == 11 && res == 1)
 			ret = 1;	
 	}
 	delete_window(window);
