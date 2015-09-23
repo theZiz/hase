@@ -236,7 +236,7 @@ int ll_calc(Uint32 steps)
 	{
 		spMapSetByID(MAP_CHAT,0);
 		char m[256] = "";
-		if (text_box(ll_font,ll_resize,"Enter Message:",m,256,0,NULL,1) == 1)
+		if (text_box(ll_font,ll_resize,"Enter Message:",m,256,0,NULL,1) == 1 && m[0])
 			send_chat(NULL,m);
 	}
 	if (spMapGetByID(MAP_WEAPON) && ll_reload_now == 0)

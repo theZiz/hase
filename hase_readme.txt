@@ -9,6 +9,9 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.2.4:
+- no empty messages in lobby
+
 1.6.2.3:
 - Removed locking zoom option, which nobody understood
 - Added new coloured moon dolphin

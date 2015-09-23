@@ -678,7 +678,7 @@ int lg_calc(Uint32 steps)
 	{
 		spMapSetByID(MAP_CHAT,0);
 		char m[256] = "";
-		if (text_box(lg_font,lg_resize,"Enter Message:",m,256,0,NULL,1) == 1)
+		if (text_box(lg_font,lg_resize,"Enter Message:",m,256,0,NULL,1) == 1 && m[0])
 			send_chat(lg_game,m);
 	}
 	if (spMapGetByID(MAP_MENU))
