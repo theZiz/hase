@@ -1,6 +1,6 @@
 #!/bin/bash
 PROGRAM="hase"
-VERSION="1.6.2.3"
+VERSION="1.6.2.4"
 DEST=./build/*
 ZIP_CALL="7z a -t7z -m0=LZMA -mmt=on -mx=9 -md=256m -mfb=512 -ms=on upload.7z"
 RM_CALL="rm upload.7z"
