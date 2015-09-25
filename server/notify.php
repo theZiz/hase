@@ -5,7 +5,7 @@
 	</head>
 	<body>
 		<h1>Hase notify tool</h1>
-		<p>This page will refresh every 10 seconds and will tell you with a notification if a new game is created. Keep sure to allow notifications, otherwise the whole page doesn't make much sense. ;) The notification will be resend until the game starts.</p>
+		<p>This page will refresh every 10 seconds and will tell you with a notification if a new game is created. Keep sure to allow notifications, otherwise the whole page doesn't make much sense. ;) The notification will be resend until the game starts. Just leave this tab open in background all the time!</p>
 		<!--<p>Next update in:</p>
 		<img src="./countdown.gif" alt="countdown"/> !-->
 		<script type="text/javascript">
