@@ -52,7 +52,7 @@
 						$days = (int)$diff;
 						echo "<li><b>$game_name</b> Done since $days:$hours:$minutes:$seconds</li>", PHP_EOL;
 				}
-				if ($create_date > $now-15) //younger than 10 seconds?
+				if ($create_date > $now-15 && $status == 0) //younger than 15 seconds?
 				{
 					echo '<script type="text/javascript">', PHP_EOL;
 					echo 'if (Notification.permission === "granted")', PHP_EOL;
