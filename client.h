@@ -6,7 +6,7 @@
 #include <sparrow3d.h>
 #include <string.h>
 
-#define CLIENT_VERSION 16
+#define CLIENT_VERSION 17
 
 #define TRACE_COUNT 16
 
@@ -48,8 +48,8 @@ typedef union
 	{
 		Uint8 ap_health;
 		Uint8 ragnarok_border;
-		Uint8 distant_damage;
-		Uint8 reserved;
+		Uint8 distant_damage_handicap_count;
+		Uint8 handicap_health;
 	} bytewise;
 } game_options_union;
 

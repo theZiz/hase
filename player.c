@@ -740,7 +740,16 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 		circle_checkpoint_u[a] = spCos(a*2*SP_PI/CIRCLE_CHECKPOINTS);
 		circle_checkpoint_v[a] = spSin(a*2*SP_PI/CIRCLE_CHECKPOINTS);
 	}
-	MAX_HEALTH = ((options.bytewise.ap_health & 15) + 2) * 25;
+	int PLAYER_MAX_HEALTH = ((options.bytewise.ap_health & 15) + 2) * 25;
+	int ai_health_diff = ((options.bytewise.handicap_health & 15) - 7) * 25;
+	int ai_hare_diff = (options.bytewise.distant_damage_handicap_count >> 4) - 8;
+	int AI_MAX_HEALTH = PLAYER_MAX_HEALTH + ai_health_diff;
+	if (AI_MAX_HEALTH < 50)
+		AI_MAX_HEALTH = 50;
+	int ai_hc = hc + ai_hare_diff;
+	if (ai_hc < 1)
+		ai_hc = 1;
+	MAX_HEALTH = spMax(PLAYER_MAX_HEALTH, AI_MAX_HEALTH);
 	lastAIDistance = 100000000;
 	dropItem = NULL;
 	next_player_go = 0;
@@ -765,7 +774,7 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 		player[i]->d_time = 0;
 		player[i]->d_health = 0;
 		player[i]->time = 0;
-		for (j = 0; j < hc; j++)
+		for (j = 0; j < (player[i]->computer?ai_hc:hc); j++)
 		{
 			pHare hare = add_hare(&(player[i]->firstHare));
 			hare->wp_x = 0;
@@ -792,7 +801,10 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 			hare->y = y << SP_ACCURACY;
 			hare->dx = 0;
 			hare->dy = 0;
-			hare->health = MAX_HEALTH;
+			if (player[i]->computer)
+				hare->health = AI_MAX_HEALTH;
+			else
+				hare->health = PLAYER_MAX_HEALTH;
 			hare->cam_rotation = hare->rotation;
 			char buffer[256];
 			sprintf(buffer,"./sprites/hase%i.ssc",player[i]->nr);

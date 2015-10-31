@@ -9,6 +9,9 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.3:
+- Added optional handicaps for the AI to make the game harder or easier
+
 1.6.2.4:
 - no empty messages in lobby
 

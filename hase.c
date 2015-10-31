@@ -485,6 +485,21 @@ void draw(void)
 	}
 	
 	y = screen->h - alive_count * (font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY));
+	int max_hare_per_player = 0;
+	for (j = 0; j < player_count; j++)
+	{
+		pHare hare = player[j]->firstHare;
+		int c = 1;
+		if (hare)
+			hare = hare->next;
+		while (hare != player[j]->firstHare)
+		{
+			c++;
+			hare = hare->next;
+		}
+		if (c > max_hare_per_player)
+			max_hare_per_player = c;
+	}
 	for (j = 0; j < player_count; j++)
 	{
 		if (player[j]->firstHare == NULL)
@@ -499,8 +514,8 @@ void draw(void)
 			hare = hare->next;
 		}
 		while (hare != player[j]->firstHare);
-		
-		int w = health*screen->w/(hase_game->hares_per_player*MAX_HEALTH*5);
+				
+		int w = health*screen->w/(max_hare_per_player*MAX_HEALTH*5);
 		if  (j != active_player)
 			spSetPattern8(153,60,102,195,153,60,102,195);
 		spRectangle(w/2, y+font->maxheight*3/8,0,w,font->maxheight*3/4,spSpriteAverageColor(hare->hase->active));

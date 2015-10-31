@@ -16,7 +16,7 @@ int op_show_map = 1;
 int op_global_chat = 1;
 char op_server[512] = "ziz.gp2x.de/hase.php";
 char op_username[32] = SP_DEVICE_STRING" User";
-Uint32 op_game_options = (2 << 4) | 2 | (3 << 12);
+Uint32 op_game_options = (2 << 0) | (2 << 4) | (0 << 8) | (3 << 12) | (0 << 16) | (8 << 20) | (7 << 24);
 int op_game_seconds = 45;
 int op_game_hares = 3;
 int op_first_game = 1;
@@ -180,11 +180,14 @@ void sop_game_options(Uint32 options)
 {
 	game_options_union opu;
 	opu.compressed = options;
-	int ap = opu.bytewise.ap_health >> 4;
 	int health = opu.bytewise.ap_health & 15;
-	int ragnarok = opu.bytewise.ragnarok_border >> 4;
+	int ap = opu.bytewise.ap_health >> 4;
 	int border = opu.bytewise.ragnarok_border & 15;
-	int distant_damage = opu.bytewise.distant_damage;
+	int ragnarok = opu.bytewise.ragnarok_border >> 4;
+	int distant_damage = opu.bytewise.distant_damage_handicap_count & 15;
+	int hdc_count = opu.bytewise.distant_damage_handicap_count >> 4;
+	int hdc_health = opu.bytewise.handicap_health & 15;
+
 	if (ap > 4)
 		ap = 4;
 	if (health > 6)
@@ -195,9 +198,14 @@ void sop_game_options(Uint32 options)
 		border = 1;
 	if (distant_damage > 1)
 		distant_damage = 1;
+	if (hdc_health == 0)
+		hdc_health = 7;
+	if (hdc_count == 0)
+		hdc_count = 8;
 	opu.bytewise.ap_health = (ap << 4) | (health & 15);
 	opu.bytewise.ragnarok_border = (ragnarok << 4) | (border & 15);
-	opu.bytewise.distant_damage = distant_damage;
+	opu.bytewise.distant_damage_handicap_count = (hdc_count << 4) | (distant_damage & 15);
+	opu.bytewise.handicap_health = (hdc_health & 15);
 	op_game_options = opu.compressed;
 }
 

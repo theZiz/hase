@@ -52,7 +52,11 @@ void lg_draw(void)
 	spFontDrawMiddle(2+l_w/2, 5, 0, buffer, lg_font );
 	//Informations
 	int w = screen->w-8-l_w;
-	sprintf(buffer,"Turn: %is   Hares: %i",lg_game->seconds_per_turn,lg_game->hares_per_player);
+	if ((lg_game->options.bytewise.distant_damage_handicap_count >> 4) != 8 &&
+		(lg_game->options.bytewise.handicap_health & 15) != 7)
+		sprintf(buffer,"Turn: %is   Hares: %i   AI handicap",lg_game->seconds_per_turn,lg_game->hares_per_player);
+	else
+		sprintf(buffer,"Turn: %is   Hares: %i   AI normal",lg_game->seconds_per_turn,lg_game->hares_per_player);
 	spFontDraw(screen->w-w, 0*lg_font->maxheight, 0, buffer, lg_font );
 
 	if (lg_game->options.bytewise.ragnarok_border & 15)
@@ -75,7 +79,7 @@ void lg_draw(void)
 		default:
 			sprintf(buffer,"Ragnarök: %i",(lg_game->options.bytewise.ragnarok_border >> 4)*5);
 	}
-	if (lg_game->options.bytewise.distant_damage)
+	if (lg_game->options.bytewise.distant_damage_handicap_count & 15)
 		sprintf(&buffer[strlen(buffer)],"   Distant dmg: Yes");
 	else
 		sprintf(&buffer[strlen(buffer)],"   Distant dmg: No");
@@ -1042,7 +1046,7 @@ int lg_reload(void* dummy)
 	return lg_game->status;
 }
 
-Uint32 lg_game_options = (2 << 4) | 1 | (3 << 12);
+Uint32 lg_game_options = (2 << 0) | (2 << 4) | (0 << 8) | (3 << 12) | (0 << 16) | (8 << 20) | (7 << 24);
 int lg_game_seconds = 45;
 int lg_game_hares = 3;
 
@@ -1050,11 +1054,13 @@ int game_options_feedback( pWindow window, pWindowElement elem, int action )
 {
 	game_options_union options;
 	options.compressed = lg_game_options;
-	int ap = options.bytewise.ap_health >> 4;
 	int health = options.bytewise.ap_health & 15;
-	int ragnarok = options.bytewise.ragnarok_border >> 4;
+	int ap = options.bytewise.ap_health >> 4;
 	int border = options.bytewise.ragnarok_border & 15;
-	int distant_damage = options.bytewise.distant_damage;
+	int ragnarok = options.bytewise.ragnarok_border >> 4;
+	int distant_damage = options.bytewise.distant_damage_handicap_count & 15;
+	int hdc_count = options.bytewise.distant_damage_handicap_count >> 4;
+	int hdc_health = options.bytewise.handicap_health & 15;
 	switch (action)
 	{
 		case WN_ACT_LEFT:
@@ -1092,6 +1098,16 @@ int game_options_feedback( pWindow window, pWindowElement elem, int action )
 				case 7:
 					distant_damage = 1-distant_damage;
 					break;
+				case 8:
+					hdc_count--;
+					if (hdc_count < 1)
+						hdc_count = 15;
+					break;
+				case 9:
+					hdc_health--;
+					if (hdc_health < 1)
+						hdc_health = 15;
+					break;
 			}
 			break;
 		case WN_ACT_RIGHT:
@@ -1127,6 +1143,16 @@ int game_options_feedback( pWindow window, pWindowElement elem, int action )
 				case 7:
 					distant_damage = 1-distant_damage;
 					break;
+				case 8:
+					hdc_count++;
+					if (hdc_count > 15)
+						hdc_count = 1;
+					break;
+				case 9:
+					hdc_health++;
+					if (hdc_health > 15)
+						hdc_health = 1;
+					break;
 			}
 			break;
 	}
@@ -1156,10 +1182,13 @@ int game_options_feedback( pWindow window, pWindowElement elem, int action )
 			else
 				sprintf(elem->text,"Long shot extra damage: No");			
 			break;
+		case 8: sprintf(elem->text,"AI handicap hares: %i",hdc_count-8); break;
+		case 9: sprintf(elem->text,"AI handicap health: %i",(hdc_health-7)*25); break;
 	}
 	options.bytewise.ap_health = (ap << 4) | (health & 15);
 	options.bytewise.ragnarok_border = (ragnarok << 4) | (border & 15);
-	options.bytewise.distant_damage = distant_damage;
+	options.bytewise.distant_damage_handicap_count = (hdc_count << 4) | (distant_damage & 15);
+	options.bytewise.handicap_health = (hdc_health & 15);
 	lg_game_options = options.compressed;
 	return 0;
 }
@@ -1177,6 +1206,8 @@ int game_options(Uint32 *game_opt,int* game_seconds,int* game_hares,spFontPointe
 	add_window_element(window,0,5);
 	add_window_element(window,0,6);
 	add_window_element(window,0,7);
+	add_window_element(window,0,8);
+	add_window_element(window,0,9);
 	int result = modal_window(window,resize);
 	delete_window(window);	
 	*game_opt = lg_game_options;

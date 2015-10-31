@@ -274,7 +274,7 @@ void drawBullets()
 				spFontDrawMiddle( screen->w/2+x,screen->h/2+y,0, buffer, font );
 			}
 			else
-			if (hase_game->options.bytewise.distant_damage)
+			if (hase_game->options.bytewise.distant_damage_handicap_count & 15)
 			{
 				char buffer[32];
 				sprintf(buffer,"%i%%",spMin(200,momBullet->age/10));
@@ -626,7 +626,7 @@ int do_damage(Sint32 x,Sint32 y,pBullet bullet,pHare hare,pPlayer p,Sint32 *mod_
 			default:
 				damage = *d*DMG_HEALTH/weapon_health_divisor[bullet->kind];
 		}
-		if (hase_game->options.bytewise.distant_damage && bullet->kind != WP_ABOVE)
+		if ((hase_game->options.bytewise.distant_damage_handicap_count & 15) && bullet->kind != WP_ABOVE)
 		{
 			if (bullet->age < 2000)
 				damage = damage * bullet->age / 1000;
