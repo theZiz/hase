@@ -809,10 +809,10 @@ void set_input()
 			if (spMapGetByID(MAP_VIEW) != button_states[MAP_VIEW])
 				input_states[INPUT_BUTTON_4] = spMapGetByID(MAP_VIEW);
 
-			if (spMapGetByID(MAP_CHAT) != button_states[MAP_CHAT])
-				input_states[INPUT_ZOMBIE] = spMapGetByID(MAP_CHAT);
-			if (spMapGetByID(MAP_MENU) != button_states[MAP_MENU])
-				input_states[INPUT_RESERVED] = spMapGetByID(MAP_MENU);
+			//if (spMapGetByID(MAP_CHAT) != button_states[MAP_CHAT])
+			//	input_states[INPUT_ZOMBIE] = spMapGetByID(MAP_CHAT);
+			//if (spMapGetByID(MAP_MENU) != button_states[MAP_MENU])
+			//	input_states[INPUT_RESERVED] = spMapGetByID(MAP_MENU);
 		}
 		else
 			memset(input_states,0,sizeof(int)*12);

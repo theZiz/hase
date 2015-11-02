@@ -63,7 +63,7 @@ void lg_draw(void)
 		ai_hc = 1;
 	int player_sum = lg_game->hares_per_player * PLAYER_MAX_HEALTH;
 	int ai_sum = ai_hc * AI_MAX_HEALTH;
-	int ai_percent = (ai_sum - player_sum) * 100 / player_sum;
+	int ai_percent = (ai_sum) * 100 / player_sum;
 	sprintf(buffer,"Turn: %is   Hares: %i   AI: %i%%",lg_game->seconds_per_turn,lg_game->hares_per_player,ai_percent);
 	spFontDraw(screen->w-w, 0*lg_font->maxheight, 0, buffer, lg_font );
 
