@@ -52,21 +52,29 @@ void lg_draw(void)
 	spFontDrawMiddle(2+l_w/2, 5, 0, buffer, lg_font );
 	//Informations
 	int w = screen->w-8-l_w;
-	if ((lg_game->options.bytewise.distant_damage_handicap_count >> 4) != 8 &&
-		(lg_game->options.bytewise.handicap_health & 15) != 7)
-		sprintf(buffer,"Turn: %is   Hares: %i   AI handicap",lg_game->seconds_per_turn,lg_game->hares_per_player);
-	else
-		sprintf(buffer,"Turn: %is   Hares: %i   AI normal",lg_game->seconds_per_turn,lg_game->hares_per_player);
+	int PLAYER_MAX_HEALTH = ((lg_game->options.bytewise.ap_health & 15) + 2) * 25;
+	int ai_health_diff = ((lg_game->options.bytewise.handicap_health & 15) - 7) * 25;
+	int ai_hare_diff = (lg_game->options.bytewise.distant_damage_handicap_count >> 4) - 8;
+	int AI_MAX_HEALTH = PLAYER_MAX_HEALTH + ai_health_diff;
+	if (AI_MAX_HEALTH < 50)
+		AI_MAX_HEALTH = 50;
+	int ai_hc = lg_game->hares_per_player + ai_hare_diff;
+	if (ai_hc < 1)
+		ai_hc = 1;
+	int player_sum = lg_game->hares_per_player * PLAYER_MAX_HEALTH;
+	int ai_sum = ai_hc * AI_MAX_HEALTH;
+	int ai_percent = (ai_sum - player_sum) * 100 / player_sum;
+	sprintf(buffer,"Turn: %is   Hares: %i   AI: %i%%",lg_game->seconds_per_turn,lg_game->hares_per_player,ai_percent);
 	spFontDraw(screen->w-w, 0*lg_font->maxheight, 0, buffer, lg_font );
 
 	if (lg_game->options.bytewise.ragnarok_border & 15)
 		sprintf(buffer,"AP: %i   HP: %i   Infinite border",
 			((lg_game->options.bytewise.ap_health >> 4)+1),
-			((lg_game->options.bytewise.ap_health & 15)+2)*25);
+			PLAYER_MAX_HEALTH);
 	else
 		sprintf(buffer,"AP: %i   HP: %i   Killing border",
 			((lg_game->options.bytewise.ap_health >> 4)+1),
-			((lg_game->options.bytewise.ap_health & 15)+2)*25);
+			PLAYER_MAX_HEALTH);
 	spFontDraw(screen->w-w, 1*lg_font->maxheight, 0, buffer, lg_font );
 	switch (lg_game->options.bytewise.ragnarok_border >> 4)
 	{

@@ -521,14 +521,14 @@ void draw(void)
 		spRectangle(w/2, y+font->maxheight*3/8,0,w,font->maxheight*3/4,spSpriteAverageColor(hare->hase->active));
 		spDeactivatePattern();
 
-		sprintf(buffer,"%i/%i",health,hase_game->hares_per_player*MAX_HEALTH);
+		sprintf(buffer,"%i (%i)",health,count);
 		int width = spFontWidth(buffer,font);
 		int pos_x = w/2-width/2;
 		if (pos_x < 0)
 			pos_x = 0;
 		spFontDraw(pos_x,y-font->maxheight/8,0,buffer,font);
 		w = spMax(w,width);
-		sprintf(buffer,"%s (%i)",player[j]->name,count);
+		sprintf(buffer,"%s",player[j]->name);
 		w += spFontDraw(w+2, y-font->maxheight/8, 0, buffer, font );
 
 		if (player[j]->d_health)
