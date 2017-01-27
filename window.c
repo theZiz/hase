@@ -69,6 +69,14 @@ pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, in
 	window->cancel_to_no = 0;
 	window->zig_zag = 1;
 	window->sizeFactor = spGetSizeFactor();
+	int i = SP_INPUT_BUTTON_COUNT;
+	while (i --> 0 )
+	{
+		window->button[i].x = -1;
+		window->button[i].y = -1;
+		window->button[i].w = -1;
+		window->button[i].h = -1;
+	}
 	return window;
 }
 
@@ -106,6 +114,90 @@ pWindowElement add_window_element(pWindow window,int type,int reference)
 }
 
 pWindow recent_window = NULL;
+
+typedef enum
+{
+	LEFT,
+	MIDDLE,
+	RIGHT
+} window_text_positon;
+
+static void window_draw_buttons(window_text_positon position, int x, int y, char const * const text__)
+{
+	int l = strlen(text__);
+	char text_buffer[l+1];
+	memcpy(text_buffer,text__,(l+1)*sizeof(char));
+	char* text = text_buffer;
+	int width = spFontWidth( text, recent_window->font );
+	switch (position)
+	{
+		case LEFT:
+			break;
+		case MIDDLE:
+			x -= width/2;
+			break;
+		case RIGHT:
+			x -= width;
+			break;
+	}
+	int i = -1;
+	int in_button = 0;
+	do
+	{
+		++i;
+		int draw_text = 0;
+		if (!in_button && text[i] == '{')
+		{
+			in_button = 1;
+			draw_text = i > 0;
+		}
+		if (in_button && (text[i] == ' ' || text[i] == 0))
+		{
+			in_button = 0;
+			draw_text = i > 0;
+		}
+
+		if (draw_text)
+		{
+			char temp = text[i];
+			text[i] = 0;
+			spFontDraw( x, y, 0, text, recent_window->font );
+			if (!in_button)
+			{
+				int B0 = spMax(spGetSizeFactor()>>17,1);
+				int B1 = spMax(spGetSizeFactor()>>16,1);
+				int B2 = spMax(spGetSizeFactor()>>15,1);
+				int B4 = spMax(spGetSizeFactor()>>14,1);
+				width = spFontWidth( text, recent_window->font ) + B4;
+				int height = recent_window->font->maxheight + B4;
+				int X = x +  width/2 - B2;
+				int Y = y + height/2 - B2;
+				spRectangleBorder( X, Y, 0, width, height, B1, B1, LL_FG);
+				spRectangle( x         - B2, y          - B2, 0, B0, B0, LL_BG );
+				spRectangle( x + width - B2, y          - B2, 0, B0, B0, LL_BG );
+				spRectangle( x         - B2, y + height - B2, 0, B0, B0, LL_BG );
+				spRectangle( x + width - B2, y + height - B2, 0, B0, B0, LL_BG );
+				int j = 0;
+				for (; text[j] && text[j] != '}';j++);
+				if (text[j])
+				{
+					text[j] = 0;
+					int id = spMapPoolByName( &(text[1]) );
+					recent_window->button[id].x = x;
+					recent_window->button[id].y = y;
+					recent_window->button[id].w = width;
+					recent_window->button[id].h = height;
+					text[j] = '}';
+				}
+			}
+			x += spFontWidth( text, recent_window->font );
+			text[i] = temp;
+			text = &(text[i]);
+			i = -1;
+		}
+	}
+	while (text[i]);
+}
 
 void window_draw(void)
 {
@@ -212,8 +304,8 @@ void window_draw(void)
 		to_left += spFontWidth(buffer,window->font);
 		to_left /= 2;
 		spDrawSprite(screen->w/2-to_left, y, 0, spActiveSprite(window_sprite[gop_sprite()]));
-		spFontDrawRight( screen->w/2-to_left-(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "{power_down}", window->font );
-		spFontDraw     ( screen->w/2-to_left+(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
+		window_draw_buttons( RIGHT, screen->w/2-to_left-(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, "{power_down}" );
+		window_draw_buttons(  LEFT, screen->w/2-to_left+(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, buffer );
 		y+=(sizeFactor*8 >> SP_ACCURACY)-SMALL_HACK;
 		if (spGetSizeFactor() <= SP_ONE)
 			y+=(sizeFactor*6 >> SP_ACCURACY);
@@ -232,9 +324,9 @@ void window_draw(void)
 		{
 			case 0: case 2:
 				if (window->only_ok)
-					spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  {jump}Okay", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, SP_PAD_NAME": Change  {jump}Okay" );
 				else
-					spFontDrawMiddle( screen->w/2,y, 0, SP_PAD_NAME": Change  {jump}Okay  {shoot}Cancel", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, SP_PAD_NAME": Change  {jump}Okay  {shoot}Cancel" );
 				break;
 			case 1:
 				if (spGetVirtualKeyboardState() == SP_VIRTUAL_KEYBOARD_ALWAYS)
@@ -244,50 +336,50 @@ void window_draw(void)
 						if (window->only_ok)
 						{
 							if (window->firstElement->next)
-								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Back", window->font );
+								window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Enter letter {view}<- {chat}Back" );
 							else
-								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Okay", window->font );
+								window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Enter letter {view}<- {chat}Okay" );
 						}
 						else
 						{
 							if (window->firstElement->next)
-								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}/{shoot}Back", window->font );
+								window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Enter letter {view}<- {chat}/{shoot}Back" );
 							else
 							if (window->insult_button)
-								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Letter {view}<- {chat}Ok {shoot}Cancel {weapon}Insult", window->font );
+								window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Letter {view}<- {chat}Ok {shoot}Cancel {weapon}Insult" );
 							else
-								spFontDrawMiddle( screen->w/2,y, 0, "{jump}Enter letter {view}<- {chat}Okay {shoot}Cancel", window->font );
+								window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Enter letter {view}<- {chat}Okay {shoot}Cancel" );
 						}
 					}
 					else
 					if (window->only_ok)
-						spFontDrawMiddle( screen->w/2,y, 0, "{chat}Change  {jump}Okay", window->font );
+						window_draw_buttons( MIDDLE, screen->w/2,y, "{chat}Change  {jump}Okay" );
 					else
-						spFontDrawMiddle( screen->w/2,y, 0, "{chat}Change  {jump}Okay  {shoot}Cancel", window->font );
+						window_draw_buttons( MIDDLE, screen->w/2,y, "{chat}Change  {jump}Okay  {shoot}Cancel" );
 				}
 				else
 				if (window->only_ok)
-					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  {jump}Okay", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, "Keyboard: Change  {jump}Okay" );
 				else
 				if (window->insult_button)
-					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  {jump}Okay  {shoot}Cancel  {weapon}Insult", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, "Keyboard: Change  {jump}Okay  {shoot}Cancel  {weapon}Insult" );
 				else
-					spFontDrawMiddle( screen->w/2,y, 0, "Keyboard: Change  {jump}Okay  {shoot}Cancel", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, "Keyboard: Change  {jump}Okay  {shoot}Cancel" );
 				break;
 			case -1:
 				if (window->main_menu)
-					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Select  {shoot}Exit", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Select  {shoot}Exit" );
 				else
 				if (window->only_ok)
-					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Select  {shoot}Back", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Select  {shoot}Back" );
 				else
 				if (window->cancel_to_no)
-					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Yes  {shoot}No", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Yes  {shoot}No" );
 				else
-					spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay  {shoot}Cancel", window->font );
+					window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Okay  {shoot}Cancel" );
 				break;
 			case -2:
-				spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay", window->font );
+				window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Okay" );
 				break;
 		}
 	}
@@ -295,9 +387,9 @@ void window_draw(void)
 	if (window->do_flip)
 	{
 		if (window->only_ok)
-			spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay", window->font );
+			window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Okay" );
 		else
-			spFontDrawMiddle( screen->w/2,y, 0, "{jump}Okay  {shoot}Cancel", window->font );
+			window_draw_buttons( MIDDLE, screen->w/2,y, "{jump}Okay  {shoot}Cancel" );
 	}
 	if (window->do_flip)
 		spFlip();
@@ -376,6 +468,22 @@ int last_window_pause;
 int window_calc(Uint32 steps)
 {
 	pWindow window = recent_window;
+	if ( spGetInput()->touchscreen.pressed )
+	{
+		int i = SP_INPUT_BUTTON_COUNT;
+		int mx = spGetInput()->touchscreen.x;
+		int my = spGetInput()->touchscreen.y;
+		while (i --> 0 )
+			if ( window->button[i].x + window->button[i].w >= mx &&
+				window->button[i].x <= mx &&
+				window->button[i].y + window->button[i].h >= my &&
+				window->button[i].y <= my )
+			{
+				spGetInput()->button[i] = 1;
+				spGetInput()->touchscreen.pressed = 0;
+				break;
+			}
+	}
 	if (window->insult_button && spMapGetByID(MAP_WEAPON) && spIsKeyboardPolled())
 	{
 		spMapSetByID(MAP_WEAPON,0);
