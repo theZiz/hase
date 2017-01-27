@@ -25,6 +25,9 @@ spTextBlockPointer lg_chat_block;
 
 void resize( Uint16 w, Uint16 h )
 {
+	#ifdef DESKTOP
+		SDL_ShowCursor( SDL_ENABLE );
+	#endif
 	screen = spGetWindowSurface();
 	spSelectRenderTarget(screen);
 	spFontSetShadeColor(0);
