@@ -42,7 +42,7 @@ typedef struct sWindow
 		int y;
 		int w;
 		int h;
-	} button[ SP_INPUT_BUTTON_COUNT ];
+	} button[ SP_MAPPING_MAX ];
 } tWindow;
 
 #define WN_ACT_UPDATE 0

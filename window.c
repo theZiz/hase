@@ -69,7 +69,7 @@ pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, in
 	window->cancel_to_no = 0;
 	window->zig_zag = 1;
 	window->sizeFactor = spGetSizeFactor();
-	int i = SP_INPUT_BUTTON_COUNT;
+	int i = SP_MAPPING_MAX;
 	while (i --> 0 )
 	{
 		window->button[i].x = -1;
@@ -156,7 +156,6 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 			in_button = 0;
 			draw_text = i > 0;
 		}
-
 		if (draw_text)
 		{
 			char temp = text[i];
@@ -182,11 +181,14 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 				if (text[j])
 				{
 					text[j] = 0;
-					int id = spMapPoolByName( &(text[1]) );
-					recent_window->button[id].x = x;
-					recent_window->button[id].y = y;
-					recent_window->button[id].w = width;
-					recent_window->button[id].h = height;
+					int id = spMapIDByName( &(text[1]) );
+					if ( id >= 0 )
+					{
+						recent_window->button[id].x = x;
+						recent_window->button[id].y = y;
+						recent_window->button[id].w = width;
+						recent_window->button[id].h = height;
+					}
 					text[j] = '}';
 				}
 			}
@@ -470,19 +472,21 @@ int window_calc(Uint32 steps)
 	pWindow window = recent_window;
 	if ( spGetInput()->touchscreen.pressed )
 	{
-		int i = SP_INPUT_BUTTON_COUNT;
 		int mx = spGetInput()->touchscreen.x;
 		int my = spGetInput()->touchscreen.y;
+		int i = SP_MAPPING_MAX;
 		while (i --> 0 )
+		{
 			if ( window->button[i].x + window->button[i].w >= mx &&
 				window->button[i].x <= mx &&
 				window->button[i].y + window->button[i].h >= my &&
 				window->button[i].y <= my )
 			{
-				spGetInput()->button[i] = 1;
+				spMapSetByID( i, 1 );
 				spGetInput()->touchscreen.pressed = 0;
 				break;
 			}
+		}
 	}
 	if (window->insult_button && spMapGetByID(MAP_WEAPON) && spIsKeyboardPolled())
 	{
