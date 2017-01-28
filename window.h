@@ -36,6 +36,14 @@ typedef struct sWindow
 	int cancel_to_no;
 	int zig_zag;
 	Sint32 sizeFactor;
+	struct
+	{
+		int x;
+		int y;
+		int w;
+		int h;
+	} button[ SP_MAPPING_MAX + 4 ];
+	int was_pressed;
 } tWindow;
 
 #define WN_ACT_UPDATE 0
