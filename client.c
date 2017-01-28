@@ -188,10 +188,8 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	spNetSendHTTP(server_connection,header);
 	//printf("\nMessage\n%sEND\n",buffer);
 	spNetSendTCP(server_connection,buffer,length);
-	
 	int res = spNetReceiveHTTP(server_connection,buffer,buffer_size-1);
 	buffer[res] = 0;
-	
 	spNetCloseTCP(server_connection);
 	//HTTP error check + jumping to begin
 	if (
@@ -214,6 +212,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	pos = 15;
 	int encoded = 0;
 	int content_length = 0;
+	int chunked = 0;
 	while (
 		buffer[pos  ] != '\r' ||
 		buffer[pos+1] != '\n' ||
@@ -262,10 +261,64 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 					content_length = atoi(&buffer[pos+16]);
 		}
 		#endif
+		if (
+			buffer[pos+ 0] == 'T' &&
+			buffer[pos+ 1] == 'r' &&
+			buffer[pos+ 2] == 'a' &&
+			buffer[pos+ 3] == 'n' &&
+			buffer[pos+ 4] == 's' &&
+			buffer[pos+ 5] == 'f' &&
+			buffer[pos+ 6] == 'e' &&
+			buffer[pos+ 7] == 'r' &&
+			buffer[pos+ 8] == '-' &&
+			buffer[pos+ 9] == 'E' &&
+			buffer[pos+10] == 'n' &&
+			buffer[pos+11] == 'c' &&
+			buffer[pos+12] == 'o' &&
+			buffer[pos+13] == 'd' &&
+			buffer[pos+14] == 'i' &&
+			buffer[pos+15] == 'n' &&
+			buffer[pos+16] == 'g' &&
+			buffer[pos+17] == ':' &&
+			buffer[pos+18] == ' ' &&
+			buffer[pos+19] == 'c' &&
+			buffer[pos+20] == 'h' &&
+			buffer[pos+21] == 'u' &&
+			buffer[pos+22] == 'n' &&
+			buffer[pos+23] == 'k' &&
+			buffer[pos+24] == 'e' &&
+			buffer[pos+25] == 'd')
+			chunked = 1;
 		pos++;
 	}
 	pos+=4;
-
+	if (chunked) //Remove chunk informations
+	{
+		int difference = 0;
+		while (
+			buffer[pos + difference + 0] != '\r' ||
+			buffer[pos + difference + 1] != '\n')
+			difference++;
+		int next_chunk = strtol(&(buffer[pos]),NULL,16);
+		difference += 2; // \r\n
+		int work_pos = pos;
+		while (next_chunk)
+		{
+			int i;
+			for (i = work_pos; i < work_pos + next_chunk; i++)
+				buffer[i] = buffer[i+difference];
+			difference += 2; // \r\n
+			work_pos += next_chunk;
+			next_chunk = strtol(&(buffer[work_pos+difference]),NULL,16);
+			while (
+				buffer[work_pos + difference + 0] != '\r' ||
+				buffer[work_pos + difference + 1] != '\n')
+				difference++;
+			difference += 2; // \r\n
+		}
+		buffer[work_pos] = 0;
+		content_length -= difference;
+	}
 	#ifndef WIN32	
 	if (encoded)
 	{
