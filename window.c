@@ -77,6 +77,7 @@ pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, in
 		window->button[i].w = -1;
 		window->button[i].h = -1;
 	}
+	window->was_pressed = 0;
 	return window;
 }
 
@@ -146,7 +147,7 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 	{
 		++i;
 		int draw_text = 0;
-		if (!in_button && text[i] == '{')
+		if (!in_button && (text[i] == '{' || text[i] == '['))
 		{
 			in_button = 1;
 			draw_text = i > 0;
@@ -160,7 +161,6 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 		{
 			char temp = text[i];
 			text[i] = 0;
-			spFontDraw( x, y, 0, text, recent_window->font );
 			if (!in_button)
 			{
 				int B0 = spMax(spGetSizeFactor()>>17,1);
@@ -171,17 +171,31 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 				int height = recent_window->font->maxheight + B4;
 				int X = x +  width/2 - B2;
 				int Y = y + height/2 - B2;
-				spRectangleBorder( X, Y, 0, width, height, B1, B1, LL_FG);
+				spRectangle      ( X, Y, 0, width + B2 , height + B2,         LL_BG);
+				spRectangleBorder( X, Y, 0, width      , height     , B1, B1, LL_FG);
 				spRectangle( x         - B2, y          - B2, 0, B0, B0, LL_BG );
 				spRectangle( x + width - B2, y          - B2, 0, B0, B0, LL_BG );
 				spRectangle( x         - B2, y + height - B2, 0, B0, B0, LL_BG );
 				spRectangle( x + width - B2, y + height - B2, 0, B0, B0, LL_BG );
 				int j = 0;
-				for (; text[j] && text[j] != '}';j++);
+				for (; text[j] && text[j] != '}' && text[j] != ']';j++);
 				if (text[j])
 				{
+					char temp2 = text[j];
 					text[j] = 0;
-					int id = spMapIDByName( &(text[1]) );
+					int id	= -1;
+					if (temp2 == '}')
+						id = spMapIDByName( &(text[1]) );
+					else // ]
+					{
+						switch (text[j-1])
+						{
+							case '<': id = SP_MAPPING_MAX+0; break;
+							case '^': id = SP_MAPPING_MAX+1; break;
+							case '>': id = SP_MAPPING_MAX+2; break;
+							case 'v': id = SP_MAPPING_MAX+3; break;
+						}
+					}
 					if ( id >= 0 )
 					{
 						recent_window->button[id].x = x;
@@ -189,9 +203,10 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 						recent_window->button[id].w = width;
 						recent_window->button[id].h = height;
 					}
-					text[j] = '}';
+					text[j] = temp2;
 				}
 			}
+			spFontDraw( x, y, 0, text, recent_window->font );
 			x += spFontWidth( text, recent_window->font );
 			text[i] = temp;
 			text = &(text[i]);
@@ -283,7 +298,14 @@ void window_draw(void)
 			if (start_nr+13 < window->count && in_nr == 12)
 				spFontDrawRight( t_r, y, 0, "...", window->font );
 			else
+			{
 				spFontDrawRight( t_r, y, 0, elem->text, window->font );
+				if (nr == window->selection && (elem->type == 0 || elem->type == 2))
+				{
+					window_draw_buttons( LEFT, t_r, y, "  [>]" );
+					window_draw_buttons( RIGHT, t_r - t_w, y, "[<]  " );
+				}
+			}
 			in_nr++;
 		}
 		nr++;
@@ -472,9 +494,10 @@ int window_calc(Uint32 steps)
 	pWindow window = recent_window;
 	if ( spGetInput()->touchscreen.pressed )
 	{
+		window->was_pressed = 1;
 		int mx = spGetInput()->touchscreen.x;
 		int my = spGetInput()->touchscreen.y;
-		int i = SP_MAPPING_MAX;
+		int i = SP_MAPPING_MAX+4;
 		while (i --> 0 )
 		{
 			if ( window->button[i].x + window->button[i].w >= mx &&
@@ -482,11 +505,37 @@ int window_calc(Uint32 steps)
 				window->button[i].y + window->button[i].h >= my &&
 				window->button[i].y <= my )
 			{
-				spMapSetByID( i, 1 );
-				spGetInput()->touchscreen.pressed = 0;
+				if ( i < SP_MAPPING_MAX )
+				{
+					spMapSetByID( i, 1 );
+					spGetInput()->touchscreen.pressed = 0;
+				}
+				else
+					switch ( i )
+					{
+						case SP_MAPPING_MAX + 0:
+							spGetInput()->axis[0] = -1;
+							break;
+						case SP_MAPPING_MAX + 1:
+							spGetInput()->axis[1] = -1;
+							break;
+						case SP_MAPPING_MAX + 2:
+							spGetInput()->axis[0] = 1;
+							break;
+						case SP_MAPPING_MAX + 3:
+							spGetInput()->axis[1] = 1;
+							break;
+					}
 				break;
 			}
 		}
+	}
+	else
+	if (window->was_pressed)
+	{
+		window->was_pressed = 0;
+		spGetInput()->axis[0] = 0;
+		spGetInput()->axis[1] = 0;
 	}
 	if (window->insult_button && spMapGetByID(MAP_WEAPON) && spIsKeyboardPolled())
 	{
@@ -698,6 +747,7 @@ int window_calc(Uint32 steps)
 			spGetInput()->axis[0] = 0;
 			if (window->feedback)
 				window->feedback(window,selElem,WN_ACT_LEFT);
+			spGetInput()->touchscreen.pressed = 0;
 		}
 		else
 		if (selElem->type == 2)
@@ -712,6 +762,7 @@ int window_calc(Uint32 steps)
 			spGetInput()->axis[0] = 0;
 			if (window->feedback)
 				window->feedback(window,selElem,WN_ACT_RIGHT);
+			spGetInput()->touchscreen.pressed = 0;
 		}
 		else
 		if (selElem->type == 2)
