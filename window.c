@@ -104,6 +104,11 @@ pWindowElement add_window_element(pWindow window,int type,int reference)
 	elem->type = type;
 	elem->reference = reference;
 	elem->text[0] = 0;
+	elem->button.x = -1;
+	elem->button.y = -1;
+	elem->button.w = -1;
+	elem->button.h = -1;
+	elem->button.type = -1;
 	if (window->feedback)
 		window->feedback(window,elem,WN_ACT_UPDATE);
 	update_elem_width(elem,window);
@@ -303,11 +308,25 @@ void window_draw(void)
 						spLine(t_r, y, 0, t_r, y+window->font->maxheight, 0,65535);
 				}
 			}
+			elem->button.w = window->width-2*meow;
+			elem->button.h = window->font->maxheight;
+			elem->button.x = (screen->w - elem->button.w)/2;
+			elem->button.y = y+SMALL_HACK/2;
 			if (start_nr > 0 && in_nr == 0)
+			{
+				t_w = spFontWidth("...",window->font);
+				t_r = (screen->w+t_w)/2;
 				spFontDrawRight( t_r, y, 0, "...", window->font );
+				elem->button.type = 1;
+			}
 			else
 			if (start_nr+13 < window->count && in_nr == 12)
+			{
+				t_w = spFontWidth("...",window->font);
+				t_r = (screen->w+t_w)/2;
 				spFontDrawRight( t_r, y, 0, "...", window->font );
+				elem->button.type = 2;
+			}
 			else
 			{
 				spFontDrawRight( t_r, y, 0, elem->text, window->font );
@@ -316,8 +335,17 @@ void window_draw(void)
 					window_draw_buttons( LEFT, t_r, y, "  [>]" );
 					window_draw_buttons( RIGHT, t_r - t_w, y, "[<]  " );
 				}
+				elem->button.type = 0;
 			}
 			in_nr++;
+		}
+		else
+		{
+			elem->button.x = -1;
+			elem->button.y = -1;
+			elem->button.w = -1;
+			elem->button.h = -1;
+			elem->button.type = -1;
 		}
 		nr++;
 		elem = elem->next;
@@ -510,36 +538,68 @@ int window_calc(Uint32 steps)
 		window->was_pressed = 1;
 		int mx = spGetInput()->touchscreen.x;
 		int my = spGetInput()->touchscreen.y;
-		int i = SP_MAPPING_MAX+4;
-		while (i --> 0 )
+		pWindowElement elem = window->firstElement;
+		int nr = 0;
+		while (elem)
 		{
-			if ( window->button[i].x + window->button[i].w >= mx &&
-				window->button[i].x <= mx &&
-				window->button[i].y + window->button[i].h >= my &&
-				window->button[i].y <= my )
+			if ( elem->button.x + elem->button.w >= mx &&
+				elem->button.x <= mx &&
+				elem->button.y + elem->button.h >= my &&
+				elem->button.y <= my )
 			{
-				if ( i < SP_MAPPING_MAX )
+				switch (elem->button.type)
 				{
-					spMapSetByID( i, 1 );
-					spGetInput()->touchscreen.pressed = 0;
+					case 0:
+						window->selection = nr;
+						if (elem->type == -1)
+							spMapSetByID( MAP_JUMP, 1 );
+						break;
+					case 1:
+						spGetInput()->axis[1] = -1;
+						break;
+					case 2:
+						spGetInput()->axis[1] = +1;
+						break;
 				}
-				else
-					switch ( i )
-					{
-						case SP_MAPPING_MAX + 0:
-							spGetInput()->axis[0] = -1;
-							break;
-						case SP_MAPPING_MAX + 1:
-							spGetInput()->axis[1] = -1;
-							break;
-						case SP_MAPPING_MAX + 2:
-							spGetInput()->axis[0] = 1;
-							break;
-						case SP_MAPPING_MAX + 3:
-							spGetInput()->axis[1] = 1;
-							break;
-					}
+				spGetInput()->touchscreen.pressed = 0;
 				break;
+			}
+			nr++;
+			elem = elem->next;
+		}
+		if (elem == NULL)
+		{
+			int i = SP_MAPPING_MAX+4;
+			while (i --> 0 )
+			{
+				if ( window->button[i].x + window->button[i].w >= mx &&
+					window->button[i].x <= mx &&
+					window->button[i].y + window->button[i].h >= my &&
+					window->button[i].y <= my )
+				{
+					if ( i < SP_MAPPING_MAX )
+					{
+						spMapSetByID( i, 1 );
+						spGetInput()->touchscreen.pressed = 0;
+					}
+					else
+						switch ( i )
+						{
+							case SP_MAPPING_MAX + 0:
+								spGetInput()->axis[0] = -1;
+								break;
+							case SP_MAPPING_MAX + 1:
+								spGetInput()->axis[1] = -1;
+								break;
+							case SP_MAPPING_MAX + 2:
+								spGetInput()->axis[0] = 1;
+								break;
+							case SP_MAPPING_MAX + 3:
+								spGetInput()->axis[1] = 1;
+								break;
+						}
+					break;
+				}
 			}
 		}
 	}

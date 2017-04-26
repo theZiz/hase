@@ -10,6 +10,14 @@ typedef struct sWindowElement
 	int reference;
 	char text[512];
 	int width;
+	struct
+	{
+		int x;
+		int y;
+		int w;
+		int h;
+		int type;
+	} button;
 	pWindowElement next;
 } tWindowElement;
 

@@ -31,7 +31,7 @@ const char help_text[] =
 	"Furthermore you can change the default hares per player, health per hare and starting AP.\n"
 	"\n"
 	"But now enjoy Hase, don't forget to play online from time to time and always remember:\n"
-	"   All your hares belong to us!";
+	"   All your hare are belong to us!";
 
 spTextBlockPointer help_block;
 Sint32 help_scroll;
