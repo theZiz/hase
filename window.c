@@ -169,6 +169,12 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 			in_button = 0;
 			draw_text = i > 0;
 		}
+		else
+		if (text[i] == 0)
+		{
+			in_button = 1;
+			draw_text = i > 0;
+		}
 		if (draw_text)
 		{
 			char temp = text[i];
@@ -335,6 +341,8 @@ void window_draw(void)
 		spDrawSprite(screen->w/2-to_left, y, 0, spActiveSprite(window_sprite[gop_sprite()]));
 		window_draw_buttons( RIGHT, screen->w/2-to_left-(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, "{power_down}" );
 		window_draw_buttons(  LEFT, screen->w/2-to_left+(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, buffer );
+		//spFontDrawRight( screen->w/2-to_left-(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, "{power_down}", window->font );
+		//spFontDraw     ( screen->w/2-to_left+(sizeFactor*12 >> SP_ACCURACY), y-window->font->maxheight/2, 0, buffer, window->font );
 		y+=(sizeFactor*8 >> SP_ACCURACY)-SMALL_HACK;
 		if (spGetSizeFactor() <= SP_ONE)
 			y+=(sizeFactor*6 >> SP_ACCURACY);
