@@ -36,28 +36,119 @@ const char help_text[] =
 spTextBlockPointer help_block;
 Sint32 help_scroll;
 spFontPointer help_font;
+struct
+{
+	int x;
+	int y;
+	int w;
+	int h;
+} help_button[3]; //exit, up, down
+int help_was_pressed;
 
 void help_draw(void)
 {
 	spClearTarget(LL_BG);
+	int B0 = spMax(spGetSizeFactor()>>17,1);
+	int B1 = spMax(spGetSizeFactor()>>16,1);
+	int B2 = spMax(spGetSizeFactor()>>15,1);
+	int B4 = spMax(spGetSizeFactor()>>14,1);
 	spFontDrawMiddle( spGetWindowSurface()->w/2,   2, 0, "How to Play", help_font );
 	int h = spGetWindowSurface()->h - 4 - 4*help_font->maxheight;
 	spFontDrawTextBlock(left,2+spGetWindowSurface()->w/6,2*help_font->maxheight+2, 0,help_block,h,help_scroll,help_font);
 	if (help_scroll != SP_ONE)
-		spFontDraw( 2+spGetWindowSurface()->w*5/6, spGetWindowSurface()->h-2-2*help_font->maxheight, 0, "[v]", help_font );
+	{
+		const char button_text[] = "[v]";
+		help_button[2].w = spFontWidth( button_text, help_font );
+		help_button[2].h = help_font->maxheight;
+		help_button[2].x = 2+spGetWindowSurface()->w*5/6;
+		help_button[2].y = spGetWindowSurface()->h-2-2*help_font->maxheight;
+		int width = help_button[2].w + B4;
+		int height = help_font->maxheight + B4;
+		draw_edgy_rectangle(help_button[2].x,help_button[2].y,width,height,B0,B1,B2);
+		spFontDraw( help_button[2].x, help_button[2].y, 0, button_text, help_font );
+	}
+	else
+	{
+		help_button[2].x = -1;
+		help_button[2].y = -1;
+		help_button[2].w = -1;
+		help_button[2].h = -1;
+	}
 	if (help_scroll != 0)
-		spFontDraw( 2+spGetWindowSurface()->w*5/6,                         2+  help_font->maxheight, 0, "[^]", help_font );
-	spFontDrawMiddle( spGetWindowSurface()->w/2,   spGetWindowSurface()->h-2-  help_font->maxheight, 0, "{jump}Okay", help_font );
+	{
+		const char button_text[] = "[^]";
+		help_button[1].w = spFontWidth( button_text, help_font );
+		help_button[1].h = help_font->maxheight;
+		help_button[1].x = 2+spGetWindowSurface()->w*5/6;
+		help_button[1].y = 2+  help_font->maxheight;
+		int width = help_button[1].w + B4;
+		int height = help_font->maxheight + B4;
+		draw_edgy_rectangle(help_button[1].x,help_button[1].y,width,height,B0,B1,B2);
+		spFontDraw( help_button[1].x, help_button[1].y, 0, button_text, help_font );
+	}
+	else
+	{
+		help_button[1].x = -1;
+		help_button[1].y = -1;
+		help_button[1].w = -1;
+		help_button[1].h = -1;
+	}
+	const char button_text[] = "{jump}Okay";
+	help_button[0].w = spFontWidth( button_text, help_font );
+	help_button[0].h = help_font->maxheight;
+	help_button[0].x = spGetWindowSurface()->w/2 - help_button[0].w/2;
+	help_button[0].y = spGetWindowSurface()->h-B4-help_font->maxheight;
+	int width = help_button[0].w + B4;
+	int height = help_font->maxheight + B4;
+	draw_edgy_rectangle(help_button[0].x,help_button[0].y,width,height,B0,B1,B2);
+	spFontDraw( help_button[0].x, help_button[0].y, 0, button_text, help_font );
 	spFlip();
 }
 
 int help_calc(Uint32 steps)
 {
+	if ( spGetInput()->touchscreen.pressed )
+	{
+		help_was_pressed = 1;
+		int mx = spGetInput()->touchscreen.x;
+		int my = spGetInput()->touchscreen.y;
+		int i = 3;
+		while (i --> 0 )
+		{
+			if ( help_button[i].x + help_button[i].w >= mx &&
+				help_button[i].x <= mx &&
+				help_button[i].y + help_button[i].h >= my &&
+				help_button[i].y <= my )
+			{
+				switch (i)
+				{
+					case 0:
+						spMapSetByID(MAP_JUMP,1);
+						break;
+					case 1:
+						spGetInput()->axis[1] = -1;
+						break;
+					case 2:
+						spGetInput()->axis[1] = +1;
+						break;
+				}
+				break;
+			}
+		}
+	}
+	else
+	if (help_was_pressed)
+	{
+		help_was_pressed = 0;
+		spGetInput()->axis[1] = 0;
+	}
 	if (spMapGetByID(MAP_JUMP) || spMapGetByID(MAP_CHAT) || spMapGetByID(MAP_MENU))
 	{
 		spMapSetByID(MAP_JUMP,0);
 		spMapSetByID(MAP_CHAT,0);
 		spMapSetByID(MAP_MENU,0);
+		spGetInput()->touchscreen.pressed = 0;
+		spGetInput()->axis[1] = 0;
 		return 1;
 	}
 	if (spGetInput()->axis[1] > 0)
@@ -77,6 +168,15 @@ int help_calc(Uint32 steps)
 
 void start_help(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 {
+	int i = 3;
+	while (i --> 0 )
+	{
+		help_button[i].x = -1;
+		help_button[i].y = -1;
+		help_button[i].w = -1;
+		help_button[i].h = -1;
+	}
+	help_was_pressed = 0;
 	help_block = spCreateTextBlock(help_text,spGetWindowSurface()->w*2/3-4,font);
 	help_scroll = 0;
 	help_font = font;

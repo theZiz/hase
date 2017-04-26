@@ -123,6 +123,18 @@ typedef enum
 	RIGHT
 } window_text_positon;
 
+void draw_edgy_rectangle(int x, int y, int width, int height, int B0, int B1, int B2)
+{
+	int X = x +  width/2 - B2;
+	int Y = y + height/2 - B2;
+	spRectangle      ( X, Y, 0, width + B2 , height + B2,         LL_BG);
+	spRectangleBorder( X, Y, 0, width      , height     , B1, B1, LL_FG);
+	spRectangle( x         - B2, y          - B2, 0, B0, B0, LL_BG );
+	spRectangle( x + width - B2, y          - B2, 0, B0, B0, LL_BG );
+	spRectangle( x         - B2, y + height - B2, 0, B0, B0, LL_BG );
+	spRectangle( x + width - B2, y + height - B2, 0, B0, B0, LL_BG );
+}
+
 static void window_draw_buttons(window_text_positon position, int x, int y, char const * const text__)
 {
 	int l = strlen(text__);
@@ -169,14 +181,7 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 				int B4 = spMax(spGetSizeFactor()>>14,1);
 				width = spFontWidth( text, recent_window->font ) + B4;
 				int height = recent_window->font->maxheight + B4;
-				int X = x +  width/2 - B2;
-				int Y = y + height/2 - B2;
-				spRectangle      ( X, Y, 0, width + B2 , height + B2,         LL_BG);
-				spRectangleBorder( X, Y, 0, width      , height     , B1, B1, LL_FG);
-				spRectangle( x         - B2, y          - B2, 0, B0, B0, LL_BG );
-				spRectangle( x + width - B2, y          - B2, 0, B0, B0, LL_BG );
-				spRectangle( x         - B2, y + height - B2, 0, B0, B0, LL_BG );
-				spRectangle( x + width - B2, y + height - B2, 0, B0, B0, LL_BG );
+				draw_edgy_rectangle(x,y,width,height,B0,B1,B2);
 				int j = 0;
 				for (; text[j] && text[j] != '}' && text[j] != ']';j++);
 				if (text[j])
