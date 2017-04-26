@@ -449,7 +449,7 @@ int load_level(char* level_string)
 	{
 		if (f->type != SP_FILE_DIRECTORY)
 		{
-			sprintf(add_window_element(window,0,r)->text,"%s",&(f->name[path_l]));
+			sprintf(add_window_element(window,-1,r)->text,"%s",&(f->name[path_l]));
 			r++;
 		}
 		f = f->next;
