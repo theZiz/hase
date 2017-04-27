@@ -543,7 +543,7 @@ int window_calc(Uint32 steps)
 					case 0:
 						if (elem->type == -1)
 							spMapSetByID( MAP_JUMP, 1 );
-						if (elem->type != 0 || elem->type != 2 || window->selection != nr)
+						if (elem->type == -1 || window->selection != nr)
 							spGetInput()->touchscreen.pressed = 0;
 						window->selection = nr;						
 						break;
