@@ -80,6 +80,17 @@ spNetIRCMessagePointer before_showing;
 SDL_Surface* screen;
 SDL_Surface* tomato;
 
+spFontPointer help_font;
+struct
+{
+	int x;
+	int y;
+	int w;
+	int h;
+	int pressed;
+} weapon_button;
+
+
 void ( *hase_resize )( Uint16 w, Uint16 h );
 
 void loadInformation(char* information)
@@ -542,7 +553,6 @@ void draw(void)
 
 		y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 	}
-		
 	spFontDrawRight( screen->w-1 - player[active_player]->weapon_points * tomato->w, screen->h-1-font->maxheight, 0, 
 		player[active_player]->weapon_points > 0 ? "Action points:" : "Action points: None", font );
 	int i;
@@ -552,7 +562,18 @@ void draw(void)
 	{
 		char number[32];
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
-		spFontDrawRight( screen->w-1, screen->h-1-font->maxheight*2, 0, weapon_name[w_nr], font );
+		int B1 = spMax(spGetSizeFactor()>>16,1);
+		int B2 = spMax(spGetSizeFactor()>>15,1);
+		weapon_button.w = spFontWidth( weapon_name[w_nr], font );
+		weapon_button.h = font->maxheight;
+		weapon_button.x = screen->w-1 - weapon_button.w;
+		weapon_button.y = screen->h-1-font->maxheight*2;
+		int width = weapon_button.w;
+		int height = font->maxheight;
+		spSetPattern8(153,60,102,195,153,60,102,195);
+		draw_edgy_rectangle(weapon_button.x,weapon_button.y,&width,&height,B1,B2);
+		spDeactivatePattern();
+		spFontDraw( weapon_button.x, weapon_button.y, 0, weapon_name[w_nr], font );
 		int bar_w = spFontWidth(" 88.8 % ",font);
 		int bar_s;
 		if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
@@ -575,6 +596,14 @@ void draw(void)
 		spDeactivatePattern();
 		spFontDrawMiddle( screen->w-1-bar_w/2, screen->h-1-3*font->maxheight, 0, number, font );
 	}
+	else
+	{
+		weapon_button.x = -1;
+		weapon_button.y = -1;
+		weapon_button.w = -1;
+		weapon_button.h = -1;
+	}
+		
 	if (ragnarok_counter && (hase_game->options.bytewise.ragnarok_border >> 4) < 7)
 	{
 		sprintf(buffer,"RAGNARÖK %i",turn_count - (hase_game->options.bytewise.ragnarok_border >> 4)*5 + 1);
@@ -1090,6 +1119,28 @@ int calc(Uint32 steps)
 		spSoundPause(0,-1);
 	spUpdateSprite(spActiveSprite(targeting),steps);
 	spParticleUpdate(&particles,steps);
+
+	if ( spGetInput()->touchscreen.pressed )
+	{
+		int mx = spGetInput()->touchscreen.x;
+		int my = spGetInput()->touchscreen.y;
+		if ( weapon_button.x + weapon_button.w >= mx &&
+			weapon_button.x <= mx &&
+			weapon_button.y + weapon_button.h >= my &&
+			weapon_button.y <= my )
+		{
+			weapon_button.pressed = 1;
+			spMapSetByID( MAP_WEAPON, 1 );
+			spGetInput()->touchscreen.pressed = 0;
+		}
+	}
+	else
+	if (weapon_button.pressed)
+	{
+		spMapSetByID( MAP_WEAPON, 0 );
+		weapon_button.pressed = 0;
+	}
+
 	for (i = 0; i < steps; i++)
 	{
 		//Camera
@@ -1799,6 +1850,11 @@ void update_map()
 
 int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 {
+	weapon_button.x = -1;
+	weapon_button.y = -1;
+	weapon_button.w = -1;
+	weapon_button.h = -1;
+	weapon_button.pressed = 0;
 	input_ok_on = 0;
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);

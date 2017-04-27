@@ -48,10 +48,8 @@ int help_was_pressed;
 void help_draw(void)
 {
 	spClearTarget(LL_BG);
-	int B0 = spMax(spGetSizeFactor()>>17,1);
-	int B1 = spMax(spGetSizeFactor()>>16,1);
-	int B2 = spMax(spGetSizeFactor()>>15,1);
-	int B4 = spMax(spGetSizeFactor()>>14,1);
+	const int B1 = spMax(spGetSizeFactor()>>16,1);
+	const int B2 = spMax(spGetSizeFactor()>>15,1);
 	spFontDrawMiddle( spGetWindowSurface()->w/2,   2, 0, "How to Play", help_font );
 	int h = spGetWindowSurface()->h - 4 - 4*help_font->maxheight;
 	spFontDrawTextBlock(left,2+spGetWindowSurface()->w/6,2*help_font->maxheight+2, 0,help_block,h,help_scroll,help_font);
@@ -64,7 +62,7 @@ void help_draw(void)
 		help_button[2].y = spGetWindowSurface()->h-2-2*help_font->maxheight;
 		int width = help_button[2].w;
 		int height = help_font->maxheight;
-		draw_edgy_rectangle(help_button[2].x,help_button[2].y,&width,&height,B0,B1,B2,B4);
+		draw_edgy_rectangle(help_button[2].x,help_button[2].y,&width,&height,B1,B2);
 		spFontDraw( help_button[2].x, help_button[2].y, 0, button_text, help_font );
 	}
 	else
@@ -83,7 +81,7 @@ void help_draw(void)
 		help_button[1].y = 2+  help_font->maxheight;
 		int width = help_button[1].w;
 		int height = help_font->maxheight;
-		draw_edgy_rectangle(help_button[1].x,help_button[1].y,&width,&height,B0,B1,B2,B4);
+		draw_edgy_rectangle(help_button[1].x,help_button[1].y,&width,&height,B1,B2);
 		spFontDraw( help_button[1].x, help_button[1].y, 0, button_text, help_font );
 	}
 	else
@@ -97,10 +95,10 @@ void help_draw(void)
 	help_button[0].w = spFontWidth( button_text, help_font );
 	help_button[0].h = help_font->maxheight;
 	help_button[0].x = spGetWindowSurface()->w/2 - help_button[0].w/2;
-	help_button[0].y = spGetWindowSurface()->h-B4-help_font->maxheight;
+	help_button[0].y = spGetWindowSurface()->h-B2*2-help_font->maxheight;
 	int width = help_button[0].w;
 	int height = help_font->maxheight;
-	draw_edgy_rectangle(help_button[0].x,help_button[0].y,&width,&height,B0,B1,B2,B4);
+	draw_edgy_rectangle(help_button[0].x,help_button[0].y,&width,&height,B1,B2);
 	spFontDraw( help_button[0].x, help_button[0].y, 0, button_text, help_font );
 	spFlip();
 }

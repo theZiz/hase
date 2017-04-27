@@ -84,13 +84,12 @@ void lobby_draw_buttons(window_text_positon position, int x, int y, char const *
 			text[i] = 0;
 			if (!in_button)
 			{
-				int B0 = spMax(spGetSizeFactor()>>17,1);
 				int B1 = spMax(spGetSizeFactor()>>16,1);
 				int B2 = spMax(spGetSizeFactor()>>15,1);
 				int B4 = spMax(spGetSizeFactor()>>14,1);
 				width = spFontWidth( text, font ) + B4;
 				int height = font->maxheight;
-				draw_edgy_rectangle(x,y,&width,&height,B0,B1,B2,B4);
+				draw_edgy_rectangle(x,y,&width,&height,B1,B2);
 				int j = 0;
 				for (; text[j] && text[j] != '}' && text[j] != ']';j++);
 				if (text[j])
