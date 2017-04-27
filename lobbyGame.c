@@ -34,9 +34,9 @@ int level_mode;
 int use_chat;
 int after_start;
 
-tLobbyButton lg_button[ SP_MAPPING_MAX + 4 ];
+tLobbyButton lg_button[ SP_MAPPING_MAX ];
 
-#define CHAT_LINES 8
+#define CHAT_LINES 7
 
 void lobby_draw_buttons(window_text_positon position, int x, int y, char const * const text__,spFontPointer font,pLobbyButton button)
 {
@@ -132,10 +132,19 @@ void lobby_draw_buttons(window_text_positon position, int x, int y, char const *
 
 void lg_draw(void)
 {
+	int i = SP_MAPPING_MAX;
+	while (i --> 0 )
+	{
+		lg_button[i].x = -1;
+		lg_button[i].y = -1;
+		lg_button[i].w = -1;
+		lg_button[i].h = -1;
+	}
 	SDL_Surface* screen = spGetWindowSurface();
 	spClearTarget(LL_BG);
 	char buffer[256];
-	int l_w = screen->h-(CHAT_LINES+1)*lg_font->maxheight;
+	const int maxheight = lg_font->maxheight + spMax(spGetSizeFactor()>>15,1);
+	int l_w = screen->h-(CHAT_LINES+1-4)*lg_font->maxheight - 4*maxheight;
 	//Level
 	spRectangle  (2+l_w/2, l_w/2, 0,l_w,l_w,LL_FG);
 	if (lg_level)
@@ -186,52 +195,27 @@ void lg_draw(void)
 		sprintf(&buffer[strlen(buffer)],"   Distant dmg: No");
 	spFontDraw(screen->w-w, 2*lg_font->maxheight, 0, buffer, lg_font );
 	//player block
-	int h = l_w-6*lg_font->maxheight;
+	int h = l_w-3*(maxheight+lg_font->maxheight);
 	spRectangle(screen->w-4-w/2, 3*lg_font->maxheight+h/2-1, 0,w,h,LL_FG);
 	if (lg_block)
 		spFontDrawTextBlock(middle,screen->w-w-4, 3*lg_font->maxheight-1, 0,lg_block,h,0,lg_font);
 	//Instructions on the right
 	//spFontDrawMiddle(screen->w-2-w/2, h+6*lg_font->maxheight, 0, "{weapon}Add player  {view}Remove player", lg_font );
-	int biggest_l = spFontWidth("{weapon}",lg_font);
-	int biggest_r = spFontWidth("{power_down}",lg_font);
-	biggest_l = spMax(biggest_l,spFontWidth("{view}",lg_font));
-	biggest_r = spMax(biggest_r,spFontWidth("{power_up}",lg_font));
 	if (level_mode)
 	{
-		if (spGetSizeFactor() <= SP_ONE)
-		{
-			spFontDraw(screen->w-2-w  , h+3*lg_font->maxheight, 0, "{weapon}New level", lg_font );
-			spFontDraw(screen->w-2-w/2, h+3*lg_font->maxheight, 0, "{power_down}Load", lg_font );
-			spFontDraw(screen->w-2-w  , h+4*lg_font->maxheight, 0, "{view}Undo Last", lg_font );
-			spFontDraw(screen->w-2-w/2, h+4*lg_font->maxheight, 0, "{power_up}Save", lg_font );
-		}
-		else
-		{
-			spFontDrawRight(screen->w-2-w  +biggest_l, h+3*lg_font->maxheight, 0, "{weapon}", lg_font );
-			spFontDraw     (screen->w-2-w  +biggest_l, h+3*lg_font->maxheight, 0, "New level", lg_font );
-			spFontDrawRight(screen->w-2-w/2+biggest_r, h+3*lg_font->maxheight, 0, "{power_down}", lg_font );
-			spFontDraw     (screen->w-2-w/2+biggest_r, h+3*lg_font->maxheight, 0, "Load", lg_font );
-			spFontDrawRight(screen->w-2-w  +biggest_l, h+4*lg_font->maxheight, 0, "{view}", lg_font );
-			spFontDraw     (screen->w-2-w  +biggest_l, h+4*lg_font->maxheight, 0, "Undo Last", lg_font );
-			spFontDrawRight(screen->w-2-w/2+biggest_r, h+4*lg_font->maxheight, 0, "{power_up}", lg_font );
-			spFontDraw     (screen->w-2-w/2+biggest_r, h+4*lg_font->maxheight, 0, "Save", lg_font );
-		}
-		spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}/{shoot}Set and back", lg_font );
+		lobby_draw_buttons( LEFT, screen->w-2-w  , h+2*lg_font->maxheight+1*maxheight, "{weapon}New level", lg_font, lg_button );
+		lobby_draw_buttons( LEFT, screen->w-2-w/2, h+2*lg_font->maxheight+1*maxheight, "{power_down}Load", lg_font, lg_button );
+		lobby_draw_buttons( LEFT, screen->w-2-w  , h+2*lg_font->maxheight+2*maxheight, "{view}Undo Last", lg_font, lg_button );
+		lobby_draw_buttons( LEFT, screen->w-2-w/2, h+2*lg_font->maxheight+2*maxheight, "{power_up}Save", lg_font, lg_button );
+		lobby_draw_buttons( LEFT, screen->w-2-w  , h+2*lg_font->maxheight+3*maxheight, "{jump}/{shoot}Set and back", lg_font, lg_button );
 	}
 	else
 	{
 		//Add these two, because I didn't need them for the level view
-		biggest_l = spMax(biggest_l,spFontWidth("{jump}",lg_font));
-		biggest_r = spMax(biggest_r,spFontWidth("{shoot}",lg_font));
-
-
-
 		if (lg_player)
 		{
-			spFontDrawRight(screen->w-2-w  +biggest_l, h+3*lg_font->maxheight, 0, "{weapon}", lg_font );
-			spFontDraw     (screen->w-2-w  +biggest_l, h+3*lg_font->maxheight, 0, "Add player", lg_font );
-			spFontDrawRight(screen->w-2-w  +biggest_l, h+4*lg_font->maxheight, 0, "{view}", lg_font );
-			spFontDraw     (screen->w-2-w  +biggest_l, h+4*lg_font->maxheight, 0, "Remove player", lg_font );
+			lobby_draw_buttons( LEFT, screen->w-2-w, h+2*lg_font->maxheight+1*maxheight, "{weapon}Add player", lg_font, lg_button );
+			lobby_draw_buttons( LEFT, screen->w-2-w, h+2*lg_font->maxheight+2*maxheight, "{view}Remove player", lg_font, lg_button );
 		}
 		else
 			spFontDrawMiddle(screen->w-2-3*w/4, h+7*lg_font->maxheight/2, 0, "Spectate mode!", lg_font );
@@ -239,50 +223,45 @@ void lg_draw(void)
 		if (lg_game->admin_pw == 0)
 		{
 			if (after_start)
-				spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "{jump}View replay", lg_font );
+				lobby_draw_buttons( MIDDLE, screen->w-2-w/2, h+2*lg_font->maxheight+3*maxheight, "{jump}View replay", lg_font, lg_button );
 			else
-				spFontDrawMiddle(screen->w-2-w/2, h+5*lg_font->maxheight, 0, "Waiting for start...", lg_font );
-			spFontDrawRight(screen->w-2-w/2+biggest_r, h+7*lg_font->maxheight/2, 0, "{shoot}", lg_font );
-			spFontDraw     (screen->w-2-w/2+biggest_r, h+7*lg_font->maxheight/2, 0, "Save level", lg_font );
+				spFontDrawMiddle(screen->w-2-w/2, h+2*lg_font->maxheight+3*maxheight, 0, "Waiting for start...", lg_font );
+			lobby_draw_buttons( LEFT, screen->w-2-w/2, h+7*lg_font->maxheight/2, "{shoot}Save level", lg_font, lg_button );
 		}
 		else
 		{
-			spFontDrawRight(screen->w-2-w/2+biggest_r, h+3*lg_font->maxheight, 0, "{power_down}", lg_font );
-			spFontDraw     (screen->w-2-w/2+biggest_r, h+3*lg_font->maxheight, 0, "Add AI", lg_font );
-			spFontDrawRight(screen->w-2-w/2+biggest_r, h+4*lg_font->maxheight, 0, "{power_up}", lg_font );
-			spFontDraw     (screen->w-2-w/2+biggest_r, h+4*lg_font->maxheight, 0, "Game Setup", lg_font );
-			spFontDrawRight(screen->w-2-w  +biggest_l, h+5*lg_font->maxheight, 0, "{jump}", lg_font );
-			spFontDraw     (screen->w-2-w  +biggest_l, h+5*lg_font->maxheight, 0, "Start game", lg_font );
-			spFontDrawRight(screen->w-2-w/2+biggest_r, h+5*lg_font->maxheight, 0, "{shoot}", lg_font );
-			spFontDraw     (screen->w-2-w/2+biggest_r, h+5*lg_font->maxheight, 0, "Level Setup", lg_font );
+			lobby_draw_buttons( LEFT, screen->w-2-w/2, h+2*lg_font->maxheight+1*maxheight, "{power_down}Add AI", lg_font, lg_button );
+			lobby_draw_buttons( LEFT, screen->w-2-w/2, h+2*lg_font->maxheight+2*maxheight, "{power_up}Game Setup", lg_font, lg_button );
+			lobby_draw_buttons( LEFT, screen->w-2-w  , h+2*lg_font->maxheight+3*maxheight, "{jump}Start game", lg_font, lg_button );
+			lobby_draw_buttons( LEFT, screen->w-2-w/2, h+2*lg_font->maxheight+3*maxheight, "{shoot}Level Setup", lg_font, lg_button );
 		}
 	}
 	//Chat
 	if (lg_game->local)
-		spFontDrawMiddle(screen->w/2, l_w+(CHAT_LINES-1)*lg_font->maxheight/2+4, 0,"No chat in local game",lg_font);
+		spFontDrawMiddle(screen->w/2, l_w+((CHAT_LINES-3)*lg_font->maxheight+2*maxheight)/2+4, 0,"No chat in local game",lg_font);
 	else
 	if (use_chat == 0)
-		spFontDrawMiddle(screen->w/2, l_w+(CHAT_LINES-1)*lg_font->maxheight/2+4, 0,"Chat deactivated",lg_font);
+		spFontDrawMiddle(screen->w/2, l_w+((CHAT_LINES-3)*lg_font->maxheight+2*maxheight)/2+4, 0,"Chat deactivated",lg_font);
 	else
 	if (get_channel() == NULL)
-		spFontDrawMiddle(screen->w/2, l_w+(CHAT_LINES-1)*lg_font->maxheight/2+4, 0,"Connecting to IRC...",lg_font);
+		spFontDrawMiddle(screen->w/2, l_w+((CHAT_LINES-3)*lg_font->maxheight+2*maxheight)/2+4, 0,"Connecting to IRC...",lg_font);
 	else
 	{
-		spRectangle(screen->w/2, l_w+(CHAT_LINES)*lg_font->maxheight/2+2, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);
+		spRectangle(screen->w/2, l_w+((CHAT_LINES-2)*lg_font->maxheight+2*maxheight)/2+2, 0,screen->w-4,CHAT_LINES*lg_font->maxheight,LL_FG);
 		if (lg_chat_block)
-			spFontDrawTextBlock(left,4, l_w+2, 0,lg_chat_block,CHAT_LINES*lg_font->maxheight,lg_scroll,NULL);
+			spFontDrawTextBlock(left,4, l_w+(-2*lg_font->maxheight+2*maxheight)/2+2, 0,lg_chat_block,((CHAT_LINES-2)*lg_font->maxheight+2*maxheight),lg_scroll,NULL);
 	}
 	//Footline
 	if (lg_game->local || (lg_game->admin_pw && get_channel() == NULL))
-		spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{menu}Leave and close game", lg_font );
+		lobby_draw_buttons( LEFT, 2, screen->h-maxheight, "{menu}Leave and close game", lg_font, lg_button);
 	else
 	if (lg_game->admin_pw == 0 && get_channel())
-		spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{chat}Chat {menu}Leave game", lg_font );
+		lobby_draw_buttons( LEFT, 2, screen->h-maxheight, "{chat}Chat   {menu}Leave game", lg_font, lg_button );
 	else
 	if (lg_game->admin_pw == 0 && get_channel() == NULL)
-		spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{menu}Leave game", lg_font );
+		lobby_draw_buttons( LEFT, 2, screen->h-maxheight, "{menu}Leave game", lg_font, lg_button );
 	else
-		spFontDraw( 2, screen->h-lg_font->maxheight, 0, "{chat}Chat {menu}Leave and close game", lg_font );
+		lobby_draw_buttons( LEFT, 2, screen->h-maxheight, "{chat}Chat   {menu}Leave and close game", lg_font, lg_button);
 	if (lg_reload_now == 1)
 		lg_reload_now = 2;
 	if (!lg_game->local && !after_start)
@@ -291,7 +270,7 @@ void lg_draw(void)
 			sprintf(buffer,"Reloading...");
 		else
 			sprintf(buffer,"Next update: %is",(LG_WAIT-lg_counter)/1000);
-		spFontDrawRight( screen->w-2, screen->h-lg_font->maxheight, 0, buffer, lg_font );
+		spFontDrawRight( screen->w-2, screen->h-maxheight, 0, buffer, lg_font );
 	}
 	spFlip();
 }
@@ -688,6 +667,24 @@ int load_level(char* level_string)
 
 int lg_calc(Uint32 steps)
 {
+	if ( spGetInput()->touchscreen.pressed )
+	{
+		int mx = spGetInput()->touchscreen.x;
+		int my = spGetInput()->touchscreen.y;
+		int i = SP_MAPPING_MAX;
+		while (i --> 0 )
+		{
+			if ( lg_button[i].x + lg_button[i].w >= mx &&
+				lg_button[i].x <= mx &&
+				lg_button[i].y + lg_button[i].h >= my &&
+				lg_button[i].y <= my )
+			{
+				spMapSetByID( i, 1 );
+				spGetInput()->touchscreen.pressed = 0;
+				break;
+			}
+		}
+	}
 	try_to_join();
 	if (lg_chat_block)
 	{
@@ -915,12 +912,12 @@ int lg_calc(Uint32 steps)
 					q = q->next;
 				}
 				if (q)
-					sprintf(add_window_element(window,0,r)->text,"%s (local)",p->name);
+					sprintf(add_window_element(window,-1,r)->text,"%s (local)",p->name);
 				else
 				if (p->computer)
-					sprintf(add_window_element(window,0,r)->text,"%s (AI)",p->name);
+					sprintf(add_window_element(window,-1,r)->text,"%s (AI)",p->name);
 				else
-					sprintf(add_window_element(window,0,r)->text,"%s (online)",p->name);
+					sprintf(add_window_element(window,-1,r)->text,"%s (online)",p->name);
 				r++;
 				p = p->next;
 			}
@@ -1321,7 +1318,7 @@ int game_options(Uint32 *game_opt,int* game_seconds,int* game_hares,spFontPointe
 
 int start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), pGame game,int spectate)
 {
-	int i = SP_MAPPING_MAX+4;
+	int i = SP_MAPPING_MAX;
 	while (i --> 0 )
 	{
 		lg_button[i].x = -1;
