@@ -560,39 +560,36 @@ int window_calc(Uint32 steps)
 			nr++;
 			elem = elem->next;
 		}
-		if (elem == NULL)
+		int i = SP_MAPPING_MAX+4;
+		while (i --> 0 )
 		{
-			int i = SP_MAPPING_MAX+4;
-			while (i --> 0 )
+			if ( window->button[i].x + window->button[i].w >= mx &&
+				window->button[i].x <= mx &&
+				window->button[i].y + window->button[i].h >= my &&
+				window->button[i].y <= my )
 			{
-				if ( window->button[i].x + window->button[i].w >= mx &&
-					window->button[i].x <= mx &&
-					window->button[i].y + window->button[i].h >= my &&
-					window->button[i].y <= my )
+				if ( i < SP_MAPPING_MAX )
 				{
-					if ( i < SP_MAPPING_MAX )
-					{
-						spMapSetByID( i, 1 );
-						spGetInput()->touchscreen.pressed = 0;
-					}
-					else
-						switch ( i )
-						{
-							case SP_MAPPING_MAX + 0:
-								spGetInput()->axis[0] = -1;
-								break;
-							case SP_MAPPING_MAX + 1:
-								spGetInput()->axis[1] = -1;
-								break;
-							case SP_MAPPING_MAX + 2:
-								spGetInput()->axis[0] = 1;
-								break;
-							case SP_MAPPING_MAX + 3:
-								spGetInput()->axis[1] = 1;
-								break;
-						}
-					break;
+					spMapSetByID( i, 1 );
+					spGetInput()->touchscreen.pressed = 0;
 				}
+				else
+					switch ( i )
+					{
+						case SP_MAPPING_MAX + 0:
+							spGetInput()->axis[0] = -1;
+							break;
+						case SP_MAPPING_MAX + 1:
+							spGetInput()->axis[1] = -1;
+							break;
+						case SP_MAPPING_MAX + 2:
+							spGetInput()->axis[0] = 1;
+							break;
+						case SP_MAPPING_MAX + 3:
+							spGetInput()->axis[1] = 1;
+							break;
+					}
+				break;
 			}
 		}
 	}
