@@ -70,7 +70,9 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	int buffer_size = 65536;
 	char in_buffer[buffer_size];
 	char* buffer = in_buffer;
-	char out_buffer[buffer_size];
+	#ifndef WIN32
+		char out_buffer[buffer_size];
+	#endif
 	char header[4096]; //magic number ftw!
 	char host[512];
 	int pos = 0;
@@ -210,7 +212,9 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 		buffer[14] != 'K')
 		return NULL;
 	pos = 15;
-	int encoded = 0;
+	#ifndef WIN32
+		int encoded = 0;
+	#endif
 	int content_length = 0;
 	int chunked = 0;
 	while (
