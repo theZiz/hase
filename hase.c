@@ -1179,17 +1179,45 @@ int calc(Uint32 steps)
 			{
 				if (player[active_player]->activeHare)
 				{
-					weapon_button[1].pressed = 1;
 					mx -= screen->w/2;
 					my -= screen->h/2;
+					weapon_button[1].pressed = 1;
 					Sint32 rot = -(player[active_player]->activeHare->cam_rotation + rotation);
 					int nx = spCos(rot) * mx - spSin(rot) * my >> SP_ACCURACY;
 					//int ny = spSin(rot) * mx + spCos(rot) * my >> SP_ACCURACY;
-					if (nx < 0)
-						spGetInput()->axis[0] = -1;
+					if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT))
+					{
+						if (nx < 0)
+							spGetInput()->axis[1] = -1;
+						else
+						if (nx > 0)
+							spGetInput()->axis[1] = +1;
+						/*Sint32 ox = -spSin(
+							player[active_player]->activeHare->cam_rotation+
+							player[active_player]->activeHare->w_direction-SP_PI/2
+							);
+						Sint32 oy =  spCos(
+							player[active_player]->activeHare->cam_rotation+
+							player[active_player]->activeHare->w_direction-SP_PI/2
+							)	;
+						Sint32 nx = spMul(ox,spCos(rotation))-spMul(oy,spSin(rotation));
+						Sint32 ny = spMul(ox,spSin(rotation))+spMul(oy,spCos(rotation));
+						Sint32 l = spSqrt(mx*mx+my*my<<SP_HALF_ACCURACY)<<SP_HALF_ACCURACY/2;
+						if (l)
+						{
+							mx = spDiv(mx << SP_ACCURACY,l);
+							my = spDiv(my << SP_ACCURACY,l);
+						}
+						printf("%.3f %.3f - %.3f %.3f - %.3f\n",spFixedToFloat(nx),spFixedToFloat(ny),spFixedToFloat(mx),spFixedToFloat(my),spFixedToFloat(l));*/
+					}
 					else
-					if (nx > 0)
-						spGetInput()->axis[0] = +1;
+					{
+						if (nx < 0)
+							spGetInput()->axis[0] = -1;
+						else
+						if (nx > 0)
+							spGetInput()->axis[0] = +1;
+					}
 				}
 			}
 		}
