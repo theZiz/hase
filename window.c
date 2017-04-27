@@ -123,8 +123,7 @@ pWindow recent_window = NULL;
 
 void draw_edgy_rectangle(int x, int y, int * width, int * height, int B0, int B1, int B2,int B4)
 {
-//	*height += 2*B1;
-	*width += 2*B2;
+	*width += 2*B1;
 	int Y;
 	for (Y = y; Y <= y + *height; ++Y)
 	{
