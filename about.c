@@ -17,9 +17,19 @@ const char help_text[] =
 	"Hase is a Worms or Artillery like balistic game, but with hares (and other creatures) in space. The gravitation's strength and direction is different at every point in the level depending on the mass nearby and is shown with arrows in the background.\n"
 	"Hase is a turn based game. In your turn you have a specific amount of time to deal as much damage to your opponents as possible while collecting items and avoiding mines.\n"
 	"\n"
-	"You control the hares with [<] and [>]. You can make a long jump with {jump}. If you press {jump} twice you do a high jump.\n"
-	"With {weapon} you can choose your weapon. Every use of a weapon needs Action Points - abbreviated AP. At default you start every round with 3 AP. You can use it all at once with one big shot or a lower amount e.g. for aiming tests. In the weapons menu you also get short descriptions of the different weapons.\n"
-	"Speaking of it: You aim with [^] and [v]. Before you shoot you should check the power of your weapon shown in the right bottom corner of the screen. You change the power with {power_down} and {power_up}. You finally shoot with {shoot}.\n"
+	"You control the hares with [<] and [>] or the "
+#ifdef DESKTOP
+	"mouse"
+#else
+	"touchscreen"
+#endif
+	". You can make a long jump with {jump}. If you press {jump} twice you do a high jump.\n"
+	"With {weapon} or a click on the chosen weapon button you can choose your weapon. Every use of a weapon needs Action Points - abbreviated AP. At default you start every round with 3 AP. You can use it all at once with one big shot or a lower amount e.g. for aiming tests. In the weapons menu you also get short descriptions of the different weapons.\n"
+	"Speaking of it: You aim with [^] and [v]"
+#ifdef DESKTOP
+	" or with the right mouse button"
+#endif
+	". Before you shoot you should check the power of your weapon shown in the right bottom corner of the screen. You change the power with {power_down} and {power_up}. You finally shoot with {shoot}.\n"
 	"\n"
 	"If you want to see more of the level while playing press {view} with other buttons. {view} + [<] / [^] / [>] / [v] let's you have a look around. With {view} + {power_down} / {power_up} you can zoom in and out. {view} + {weapon} will speed up the game while {view} + {shoot} will slow it down.\n"
 	"If you are unsure what to press while gaming you can always press {view} + {jump} to show an ingame help. With {menu} you open an options menu, from which you can also end the game. If you are playing online - which you should, Hase online doubles the fun! - press {chat} to chat with your opponents.\n"
