@@ -1135,42 +1135,61 @@ int calc(Uint32 steps)
 				spMapSetByID( MAP_WEAPON, 1 );
 				spGetInput()->touchscreen.pressed = 0;
 			}
-			if ( wp_choose &&
-				weapon_button[1].x + weapon_button[1].w >= mx &&
-				weapon_button[1].x <= mx &&
-				weapon_button[1].y + weapon_button[1].h >= my &&
-				weapon_button[1].y <= my )
+			if ( wp_choose )
 			{
-				weapon_button[1].pressed = 1;
-				int x = (mx - weapon_button[1].x) * WEAPON_X / weapon_button[1].w;
-				int y = (my - weapon_button[1].y) * WEAPON_Y / weapon_button[1].h;
+				if ( weapon_button[1].x + weapon_button[1].w >= mx &&
+					weapon_button[1].x <= mx &&
+					weapon_button[1].y + weapon_button[1].h >= my &&
+					weapon_button[1].y <= my )
+				{
+					weapon_button[1].pressed = 1;
+					int x = (mx - weapon_button[1].x) * WEAPON_X / weapon_button[1].w;
+					int y = (my - weapon_button[1].y) * WEAPON_Y / weapon_button[1].h;
+					if (player[active_player]->activeHare)
+					{
+						//X
+						if (spGetInput()->axis[0])
+							spGetInput()->axis[0] = 0;
+						else
+						if (player[active_player]->activeHare->wp_x < x)
+							spGetInput()->axis[0] = +1;
+						else
+						if (player[active_player]->activeHare->wp_x > x)
+							spGetInput()->axis[0] = -1;
+						//Y
+						if (spGetInput()->axis[1])
+							spGetInput()->axis[1] = 0;
+						else
+						if (player[active_player]->activeHare->wp_y < y)
+							spGetInput()->axis[1] = +1;
+						else
+						if (player[active_player]->activeHare->wp_y > y)
+							spGetInput()->axis[1] = -1;
+						//Hit
+						if (player[active_player]->activeHare->wp_x == x &&
+							player[active_player]->activeHare->wp_y == y)
+						{
+							spMapSetByID( MAP_WEAPON, 1 );
+							spGetInput()->touchscreen.pressed = 0;
+						}
+					}
+				}
+			}
+			else
+			{
 				if (player[active_player]->activeHare)
 				{
-					//X
-					if (spGetInput()->axis[0])
-						spGetInput()->axis[0] = 0;
-					else
-					if (player[active_player]->activeHare->wp_x < x)
-						spGetInput()->axis[0] = +1;
-					else
-					if (player[active_player]->activeHare->wp_x > x)
+					weapon_button[1].pressed = 1;
+					mx -= screen->w/2;
+					my -= screen->h/2;
+					Sint32 rot = -(player[active_player]->activeHare->cam_rotation + rotation);
+					int nx = spCos(rot) * mx - spSin(rot) * my >> SP_ACCURACY;
+					//int ny = spSin(rot) * mx + spCos(rot) * my >> SP_ACCURACY;
+					if (nx < 0)
 						spGetInput()->axis[0] = -1;
-					//Y
-					if (spGetInput()->axis[1])
-						spGetInput()->axis[1] = 0;
 					else
-					if (player[active_player]->activeHare->wp_y < y)
-						spGetInput()->axis[1] = +1;
-					else
-					if (player[active_player]->activeHare->wp_y > y)
-						spGetInput()->axis[1] = -1;
-					//Hit
-					if (player[active_player]->activeHare->wp_x == x &&
-						player[active_player]->activeHare->wp_y == y)
-					{
-						spMapSetByID( MAP_WEAPON, 1 );
-						spGetInput()->touchscreen.pressed = 0;
-					}
+					if (nx > 0)
+						spGetInput()->axis[0] = +1;
 				}
 			}
 		}
