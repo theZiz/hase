@@ -543,53 +543,60 @@ int window_calc(Uint32 steps)
 				switch (elem->button.type)
 				{
 					case 0:
-						window->selection = nr;
 						if (elem->type == -1)
 							spMapSetByID( MAP_JUMP, 1 );
+						else
+						if (window->selection != nr)
+							spGetInput()->touchscreen.pressed = 0;
+						window->selection = nr;						
 						break;
 					case 1:
 						spGetInput()->axis[1] = -1;
+						spGetInput()->touchscreen.pressed = 0;
 						break;
 					case 2:
 						spGetInput()->axis[1] = +1;
+						spGetInput()->touchscreen.pressed = 0;
 						break;
 				}
-				spGetInput()->touchscreen.pressed = 0;
 				break;
 			}
 			nr++;
 			elem = elem->next;
 		}
-		int i = SP_MAPPING_MAX+4;
-		while (i --> 0 )
+		if (spGetInput()->touchscreen.pressed)
 		{
-			if ( window->button[i].x + window->button[i].w >= mx &&
-				window->button[i].x <= mx &&
-				window->button[i].y + window->button[i].h >= my &&
-				window->button[i].y <= my )
+			int i = SP_MAPPING_MAX+4;
+			while (i --> 0 )
 			{
-				if ( i < SP_MAPPING_MAX )
+				if ( window->button[i].x + window->button[i].w >= mx &&
+					window->button[i].x <= mx &&
+					window->button[i].y + window->button[i].h >= my &&
+					window->button[i].y <= my )
 				{
-					spMapSetByID( i, 1 );
-					spGetInput()->touchscreen.pressed = 0;
-				}
-				else
-					switch ( i )
+					if ( i < SP_MAPPING_MAX )
 					{
-						case SP_MAPPING_MAX + 0:
-							spGetInput()->axis[0] = -1;
-							break;
-						case SP_MAPPING_MAX + 1:
-							spGetInput()->axis[1] = -1;
-							break;
-						case SP_MAPPING_MAX + 2:
-							spGetInput()->axis[0] = 1;
-							break;
-						case SP_MAPPING_MAX + 3:
-							spGetInput()->axis[1] = 1;
-							break;
+						spMapSetByID( i, 1 );
+						spGetInput()->touchscreen.pressed = 0;
 					}
-				break;
+					else
+						switch ( i )
+						{
+							case SP_MAPPING_MAX + 0:
+								spGetInput()->axis[0] = -1;
+								break;
+							case SP_MAPPING_MAX + 1:
+								spGetInput()->axis[1] = -1;
+								break;
+							case SP_MAPPING_MAX + 2:
+								spGetInput()->axis[0] = 1;
+								break;
+							case SP_MAPPING_MAX + 3:
+								spGetInput()->axis[1] = 1;
+								break;
+						}
+					break;
+				}
 			}
 		}
 	}
