@@ -1,7 +1,6 @@
 #include "lobbyGame.h"
 #include "level.h"
 #include <time.h> 
-#include "window.h"
 
 #include "options.h"
 #include "client.h"
@@ -35,7 +34,101 @@ int level_mode;
 int use_chat;
 int after_start;
 
+tLobbyButton lg_button[ SP_MAPPING_MAX + 4 ];
+
 #define CHAT_LINES 8
+
+void lobby_draw_buttons(window_text_positon position, int x, int y, char const * const text__,spFontPointer font,pLobbyButton button)
+{
+	int l = strlen(text__);
+	char text_buffer[l+1];
+	memcpy(text_buffer,text__,(l+1)*sizeof(char));
+	char* text = text_buffer;
+	int width = spFontWidth( text, font );
+	switch (position)
+	{
+		case LEFT:
+			break;
+		case MIDDLE:
+			x -= width/2;
+			break;
+		case RIGHT:
+			x -= width;
+			break;
+	}
+	int i = -1;
+	int in_button = 0;
+	do
+	{
+		++i;
+		int draw_text = 0;
+		if (!in_button && (text[i] == '{' || text[i] == '['))
+		{
+			in_button = 1;
+			draw_text = i > 0;
+		}
+		if (in_button && ((text[i] == ' ' && text[i+1] == ' ') || text[i] == 0))
+		{
+			in_button = 0;
+			draw_text = i > 0;
+		}
+		else
+		if (text[i] == 0)
+		{
+			in_button = 1;
+			draw_text = i > 0;
+		}
+		if (draw_text)
+		{
+			char temp = text[i];
+			text[i] = 0;
+			if (!in_button)
+			{
+				int B0 = spMax(spGetSizeFactor()>>17,1);
+				int B1 = spMax(spGetSizeFactor()>>16,1);
+				int B2 = spMax(spGetSizeFactor()>>15,1);
+				int B4 = spMax(spGetSizeFactor()>>14,1);
+				width = spFontWidth( text, font ) + B4;
+				int height = font->maxheight;
+				draw_edgy_rectangle(x,y,&width,&height,B0,B1,B2,B4);
+				int j = 0;
+				for (; text[j] && text[j] != '}' && text[j] != ']';j++);
+				if (text[j])
+				{
+					char temp2 = text[j];
+					text[j] = 0;
+					int id	= -1;
+					if (temp2 == '}')
+						id = spMapIDByName( &(text[1]) );
+					else // ]
+					{
+						switch (text[j-1])
+						{
+							case '<': id = SP_MAPPING_MAX+0; break;
+							case '^': id = SP_MAPPING_MAX+1; break;
+							case '>': id = SP_MAPPING_MAX+2; break;
+							case 'v': id = SP_MAPPING_MAX+3; break;
+						}
+					}
+					if ( id >= 0 )
+					{
+						button[id].x = x;
+						button[id].y = y;
+						button[id].w = width;
+						button[id].h = height;
+					}
+					text[j] = temp2;
+				}
+			}
+			spFontDraw( x, y, 0, text, font );
+			x += spFontWidth( text, font );
+			text[i] = temp;
+			text = &(text[i]);
+			i = -1;
+		}
+	}
+	while (text[i]);
+}
 
 void lg_draw(void)
 {
@@ -1228,6 +1321,14 @@ int game_options(Uint32 *game_opt,int* game_seconds,int* game_hares,spFontPointe
 
 int start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), pGame game,int spectate)
 {
+	int i = SP_MAPPING_MAX+4;
+	while (i --> 0 )
+	{
+		lg_button[i].x = -1;
+		lg_button[i].y = -1;
+		lg_button[i].w = -1;
+		lg_button[i].h = -1;
+	}
 	int result = 0;
 	level_mode = 0;
 	level_filename[0] = 0;

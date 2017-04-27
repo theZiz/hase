@@ -69,7 +69,7 @@ pWindow create_window(int ( *feedback )( pWindow window, pWindowElement elem, in
 	window->cancel_to_no = 0;
 	window->zig_zag = 1;
 	window->sizeFactor = spGetSizeFactor();
-	int i = SP_MAPPING_MAX;
+	int i = SP_MAPPING_MAX+4;
 	while (i --> 0 )
 	{
 		window->button[i].x = -1;
@@ -121,23 +121,18 @@ pWindowElement add_window_element(pWindow window,int type,int reference)
 
 pWindow recent_window = NULL;
 
-typedef enum
+void draw_edgy_rectangle(int x, int y, int * width, int * height, int B0, int B1, int B2,int B4)
 {
-	LEFT,
-	MIDDLE,
-	RIGHT
-} window_text_positon;
-
-void draw_edgy_rectangle(int x, int y, int width, int height, int B0, int B1, int B2)
-{
-	int X = x +  width/2 - B2;
-	int Y = y + height/2 - B2;
-	spRectangle      ( X, Y, 0, width + B2 , height + B2,         LL_BG);
-	spRectangleBorder( X, Y, 0, width      , height     , B1, B1, LL_FG);
-	spRectangle( x         - B2, y          - B2, 0, B0, B0, LL_BG );
-	spRectangle( x + width - B2, y          - B2, 0, B0, B0, LL_BG );
-	spRectangle( x         - B2, y + height - B2, 0, B0, B0, LL_BG );
-	spRectangle( x + width - B2, y + height - B2, 0, B0, B0, LL_BG );
+//	*height += 2*B1;
+	*width += 2*B2;
+	int Y;
+	for (Y = y; Y <= y + *height; ++Y)
+	{
+		int add = 0;
+		if (Y < y + B1 || Y > y + *height - B1)
+			add = B2;
+		spLine( x - B1 + add, Y, 0, x - B1 + *width - add, Y, 0, LL_FG );
+	}
 }
 
 static void window_draw_buttons(window_text_positon position, int x, int y, char const * const text__)
@@ -190,9 +185,9 @@ static void window_draw_buttons(window_text_positon position, int x, int y, char
 				int B1 = spMax(spGetSizeFactor()>>16,1);
 				int B2 = spMax(spGetSizeFactor()>>15,1);
 				int B4 = spMax(spGetSizeFactor()>>14,1);
-				width = spFontWidth( text, recent_window->font ) + B4;
-				int height = recent_window->font->maxheight + B4;
-				draw_edgy_rectangle(x,y,width,height,B0,B1,B2);
+				width = spFontWidth( text, recent_window->font );
+				int height = recent_window->font->maxheight;
+				draw_edgy_rectangle(x,y,&width,&height,B0,B1,B2,B4);
 				int j = 0;
 				for (; text[j] && text[j] != '}' && text[j] != ']';j++);
 				if (text[j])
@@ -332,8 +327,8 @@ void window_draw(void)
 				spFontDrawRight( t_r, y, 0, elem->text, window->font );
 				if (nr == window->selection && (elem->type == 0 || elem->type == 2))
 				{
-					window_draw_buttons( LEFT, t_r, y, "  [>]" );
-					window_draw_buttons( RIGHT, t_r - t_w, y, "[<]  " );
+					window_draw_buttons( LEFT, t_r, y+SMALL_HACK/2, "  [>]" );
+					window_draw_buttons( RIGHT, t_r - t_w, y+SMALL_HACK/2, "[<]  " );
 				}
 				elem->button.type = 0;
 			}
@@ -381,8 +376,7 @@ void window_draw(void)
 		spFontDrawMiddle( screen->w/2, y, 0, buffer, window->font);
 	}
 	
-	
-	y = (screen->h + window->height) / 2 - meow - 3*window->font->maxheight/2-SMALL_HACK/2  + extra_y;
+	y = (screen->h + window->height) / 2 - meow - 3*window->font->maxheight/2-SMALL_HACK/2  + extra_y + 1;
 	if (selElem)
 	{
 		switch (selElem->type)

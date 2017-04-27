@@ -62,9 +62,9 @@ void help_draw(void)
 		help_button[2].h = help_font->maxheight;
 		help_button[2].x = 2+spGetWindowSurface()->w*5/6;
 		help_button[2].y = spGetWindowSurface()->h-2-2*help_font->maxheight;
-		int width = help_button[2].w + B4;
-		int height = help_font->maxheight + B4;
-		draw_edgy_rectangle(help_button[2].x,help_button[2].y,width,height,B0,B1,B2);
+		int width = help_button[2].w;
+		int height = help_font->maxheight;
+		draw_edgy_rectangle(help_button[2].x,help_button[2].y,&width,&height,B0,B1,B2,B4);
 		spFontDraw( help_button[2].x, help_button[2].y, 0, button_text, help_font );
 	}
 	else
@@ -81,9 +81,9 @@ void help_draw(void)
 		help_button[1].h = help_font->maxheight;
 		help_button[1].x = 2+spGetWindowSurface()->w*5/6;
 		help_button[1].y = 2+  help_font->maxheight;
-		int width = help_button[1].w + B4;
-		int height = help_font->maxheight + B4;
-		draw_edgy_rectangle(help_button[1].x,help_button[1].y,width,height,B0,B1,B2);
+		int width = help_button[1].w;
+		int height = help_font->maxheight;
+		draw_edgy_rectangle(help_button[1].x,help_button[1].y,&width,&height,B0,B1,B2,B4);
 		spFontDraw( help_button[1].x, help_button[1].y, 0, button_text, help_font );
 	}
 	else
@@ -98,9 +98,9 @@ void help_draw(void)
 	help_button[0].h = help_font->maxheight;
 	help_button[0].x = spGetWindowSurface()->w/2 - help_button[0].w/2;
 	help_button[0].y = spGetWindowSurface()->h-B4-help_font->maxheight;
-	int width = help_button[0].w + B4;
-	int height = help_font->maxheight + B4;
-	draw_edgy_rectangle(help_button[0].x,help_button[0].y,width,height,B0,B1,B2);
+	int width = help_button[0].w;
+	int height = help_font->maxheight;
+	draw_edgy_rectangle(help_button[0].x,help_button[0].y,&width,&height,B0,B1,B2,B4);
 	spFontDraw( help_button[0].x, help_button[0].y, 0, button_text, help_font );
 	spFlip();
 }

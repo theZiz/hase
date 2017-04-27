@@ -25,6 +25,8 @@ int use_chat;
 
 pGame mom_game;
 
+tLobbyButton ll_button[ SP_MAPPING_MAX ];
+
 #define LL_SURFACE_DIV 16
 #define LL_MOM_PLAYER 11
 #define LL_STATUS 13
@@ -90,14 +92,25 @@ void ll_draw(void)
 	spClearTarget(LL_BG);
 	char buffer[256];
 
+	int i = SP_MAPPING_MAX;
+	while (i --> 0 )
+	{
+		ll_button[i].x = -1;
+		ll_button[i].y = -1;
+		ll_button[i].w = -1;
+		ll_button[i].h = -1;
+	}
+
+	int button_pos = spMax(spGetSizeFactor()>>15,1);
+
 	sprintf(buffer,"%i Games on Server (Version %i):\n",ll_game_count,CLIENT_VERSION);
-	spFontDrawMiddle( screen->w/3+2, 0*ll_font->maxheight, 0, buffer, ll_font );
-	spBlitSurface(screen->w/3,ll_font->maxheight*1+ll_surface->h/2,0,ll_surface);
+	spFontDrawMiddle( screen->w/3+2, 0*ll_font->maxheight-2, 0, buffer, ll_font );
+	spBlitSurface(screen->w/3,ll_font->maxheight*1+ll_surface->h/2-1,0,ll_surface);
 	
-	spFontDrawMiddle(5*screen->w/6+4, 0*ll_font->maxheight, 0, "Preview & Players", ll_font );
-	spRectangle(5*screen->w/6, 1*ll_font->maxheight+screen->w/6-4, 0,screen->w/3-6,screen->w/3-6,LL_FG);
+	spFontDrawMiddle(5*screen->w/6, 0*ll_font->maxheight-2, 0, "Preview & Players", ll_font );
+	spRectangle(5*screen->w/6, ll_font->maxheight+screen->w/6-5, 0,screen->w/3-6,screen->w/3-6,LL_FG);
 	if (ll_level)
-		spBlitSurface(5*screen->w/6, 1*ll_font->maxheight+screen->w/6-4, 0,ll_level);
+		spBlitSurface(5*screen->w/6, 1*ll_font->maxheight+screen->w/6-5, 0,ll_level);
 
 	int h = screen->h-(screen->w/3+3*ll_font->maxheight-6);
 		
@@ -108,29 +121,31 @@ void ll_draw(void)
 		spFontDrawMiddle(screen->w/2, screen->h-2*ll_font->maxheight-h/2, 0, "Connecting to IRC Server...", ll_font );
 	else
 	{
-		spFontDrawMiddle(screen->w/2, 1*ll_font->maxheight+screen->w/3-6, 0, "{chat}Chat {power_down}/{power_up}scroll", ll_font );
-		int rh = (h+3)/ll_font->maxheight*ll_font->maxheight;
-		spRectangle(screen->w/2, screen->h-1*ll_font->maxheight-h/2, 0,screen->w-4,rh,LL_FG);
+		int rh = (h+3)/ll_font->maxheight*ll_font->maxheight-button_pos*5 + (spGetSizeFactor()>>17)*3;
+		spRectangle(screen->w/2, screen->h-1*ll_font->maxheight-h/2-1, 0,screen->w-4,rh,LL_FG);
 		if (ll_chat_block)
 			spFontDrawTextBlock(left,2, screen->h-1*ll_font->maxheight-h-2+(h-rh)/2, 0,ll_chat_block,rh,ll_chat_scroll,ll_font);
+		const int button_y = (
+			screen->h-1*ll_font->maxheight-h/2-1 - rh/2 + //chat window top
+			ll_font->maxheight+screen->w/6-5 + (screen->w/3-6) / 2 // preview window bottom
+			) / 2 - ll_font->maxheight/2;
+		lobby_draw_buttons( MIDDLE, screen->w/2, button_y, "{chat}Chat   {power_down}scroll up   {power_up}scroll down", ll_font, ll_button );
 	}
 
 	if (ll_game_count > 0 && mom_game && ll_block)
 	{
-		//spFontDrawMiddle(5*screen->w/6+4, 2*ll_font->maxheight+screen->w/3-6, 0, "Players", ll_font );
-		//spRectangle(5*screen->w/6, screen->h-1*ll_font->maxheight-h/2, 0,screen->w/3-6,h,LL_FG);
-		spFontDrawTextBlock(middle,4*screen->w/6+5, 1*ll_font->maxheight + 5 /*+ screen->w/6 - ll_block->line_count*ll_font->maxheight/2*/, 0,ll_block,screen->w/3-6,0,ll_font);
+		spFontDrawTextBlock(middle,4*screen->w/6+5, 1*ll_font->maxheight + 5, 0,ll_block,screen->w/3-6,0,ll_font);
 	}
-	
+
 	if (ll_reload_now == 0)
 	{
 		if (mom_game && mom_game->status != 0)
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}/{view}Show   {weapon}Create   {menu}Back", ll_font );
+			lobby_draw_buttons( LEFT, 2, screen->h-ll_font->maxheight-button_pos, "{jump}/{view}Show   {weapon}Create   {menu}Back", ll_font, ll_button );
 		else
-			spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{jump}Join   {weapon}Create   {view}Spectate   {menu}Back", ll_font );
+			lobby_draw_buttons( LEFT, 2, screen->h-ll_font->maxheight-button_pos, "{jump}Join   {weapon}Create   {view}Spectate   {menu}Back", ll_font, ll_button);
 	}
 	else
-		spFontDraw( 2, screen->h-ll_font->maxheight, 0, "{menu}Back", ll_font );
+		lobby_draw_buttons( LEFT, 2, screen->h-ll_font->maxheight-button_pos, "{menu}Back", ll_font, ll_button);
 	
 	if (ll_reload_now == 1)
 		ll_reload_now = 2;
@@ -138,7 +153,7 @@ void ll_draw(void)
 		sprintf(buffer,"Reloading...");
 	else
 		sprintf(buffer,"Next update: %is",(10000-ll_counter)/1000);
-	spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight, 0, buffer, ll_font );
+	spFontDrawRight( screen->w-2, screen->h-ll_font->maxheight-2, 0, buffer, ll_font );
 
 	spFlip();
 }
@@ -166,6 +181,24 @@ int create_game_feedback( pWindow window, pWindowElement elem, int action )
 
 int ll_calc(Uint32 steps)
 {
+	if ( spGetInput()->touchscreen.pressed )
+	{
+		int mx = spGetInput()->touchscreen.x;
+		int my = spGetInput()->touchscreen.y;
+		int i = SP_MAPPING_MAX;
+		while (i --> 0 )
+		{
+			if ( ll_button[i].x + ll_button[i].w >= mx &&
+				ll_button[i].x <= mx &&
+				ll_button[i].y + ll_button[i].h >= my &&
+				ll_button[i].y <= my )
+			{
+				spMapSetByID( i, 1 );
+				spGetInput()->touchscreen.pressed = 0;
+				break;
+			}
+		}
+	}
 	try_to_join();
 	int CHAT_LINES = (spGetWindowSurface()->h-(spGetWindowSurface()->w/3+4*ll_font->maxheight-4))/ll_font->maxheight;
 	if (ll_chat_block)
@@ -480,6 +513,14 @@ int ll_reload(void* dummy)
 
 void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), int start_chat)
 {
+	int i = SP_MAPPING_MAX;
+	while (i --> 0 )
+	{
+		ll_button[i].x = -1;
+		ll_button[i].y = -1;
+		ll_button[i].w = -1;
+		ll_button[i].h = -1;
+	}
 	use_chat = start_chat;
 	char time_buffer[128];
     time_t t = time(NULL);
