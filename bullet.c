@@ -154,7 +154,7 @@ void delete_weapons()
 		spDeleteSurface(weapon_surface[i]);
 }
 
-void draw_weapons()
+void draw_weapons(int *X,int *Y,int *W,int* H)
 {
 	int factor = 21 * (SP_ONE*2/4+spGetSizeFactor()*3/4) >> SP_ACCURACY;
 	int x,y,w = factor * WEAPON_X,i = 0;
@@ -177,11 +177,29 @@ void draw_weapons()
 	{
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 		spFontDrawMiddle(screen->w/2,(screen->h-4*h/3)/2,0,weapon_name[w_nr],font);
-		spRectangleBorder((screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-1)*factor*2+(WEAPON_X-1)*factor)/2-1,(screen->h-4*h/3+player[active_player]->activeHare->wp_y*factor*2)/2+factor/2+font->maxheight-1,0,factor-4,factor-4,2,2,get_border_color());
+		spRectangleBorder(
+			(screen->w-(WEAPON_X-player[active_player]->activeHare->wp_x-1)*factor*2+(WEAPON_X-1)*factor)/2-1,
+			(screen->h-4*h/3+player[active_player]->activeHare->wp_y*factor*2)/2+factor/2+font->maxheight-1,
+			0,factor-4,factor-4,2,2,get_border_color());
+
+		*X = (screen->w-(WEAPON_X-1)*factor*2+(WEAPON_X-1)*factor)/2-1 - factor/2 + 2;
+		*Y = (screen->h-4*h/3+  0*factor*2)/2+factor/2+font->maxheight-1 - factor/2 + 2;
+		int X2 = (screen->w-0*factor*2+(WEAPON_X-1)*factor)/2-1 + factor/2 - 2;
+		int Y2 = (screen->h-4*h/3+(WEAPON_Y-1)*factor*2)/2+factor/2+font->maxheight-1 + factor/2 - 2;
+		*W = X2-*X;
+		*H = Y2-*Y;
+		
 		spFontDraw((screen->w-w)/2,(screen->h+2*h/3)/2-font->maxheight*2,0,weapon_description[w_nr],font);
 		spFontDrawRight((screen->w+w)/2 - weapon_cost[w_nr] * tomato->w,(screen->h+2*h/3)/2-font->maxheight*1,0,"Cost:",font);
 		for (i = 0; i < weapon_cost[w_nr]; i++)
 			spBlitSurface( (screen->w+w)/2 - tomato->w*(2*i+1)/2, (screen->h+2*h/3)/2-font->maxheight/2,0,tomato);
+	}
+	else
+	{
+		*X = -1;
+		*Y = -1;
+		*W = -1;
+		*H = -1;
 	}
 }
 

@@ -88,7 +88,7 @@ struct
 	int w;
 	int h;
 	int pressed;
-} weapon_button;
+} weapon_button[2]; //activate, weapon field
 
 
 void ( *hase_resize )( Uint16 w, Uint16 h );
@@ -564,16 +564,16 @@ void draw(void)
 		int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 		int B1 = spMax(spGetSizeFactor()>>16,1);
 		int B2 = spMax(spGetSizeFactor()>>15,1);
-		weapon_button.w = spFontWidth( weapon_name[w_nr], font );
-		weapon_button.h = font->maxheight;
-		weapon_button.x = screen->w-1 - weapon_button.w;
-		weapon_button.y = screen->h-1-font->maxheight*2;
-		int width = weapon_button.w;
+		weapon_button[0].w = spFontWidth( weapon_name[w_nr], font );
+		weapon_button[0].h = font->maxheight;
+		weapon_button[0].x = screen->w-1 - weapon_button[0].w;
+		weapon_button[0].y = screen->h-1-font->maxheight*2;
+		int width = weapon_button[0].w;
 		int height = font->maxheight;
 		spSetPattern8(153,60,102,195,153,60,102,195);
-		draw_edgy_rectangle(weapon_button.x,weapon_button.y,&width,&height,B1,B2);
+		draw_edgy_rectangle(weapon_button[0].x,weapon_button[0].y,&width,&height,B1,B2);
 		spDeactivatePattern();
-		spFontDraw( weapon_button.x, weapon_button.y, 0, weapon_name[w_nr], font );
+		spFontDraw( weapon_button[0].x, weapon_button[0].y, 0, weapon_name[w_nr], font );
 		int bar_w = spFontWidth(" 88.8 % ",font);
 		int bar_s;
 		if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG ||
@@ -598,10 +598,10 @@ void draw(void)
 	}
 	else
 	{
-		weapon_button.x = -1;
-		weapon_button.y = -1;
-		weapon_button.w = -1;
-		weapon_button.h = -1;
+		weapon_button[0].x = -1;
+		weapon_button[0].y = -1;
+		weapon_button[0].w = -1;
+		weapon_button[0].h = -1;
 	}
 		
 	if (ragnarok_counter && (hase_game->options.bytewise.ragnarok_border >> 4) < 7)
@@ -622,7 +622,7 @@ void draw(void)
 
 	
 	if (wp_choose)
-		draw_weapons();
+		draw_weapons(&(weapon_button[1].x),&(weapon_button[1].y),&(weapon_button[1].w),&(weapon_button[1].h));
 
 	//Help
 	draw_help();
@@ -1120,29 +1120,75 @@ int calc(Uint32 steps)
 	spUpdateSprite(spActiveSprite(targeting),steps);
 	spParticleUpdate(&particles,steps);
 
-	if ( spGetInput()->touchscreen.pressed )
-	{
-		int mx = spGetInput()->touchscreen.x;
-		int my = spGetInput()->touchscreen.y;
-		if ( weapon_button.x + weapon_button.w >= mx &&
-			weapon_button.x <= mx &&
-			weapon_button.y + weapon_button.h >= my &&
-			weapon_button.y <= my )
-		{
-			weapon_button.pressed = 1;
-			spMapSetByID( MAP_WEAPON, 1 );
-			spGetInput()->touchscreen.pressed = 0;
-		}
-	}
-	else
-	if (weapon_button.pressed)
-	{
-		spMapSetByID( MAP_WEAPON, 0 );
-		weapon_button.pressed = 0;
-	}
-
 	for (i = 0; i < steps; i++)
 	{
+		if ( spGetInput()->touchscreen.pressed )
+		{
+			int mx = spGetInput()->touchscreen.x;
+			int my = spGetInput()->touchscreen.y;
+			if ( weapon_button[0].x + weapon_button[0].w >= mx &&
+				weapon_button[0].x <= mx &&
+				weapon_button[0].y + weapon_button[0].h >= my &&
+				weapon_button[0].y <= my )
+			{
+				weapon_button[0].pressed = 1;
+				spMapSetByID( MAP_WEAPON, 1 );
+				spGetInput()->touchscreen.pressed = 0;
+			}
+			if ( wp_choose &&
+				weapon_button[1].x + weapon_button[1].w >= mx &&
+				weapon_button[1].x <= mx &&
+				weapon_button[1].y + weapon_button[1].h >= my &&
+				weapon_button[1].y <= my )
+			{
+				weapon_button[1].pressed = 1;
+				int x = (mx - weapon_button[1].x) * WEAPON_X / weapon_button[1].w;
+				int y = (my - weapon_button[1].y) * WEAPON_Y / weapon_button[1].h;
+				if (player[active_player]->activeHare)
+				{
+					//X
+					if (spGetInput()->axis[0])
+						spGetInput()->axis[0] = 0;
+					else
+					if (player[active_player]->activeHare->wp_x < x)
+						spGetInput()->axis[0] = +1;
+					else
+					if (player[active_player]->activeHare->wp_x > x)
+						spGetInput()->axis[0] = -1;
+					//Y
+					if (spGetInput()->axis[1])
+						spGetInput()->axis[1] = 0;
+					else
+					if (player[active_player]->activeHare->wp_y < y)
+						spGetInput()->axis[1] = +1;
+					else
+					if (player[active_player]->activeHare->wp_y > y)
+						spGetInput()->axis[1] = -1;
+					//Hit
+					if (player[active_player]->activeHare->wp_x == x &&
+						player[active_player]->activeHare->wp_y == y)
+					{
+						spMapSetByID( MAP_WEAPON, 1 );
+						spGetInput()->touchscreen.pressed = 0;
+					}
+				}
+			}
+		}
+		else
+		{
+			if (weapon_button[0].pressed)
+			{
+				spMapSetByID( MAP_WEAPON, 0 );
+				weapon_button[0].pressed = 0;
+			}
+			if (weapon_button[1].pressed)
+			{
+				spMapSetByID( MAP_WEAPON, 0 );
+				spGetInput()->axis[0] = 0;
+				spGetInput()->axis[1] = 0;
+				weapon_button[1].pressed = 0;
+			}
+		}
 		//Camera
 		Sint32 superZoom = 0;
 		if (player[active_player]->activeHare)
@@ -1850,11 +1896,15 @@ void update_map()
 
 int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 {
-	weapon_button.x = -1;
-	weapon_button.y = -1;
-	weapon_button.w = -1;
-	weapon_button.h = -1;
-	weapon_button.pressed = 0;
+	int i = 2;
+	while (i --> 0 )
+	{
+		weapon_button[i].x = -1;
+		weapon_button[i].y = -1;
+		weapon_button[i].w = -1;
+		weapon_button[i].h = -1;
+		weapon_button[i].pressed = 0;
+	}
 	input_ok_on = 0;
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
@@ -1978,7 +2028,6 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 		message_box(font,hase_resize,"You got disconnected!");
 	if (result == 2)
 	{
-		int i;
 		for (i = 0; i < player_count; i ++)
 			if (player[i]->firstHare)
 				break;
@@ -1993,7 +2042,6 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	}
 	deleteAllBullets();
 	free_gravity();
-	int i;
 	for (i = 0; i < player_count; i++)
 	{
 		pHare hare = player[i]->firstHare;
