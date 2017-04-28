@@ -1346,7 +1346,7 @@ int calc(Uint32 steps)
 		{
 			int w_nr = weapon_pos[player[active_player]->activeHare->wp_y][player[active_player]->activeHare->wp_x];
 			if (player[active_player]->computer && player[active_player]->activeHare)
-			{		
+			{
 				//AI
 				if (player[active_player]->weapon_points)
 				{
@@ -1381,16 +1381,31 @@ int calc(Uint32 steps)
 							{
 								if (player[active_player]->weapon_points >= weapon_cost[WP_ABOVE] && ai_shoot_tries == 1)
 								{
+									pHare hitted[CIRCLE_CHECKPOINTS];
+									int hit_count = 0;
 									for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
 										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->cam_rotation - SP_PI/2) < -SP_ONE/4)
 										{
+											int k;
+											for (k = 0; k < hit_count; ++k)
+												if (hitted[k] == player[active_player]->activeHare->circle_checkpoint_hare[j])
+													break;
+											if (k == hit_count)
+											{
+												hitted[hit_count] = player[active_player]->activeHare->circle_checkpoint_hare[j];
+												hit_count++;
+											}
+											else //hare already hitted!
+											{
+												printf("Ignored second occurence of hare in checkpoint list\n");
+												continue;
+											}
 											pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 											bullet->x = player[active_player]->activeHare->x;
 											bullet->y = player[active_player]->activeHare->y;
 											bullet->kind = WP_ABOVE;
 											bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
 											int d;
-											int k;
 											pPlayer p;
 											for (k = 0; k < player_count; k++)
 											{
@@ -1668,6 +1683,8 @@ int calc(Uint32 steps)
 							int once;
 							input_states[INPUT_BUTTON_CANCEL] = 0;
 							player[active_player]->weapon_points-=weapon_cost[w_nr];
+							pHare hitted[CIRCLE_CHECKPOINTS];
+							int hit_count;
 							if (weapon_shoot[w_nr])
 							{
 								for (j = ((w_nr == WP_SHOTGUN)?-2:0); j <= ((w_nr == WP_SHOTGUN)?2:0); j++)
@@ -1736,16 +1753,30 @@ int calc(Uint32 steps)
 									break;
 								case WP_ABOVE:
 									once = 0;
+									hit_count = 0;
 									for (j = 0; j < CIRCLE_CHECKPOINTS; j++)
 										if (player[active_player]->activeHare->circle_checkpoint_hare[j] && spCos(j*2*SP_PI/CIRCLE_CHECKPOINTS - player[active_player]->activeHare->cam_rotation - SP_PI/2) < -SP_ONE/4)
 										{
+											int k;
+											for (k = 0; k < hit_count; ++k)
+												if (hitted[k] == player[active_player]->activeHare->circle_checkpoint_hare[j])
+													break;
+											if (k == hit_count)
+											{
+												hitted[hit_count] = player[active_player]->activeHare->circle_checkpoint_hare[j];
+												hit_count++;
+											}
+											else //hare already hitted!
+											{
+												printf("Ignored second occurence of hare in checkpoint list\n");
+												continue;
+											}
 											pBullet bullet = (pBullet)malloc(sizeof(tBullet));
 											bullet->x = player[active_player]->activeHare->x;
 											bullet->y = player[active_player]->activeHare->y;
 											bullet->kind = WP_ABOVE;
 											bullet->hit = player[active_player]->activeHare->circle_checkpoint_hare[j];
 											int d;
-											int k;
 											pPlayer p;
 											for (k = 0; k < player_count; k++)
 											{
