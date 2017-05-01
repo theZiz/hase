@@ -1433,9 +1433,9 @@ int calc(Uint32 steps)
 												&d);
 											if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
 											{
-												player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(p->firstHare));
-												if (p->firstHare == NULL)
-													alive_count--;
+												del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],p);
+												if (alive_count < 2)
+													result = 2;
 											}
 											free(bullet);
 											once = 1;
@@ -1804,9 +1804,7 @@ int calc(Uint32 steps)
 												&d);
 											if (player[active_player]->activeHare->circle_checkpoint_hare[j]->health <= 0)
 											{
-												player[active_player]->activeHare->circle_checkpoint_hare[j] = del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],&(p->firstHare));
-												if (p->firstHare == NULL)
-													alive_count--;
+												del_hare(player[active_player]->activeHare->circle_checkpoint_hare[j],p);
 												if (alive_count < 2)
 													result = 2;
 											}

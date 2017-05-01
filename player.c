@@ -713,17 +713,28 @@ void hareplosion(pHare hare)
 	}
 }
 
-pHare del_hare(pHare hare,pHare* firstHare)
+pHare del_hare(pHare hare,pPlayer p)
 {
+	if (hare == p->activeHare ||
+		hare == p->setActiveHare)
+	{
+		p->setActiveHare = hare->next;
+		p->activeHare = NULL;
+		if (p == player[active_player])//Suicid!
+			next_player();
+	}
 	pHare next = NULL;
 	if (hare->next == hare)
-		*firstHare = NULL;
+	{
+		p->firstHare = NULL;
+		alive_count--;
+	}
 	else
 	{
 		hare->before->next = hare->next;
 		hare->next->before = hare->before;
-		if (*firstHare == hare)
-			*firstHare = hare->next;
+		if (p->firstHare == hare)
+			p->firstHare = hare->next;
 		next = hare->next;
 	}
 	hareplosion(hare);

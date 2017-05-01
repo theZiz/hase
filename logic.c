@@ -70,17 +70,7 @@ int do_physics()
 			}
 			if (((hase_game->options.bytewise.ragnarok_border & 15) == 0) && (hare->x <  0 || hare->y < 0 || hare->x >= spIntToFixed(LEVEL_WIDTH) || hare->y >= spIntToFixed(LEVEL_HEIGHT)))
 			{
-				if (hare == player[j]->activeHare ||
-					hare == player[j]->setActiveHare)
-				{
-					player[j]->setActiveHare = hare->next;
-					player[j]->activeHare = NULL;
-					if (j == active_player)//Suicid!
-						next_player();
-				}
-				hare = del_hare(hare,&(player[j]->firstHare));
-				if (player[j]->firstHare == NULL)
-					alive_count--;
+				hare = del_hare(hare,player[j]);
 				if (alive_count < 2)
 					return 1;
 			}
