@@ -834,6 +834,8 @@ void init_player(pPlayer player_list,int pc,int hc,game_options_union options)
 	active_player = 0;
 	posX = player[active_player]->firstHare->x;
 	posY = player[active_player]->firstHare->y;
+	mapviewX = 0;
+	mapviewY = 0;
 	rotation = -player[active_player]->firstHare->rotation;
 	ai_shoot_tries = 0;
 	last_ai_try = 0;

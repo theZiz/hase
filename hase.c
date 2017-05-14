@@ -32,6 +32,7 @@ SDL_Surface* level_original;
 Uint16* level_pixel;
 SDL_Surface* arrow;
 int posX,posY,rotation;
+int mapviewX,mapviewY;
 Sint32 zoom;
 Sint32 zoom_d; 
 Sint32 zoomAdjust;
@@ -1088,24 +1089,30 @@ int calc(Uint32 steps)
 			zoom_d =  1;
 		if (spGetInput()->axis[0] < 0)
 		{
-			posX -= spDiv(spCos(-rotation),zoom*3/4)*steps;
-			posY -= spDiv(spSin(-rotation),zoom*3/4)*steps;
+			mapviewX -= spMul(spGetSizeFactor(),spDiv(spCos(-rotation),zoom*3))*steps;
+			mapviewY -= spMul(spGetSizeFactor(),spDiv(spSin(-rotation),zoom*3))*steps;
 		}
 		if (spGetInput()->axis[0] > 0)
 		{
-			posX -= spDiv(spCos(-rotation+SP_PI),zoom*3/4)*steps;
-			posY -= spDiv(spSin(-rotation+SP_PI),zoom*3/4)*steps;
+			mapviewX -= spMul(spGetSizeFactor(),spDiv(spCos(-rotation+SP_PI),zoom*3))*steps;
+			mapviewY -= spMul(spGetSizeFactor(),spDiv(spSin(-rotation+SP_PI),zoom*3))*steps;
 		}
 		if (spGetInput()->axis[1] < 0)
 		{
-			posX -= spDiv(spCos(-rotation+SP_PI/2),zoom*3/4)*steps;
-			posY -= spDiv(spSin(-rotation+SP_PI/2),zoom*3/4)*steps;
+			mapviewX -= spMul(spGetSizeFactor(),spDiv(spCos(-rotation+SP_PI/2),zoom*3))*steps;
+			mapviewY -= spMul(spGetSizeFactor(),spDiv(spSin(-rotation+SP_PI/2),zoom*3))*steps;
 		}
 		if (spGetInput()->axis[1] > 0)
 		{
-			posX -= spDiv(spCos(-rotation+3*SP_PI/2),zoom*3/4)*steps;
-			posY -= spDiv(spSin(-rotation+3*SP_PI/2),zoom*3/4)*steps;
+			mapviewX -= spMul(spGetSizeFactor(),spDiv(spCos(-rotation+3*SP_PI/2),zoom*3))*steps;
+			mapviewY -= spMul(spGetSizeFactor(),spDiv(spSin(-rotation+3*SP_PI/2),zoom*3))*steps;
 		}
+	}
+	else
+	if (mapviewX || mapviewY)
+	{
+		mapviewX = 0;
+		mapviewY = 0;
 	}
 	int i,j;
 	update_player_sprite(steps);
@@ -1273,8 +1280,8 @@ int calc(Uint32 steps)
 				superZoom = 65536/(spFixedToInt(spMax(abs(dxl-dxr),abs(dyl-dyr)))+1)*(spGetSizeFactor()*224 >> SP_ACCURACY);
 				superZoom = spSqrt(superZoom);
 			}
-			posX = ((Sint64)posX*(Sint64)255+(Sint64)destX) >> 8;
-			posY = ((Sint64)posY*(Sint64)255+(Sint64)destY) >> 8;
+			posX = ((Sint64)posX*(Sint64)255+(Sint64)destX+(Sint64)mapviewX) >> 8;
+			posY = ((Sint64)posY*(Sint64)255+(Sint64)destY+(Sint64)mapviewY) >> 8;
 		}
 		//Zoom
 		if (zoom_d == -1)
