@@ -9,6 +9,9 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.5:
+- Improved camera handling, especially for small device screens
+
 1.6.4.1:
 - Fixed crash with "kill above hare" weapon
 
