@@ -336,9 +336,9 @@ void bullet_impact(int X,int Y,int radius)
 		p = spParticleCreate(c,hare_explosion_feedback,&particles);	
 	c = 0;
 	int BORDER_COLOR = get_border_color();
-	for (x = -radius-BORDER_SIZE; x < radius+BORDER_SIZE+1; x++)
+	for (x = first_x; x <= last_x; x++)
 	{
-		for (y = -radius-BORDER_SIZE; y < radius+BORDER_SIZE+1; y++)
+		for (y = first_y; y <= last_y; y++)
 		{
 			int sum = x*x+y*y;
 			if (sum > outer_radius)
