@@ -151,7 +151,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	sprintf(temp,
 		"\r\n--%s--",boundary);
 	memcpy(&(buffer[pos]),temp,2+4+boundary_len+1);
-		
+
 	sprintf(host,"%s",server);
 	char* server_directory = strchr(host,'/');
 	if (server_directory)
@@ -323,7 +323,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 		buffer[work_pos] = 0;
 		content_length -= difference;
 	}
-	#ifndef WIN32	
+	#ifndef WIN32
 	if (encoded)
 	{
 		z_stream strm;
@@ -355,7 +355,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
             case Z_NEED_DICT:
 				printf("Error: ZStream need dict error\n");
 				return NULL;
-				
+
 		}
 		//printf("Compression saved %i%% (%i vs. %i)\n",100-content_length*100/(int)strm.total_out,content_length,(int)strm.total_out);
 		inflateEnd(&strm);
@@ -366,7 +366,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	#endif
 		buffer = in_buffer;
 	//printf("%s\n",&buffer[pos]);
-	
+
 	if (direction == -1) //incoming file
 	{
 		if (buffer[pos+1] == 'A' &&
@@ -420,7 +420,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			//printf("Add %s -> %s\n",line,middle);
 		}
 		if (exit_afterwards)
-			break;		
+			break;
 		rest = ++found;
 	}
 	return result;
@@ -428,7 +428,9 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 
 char irc_server[256] = "";
 char irc_channel[256] = "";
-int irc_port = 6667;
+#define HASE_MAX_IRC_PORT 8
+int irc_port[HASE_MAX_IRC_PORT] = {6667,6667,6667,6667,6667,6667,6667,6667};
+int irc_port_count = 1;
 
 int server_info()
 {
@@ -448,7 +450,20 @@ int server_info()
 			sprintf(irc_channel,"%s",mom->content);
 		else
 		if (strcmp(mom->name,"irc_port") == 0)
-			irc_port = atoi(mom->content);
+		{
+			char* content = mom->content;
+			for (irc_port_count = 0; irc_port_count < HASE_MAX_IRC_PORT; irc_port_count++)
+			{
+				irc_port[irc_port_count] = strtol (content, &content, 10);
+				if (content[0] != ',')
+				{
+					irc_port_count++;
+					break;
+				}
+				else
+					content++;
+			}
+		}
 		else
 		if (strcmp(mom->name,"version") == 0)
 		{
@@ -570,7 +585,7 @@ int get_games(pGame *gameList)
 			{
 				game->next = (pGame)malloc(sizeof(tGame));
 				game = game->next;
-			} 
+			}
 			else
 			{
 				*gameList = (pGame)malloc(sizeof(tGame));
@@ -908,7 +923,7 @@ void set_status(pGame game,int status)
 		for (i = 0; i < 3 && result == NULL;i++)
 			result = sendMessage(message,NULL,NULL,0,"set_status.php",hase_url);
 		deleteMessage(&message);
-		deleteMessage(&result);	
+		deleteMessage(&result);
 	}
 	else
 	if (status == 1 && old_status != 1)
@@ -954,7 +969,7 @@ void set_level(pGame game,char* level_string)
 		deleteMessage(&message);
 		if (result)
 			sprintf(game->level_string,"%s",level_string);
-		deleteMessage(&result);	
+		deleteMessage(&result);
 	}
 	else
 		sprintf(game->level_string,"%s",level_string);
@@ -981,7 +996,7 @@ void change_game(pGame game,Uint32 options,int seconds_per_turn,int hares_per_pl
 			game->seconds_per_turn = seconds_per_turn;
 			game->hares_per_player = hares_per_player;
 		}
-		deleteMessage(&result);	
+		deleteMessage(&result);
 	}
 	else
 	{
@@ -1151,7 +1166,7 @@ int pull_thread_function(void* data)
 			next_data->player = player;
 			next_data->second_of_player = new_second;
 			next_data->next = NULL;
-			SDL_mutexP(player->input_mutex);	
+			SDL_mutexP(player->input_mutex);
 			if (player->last_input_data_write)
 				player->last_input_data_write->next = next_data;
 			else
@@ -1251,7 +1266,7 @@ void start_irc_client(char* name)
 	char buffer[17]; //max nick len on freenode is 16... Let's keep some space for numbers
 	int i;
 	for (i = 0; i < 15 && name[i];i++)
-		if ((((name[i] < '0') || 
+		if ((((name[i] < '0') ||
 			  (name[i] > '9' && name[i] < 'A') ||
 			   name[i] > '}') &&
 			(name[i] !='-' || i == 0)) ||
@@ -1260,13 +1275,20 @@ void start_irc_client(char* name)
 		else
 			buffer[i] = name[i];
 	buffer[i] = 0;
-	printf("%s %i %s\n",buffer,irc_port,irc_server);
-	char buffer2[128];
-	sprintf(buffer2,SP_DEVICE_STRING);
-	for (i = 0; buffer2[i]; i++)
-		if (buffer2[i] == ' ')
-			buffer2[i] = '_';
-	server = spNetIRCConnectServer(irc_server,irc_port,buffer,buffer2,name,"*");
+	int port_try;
+	for (port_try = 0; port_try < irc_port_count; port_try++)
+	{
+		printf("%s %i %s\n",buffer,irc_port[port_try],irc_server);
+		char buffer2[128];
+		sprintf(buffer2,SP_DEVICE_STRING);
+		for (i = 0; buffer2[i]; i++)
+			if (buffer2[i] == ' ')
+				buffer2[i] = '_';
+		if (server = spNetIRCConnectServer(irc_server,irc_port[port_try],buffer,buffer2,name,"*"))
+			break;
+		else
+			printf("Port %i failed, trying next if available\n",irc_port[port_try]);
+	}
 }
 
 int last_query_time = 0;
@@ -1370,7 +1392,7 @@ int heartbeat_thread_function(void* data)
 void start_heartbeat(pPlayer player)
 {
 	player->heartbeat_message = 0;
-	player->heartbeat_thread = SDL_CreateThread(heartbeat_thread_function,(void*)player);	
+	player->heartbeat_thread = SDL_CreateThread(heartbeat_thread_function,(void*)player);
 }
 
 void stop_heartbeat(pPlayer player)
