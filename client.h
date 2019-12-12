@@ -6,7 +6,7 @@
 #include <sparrow3d.h>
 #include <string.h>
 
-#define CLIENT_VERSION 17
+#define CLIENT_VERSION 18
 
 #define TRACE_COUNT 16
 
@@ -100,7 +100,7 @@ typedef struct sHare
 	int hops;
 	int high_hops;
 	int health;
-	spSpriteCollectionPointer hase;	
+	spSpriteCollectionPointer hase;
 	pHare before,next;
 	int wp_x,wp_y;
 	Sint32 cam_rotation;

@@ -1,24 +1,23 @@
-<?php 
+<?php
 include 'config.php';
 include 'utils.php';
 
-$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
-mysql_select_db($mysql_dbname) or die;
+$connection = mysqli_connect ($mysql_host, $mysql_username, $mysql_password, $mysql_dbname) or die;
 
 $game_id = (int)$_POST['game_id'];
-$player_name = escape_input($_POST['player_name']);
+$player_name = escape_input( $connection, $_POST['player_name']);
 $player_pw = rand();
 $computer = (int)$_POST['computer'];
 $nr = (int)$_POST['nr'];
 
 //counting players
-$result = mysql_query("SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'");
-$row = mysql_fetch_assoc($result);
+$result = mysqli_query( $connection, "SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'");
+$row = mysqli_fetch_assoc($result);
 $player_count = $row['total'];
 
 //getting optionss
-$result = mysql_query("SELECT * FROM " . $mysql_prefix . "game_list WHERE game_id='$game_id'");
-$row = mysql_fetch_assoc($result);
+$result = mysqli_query( $connection, "SELECT * FROM " . $mysql_prefix . "game_list WHERE game_id='$game_id'");
+$row = mysqli_fetch_assoc($result);
 $options = $row['options'];
 $status = $row['status'];
 
@@ -32,11 +31,11 @@ else
 	$query = "INSERT INTO " . $mysql_prefix . "player_list (game_id, player_pw, player_name, position_in_game, computer, chat_get_time, status, heartbeat_time, nr) ".
 	"VALUES ( '$game_id', '$player_pw', '$player_name', '0', '$computer', '0', '0', '$now', '$nr')";
 
-	mysql_query($query) or die;
-	$player_id = mysql_insert_id();
+	mysqli_query( $connection, $query) or die;
+	$player_id = mysqli_insert_id( $connection );
 	echo "player_id: $player_id", PHP_EOL;
 	echo "player_pw: $player_pw", PHP_EOL;
 	echo "error: 0";
 }
-mysql_close($connection); 
+mysqli_close($connection);
 ?>

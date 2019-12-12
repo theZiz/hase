@@ -19,14 +19,13 @@
 		</script>
 		<p>Games on server:</p>
 		<ul>
-		<?php 
+		<?php
 			include 'config.php';
-			$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
-			mysql_select_db($mysql_dbname) or die;
+			$connection = mysqli_connect ($mysql_host, $mysql_username, $mysql_password, $mysql_dbname) or die;
 			$now = time();
 			$query = "SELECT * FROM " . $mysql_prefix . "game_list ORDER BY create_date DESC";
-			$result = mysql_query($query) or die;
-			while ($row = mysql_fetch_array( $result ))
+			$result = mysqli_query($connection, $query) or die;
+			while ($row = mysqli_fetch_array( $result ))
 			{
 				$status = $row['status'];
 				if ($status == -2)
@@ -35,11 +34,11 @@
 				$game_name = $row['game_name'];
 				switch ($status)
 				{
-					case 0: 
-						echo "<li><b>$game_name</b> Open</li>", PHP_EOL;				
+					case 0:
+						echo "<li><b>$game_name</b> Open</li>", PHP_EOL;
 						break;
-					case 1: 
-						echo "<li><b>$game_name</b> Running</li>", PHP_EOL;				
+					case 1:
+						echo "<li><b>$game_name</b> Running</li>", PHP_EOL;
 						break;
 					default:
 						$diff = $now - $create_date;
@@ -60,7 +59,7 @@
 					echo '</script>', PHP_EOL;
 				}
 			}
-			mysql_close($connection); 
+			mysqli_close($connection);
 		?>
 		</ul>
 	</body>

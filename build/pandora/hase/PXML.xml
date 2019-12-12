@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="6" release="5" build="0"/>
+<version major="1" minor="6" release="7" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,12 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.6.7:
+- Ported the server to php7 and moved to different server per default
+
+1.6.6:
+- Connecting to another IRC port of one is not working
 
 1.6.5:
 - Improved camera handling, especially for small device screens
@@ -314,7 +320,7 @@ Changelog
 	- health
 	- more weapon points
 	- mine
-	
+
 1.4.7.2
 - Added button arrow images to sparrow3d and use them now in hase in the help
 
@@ -384,7 +390,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="6" release="5" build="0" type="release"/>
+<version major="1" minor="6" release="7" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

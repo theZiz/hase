@@ -192,6 +192,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	spNetSendTCP(server_connection,buffer,length);
 	int res = spNetReceiveHTTP(server_connection,buffer,buffer_size-1);
 	buffer[res] = 0;
+	//printf("\n%s\n",buffer);
 	spNetCloseTCP(server_connection);
 	//HTTP error check + jumping to begin
 	if (

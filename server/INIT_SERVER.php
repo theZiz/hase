@@ -1,8 +1,7 @@
-<?php 
+<?php
 include 'config.php';
 
-$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
-mysql_select_db($mysql_dbname) or die;
+$connection = mysqli_connect ($mysql_host, $mysql_username, $mysql_password, $mysql_dbname) or die;
 
 $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."data_list` (".
 "  `game_id` int(11) NOT NULL,".
@@ -10,7 +9,8 @@ $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."data_list` (".
 "  `second_of_player` int(11) NOT NULL,".
 "  `data` mediumblob NOT NULL".
 ") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
-mysql_query($query) or die;
+mysqli_query($connection, $query) or die;
+
 $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."game_list` (".
 "`game_id` int(11) NOT NULL,".
 "  `game_name` varchar(32) NOT NULL,".
@@ -22,7 +22,8 @@ $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."game_list` (".
 "  `level_string` varchar(512) NOT NULL,".
 "  `hares_per_player` int(11) NOT NULL".
 ") ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=0;";
-mysql_query($query) or die;
+mysqli_query($connection, $query) or die;
+
 $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."player_list` (".
 "`player_id` int(11) NOT NULL,".
 "  `game_id` int(11) NOT NULL,".
@@ -35,26 +36,26 @@ $query = "CREATE TABLE IF NOT EXISTS `".$mysql_prefix."player_list` (".
 "  `heartbeat_time` int(11) NOT NULL,".
 "  `nr` int(11) NOT NULL".
 ") ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=0;";
-mysql_query($query) or die;
+mysqli_query($connection, $query) or die;
 
 $query = "ALTER TABLE `".$mysql_prefix."data_list`".
 " ADD PRIMARY KEY (`game_id`,`player_id`,`second_of_player`);";
-mysql_query($query) or die;
+mysqli_query($connection, $query) or die;
 $query = "ALTER TABLE `".$mysql_prefix."game_list`".
 " ADD PRIMARY KEY (`game_id`), ADD UNIQUE KEY `game_id` (`game_id`);";
-mysql_query($query) or die;
+mysqli_query($connection, $query) or die;
 $query = "ALTER TABLE `".$mysql_prefix."player_list`".
 " ADD PRIMARY KEY (`player_id`,`game_id`);";
-mysql_query($query) or die;
+mysqli_query($connection, $query) or die;
 $query = "ALTER TABLE `".$mysql_prefix."game_list`".
 " MODIFY `game_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=0;";
-mysql_query($query) or die;
+mysqli_query($connection, $query) or die;
 $query = "ALTER TABLE `".$mysql_prefix."player_list`".
 " MODIFY `player_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=0;";
-mysql_query($query) or die;
+mysqli_query($connection, $query) or die;
 
-mysql_close($connection); 
+mysqli_close($connection);
 
-echo "Success!";
-echo "Delete this file now, you will not need it again!";
+echo "Success!", PHP_EOL;
+echo "Delete this file now, you will not need it again!", PHP_EOL;
 ?>

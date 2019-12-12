@@ -1,15 +1,14 @@
-<?php 
+<?php
 include 'config.php';
 
-$connection = mysql_connect ($mysql_host, $mysql_username, $mysql_password) or die;
-mysql_select_db($mysql_dbname) or die;
+$connection = mysqli_connect ($mysql_host, $mysql_username, $mysql_password, $mysql_dbname) or die;
 
 $now = time();
 
 $query = "SELECT * FROM " . $mysql_prefix . "game_list";
-$result = mysql_query($query) or die;
+$result = mysqli_query( $connection, $query) or die;
 $i = 0;
-while ($row = mysql_fetch_array( $result ))
+while ($row = mysqli_fetch_array( $result ))
 {
 	$game_id = $row['game_id'];
 	$create_date = $row['create_date'];
@@ -17,18 +16,18 @@ while ($row = mysql_fetch_array( $result ))
 	if ($create_date < $now-3600*24*8) //delete after 8 days
 	{
 		$query = "DELETE FROM " . $mysql_prefix . "game_list WHERE game_id = '$game_id'";
-		mysql_query($query) or die;
+		mysqli_query( $connection, $query) or die;
 		$query = "DELETE FROM " . $mysql_prefix . "player_list WHERE game_id = '$game_id'";
-		mysql_query($query) or die;
+		mysqli_query( $connection, $query) or die;
 		$query = "DELETE FROM " . $mysql_prefix . "data_list WHERE game_id = '$game_id'";
-		mysql_query($query) or die;
+		mysqli_query( $connection, $query) or die;
 		continue;
 	}
 	else
 	if ($create_date < $now-3600*24*7) //mark as deleted after 7 days
 	{
 		$query = "UPDATE " . $mysql_prefix . "game_list SET status='-2' WHERE game_id = '$game_id'";
-		mysql_query($query) or die;
+		mysqli_query( $connection, $query) or die;
 		continue;
 	}
 	else
@@ -38,7 +37,7 @@ while ($row = mysql_fetch_array( $result ))
 			$query = "UPDATE " . $mysql_prefix . "game_list SET status='-2' WHERE game_id = '$game_id'";
 		else
 			$query = "UPDATE " . $mysql_prefix . "game_list SET status='-1' WHERE game_id = '$game_id'";
-		mysql_query($query) or die;
+		mysqli_query( $connection, $query) or die;
 		continue;
 	}
 	if ($status == -2)
@@ -48,8 +47,8 @@ while ($row = mysql_fetch_array( $result ))
 	$seconds_per_turn = $row['seconds_per_turn'];
 	$hares_per_player = $row['hares_per_player'];
 	//count player
-	$subresult = mysql_query("SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'");
-	$subrow = mysql_fetch_assoc($subresult);
+	$subresult = mysqli_query( $connection, "SELECT COUNT(*) AS total FROM " . $mysql_prefix . "player_list WHERE game_id='$game_id'");
+	$subrow = mysqli_fetch_assoc($subresult);
 	$player_count = $subrow['total'];
 	echo "player_count: $player_count", PHP_EOL;
 	echo "create_date: $create_date", PHP_EOL;
@@ -62,5 +61,5 @@ while ($row = mysql_fetch_array( $result ))
 	$i = $i + 1;
 }
 echo "game_count: $i";
-mysql_close($connection); 
+mysqli_close($connection);
 ?>

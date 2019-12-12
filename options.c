@@ -21,6 +21,17 @@ int op_game_seconds = 45;
 int op_game_hares = 3;
 int op_first_game = 1;
 int op_sprite = 0;
+int op_update_server = 0;
+
+void sop_update_server(int v)
+{
+	op_update_server = v;
+}
+
+int gop_update_server()
+{
+	return op_update_server;
+}
 
 int gop_first_game()
 {
@@ -266,6 +277,8 @@ void load_options()
 			sop_first_game(atoi(entry->value));
 		if (strcmp(entry->key,"sprite") == 0)
 			sop_sprite(atoi(entry->value));
+		if (strcmp(entry->key,"update_server") == 0)
+			sop_update_server(atoi(entry->value));
 		entry = entry->next;
 	}
 	spNetC4AProfilePointer profile;
@@ -277,6 +290,15 @@ void load_options()
 	sop_music_volume(gop_music_volume());
 	sop_sample_volume(gop_sample_volume());
 	spConfigFree(conf);
+	if (gop_update_server() == 0)
+	{
+		if ( strcmp( gop_server(), "ziz.gp2x.de/hase.php" ) == 0 )
+		{
+			sop_update_server( 1 );
+			sop_server("ziz.myftp.info/hase/hase.php");
+			save_options();
+		}
+	}
 }
 
 void save_options()
@@ -298,6 +320,7 @@ void save_options()
 	spConfigSetInt(conf,"game_hares",op_game_hares);
 	spConfigSetInt(conf,"first_game",op_first_game);
 	spConfigSetInt(conf,"sprite",op_sprite);
+	spConfigSetInt(conf,"update_server",op_update_server);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }
@@ -485,7 +508,7 @@ int options_window(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),in
 			mapping_window(font,resize,0);
 		}
 		if (window->selection == 11 && res == 1)
-			ret = 1;	
+			ret = 1;
 	}
 	delete_window(window);
 	save_options();

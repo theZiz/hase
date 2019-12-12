@@ -1,4 +1,4 @@
-Hase 
+Hase
 ====
 
 Hase is a game about hares in space. It is a bit like Worms or Artillery, but with gravitation.
@@ -8,6 +8,12 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 
 Changelog
 =========
+
+1.6.7:
+- Ported the server to php7 and moved to different server per default
+
+1.6.6:
+- Connecting to another IRC port of one is not working
 
 1.6.5:
 - Improved camera handling, especially for small device screens
@@ -307,7 +313,7 @@ Changelog
 	- health
 	- more weapon points
 	- mine
-	
+
 1.4.7.2
 - Added button arrow images to sparrow3d and use them now in hase in the help
 
