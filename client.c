@@ -370,31 +370,31 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 
 	if (direction == -1) //incoming file
 	{
-		if (buffer[pos+1] == 'A' &&
-			buffer[pos+2] == 'C' &&
-			buffer[pos+3] == 'K')
+		if (buffer[pos+0] == 'A' &&
+			buffer[pos+1] == 'C' &&
+			buffer[pos+2] == 'K')
 		{
-			memcpy(binary,&buffer[pos+4],count);
-			last_heartbeat_diff = *((int*)(&buffer[pos+4+count]));
+			memcpy(binary,&buffer[pos+3],count);
+			last_heartbeat_diff = *((int*)(&buffer[pos+3+count]));
 			pMessage result = NULL;
 			numToMessage(&result,"Okay",1);
 			return result;
 		}
-		if (buffer[pos+1] == 'N' &&
-			buffer[pos+2] == 'U' &&
-			buffer[pos+3] == 'L')
+		if (buffer[pos+0] == 'N' &&
+			buffer[pos+1] == 'U' &&
+			buffer[pos+2] == 'L')
 		{
 			memset(binary,1+2+16+32,count);
-			last_heartbeat_diff = (int)(buffer[pos+4]);
+			last_heartbeat_diff = (int)(buffer[pos+3]);
 			pMessage result = NULL;
 			numToMessage(&result,"Kicked",1);
 			return result;
 		}
-		if (buffer[pos+1] == 'E' &&
-			buffer[pos+2] == 'R' &&
-			buffer[pos+3] == 'R')
+		if (buffer[pos+0] == 'E' &&
+			buffer[pos+1] == 'R' &&
+			buffer[pos+2] == 'R')
 		{
-			last_heartbeat_diff = (int)(buffer[pos+4]);
+			last_heartbeat_diff = (int)(buffer[pos+3]);
 			return NULL;
 		}
 		return NULL;
