@@ -9,6 +9,7 @@ TIME=`date -u +"%d.%m.%Y %R"`
 eval "$RM_CALL"
 
 cat header.htm > index.htm
+echo "<p>Version $VERSION</p>" >> index.htm
 echo "<p>Updated at the $TIME.</p>" >> index.htm
 echo "<ul>" >> index.htm
 echo "<?php" > symlink.php
@@ -62,12 +63,22 @@ do
 					echo "symlink('$PROGRAM-$VERSION.opk', '$PROGRAM.opk');" >> ../../symlink.php
 					ZIP_CALL+=" $PROGRAM-$VERSION.opk"
 				else
-					zip -9 -r "$PROGRAM-$NAME-$VERSION.zip" * > /dev/null
-					mv "$PROGRAM-$NAME-$VERSION.zip" ../..
-					echo "<li><a href=$PROGRAM-$NAME-$VERSION.zip>$NAME</a></li>" >> ../../index.htm
-					echo "unlink('$PROGRAM-$NAME.zip');" >> ../../symlink.php
-					echo "symlink('$PROGRAM-$NAME-$VERSION.zip', '$PROGRAM-$NAME.zip');" >> ../../symlink.php
-					ZIP_CALL+=" $PROGRAM-$NAME-$VERSION.zip"
+					if [ $NAME = "rg350" ]; then
+						cp ../../small_resolution_censorship/* "$PROGRAM/data"
+						mksquashfs * "$PROGRAM-$NAME-$VERSION.opk" -all-root -noappend -no-exports -no-xattrs
+						mv "$PROGRAM-$NAME-$VERSION.opk" ../..
+						echo "<li><a href=$PROGRAM-$NAME.opk type=\"application/x-opk+squashfs\">$NAME</a></li>" >> ../../index.htm
+						echo "unlink('$PROGRAM-$NAME.opk');" >> ../../symlink.php
+						echo "symlink('$PROGRAM-$NAME-$VERSION.opk', '$PROGRAM-$NAME.opk');" >> ../../symlink.php
+						ZIP_CALL+=" $PROGRAM-$NAME-$VERSION.opk"
+					else
+						zip -9 -r "$PROGRAM-$NAME-$VERSION.zip" * > /dev/null
+						mv "$PROGRAM-$NAME-$VERSION.zip" ../..
+						echo "<li><a href=$PROGRAM-$NAME-$VERSION.zip>$NAME</a></li>" >> ../../index.htm
+						echo "unlink('$PROGRAM-$NAME.zip');" >> ../../symlink.php
+						echo "symlink('$PROGRAM-$NAME-$VERSION.zip', '$PROGRAM-$NAME.zip');" >> ../../symlink.php
+						ZIP_CALL+=" $PROGRAM-$NAME-$VERSION.zip"
+					fi
 				fi
 			fi
 		fi
