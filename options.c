@@ -14,7 +14,7 @@ int op_direction_flip = 0;
 int op_show_names = 1;
 int op_show_map = 1;
 int op_global_chat = 1;
-char op_server[512] = "ziz.gp2x.de/hase.php";
+char op_server[512] = "hase.schmidt-matthes.de/hase.php";
 char op_username[32] = SP_DEVICE_STRING" User";
 Uint32 op_game_options = (2 << 0) | (2 << 4) | (0 << 8) | (3 << 12) | (0 << 16) | (8 << 20) | (7 << 24);
 int op_game_seconds = 45;
@@ -290,12 +290,13 @@ void load_options()
 	sop_music_volume(gop_music_volume());
 	sop_sample_volume(gop_sample_volume());
 	spConfigFree(conf);
-	if (gop_update_server() == 0)
+	if (gop_update_server() < 2)
 	{
-		if ( strcmp( gop_server(), "ziz.gp2x.de/hase.php" ) == 0 )
+		if ( strcmp( gop_server(), "ziz.gp2x.de/hase.php" ) == 0 ||
+			 strcmp( gop_server(), "ziz.myftp.info/hase/hase.php" ) == 0 )
 		{
-			sop_update_server( 1 );
-			sop_server("ziz.myftp.info/hase/hase.php");
+			sop_update_server( 2 );
+			sop_server("hase.schmidt-matthes.de/hase.php");
 			save_options();
 		}
 	}

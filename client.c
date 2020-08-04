@@ -70,7 +70,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	int buffer_size = 65536;
 	char in_buffer[buffer_size];
 	char* buffer = in_buffer;
-	#ifndef WIN32
+	#ifdef INPUT_COMPRESSION
 		char out_buffer[buffer_size];
 	#endif
 	char header[4096]; //magic number ftw!
@@ -165,7 +165,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			"Connection: Close\r\n"
 			"Content-Type: multipart/form-data; boundary=%s\r\n"
 			"Content-Length: %i\r\n"
-			#ifndef WIN32
+			#ifdef INPUT_COMPRESSION
 			"Accept-Encoding: gzip\r\n"
 			#endif
 			"Host: %s\r\n"
@@ -180,7 +180,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 			"Connection: Close\r\n"
 			"Content-Type: multipart/form-data; boundary=%s\r\n"
 			"Content-Length: %i\r\n"
-			#ifndef WIN32
+			#ifdef INPUT_COMPRESSION
 			"Accept-Encoding: gzip\r\n"
 			#endif
 			"Host: %s\r\n"
@@ -213,7 +213,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 		buffer[14] != 'K')
 		return NULL;
 	pos = 15;
-	#ifndef WIN32
+	#ifdef INPUT_COMPRESSION
 		int encoded = 0;
 	#endif
 	int content_length = 0;
@@ -226,7 +226,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	{
 		if (buffer[pos] == 0)
 			return NULL;
-		#ifndef WIN32
+		#ifdef INPUT_COMPRESSION
 		if (
 			buffer[pos+ 0] == 'C' &&
 			buffer[pos+ 1] == 'o' &&
@@ -324,7 +324,7 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 		buffer[work_pos] = 0;
 		content_length -= difference;
 	}
-	#ifndef WIN32
+	#ifdef INPUT_COMPRESSION
 	if (encoded)
 	{
 		z_stream strm;
@@ -370,6 +370,8 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 
 	if (direction == -1) //incoming file
 	{
+		if (buffer[pos] == '\n')
+			pos++;
 		if (buffer[pos+0] == 'A' &&
 			buffer[pos+1] == 'C' &&
 			buffer[pos+2] == 'K')
