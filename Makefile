@@ -6,7 +6,7 @@ DYNAMIC = -lSDL_ttf -lSDL_mixer -lSDL_image -lSDL -lm
 CFLAGS = -O3 -fsingle-precision-constant -Wimplicit-function-declaration -Wunused
 GENERAL_TWEAKS = -ffast-math
 #==PC defaults==
-FLAGS = -DDESKTOP $(GENERAL_TWEAKS)
+FLAGS = -DDESKTOP $(GENERAL_TWEAKS) -mtune=native -march=native
 
 ifdef NO_DEBUG
 	FLAGS += -O3
