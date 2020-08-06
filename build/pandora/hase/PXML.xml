@@ -1,7 +1,7 @@
 <!-- This is a sample PXML.xml file making use of many different things.-->
 <PXML xmlns="http://openpandora.org/namespaces/PXML">
 <package id="hase_prototype-hase_prototype-12345">
-<version major="1" minor="6" release="7" build="0"/>
+<version major="1" minor="6" release="8" build="0"/>
 <author name="Ziz" website="http://ziz.openhandhelds.org"/>
 <titles>
 <title lang="en_US">
@@ -16,6 +16,11 @@ The used fonts are Pixel Mania by HiBan (CC-BY-SA) and DejaVu Sans (Public Domai
 
 Changelog
 =========
+
+1.6.8:
+- Added the irc server, channel and ports as config option
+- Moved to another server again and furthermore a new irc server
+- Fixed random crash caused by IRC chat
 
 1.6.7:
 - Ported the server to php7 and moved to different server per default
@@ -390,7 +395,7 @@ Changelog
 </package>
 <application id="hase_prototype-hase_prototype-12345" appdata="hase_prototype">
 <exec command="./hase.sh"/>
-<version major="1" minor="6" release="7" build="0" type="release"/>
+<version major="1" minor="6" release="8" build="0" type="release"/>
 <!--This program's version-->
 <osversion major="1" minor="0" release="0" build="0"/>
 <!--The minimum OS version required-->

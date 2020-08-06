@@ -9,6 +9,11 @@ The music is from Kevin MacLeod (CC-BY-SA)\nwww.incompetech.com
 Changelog
 =========
 
+1.6.8:
+- Added the irc server, channel and ports as config option
+- Moved to another server again and furthermore a new irc server
+- Fixed random crash caused by IRC chat
+
 1.6.7:
 - Ported the server to php7 and moved to different server per default
 
