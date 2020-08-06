@@ -20,6 +20,9 @@ int gop_global_chat();
 int gop_first_game();
 int gop_sprite();
 int gop_update_server();
+char* gop_irc_server();
+char* gop_irc_channel();
+char* gop_irc_ports();
 
 void sop_zoom(int v);
 void sop_circle(int v);
@@ -36,6 +39,9 @@ void sop_global_chat(int v);
 void sop_first_game(int g);
 void sop_sprite(int v);
 void sop_update_server(int v);
+void sop_irc_server(char* irc);
+void sop_irc_channel(char* channel);
+void sop_irc_ports(char* ports);
 
 Uint32* gop_game_options_ptr();
 int* gop_game_hares_ptr();

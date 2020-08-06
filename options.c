@@ -22,6 +22,9 @@ int op_game_hares = 3;
 int op_first_game = 1;
 int op_sprite = 0;
 int op_update_server = 0;
+char op_irc_server[256] = "irc.de.euirc.net";
+char op_irc_channel[256] = "#hase";
+char op_irc_ports[256] = "6666,6667,6668";
 
 void sop_update_server(int v)
 {
@@ -126,6 +129,21 @@ int* gop_game_hares_ptr()
 int* gop_game_seconds_ptr()
 {
 	return &op_game_seconds;
+}
+
+char* gop_irc_server()
+{
+	return op_irc_server;
+}
+
+char* gop_irc_channel()
+{
+	return op_irc_channel;
+}
+
+char* gop_irc_ports()
+{
+	return op_irc_ports;
 }
 
 int gop_sprite()
@@ -235,6 +253,21 @@ void sop_sprite(int v)
 	op_sprite = spMax(0,spMin(v,SPRITE_COUNT-1));
 }
 
+void sop_irc_server(char* irc)
+{
+	sprintf(op_irc_server,"%s",irc);
+}
+
+void sop_irc_channel(char* channel)
+{
+	sprintf(op_irc_channel,"%s",channel);
+}
+
+void sop_irc_ports(char* ports)
+{
+	sprintf(op_irc_ports,"%s",ports);
+}
+
 void load_options()
 {
 	spConfigPointer conf = spConfigRead("config.ini","hase");
@@ -279,6 +312,12 @@ void load_options()
 			sop_sprite(atoi(entry->value));
 		if (strcmp(entry->key,"update_server") == 0)
 			sop_update_server(atoi(entry->value));
+		if (strcmp(entry->key,"irc") == 0)
+			sop_irc_server(entry->value);
+		if (strcmp(entry->key,"channel") == 0)
+			sop_irc_channel(entry->value);
+		if (strcmp(entry->key,"ports") == 0)
+			sop_irc_ports(entry->value);
 		entry = entry->next;
 	}
 	spNetC4AProfilePointer profile;
@@ -322,6 +361,9 @@ void save_options()
 	spConfigSetInt(conf,"first_game",op_first_game);
 	spConfigSetInt(conf,"sprite",op_sprite);
 	spConfigSetInt(conf,"update_server",op_update_server);
+	sprintf(spConfigGetString(conf,"irc",""),"%s",op_irc_server);
+	sprintf(spConfigGetString(conf,"channel",""),"%s",op_irc_channel);
+	sprintf(spConfigGetString(conf,"ports",""),"%s",op_irc_ports);
 	spConfigWrite(conf);
 	spConfigFree(conf);
 }

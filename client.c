@@ -429,11 +429,25 @@ pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,c
 	return result;
 }
 
-char irc_server[256] = "";
-char irc_channel[256] = "";
 #define HASE_MAX_IRC_PORT 8
 int irc_port[HASE_MAX_IRC_PORT] = {6667,6667,6667,6667,6667,6667,6667,6667};
 int irc_port_count = 1;
+
+void update_irc_ports()
+{
+	char* content = gop_irc_ports();
+	for (irc_port_count = 0; irc_port_count < HASE_MAX_IRC_PORT; irc_port_count++)
+	{
+		irc_port[irc_port_count] = strtol (content, &content, 10);
+		if (content[0] != ',')
+		{
+			irc_port_count++;
+			break;
+		}
+		else
+			content++;
+	}
+}
 
 int server_info()
 {
@@ -445,28 +459,6 @@ int server_info()
 	{
 		if (strcmp(mom->name,"gzip") == 0 && strcmp(mom->content,"yes") == 0)
 			hase_gzip = 1;
-		else
-		if (strcmp(mom->name,"irc_server") == 0)
-			sprintf(irc_server,"%s",mom->content);
-		else
-		if (strcmp(mom->name,"irc_channel") == 0)
-			sprintf(irc_channel,"%s",mom->content);
-		else
-		if (strcmp(mom->name,"irc_port") == 0)
-		{
-			char* content = mom->content;
-			for (irc_port_count = 0; irc_port_count < HASE_MAX_IRC_PORT; irc_port_count++)
-			{
-				irc_port[irc_port_count] = strtol (content, &content, 10);
-				if (content[0] != ',')
-				{
-					irc_port_count++;
-					break;
-				}
-				else
-					content++;
-			}
-		}
 		else
 		if (strcmp(mom->name,"version") == 0)
 		{
@@ -1278,16 +1270,17 @@ void start_irc_client(char* name)
 		else
 			buffer[i] = name[i];
 	buffer[i] = 0;
+	update_irc_ports();
 	int port_try;
 	for (port_try = 0; port_try < irc_port_count; port_try++)
 	{
-		printf("%s %i %s\n",buffer,irc_port[port_try],irc_server);
+		printf("%s %i %s\n",buffer,irc_port[port_try],gop_irc_server());
 		char buffer2[128];
 		sprintf(buffer2,SP_DEVICE_STRING);
 		for (i = 0; buffer2[i]; i++)
 			if (buffer2[i] == ' ')
 				buffer2[i] = '_';
-		if (server = spNetIRCConnectServer(irc_server,irc_port[port_try],buffer,buffer2,name,"*"))
+		if (server = spNetIRCConnectServer(gop_irc_server(),irc_port[port_try],buffer,buffer2,name,"*"))
 			break;
 		else
 			printf("Port %i failed, trying next if available\n",irc_port[port_try]);
@@ -1300,7 +1293,7 @@ void try_to_join()
 {
 	if (channel == NULL && server && spNetIRCServerReady(server))
 	{
-		channel = spNetIRCJoinChannel(server,irc_channel);
+		channel = spNetIRCJoinChannel(server,gop_irc_channel());
 		channel->show_users = 1;
 	}
 	if (server)

@@ -103,7 +103,7 @@ void resize( Uint16 w, Uint16 h )
 	spFontAddArrowButton( font, 'v', SP_BUTTON_ARROW_DOWN, BUTTON_FG, BUTTON_BG );
 	spFontMulWidth(font,spFloatToFixed(0.9f));
 	spFontMulWidth(font_dark,spFloatToFixed(0.9f));
-	
+
 	#ifdef GCW_FEELING
 		spSetVirtualKeyboard(SP_VIRTUAL_KEYBOARD_ALWAYS,0,h-w*48/320,w,w*48/320,spLoadSurface("./data/keyboard320.png"),spLoadSurface("./data/keyboardShift320.png"));
 	#else
@@ -153,7 +153,8 @@ int main(int argc, char **argv)
 	#ifdef GCW_FEELING
 		spSetDefaultWindowSize( 320, 240 );
 	#else
-		spSetDefaultWindowSize( 1024, 600 );
+		//~ spSetDefaultWindowSize( 800, 480 );
+		spSetDefaultWindowSize( 1600, 960 );
 	#endif
 	spInitCore();
 	spSetReturnBehavior(1,0);
@@ -164,7 +165,7 @@ int main(int argc, char **argv)
 	spSetZTest(0);
 	load_options();
 	save_options();
-	
+
 	start_random_music();
 	spMapSetMapSet(1);
 	#ifdef DESKTOP
@@ -300,7 +301,7 @@ int main(int argc, char **argv)
 			}
 		else
 			done = 1;
-	}	
+	}
 	delete_window(window);
 	quit_window_sprites();
 	spSoundStopMusic(0);
