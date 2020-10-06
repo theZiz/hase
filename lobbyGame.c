@@ -1,6 +1,7 @@
 #include "lobbyGame.h"
+#include "lobbyList.h"
 #include "level.h"
-#include <time.h> 
+#include <time.h>
 
 #include "options.h"
 #include "client.h"
@@ -12,7 +13,6 @@
 #define LG_WAIT 5000
 
 spFontPointer lg_font;
-spFontPointer font_dark;
 void ( *lg_resize )( Uint16 w, Uint16 h );
 int lg_counter;
 pGame lg_game;
@@ -22,7 +22,6 @@ pPlayer lg_player_list = NULL;
 pPlayer lg_player;
 pPlayer lg_last_player;
 spTextBlockPointer lg_block = NULL;
-spTextBlockPointer lg_chat_block = NULL;
 spNetIRCMessagePointer lg_last_read_message = NULL;
 Sint32 lg_scroll;
 char lg_level_string[1024];
@@ -31,7 +30,6 @@ char lg_last_level_string[1024];
 SDL_Thread* lg_thread = NULL;
 int level_mode;
 
-int use_chat;
 int after_start;
 
 tLobbyButton lg_button[ SP_MAPPING_MAX ];
@@ -218,7 +216,7 @@ void lg_draw(void)
 		}
 		else
 			spFontDrawMiddle(screen->w-2-3*w/4, h+7*lg_font->maxheight/2, 0, "Spectate mode!", lg_font );
-		
+
 		if (lg_game->admin_pw == 0)
 		{
 			if (after_start)
@@ -418,7 +416,7 @@ void save_level(char* level_string)
 					SDL_RWclose(file);*/
 					FILE* file = fopen (complete_path,"w");
 					fprintf (file, "version 14\n");
-					
+
 					//Reading the texture...
 					char* mom = level_string;
 					int t = strtol(mom,&mom,36);
@@ -1111,8 +1109,8 @@ int lg_calc(Uint32 steps)
 			int l_w = spGetWindowSurface()->h-(1+CHAT_LINES)*lg_font->maxheight;
 			lg_level = create_level(lg_set_level_string,l_w,l_w,LL_BG);
 		}
-		
-			
+
+
 	}
 	return 0;
 }
@@ -1265,19 +1263,19 @@ int game_options_feedback( pWindow window, pWindowElement elem, int action )
 				case 0: sprintf(elem->text,"Ragnarök: Instant"); break;
 				case 7: sprintf(elem->text,"Ragnarök: No"); break;
 				default: sprintf(elem->text,"Ragnarök after %i rounds",ragnarok*5);
-			}		
+			}
 			break;
 		case 6:
 			if (border)
 				sprintf(elem->text,"Border behaviour: Infinite");
 			else
-				sprintf(elem->text,"Border behaviour: Killing");			
+				sprintf(elem->text,"Border behaviour: Killing");
 			break;
 		case 7:
 			if (distant_damage)
 				sprintf(elem->text,"Long shot extra damage: Yes");
 			else
-				sprintf(elem->text,"Long shot extra damage: No");			
+				sprintf(elem->text,"Long shot extra damage: No");
 			break;
 		case 8: sprintf(elem->text,"AI handicap hares: %i",hdc_count-8); break;
 		case 9: sprintf(elem->text,"AI handicap health: %i",(hdc_health-7)*25); break;
@@ -1306,7 +1304,7 @@ int game_options(Uint32 *game_opt,int* game_seconds,int* game_hares,spFontPointe
 	add_window_element(window,0,8);
 	add_window_element(window,0,9);
 	int result = modal_window(window,resize);
-	delete_window(window);	
+	delete_window(window);
 	*game_opt = lg_game_options;
 	*game_seconds = lg_game_seconds;
 	*game_hares = lg_game_hares;
@@ -1364,9 +1362,9 @@ int start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),
 		lg_chat_text[0] = 0;
 		if (!spectate && !lg_game->local)
 			start_heartbeat(lg_player);
-		
+
 		int res = spLoop(lg_draw,lg_calc,10,resize,NULL);
-		
+
 		if (lg_block)
 			spDeleteTextBlock(lg_block);
 		if (res == -1)
@@ -1404,8 +1402,7 @@ int start_lobby_game(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ),
 			leave_game(lg_ai_list);
 			lg_ai_list = next;
 		}
-			
+
 	}
 	return result;
 }
-

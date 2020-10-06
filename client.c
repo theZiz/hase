@@ -8,6 +8,7 @@ spNetIP ip;
 
 char hase_url[512] = "";
 char hase_gzip = 0;
+int last_heartbeat_diff = -1;
 
 void addToMessage(pMessage *message, char* name, char* content)
 {
@@ -38,8 +39,6 @@ void deleteMessage(pMessage *message)
 #ifndef WIN32
 #define INPUT_COMPRESSION
 #endif
-
-int last_heartbeat_diff = -1;
 
 pMessage sendMessage(pMessage message,char* binary_name,void* binary,int count,char* dest,char* server)
 {

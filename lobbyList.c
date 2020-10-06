@@ -21,7 +21,12 @@ char ll_game_name[33] = "New game";
 spTextBlockPointer ll_chat_block = NULL;
 Sint32 ll_chat_scroll;
 
-int use_chat;
+int use_chat = 0;
+spTextBlockPointer lg_chat_block = NULL;
+spFontPointer font_dark = NULL;
+spFontPointer font = NULL;
+spFontPointer help_font = NULL;
+SDL_Surface* screen = NULL;
 
 pGame mom_game;
 
@@ -41,7 +46,7 @@ void update_ll_surface()
 	spFontDraw( 2+LL_STATUS*ll_surface->w/LL_SURFACE_DIV, pos*ll_font->maxheight-ll_scroll/1024, 0, "Status", ll_font );
 	pos++;
 	spLine(2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, ll_surface->w-2,1+pos*ll_font->maxheight-ll_scroll/1024, 0, 65535);
-	  
+
 	pGame game = ll_game_list;
 	mom_game = NULL;
 	while (game)
@@ -106,14 +111,14 @@ void ll_draw(void)
 	sprintf(buffer,"%i Games on Server (Version %i):\n",ll_game_count,CLIENT_VERSION);
 	spFontDrawMiddle( screen->w/3+2, 0*ll_font->maxheight-2, 0, buffer, ll_font );
 	spBlitSurface(screen->w/3,ll_font->maxheight*1+ll_surface->h/2-1,0,ll_surface);
-	
+
 	spFontDrawMiddle(5*screen->w/6, 0*ll_font->maxheight-2, 0, "Preview & Players", ll_font );
 	spRectangle(5*screen->w/6, ll_font->maxheight+screen->w/6-5, 0,screen->w/3-6,screen->w/3-6,LL_FG);
 	if (ll_level)
 		spBlitSurface(5*screen->w/6, 1*ll_font->maxheight+screen->w/6-5, 0,ll_level);
 
 	int h = screen->h-(screen->w/3+3*ll_font->maxheight-6);
-		
+
 	if (use_chat == 0)
 		spFontDrawMiddle(screen->w/2, screen->h-2*ll_font->maxheight-h/2, 0, "Chat deactivated", ll_font);
 	else
@@ -146,7 +151,7 @@ void ll_draw(void)
 	}
 	else
 		lobby_draw_buttons( LEFT, 2, screen->h-ll_font->maxheight-button_pos, "{menu}Back", ll_font, ll_button);
-	
+
 	if (ll_reload_now == 1)
 		ll_reload_now = 2;
 	if (ll_reload_now)
@@ -241,7 +246,7 @@ int ll_calc(Uint32 steps)
 				spNetIRCMessagePointer next = get_channel()->last_read_message->next;
 
 				log_message(next->user,next->message);
-				
+
 				if (strcmp(next->ctcp,"ACTION") == 0)
 					sprintf(buffer,"*** %s %s",next->user,next->message);
 				else
@@ -298,7 +303,7 @@ int ll_calc(Uint32 steps)
 			}
 		}
 		ll_counter = 10000;
-	}		
+	}
 	if (spMapGetByID(MAP_JUMP) && ll_reload_now == 0)
 	{
 		spMapSetByID(MAP_JUMP,0);
@@ -402,7 +407,7 @@ int ll_calc(Uint32 steps)
 		if (spGetInput()->axis[1] > 0)
 		{
 			if (ll_wait == -1)
-			{	
+			{
 				ll_wait = MAX_WAIT;
 				ll_selected++;
 				if (ll_level)
@@ -489,7 +494,7 @@ int ll_reload(void* dummy)
 	}
 	if (info != CLIENT_VERSION)
 	{
-		ll_reload_now = 4;		
+		ll_reload_now = 4;
 		return 3;
 	}
 	if (use_chat)
@@ -528,7 +533,7 @@ void start_lobby(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ), int
     strftime(time_buffer,2048,"%c",ti);
 
 	log_message("Enter lobby",time_buffer);
-	
+
 	ll_selected = 0;
 	ll_font = font;
 	ll_level = NULL;

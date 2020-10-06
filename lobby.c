@@ -11,17 +11,11 @@
 #include "mapping.h"
 #include <unistd.h>
 
-SDL_Surface* screen;
-spFontPointer font = NULL;
-spFontPointer font_dark = NULL;
-
 #define BUTTON_FG spGetRGB(32,32,32)
 #define BUTTON_BG spGetRGB(220,220,220)
 #define FONT_BG spGetRGB(64,64,64)
 #define FONT_FG spGetRGB(220,220,220)
 #define FONT_DARK_FG spGetRGB(110,110,110)
-
-spTextBlockPointer lg_chat_block;
 
 void resize( Uint16 w, Uint16 h )
 {

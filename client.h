@@ -150,6 +150,8 @@ typedef struct sThreadData
 	pThreadData next;
 } tThreadData;
 
+extern int last_heartbeat_diff;
+
 int server_info();
 pGame create_game(char* game_name,Uint32 options,int seconds_per_turn,char* level_string,int local,int hares_per_player);
 void delete_game_list(pGame game);

@@ -25,8 +25,6 @@ spSound* snd_turn;
 spSound* snd_item;
 spSound* snd_create;
 
-spFontPointer font;
-spFontPointer font_dark;
 SDL_Surface* level;
 SDL_Surface* level_original;
 Uint16* level_pixel;
@@ -34,7 +32,7 @@ SDL_Surface* arrow;
 int posX,posY,rotation;
 int mapviewX,mapviewY;
 Sint32 zoom;
-Sint32 zoom_d; 
+Sint32 zoom_d;
 Sint32 zoomAdjust;
 Sint32 zoomAdjustAdjust;
 Sint32 minZoom,maxZoom;
@@ -78,10 +76,8 @@ spSpriteCollectionPointer targeting;
 
 spNetIRCMessagePointer before_showing;
 
-SDL_Surface* screen;
 SDL_Surface* tomato;
 
-spFontPointer help_font;
 struct
 {
 	int x;
@@ -133,7 +129,7 @@ SDL_Surface* map_surface;
 
 void draw_map(int px,int py)
 {
-	spRotozoomSurface(px,py,0,map_surface,SP_ONE,SP_ONE,rotation);	
+	spRotozoomSurface(px,py,0,map_surface,SP_ONE,SP_ONE,rotation);
 	//player
 	int j;
 	for (j = 0; j < player_count; j++)
@@ -143,7 +139,7 @@ void draw_map(int px,int py)
 		pHare hare = player[j]->firstHare;
 		if (hare)
 		do
-		{	
+		{
 			int X = hare->x-(LEVEL_WIDTH << SP_ACCURACY-1);
 			int Y = hare->y-(LEVEL_HEIGHT << SP_ACCURACY-1);
 			int x = px+(spMul(spCos(rotation),X) - spMul(spSin(rotation),Y) >> SP_ACCURACY)*map_w/LEVEL_WIDTH;
@@ -159,7 +155,7 @@ void draw_map(int px,int py)
 				spEllipse(x,y,0,map_size,map_size,spGetFastRGB(255,0,0));
 			hare = hare->next;
 		}
-		while (hare != player[j]->firstHare);	
+		while (hare != player[j]->firstHare);
 	}
 	pItem item = firstItem;
 	while (item)
@@ -222,7 +218,7 @@ void draw(void)
 	spSetHorizontalOrigin(SP_FIXED);
 	if (gop_rotation() == 0)
 		rotation = 0;
-	
+
 	//Level
 	spRotozoomSurface(screen->w/2,screen->h/2,0,level,zoom,zoom,rotation);
 
@@ -248,10 +244,10 @@ void draw(void)
 				continue;
 			pixels[x+y*screen->w] = texture[a+b*LEVEL_WIDTH];
 		}*/
-	
+
 	spSetVerticalOrigin(SP_CENTER);
 	spSetHorizontalOrigin(SP_CENTER);
-	
+
 	//Items
 	items_draw();
 
@@ -264,7 +260,7 @@ void draw(void)
 		pHare hare = player[j]->firstHare;
 		if (hare)
 		do
-		{							
+		{
 			spSpritePointer sprite = spActiveSprite(hare->hase);
 			spSetSpriteZoom(sprite,zoom/2,zoom/2);
 			spSetSpriteRotation(sprite,+rotation+hare->cam_rotation);
@@ -285,7 +281,7 @@ void draw(void)
 				//building
 				if (w_nr == WP_BUILD_SML || w_nr == WP_BUILD_MID || w_nr == WP_BUILD_BIG)
 				{
-					
+
 					int r = (zoom*weapon_explosion[w_nr] >> SP_ACCURACY+1);
 					int d = 12+weapon_explosion[w_nr]+(hare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
@@ -306,7 +302,7 @@ void draw(void)
 				else
 				if (w_nr == WP_TUNNEL_SML || w_nr == WP_TUNNEL_MID || w_nr == WP_TUNNEL_BIG)
 				{
-					
+
 					int r = (zoom*weapon_explosion[w_nr] >> SP_ACCURACY+1);
 					int d = 12+weapon_explosion[w_nr]+(hare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
@@ -327,7 +323,7 @@ void draw(void)
 				else
 				if (w_nr == WP_TELEPORT)
 				{
-					
+
 					int r = (zoom*20 >> SP_ACCURACY+1);
 					int d = 12+weapon_explosion[w_nr]+(hare->w_build_distance*(12+weapon_explosion[w_nr]) >> SP_ACCURACY);
 					Sint32 ox = spMul(hare->x-posX-d*-spMul(spSin(hare->cam_rotation+hare->w_build_direction-SP_PI/2),hare->w_build_distance+SP_ONE*2/3),zoom);
@@ -383,7 +379,7 @@ void draw(void)
 					spDrawSprite(screen->w/2+nx,screen->h/2+ny,0,target);
 					spLine(screen->w/2+x,screen->h/2+y,0,screen->w/2+nx,screen->h/2+ny,0,get_border_color());
 					//spSetBlending( SP_ONE );
-				}				
+				}
 			}
 			spDrawSprite(screen->w/2+x,screen->h/2+y,0,sprite);
 			//spEllipseBorder(screen->w/2+x,screen->h/2+y,0,PLAYER_RADIUS*zoom >> SP_ACCURACY,PLAYER_RADIUS*zoom >> SP_ACCURACY,1,1,65535);
@@ -411,7 +407,7 @@ void draw(void)
 				else
 					pixels[X+Y*screen->w] = spGetFastRGB(255,0,0);
 			}*/
-				
+
 			//Health bar
 			y-=zoom*3>>14;
 			spSetBlending( SP_ONE*2/3 );
@@ -467,17 +463,17 @@ void draw(void)
 	}
 	//Particles
 	spParticleDraw(particles);
-	
+
 	//Bullets
 	drawBullets();
-		
+
 	//Trace
 	drawTrace(player[active_player]);
-		
+
 	//Map
 	if (gop_show_map())
 		draw_map(screen->w-map_w/2,map_h/2);
-	
+
 	//HID
 	int y = 0;
 	if (get_channel())
@@ -495,7 +491,7 @@ void draw(void)
 			line = line->next;
 		}
 	}
-	
+
 	y = screen->h - alive_count * (font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY));
 	int max_hare_per_player = 0;
 	for (j = 0; j < player_count; j++)
@@ -526,7 +522,7 @@ void draw(void)
 			hare = hare->next;
 		}
 		while (hare != player[j]->firstHare);
-				
+
 		int w = health*screen->w/(max_hare_per_player*MAX_HEALTH*5);
 		if  (j != active_player)
 			spSetPattern8(153,60,102,195,153,60,102,195);
@@ -554,7 +550,7 @@ void draw(void)
 
 		y += font->maxheight*3/4+(spGetSizeFactor()*2 >> SP_ACCURACY);
 	}
-	spFontDrawRight( screen->w-1 - player[active_player]->weapon_points * tomato->w, screen->h-1-font->maxheight, 0, 
+	spFontDrawRight( screen->w-1 - player[active_player]->weapon_points * tomato->w, screen->h-1-font->maxheight, 0,
 		player[active_player]->weapon_points > 0 ? "Action points:" : "Action points: None", font );
 	int i;
 	for (i = 0; i < player[active_player]->weapon_points; i++)
@@ -604,12 +600,12 @@ void draw(void)
 		weapon_button[0].w = -1;
 		weapon_button[0].h = -1;
 	}
-		
+
 	if (ragnarok_counter && (hase_game->options.bytewise.ragnarok_border >> 4) < 7)
 	{
 		sprintf(buffer,"RAGNARÖK %i",turn_count - (hase_game->options.bytewise.ragnarok_border >> 4)*5 + 1);
 		spFontDrawMiddle( screen->w >> 1, screen->h*2/3, 0, buffer, font );
-	}	
+	}
 	if (player[active_player]->weapon_points)
 		sprintf(buffer,"%is",countdown / 1000);
 	else
@@ -621,7 +617,7 @@ void draw(void)
 		sprintf(&buffer[strlen(buffer)]," (>> x%i)",speed);
 	spFontDrawMiddle( screen->w >> 1, screen->h-1-font->maxheight, 0, buffer, font );
 
-	
+
 	if (wp_choose)
 		draw_weapons(&(weapon_button[1].x),&(weapon_button[1].y),&(weapon_button[1].w),&(weapon_button[1].h));
 
@@ -631,7 +627,7 @@ void draw(void)
 	int b_alpha = bullet_alpha();
 	if (b_alpha)
 		spAddColorToTarget(EXPLOSION_COLOR,b_alpha);
-	
+
 	//Error message
 	if (game_pause)
 		draw_message();
@@ -640,14 +636,14 @@ void draw(void)
 	if (chatWindow)
 		window_draw();
 	spMapSetMapSet(1);
-		
+
 	#ifdef PROFILE
 		draw_time = SDL_GetTicks() - start_time;
 		sprintf(buffer,"FPS: %i\nDraw: %ims\nCalc: %ims",spGetFPS(),draw_time,calc_time);
 		printf(        "FPS: %i\tDraw: %ims\tCalc: %ims\n",spGetFPS(),draw_time,calc_time);
 		spFontDrawMiddle( screen->w >> 1, 1, 0, buffer, font );
 	#endif
-	
+
 	spFlip();
 }
 
@@ -676,7 +672,7 @@ int min_d_not_me(int x,int y,int me, int r)
 		pHare hare = player[i]->firstHare;
 		if (hare)
 		do
-		{							
+		{
 			int d = spFixedToInt(hare->x-x)*spFixedToInt(hare->x-x)+
 					spFixedToInt(hare->y-y)*spFixedToInt(hare->y-y);
 			if (i != me)
@@ -777,8 +773,6 @@ void get_ms_from_data(int ms)
 	}
 }
 
-int last_heartbeat_diff;
-
 void set_input()
 {
 	if (player[active_player]->computer)
@@ -803,7 +797,7 @@ void set_input()
 			{
 				input_states[INPUT_AXIS_0_LEFT] = 0;
 				input_states[INPUT_AXIS_0_RIGHT] = 0;
-			}		
+			}
 			if (gop_direction_flip() && !gop_rotation() && player[active_player]->activeHare->cam_rotation > SP_PI/2 && player[active_player]->activeHare->cam_rotation < SP_PI*3/2)
 			{
 				int temp = input_states[INPUT_AXIS_0_LEFT];
@@ -881,9 +875,9 @@ void set_input()
 				if (last_heartbeat_diff < 90)
 					sprintf(buffer,"Waiting for turn data\nfrom player %s...\n(Last vital sign %i seconds ago, kick at 90)",player[active_player]->name,last_heartbeat_diff);
 				else
-					sprintf(buffer,"Waiting for turn data\nfrom player %s...",player[active_player]->name);				
+					sprintf(buffer,"Waiting for turn data\nfrom player %s...",player[active_player]->name);
 				set_message(font,buffer);
-			}	
+			}
 		}
 		if (game_pause == 0)
 		{
@@ -933,7 +927,7 @@ int calc(Uint32 steps)
 					sprintf(buffer,"*** %s %s",showing->user,message);
 				else
 					sprintf(buffer,"%s: %s",showing->user,message);
-					
+
 			}
 			else
 			if (gop_global_chat())
@@ -1035,7 +1029,7 @@ int calc(Uint32 steps)
 		spMapSetMapSet(1);
 		spSoundPause(0,-1);
 	}
-	
+
 	if (chatWindow)
 	{
 		spMapSetMapSet(0);
@@ -1053,7 +1047,7 @@ int calc(Uint32 steps)
 		}
 		spMapSetMapSet(1);
 	}
-	
+
 	if (spMapGetByID(MAP_CHAT) && get_channel())
 	{
 		spMapSetByID(MAP_CHAT,0);
@@ -1419,7 +1413,7 @@ int calc(Uint32 steps)
 												pHare h = player[k]->firstHare;
 												if (h)
 												do
-												{	
+												{
 													if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
 													{
 														p = player[k];
@@ -1526,7 +1520,7 @@ int calc(Uint32 steps)
 					{
 						if (player[active_player]->activeHare->jump_failed || spRand()%16 == 0)
 							player[active_player]->activeHare->direction = 1-player[active_player]->activeHare->direction;
-						player[active_player]->activeHare->jump_failed = 0;					
+						player[active_player]->activeHare->jump_failed = 0;
 						switch (spRand()/1337%7)
 						{
 							case 0: case 1: case 2: case 3:
@@ -1564,7 +1558,7 @@ int calc(Uint32 steps)
 					}
 					else
 						input_ok_on = 0;
-						
+
 					if (input_states[INPUT_AXIS_0_LEFT])
 					{
 						if (player[active_player]->activeHare->direction == 1)
@@ -1594,7 +1588,7 @@ int calc(Uint32 steps)
 					}
 					else
 						direction_hold = 0;
-					
+
 					if (input_states[INPUT_AXIS_1_LEFT])
 					{
 						direction_pressed += SP_ONE/20;
@@ -1744,7 +1738,7 @@ int calc(Uint32 steps)
 									if (player[active_player]->activeHare->bums && player[active_player]->activeHare->hops <= 0)
 										jump(2); //jump is possible
 									else
-										player[active_player]->weapon_points+=weapon_cost[w_nr]; //payback						
+										player[active_player]->weapon_points+=weapon_cost[w_nr]; //payback
 									break;
 								case WP_KAIO_KEN:
 									player[active_player]->next_round_extra++;
@@ -1790,7 +1784,7 @@ int calc(Uint32 steps)
 												pHare h = player[k]->firstHare;
 												if (h)
 												do
-												{	
+												{
 													if (h == player[active_player]->activeHare->circle_checkpoint_hare[j])
 													{
 														p = player[k];
@@ -1846,7 +1840,7 @@ int calc(Uint32 steps)
 				channel_end = -1;
 			}
 
-		
+
 		if (wp_choose)
 		{
 			if (input_states[INPUT_AXIS_0_LEFT] && player[active_player]->activeHare)
@@ -1928,7 +1922,7 @@ int calc(Uint32 steps)
 				p->particle[i].status = -1;
 			else*/
 				p->particle[i].status = 0;
-		}		
+		}
 	}
 	#ifdef PROFILE
 		calc_time = SDL_GetTicks() - start_time;
@@ -2016,7 +2010,7 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 				p->local = 1;
 				p->pw = q->pw;
 				break;
-			}	
+			}
 			q = q->next;
 		}
 		p = p->next;
@@ -2078,11 +2072,11 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	snd_turn = spSoundLoad("./sounds/your_turn.wav");
 	snd_item = spSoundLoad("./sounds/item.wav");
 	snd_create = spSoundLoad("./sounds/create.wav");
-	
+
 	spMapSetMapSet(1);
-	
+
 	start_random_music();
-	
+
 	if (player[active_player]->local)
 		spSoundPlay(snd_turn,-1,0,0,-1);
 	if ((hase_game->options.bytewise.ragnarok_border >> 4) == 0)
@@ -2092,9 +2086,9 @@ int hase(void ( *resize )( Uint16 w, Uint16 h ),pGame game,pPlayer me_list)
 	}
 
 	int result = spLoop(draw,calc,10,resize,NULL);
-	
+
 	spMapSetMapSet(0);
-	
+
 	spSoundStop(-1,0);
 	spSoundDelete(snd_explosion);
 	spSoundDelete(snd_beep);

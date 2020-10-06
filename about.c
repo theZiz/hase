@@ -10,7 +10,7 @@ void start_about(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 	window->height += font->maxheight*16;
 	window->only_ok = 1;
 	modal_window(window,resize);
-	delete_window(window);	
+	delete_window(window);
 }
 
 const char help_text[] =
@@ -45,7 +45,6 @@ const char help_text[] =
 
 spTextBlockPointer help_block;
 Sint32 help_scroll;
-spFontPointer help_font;
 struct
 {
 	int x;
@@ -189,6 +188,6 @@ void start_help(spFontPointer font, void ( *resize )( Uint16 w, Uint16 h ))
 	help_scroll = 0;
 	help_font = font;
 	spLoop(help_draw,help_calc,10,resize,NULL);
-	
+
 	spDeleteTextBlock(help_block);
 }
